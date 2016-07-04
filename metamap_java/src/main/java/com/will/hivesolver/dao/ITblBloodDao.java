@@ -18,8 +18,8 @@ public interface ITblBloodDao {
     @Select("select * from tbl_blood where valid = 1 and tbl_name=#{tblName}")
     public List<TblBlood> selectByTblName(@Param("tblName")String tblName);
 
-    @Select("select * from tbl_blood where id=#{id}")
-    public List<TblBlood> selectById(@Param("id")int id);
+    @Select("select * from tbl_blood where related_etl_id=#{id}")
+    public List<TblBlood> selectByETLId(@Param("id")int id);
     
     @Select("select b.* from"
             + " tbl_blood a join tbl_blood b"

@@ -205,9 +205,9 @@ proto.postFormRequest = function(options, callback){
       return;
     }
   }
-  if(opts.req ){
-    opts.form = this.extend({uid: opts.req.session.user.id}, opts.form);
-  }
+  // if(opts.req ){
+  //   opts.form = this.extend({uid: opts.req.session.user.id}, opts.form);
+  // }
 
   console.log("post form服务器:" +  opts.url + "  上传数据：");
   console.log(opts.form);

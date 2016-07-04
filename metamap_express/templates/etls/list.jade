@@ -1,17 +1,20 @@
 extends ../layout
 
 block content
-  h2 ETL List
+  head
+    title ETL列表
+    
+  h2 ETL列表
 
   table.table.table-striped
-    caption ETL list
+    caption ETL列表
       thead 
         tr
           td ID
           td Meta
-          td tblName
-          td hanlde
-          td blood
+          td 表名
+          td 操作
+          td 血统
           
     tbody
       each etl in etls

@@ -22,14 +22,26 @@ module.exports = {
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
   },
+  addETL: {
+    name: '添加新版本的ETL',
+    path: '/etl/add',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
+  },
+  allETL: {
+    name: '获取所有有效的ETL',
+    path: '/etl/getAll',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
+  },
   editETL: {
-    name: 'test etl edit route',
+    name: '获取需要编辑的ETL',
     path: '/etl/getETL',
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
   },
   bloodDAG: {
-    name: 'bloodDAG',
+    name: '血统DAG',
     path: '/etl/getMermaidById',
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false

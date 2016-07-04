@@ -62,25 +62,28 @@ public class ETLService {
      */
     @Transactional
     public  void addETL(ETL etl) {
+        // must after tbl blood analyse?
+        etlDao.makePreviousInvalid(etl.getTblName());
+        etlDao.insertSingleETL(etl);
+        int etlId = etlDao.getETLByTblName(etl.getTblName()).get(0).getId();
+
+
         tblBloodDao.makePreviousInvalid(etl.getTblName());
         Set<String> parents = HiveJdbcClient.get(etl.getQuery());
         TblBlood blood = null;
         for (String parent : parents) {
             blood = new TblBlood();
             blood.setParentTbl(parent);
-            blood.setRelatedEtlId(etl.getId());
+            blood.setRelatedEtlId(etlId);
             blood.setTblName(etl.getTblName());
             blood.setUtime(System.currentTimeMillis()/1000);
             tblBloodDao.insertOne(blood);
         }
 
-        // must after tbl blood analyse
-        etlDao.makePreviousInvalid(etl.getTblName());
-        int id = etlDao.insertSingleETL(etl);
     }
 
     public Set<TblBlood> getETLMermaid(int id) {
-        List<TblBlood> selectAllValidETL = tblBloodDao.selectById(id);
+        List<TblBlood> selectAllValidETL = tblBloodDao.selectByETLId(id);
         Set<TblBlood> tblBloods = new HashSet<TblBlood>();
         if (selectAllValidETL.size() > 0) {
             TblBlood blood = selectAllValidETL.get(0);

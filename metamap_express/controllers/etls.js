@@ -1,5 +1,4 @@
 'use strict';
-var request = require('request');
 var ROOT_PATH = require('x-root-path');
 
 var system = require( ROOT_PATH + '/configs/system' ),
@@ -8,35 +7,32 @@ var system = require( ROOT_PATH + '/configs/system' ),
 
 module.exports = function (router) {
     router.get('/list', function (req, res) {
-      var etls;
-      request.get('http://192.168.80.128:9090/metamap/etl/getAll', function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          etls =  JSON.parse(body);
-
-          console.log('inner ' + JSON.stringify(etls));
-          res.render('etls/list', { etls : etls});
-        }
-      })
-      console.log('outter: ' + JSON.stringify(etls));
+      common.getRequest({
+            urlsName:'allETL',
+            req: req,
+            params: req.query
+          }, function (etls) {
+            res.render('etls/list', { etls : etls});
+          })
     });
 
     router.get('/add', function (req, res) {
-          res.render('etls/add');
+          res.render('etls/edit');
     });
 
     router.post('/add', function (req, res) {
-      console.log('bbody---->' + JSON.stringify(req.body.name));
-      // var etls;
-      // request.get('http://mobile.weather.com.cn/data/forecast/101010100.html?_=1381891660081', function (error, response, body) {
-      //   if (!error && response.statusCode == 200) {
-      //     etls =  JSON.parse(body);
-
-      //     console.log('inner ' + JSON.stringify(etls));
-      //     res.render('etls/add', { etls : etls.f.f1[0]});
-      //   }
-      // })
-      // console.log('outter: ' + JSON.stringify(etls));
-      res.redirect("list");
+      common.postFormRequest({
+        urlsName: 'addETL',
+        req: req,
+        form: req.body
+      }, function (results) {
+        if (results.message == 'success') {
+          console.log(req.body.tblName + ' has been added');
+          res.redirect("list");
+        } else {
+          res.send(results);
+        }
+      });
     });
 
     router.get('/edit', function (req, res) {

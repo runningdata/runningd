@@ -1,4 +1,3 @@
-var request = require('request');
 var ROOT_PATH = require('x-root-path');
 
 var system = require( ROOT_PATH + '/configs/system' ),

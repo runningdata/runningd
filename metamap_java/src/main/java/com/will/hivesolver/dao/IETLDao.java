@@ -15,7 +15,7 @@ public interface IETLDao {
             + "(query, meta, tbl_name, author, pre_sql, on_schedule,valid, ctime, utime)   values "
             + "  (#{query}, #{meta}, #{tblName}, #{author}, #{preSql}, #{onSchedule},"
             + " #{valid}, #{ctime}, #{utime})")
-    public int insertSingleETL(ETL etl);
+    public void insertSingleETL(ETL etl);
     
     @Select("select * from etl where tbl_name=#{tableName} and valid = 1")
     public List<ETL> getETLByTblName(@Param("tableName")String tableName);

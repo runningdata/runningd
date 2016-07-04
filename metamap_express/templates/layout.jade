@@ -1,7 +1,6 @@
 doctype html
 html
   head
-    title= title
     script(src='/jquery/dist/jquery.min.js')
     script(src='/bootstrap/dist/js/bootstrap.min.js')
     link(rel='stylesheet', href='/bootstrap/dist/css/bootstrap.min.css')
@@ -25,9 +24,9 @@ html
                 span.caret
               ul.dropdown-menu
                 li
-                  a(href='/etls/list') list
+                  a(href='/etls/list') 列表
                 li
-                  a(href='/etls/add') add ETL
+                  a(href='/etls/add') 新增
                 li.divider
                 li.dropdown-header Nav header
                 li
@@ -35,16 +34,6 @@ html
                 li
                   a(href='#') One more separated link
               
-            li.dropdown
-              a.dropdown-toggle(data-toggle='dropdown',role="button",aria-haspopup="true",aria-expanded="false")
-                | BLOOD
-                span.caret
-              ul.dropdown-menu
-                li
-                  a(href='/etls/list') DAG
-                li.divider
-                  li
-                    a(href='/etls/add') All
 
           ul.nav.navbar-nav.navbar-right
             li

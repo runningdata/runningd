@@ -1,28 +1,49 @@
 extends ../layout
 
-block content
-  h2 Edit etl
 
-  form(method="post")
+block content
+
+  - var tblName = '';
+  - var query = '';
+  - var preSql = '';
+  - var onSchedule = -1;
+  - var meta = '';
+  if etl
+    - tblName = etl.tblName;
+    - query = etl.query;
+    - preSql = etl.preSql;
+    - onSchedule = etl.onSchedule;
+    - meta = etl.meta;
+
+  head
+    title ETL
+
+  h2 ETL
+
+  form(method="post", action="add")
     .form-group
-      label.label-inline ID :
-        #{etl.id}
+      if etl
+        label.label-inline ID :
+          #{etl.id}
       p
-      label Name
-      input.form-control(name="tblName", type="text", value="#{etl.tblName}")
-      label QUERY
-      textarea.form-control(name="query",rows="3") #{etl.query}
-      label Presql
-      textarea.form-control(name="preSql",rows="3") #{etl.preSql}
+      label ETL名称
+      input.form-control(name="tblName", type="text", value="#{tblName}") 
+      label ETL数据源
+      input.form-control(name="meta", type="text", value="#{meta}") 
+      label 查询SQL
+      textarea.form-control(name="query",rows="3") #{query}
+      label 配置
+      textarea.form-control(name="setting",rows="3")
+      label 先行SQL（针对target）
+      textarea.form-control(name="preSql",rows="3") #{preSql}
       .form-group
-          label OnSchedule
+          label 调度生效
           .radio-inline
             label
-              if etl.onSchedule == 1
-                input#optionsRadios1(type="radio", name="onSchedule", value="N",  "checked"=etl.onSchedule== 1)
-                | Y
+                input#optionsRadios1(type="radio", name="onSchedule", value=1,  "checked"=onSchedule== 1)
+                | 是
           .radio-inline
             label
-              input#optionsRadios3(type="radio", name="onSchedule", value="N",  "checked"=etl.onSchedule== 0)
-              | N
+              input#optionsRadios3(type="radio", name="onSchedule", value=0,  "checked"=onSchedule== 0)
+              | 否
       input.btn.btn-primary(type="submit", value="submit")

@@ -28,7 +28,7 @@ public class ETLController {
     public @ResponseBody Object addETL(ETL etl) {
         etl.setAuthor("will");
         etlService.addETL(etl);
-        return "etl authro: " + etl.getAuthor();
+        return "{\"message\" :\"success\"}";
     }
 
     @RequestMapping(value = "getMermaidById",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
