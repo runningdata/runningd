@@ -1,0 +1,24 @@
+extends ../layout
+
+block content
+  h2 Add ETL
+
+  form(method="post")
+    .form-group
+      label Name
+      input.form-control(name="name", type="text")
+      label QUERY
+      textarea.form-control(name="query",rows="3")
+      label Presql
+      textarea.form-control(name="preSql",rows="3")
+      .form-group
+          label OnSchedule
+          .radio-inline
+            label
+              input(type="radio", name="onSchedule", value="Y")
+              | Y
+          .radio-inline
+            label
+              input(type="radio", name="onSchedule", value="N")
+              | N
+      input.btn.btn-primary(type="submit", value="submit")

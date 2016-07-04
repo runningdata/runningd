@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	<import resource="spring-common.xml" />
+	<import resource="spring-config.xml" />
+	<import resource="spring-datasource.xml" />
+	<import resource="spring-mybatis.xml" />
+	<import resource="spring-tx.xml" />
+	<import resource="spring-threadpool.xml" />
+</beans>

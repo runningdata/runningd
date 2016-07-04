@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+
+  script(src='/mermaid/dist/mermaid.min.js')
+  link(rel='stylesheet', href='/mermaid/dist/mermaid.css')
+  script(type='text/jaascript').
+    mermaid.initialize({startOnLoad:true});
+
+
+  h2 Blood DAG
+
+  .mermaid
+    | graph TD;
+    | #{bloods}
+    
+      

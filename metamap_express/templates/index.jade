@@ -1,0 +1,16 @@
+extends layout
+
+block content
+
+  script(src='/mermaid/dist/mermaid.min.js')    
+  link(rel='stylesheet', href='/mermaid/dist/mermaid.css')
+  h1= title
+  p Welcome to #{title}
+ 
+  .mermaid
+    | graph TD;
+    | A[Square Rect] -- Link text --> B((Circle));
+    | A --> C(Round Rect);
+    | B --> D{Rhombus};
+    | C --> D;
+

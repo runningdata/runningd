@@ -1,0 +1,25 @@
+extends ../layout
+
+block content
+  h2 ETL List
+
+  table.table.table-striped
+    caption ETL list
+      thead 
+        tr
+          td ID
+          td Meta
+          td tblName
+          td hanlde
+          td blood
+          
+    tbody
+      each etl in etls
+        tr
+          td #{etl.id}
+          td #{etl.meta}
+          td #{etl.tblName}
+          td 
+            a.btn.btn-primary.btn-sm(href="edit?id=#{etl.id}") Edit
+          td
+            a.btn.btn-primary.btn-sm(href="/blood?id=#{etl.id}") Blood

@@ -1,0 +1,28 @@
+extends ../layout
+
+block content
+  h2 Edit etl
+
+  form(method="post")
+    .form-group
+      label.label-inline ID :
+        #{etl.id}
+      p
+      label Name
+      input.form-control(name="tblName", type="text", value="#{etl.tblName}")
+      label QUERY
+      textarea.form-control(name="query",rows="3") #{etl.query}
+      label Presql
+      textarea.form-control(name="preSql",rows="3") #{etl.preSql}
+      .form-group
+          label OnSchedule
+          .radio-inline
+            label
+              if etl.onSchedule == 1
+                input#optionsRadios1(type="radio", name="onSchedule", value="N",  "checked"=etl.onSchedule== 1)
+                | Y
+          .radio-inline
+            label
+              input#optionsRadios3(type="radio", name="onSchedule", value="N",  "checked"=etl.onSchedule== 0)
+              | N
+      input.btn.btn-primary(type="submit", value="submit")

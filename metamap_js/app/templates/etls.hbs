@@ -1,0 +1,22 @@
+
+<h2>添加ETL</h2>
+
+<form>
+  <div class="form-group">
+    <label>名称</label>
+    {{input value=name type="text" class="form-control" }}
+  </div>
+  <div class="form-group">     
+     <label>sql</label>
+     {{textarea value=query type="text" class="form-control"}}
+  </div>
+   <div class="form-group">     
+    <label>Presql</label>
+    {{textarea value=preSql type="text" class="form-control"}}
+  </div>
+  <div class="form-group">  
+  <label>是否参与每日调度</label>     
+    {{input  value=onSchedule type="text" class="form-control" placeholder="填写true或者false"}}
+  </div> 
+  <button {{action 'addETL'}} type="submit" class="btn btn-primary">提交</button>
+</form>

@@ -1,0 +1,36 @@
+{{tbbloods2}}
+
+<br/>
+<br/>
+
+<div class="mermaid">
+       graph TD<br/>
+      {{#each tbbloods1 as |tbblood|}}
+        {{#if tbblood.parentTbl}}
+            {{replace-at tbblood.parentTbl}} --> {{replace-at tbblood.tblName}}<br/>
+        {{/if}}
+      {{/each}}
+</div>
+
+<div class="mermaid">
+graph TD
+mymeta___my_table_cc --> mymeta___my_table_cc2
+mymeta___my_table_c --> mymeta___my_table_cc
+mymeta___my_table_pp2 --> mymeta___my_table_pp
+default___batting --> mymeta___my_table
+mymeta___my_table_pp --> mymeta___my_table_p
+mymeta___my_table_p2 --> mymeta___my_table_p
+mymeta___my_table --> mymeta___my_table_c
+mymeta___my_table_c --> mymeta___my_table_c2
+mymeta___my_table_p --> default___batting
+</div>
+
+
+<div class="mermaid">
+       graph TD<br/>
+      (#each tbbloods1 as |tbblood|)
+        (#if tbblood.parentTbl)
+            (replace-at tbblood.parentTbl) --> (replace-at tbblood.tblName)<br/>
+        (/if)
+      (/each)
+</div>
