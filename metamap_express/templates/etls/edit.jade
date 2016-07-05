@@ -8,12 +8,14 @@ block content
   - var preSql = '';
   - var onSchedule = -1;
   - var meta = '';
+  - var time = '';
   if etl
     - tblName = etl.tblName;
     - query = etl.query;
     - preSql = etl.preSql;
     - onSchedule = etl.onSchedule;
     - meta = etl.meta;
+    - time = etl.ctimeFormat;
 
   head
     title ETL
@@ -23,8 +25,8 @@ block content
   form(method="post", action="add")
     .form-group
       if etl
-        label.label-inline ID :
-          #{etl.id}
+        span.label.label-primary ID :   #{etl.id}
+        span.label.label-success 创建时间 :  #{time}
       p
       label ETL名称
       input.form-control(name="tblName", type="text", value="#{tblName}") 
@@ -46,4 +48,4 @@ block content
             label
               input#optionsRadios3(type="radio", name="onSchedule", value=0,  "checked"=onSchedule== 0)
               | 否
-      input.btn.btn-primary(type="submit", value="submit")
+      input.btn.btn-primary(type="submit", value="保存")

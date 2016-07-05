@@ -72,16 +72,52 @@ proto.formatQuery = function (query) {
 
 /**
  * [formatDate description]
+ * @param  {[type]} long   [10位时间戳]
+ * @param  {[type]} params [格式化字符串]
+ * @return {[type]}        [String]
+ */
+proto.formatDateTS = function (ts, params) {
+  var date = new Date(parseInt(ts) * 1000) || new Date();
+  var y = date.getFullYear();
+  var m = date.getMonth()+1;
+  var d = date.getDate();
+  var h = date.getHours();
+  var mm = date.getMinutes();
+  var s = date.getSeconds();
+  var dateStr = "";
+  switch (params) {
+    case "yymmdd":
+      dateStr += y + (m > 9 ? "" : "0") + m + d;
+      break;
+    case "yymmdd hh:mm:ss":
+      dateStr += y + (m > 9 ? "" : "0") + (m) + (d) + ' ' + (h > 9 ? "" : "0") + (h) + ':' + (mm > 9 ? "" : "0") + (mm) + ':' +   (s > 9 ? "" : "0") + (s);
+      break;
+  }
+  return dateStr;
+}
+
+
+/**
+ * [formatDate description]
  * @param  {[type]} date   [日期类型数据]
  * @param  {[type]} params [格式化字符串]
  * @return {[type]}        [String]
  */
 proto.formatDate = function (date, params) {
-  var date = date || new Date(),
-    dateStr = "";
+  var date = date || new Date();
+  var y = date.getFullYear();
+  var m = date.getMonth()+1;
+  var d = date.getDate();
+  var h = date.getHours();
+  var mm = date.getMinutes();
+  var s = date.getSeconds();
+  var dateStr = "";
   switch (params) {
     case "yymmdd":
-      dateStr += date.getFullYear() + (date.getMonth() > 9 ? "" : "0") + (date.getMonth() + 1) + (date.getDate());
+      dateStr += y + (m > 9 ? "" : "0") + m + d;
+      break;
+    case "yymmdd hh:mm:ss":
+      dateStr += y + (m > 9 ? "" : "0") + (m) + (d) + ' ' + (h > 9 ? "" : "0") + (h) + ':' + (mm > 9 ? "" : "0") + (mm) + ':' +   (s > 9 ? "" : "0") + (s);
       break;
   }
   return dateStr;
