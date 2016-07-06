@@ -6,23 +6,29 @@ block content
     
   h2 ETL列表
 
-  table.table.table-striped
-    caption ETL列表
-      thead 
-        tr
-          td ID
-          td Meta
-          td 表名
-          td 操作
-          td 血统
-          
-    tbody
-      each etl in etls
-        tr
-          td #{etl.id}
-          td #{etl.meta}
-          td #{etl.tblName}
-          td 
-            a.btn.btn-primary.btn-sm(href="edit?id=#{etl.id}") Edit
-          td
-            a.btn.btn-primary.btn-sm(href="/blood?id=#{etl.id}") Blood
+  if etls.length
+    table.table.table-striped
+      caption ETL列表
+        thead 
+          tr
+            td ID
+            td Meta
+            td 表名
+            td 
+              center 操作
+            td 血统
+      tbody
+        each etl in etls
+          tr
+            td #{etl.id}
+            td #{etl.meta}
+            td #{etl.tblName}
+            td 
+              center 
+                a.btn.btn-primary.btn-sm(href="edit?id=#{etl.id}") Edit
+                &nbsp;&nbsp;
+                a.btn.btn-primary.btn-sm(href="generate_script?id=#{etl.id}") 生成脚本
+            td
+              a.btn.btn-primary.btn-sm(href="/blood?id=#{etl.id}") Blood
+  else
+     |No ETL Found

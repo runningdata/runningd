@@ -1,0 +1,45 @@
+{% include 'components/header.html' %}
+<div class="container">
+<h2>ETL</h2>
+
+
+
+<table class="table table-striped">
+<caption>ETL list</caption>
+   <thead>
+      <tr>
+         <th>ID</th>
+         <th>META</th>
+         <th>tblName</th>
+         <th>author</th>
+         <th>preSql</th>
+         <th>SQL</th>
+         <th>onSchedule</th>
+         <th>priority</th>
+         <th>ctime</th>
+         <th>caozuo</th>
+      </tr>
+   </thead>
+   <tbody>
+{% if latest_etl_list %}
+    {% for etl in latest_etl_list %}
+        <tr>
+            <td>{{etl.id}}</td>
+            <td>{{etl.meta}}</td>
+            <td>{{etl.tblName}}</td>
+            <td>{{etl.author}}</td>
+            <td>{{etl.preSql}}</td>
+            <td>{{etl.query}}</td>
+            <td>{{etl.onSchedule}}</td>
+            <td>{{etl.priority}}</td>
+            <td>{{etl.ctime}}</td>
+            <td>
+                <a href="etl/{{ etl.id }}/">EDIT{{etl.meta}}</a> </td>
+        </tr>
+            {% endfor %}
+      {% else %}
+    <p>No polls are available.</p>
+{% endif %}
+  </tbody>
+</table>
+</div>

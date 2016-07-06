@@ -46,4 +46,14 @@ module.exports = function (router) {
       })
     });
 
+    router.get('/generate_script', function (req, res) {
+      common.getRequest({
+        urlsName:'generateEditScript',
+        req: req,
+        params: req.query
+      }, function (body) {
+        res.send('successed in location : ' + body.location);
+      })
+    });
+
 };

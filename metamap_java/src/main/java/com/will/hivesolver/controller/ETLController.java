@@ -31,6 +31,16 @@ public class ETLController {
         return "{\"message\" :\"success\"}";
     }
 
+    @RequestMapping(value = "generateETLScript",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
+    public @ResponseBody Object generateETLScript(int id) {
+        try {
+            return JsonUtil.writeValueAsString(etlService.generateETLScript(id));
+        } catch (Exception e) {
+            log.error("something happened when getMermaid");
+            return "error";
+        }
+    }
+
     @RequestMapping(value = "getMermaidById",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
     public @ResponseBody Object getMermaid(int id) {
         try {

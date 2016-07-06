@@ -103,4 +103,9 @@ public class ETLTest {
         ;
     }
 
+    @Test
+    public void testETLShell() throws Exception {
+        System.out.println(JsonUtil.writeValueAsString(etlService.generateETLScript(1)));
+    }
+
 }

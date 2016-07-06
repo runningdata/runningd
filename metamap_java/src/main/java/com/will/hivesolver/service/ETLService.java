@@ -2,11 +2,7 @@ package com.will.hivesolver.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.Resource;
 
@@ -38,6 +34,8 @@ public class ETLService {
     private final String AZKABAN_BASE_LOCATION = "/tmp/";
     
     private final String AZKABAN_SCRIPT_LOCATION = "/var/azkaban-metamap/";
+
+    private final String TMP_SCRIPT_LOCATION = "/var/metamap-tmp/";
 
     Joiner joiner =  Joiner.on(",");
 
@@ -332,5 +330,22 @@ public class ETLService {
 
     public ETL getETLById(int id) {
         return etlDao.getETLById(id).get(0);
+    }
+
+    public Object generateETLScript(int id) throws IOException {
+        Map<String, Object> result = new HashMap<String, Object>();
+        ETL etl = etlDao.getETLById(id).get(0);
+        String location = TMP_SCRIPT_LOCATION + DateUtil.getDateTime(new Date(), "yyyyMMddHHmmss") + "-" + etl.getTblName() + ".sh";
+                StringBuffer sb  = new StringBuffer();
+        sb.append("# job for " + etl.getTblName() + "\n");
+        sb.append("# author : " + etl.getAuthor() + "\n");
+        sb.append("# create time : " + DateUtil.getDateTime(new Date(etl.getCtime()), "yyyyMMddHHmmss") + "\n");
+        sb.append("# pre settings " +"\n");
+        sb.append(etl.getPreSql() + "\n");
+        sb.append(etl.getQuery());
+        FileUtils.write(new File(location), sb.toString(), "utf8", false);
+        result.put("message", "success");
+        result.put("location", location);
+        return result;
     }
 }

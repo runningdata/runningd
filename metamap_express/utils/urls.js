@@ -45,5 +45,11 @@ module.exports = {
     path: '/etl/getMermaidById',
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
+  },
+  generateEditScript: {
+    name: '生成ETL脚本文件到临时目录',
+    path: '/etl/generateETLScript',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
   }
 };
