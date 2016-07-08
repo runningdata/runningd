@@ -2,6 +2,7 @@
 var ROOT_PATH = require('x-root-path');
 
 var system = require( ROOT_PATH + '/configs/system' ),
+    worker = require('child_process'),
     common = require( ROOT_PATH + '/utils/common');
 
 
@@ -55,5 +56,37 @@ module.exports = function (router) {
         res.send('successed in location : ' + body.location);
       })
     });
+
+    router.get('/exec', function (req, res) {
+      common.getRequest({
+        urlsName:'generateEditScript',
+        req: req,
+        params: req.query
+      }, function (body) {
+        worker.exec("hive -e " + body.location + " > " + body.location +".log 2>&1", { 
+          encoding: 'utf8',
+          timeout: 0, /*子进程最长执行时间 */
+          // maxBuffer: 200*1024,  /*stdout和stderr的最大长度*/
+          killSignal: 'SIGTERM',
+          cwd: null,
+          env: null
+        }); 
+        res.render('etls/exec', {
+          log: body.location + ".log",
+          id: req.query.id
+            });
+      })
+    });
+
+    router.get('/get_log', function (req, res) {
+      worker.exec("cat " + req.query.location, function (error, stdout, stderr) {
+        console.log('stderr : ' + stderr);
+        console.log('stdout : ' + stdout);
+        console.log('error : ' + error);
+        // res.render('etls/log', {stdout : stdout, log : req.query.location});
+        res.send({log: stdout.replace(/\n/g, '<br/>'), status: 1});
+      }); 
+    });
+
 
 };

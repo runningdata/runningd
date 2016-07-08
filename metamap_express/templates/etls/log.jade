@@ -1,0 +1,6 @@
+extends ../layout
+
+block content
+  h2 log for #{log}
+  .container.
+    !{stdout.replace(/\n/g, '<br/>')}

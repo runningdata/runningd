@@ -22,10 +22,27 @@ public class DateUtil {
 	    SimpleDateFormat format = new SimpleDateFormat("yyyMMddHHmmss");
 	    return format.format(new Date());
 	}
-	
+
+	public static String getDateKeyStrFromNow(int delta) throws ParseException {
+		Calendar today = getToday();
+		today.add(Calendar.DATE, -delta);
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+		return format.format(today.getTime());
+	}
+
+	public static String getDateKeyStr(String date, int delta) throws ParseException {
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(format.parse(date));
+		calendar.add(Calendar.DATE, -delta);
+		return format.format(calendar.getTime());
+	}
+
+
+
 	/**
 	 * Return 缺省的日期格式 (yyyy-MM-dd)
-	 * 
+	 *
 	 * @return 在页面中显示的日期格式
 	 */
 	public static String getDatePattern() {
@@ -256,7 +273,7 @@ public class DateUtil {
 	/**
 	 * 判断指定日期的年份是否是闰年
 	 * 
-	 * @param date指定日期
+	 * @param date
 	 *            。
 	 * @return 是否闰年
 	 */
@@ -326,7 +343,6 @@ public class DateUtil {
 	/**
 	 * 取得指定日期的所处星期的第一天
 	 * 
-	 * @param gc参数为Calendar类型
 	 * @return 指定日期的所处星期的第一天
 	 */
 	public static Calendar getFirstDayOfWeek(Calendar gc) {

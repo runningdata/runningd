@@ -6,6 +6,7 @@ import java.util.*;
 
 import javax.annotation.Resource;
 
+import com.will.hivesolver.util.SPELUtils;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -343,7 +344,7 @@ public class ETLService {
         sb.append("# pre settings " +"\n");
         sb.append(etl.getPreSql() + "\n");
         sb.append(etl.getQuery());
-        FileUtils.write(new File(location), sb.toString(), "utf8", false);
+        FileUtils.write(new File(location), SPELUtils.getRenderELTemplate(sb.toString()), "utf8", false);
         result.put("message", "success");
         result.put("location", location);
         return result;
