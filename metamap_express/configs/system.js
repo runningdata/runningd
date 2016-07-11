@@ -39,7 +39,7 @@ var debug = require('debug')('metamap:configs:system');
  * 不传, 返回默认的线上 BACKEND
  */
 var config = {
-  hostIp: 'http://192.168.80.128',
+  hostIp: 'http://192.168.80.130',
   port: 9090 || 80,
   basePath: '/metamap'
 };
