@@ -1,0 +1,44 @@
+extends ../layout
+
+
+block content
+
+  - var db = '';
+  - var valid = 1, id = -1;
+  - var meta = '';
+  - var time = '';
+  - var settings = '', type = 0;
+  if meta_obj
+    - db = meta_obj.db;
+    - valid = meta_obj.valid;
+    - id = meta_obj.id;
+    - meta = meta_obj.meta;
+    - time = meta_obj.ctimeFormat;
+    - settings = meta_obj.settings;
+    - type = meta_obj.type;
+
+  head
+    title meta
+
+  h2 meta
+
+  form(method="post", action="add")
+    .form-group
+      if meta_obj
+        span.label.label-primary ID :   #{meta_obj.id}
+        &nbsp;&nbsp;
+        span.label.label-success 创建时间 :  #{time}
+      p
+      label 数据库名称
+      input.form-control(name="db", type="text", value="#{db}") 
+      label meta_obj数据源
+      input.form-control(name="meta", type="text", value="#{meta}") 
+      label 配置
+      textarea.form-control(name="settings",rows="3") #{settings}
+      label 类型
+      select.form-control(name="type") 
+        option(value="1" selected=type== 1) mysql
+        option(value="2" selected=type== 2) hive
+      input(name="id", type="hidden",value="#{id}")
+      input(name="valid", type="hidden",value="#{valid}")
+      input.btn.btn-primary(type="submit", value="保存")

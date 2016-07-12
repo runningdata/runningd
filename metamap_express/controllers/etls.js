@@ -1,8 +1,7 @@
 'use strict';
 var ROOT_PATH = require('x-root-path');
 
-var system = require( ROOT_PATH + '/configs/system' ),
-    worker = require('child_process'),
+var worker = require('child_process'),
     common = require( ROOT_PATH + '/utils/common');
 
 

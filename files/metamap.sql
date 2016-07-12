@@ -107,3 +107,15 @@ ALTER TABLE `etl` AUTO_INCREMENT=18;
 -- Auto increment value for tbl_blood
 -- ----------------------------
 ALTER TABLE `tbl_blood` AUTO_INCREMENT=21;
+
+
+CREATE TABLE `metas` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `meta` varchar(20) CHARACTER SET latin1 NOT NULL,
+  `db` varchar(20) CHARACTER SET latin1 NOT NULL,
+  `settings` varchar(300) DEFAULT NULL,
+  `type` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1. mysql\r\n2. hive',
+  `valid` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1 有效 0 失效',
+  `ctime` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8

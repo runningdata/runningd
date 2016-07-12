@@ -22,6 +22,24 @@ module.exports = {
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
   },
+  editMeta: {
+    name: '获取需要编辑的Meta',
+    path: '/meta/get',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
+  },
+  addMeta: {
+    name: '添加新版本的Meta, 或者更新已有的Meta',
+    path: '/meta/add',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
+  },
+  allMeta: {
+    name: '获取所有有效的Meta',
+    path: '/meta/getAll',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
+  },
   addETL: {
     name: '添加新版本的ETL',
     path: '/etl/add',

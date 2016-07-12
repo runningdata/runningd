@@ -1,0 +1,29 @@
+extends ../layout
+
+block content
+  head
+    title Meta列表
+    
+  h2 Meta列表
+
+  if metas.length
+    table.table.table-striped
+      caption Meta列表
+        thead 
+          tr
+            td ID
+            td Meta
+            td 数据库名称
+            td 
+              center 操作
+      tbody
+        each meta in metas
+          tr
+            td #{meta.id}
+            td #{meta.meta}
+            td #{meta.db}
+            td 
+              center 
+                a.btn.btn-primary.btn-sm(href="edit?id=#{meta.id}") Edit
+  else
+     |No meta Found
