@@ -27,7 +27,7 @@
 var express = require('express');
 var url = require('url');
 var debug = require('debug')('metamap:configs:system');
-
+var program = require('commander');
 /**
  * node端 -> BACKEND JAVA端
  *
@@ -38,11 +38,35 @@ var debug = require('debug')('metamap:configs:system');
  *
  * 不传, 返回默认的线上 BACKEND
  */
-var config = {
+
+var dev = {
   hostIp: 'http://192.168.80.130',
   port: 9090 || 80,
   basePath: '/metamap'
 };
+
+var prod = {
+  hostIp: 'http://10.0.1.62',
+  port: 9090 || 80,
+  basePath: '/metamap'
+};
+
+program
+  .version('0.0.1')
+  .option('-e, --environment <string>', 'target environment')
+  .parse(process.argv);
+
+var env = program.environment;
+
+var config = dev;
+if (env == 'prod') {
+  console.log('prod emvironment');
+  config = prod;
+} else {
+  console.log('dev emvironment');
+}
+
+
 
 module.exports = {
 
