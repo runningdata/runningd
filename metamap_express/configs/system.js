@@ -58,12 +58,12 @@ program
 
 var env = program.environment;
 
-var config = dev;
-if (env == 'prod') {
-  console.log('prod emvironment');
-  config = prod;
-} else {
+var config = prod;
+if (env == 'dev') {
   console.log('dev emvironment');
+  config = dev;
+} else {
+  console.log('prod emvironment');
 }
 
 
