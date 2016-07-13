@@ -9,11 +9,6 @@ import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.lang.reflect.MethodUtils;
 
-/**
- * 
- * @author jiayi.zhang
- *
- */
 @SuppressWarnings("serial")
 public abstract class Entity implements Serializable {
 	

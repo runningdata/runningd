@@ -20,7 +20,7 @@ public interface ITblBloodDao {
 
     @Select("select * from tbl_blood where related_etl_id=#{id}")
     public List<TblBlood> selectByETLId(@Param("id")int id);
-    
+
     @Select("select b.* from"
             + " tbl_blood a join tbl_blood b"
             + " on a.parent_tbl = b.tbl_name and b.valid = 1"
@@ -37,12 +37,5 @@ public interface ITblBloodDao {
     
     @Select("select * from tbl_blood where valid = 1 and parent_tbl=#{tblName}")
     public List<TblBlood> selectByParentTblName(@Param("tblName")String tblName);
-
-    @Insert("insert into tbl_blood  (parent_tbl, tbl_name, related_etl_id, utime, valid) "
-            + " values   (#{parentTbl}, #{tblName}, #{relatedEtlId}, #{utime}, #{valid})")
-    public void insertOne(TblBlood blood);
-
-    @Update("update tbl_blood set valid = 0 where tbl_name=#{tblName}")
-    public void makePreviousInvalid(@Param("tblName")String tblName);
 
 }

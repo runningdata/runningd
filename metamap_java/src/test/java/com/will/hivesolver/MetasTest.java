@@ -15,7 +15,7 @@ import java.util.List;
  * Created by will on 16-7-11.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("/spring/applicationContext.xml")
+@ContextConfiguration("/applicationContext.xml")
 public class MetasTest {
     @Autowired
     private MetaService metaService;
@@ -27,8 +27,18 @@ public class MetasTest {
         meta.setDb("default");
         meta.setType(Meta.TYPE_HIVE);
         meta.setValid(1);
-        meta.setCtime(System.currentTimeMillis());
-        metaService.add(meta);
+        metaService.save(meta);
+    }
+
+    @Test
+    public void testUpdate() {
+        Meta meta = new Meta();
+        meta.setId(1);
+        meta.setMeta("hive");
+        meta.setDb("default");
+        meta.setType(Meta.TYPE_HIVE);
+        meta.setValid(1);
+        metaService.save(meta);
     }
 
     @Test
@@ -43,5 +53,12 @@ public class MetasTest {
     public void testGetONe() throws Exception  {
         System.out.println("testGetONe ............");
         System.out.println(JsonUtil.writeValueAsString(metaService.getById(1)));
+    }
+
+    @Test
+    public void testDeleteForeverONe() throws Exception  {
+        System.out.println("testDeleteForeverONe ............");
+        System.out.println(JsonUtil.writeValueAsString(metaService.deleteForever(2)));
+        System.out.println(JsonUtil.writeValueAsString(metaService.getAll()));
     }
 }

@@ -1,26 +1,32 @@
 package com.will.hivesolver.entity;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
+import javax.persistence.*;
+import java.util.Date;
+
+@javax.persistence.Entity
+@DynamicUpdate
+@DynamicInsert
+@Table(name = "tbl_blood")
 public class TblBlood {
+    @Id
+    @GeneratedValue
     private int id;
     private String tblName;
     private String parentTbl;
     private int relatedEtlId;
     private int valid = 1;
+    @Transient
     private boolean isSelected;
-    private long ctime;
-    private long utime;
-    public long getCtime() {
-        return ctime;
-    }
-    public void setCtime(long ctime) {
-        this.ctime = ctime;
-    }
-    public long getUtime() {
-        return utime;
-    }
-    public void setUtime(long utime) {
-        this.utime = utime;
-    }
+
+
+    @Column(updatable = false, insertable = false)
+    private Date ctime;
+
+    @Column(updatable = true, insertable = false)
+    private Date utime;
     public int getId() {
         return id;
     }
@@ -56,5 +62,21 @@ public class TblBlood {
     }
     public void setSelected(boolean isSelected) {
         this.isSelected = isSelected;
+    }
+
+    public Date getCtime() {
+        return ctime;
+    }
+
+    public void setCtime(Date ctime) {
+        this.ctime = ctime;
+    }
+
+    public Date getUtime() {
+        return utime;
+    }
+
+    public void setUtime(Date utime) {
+        this.utime = utime;
     }
 }

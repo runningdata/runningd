@@ -21,7 +21,7 @@ public class ZipUtils {
     /**
      * Add all files from the source directory to the destination zip file
      *
-     * @param source      the directory with files to add
+     * @param source      the directory with files to save
      * @param destination the zip file that should contain the files
      * @throws IOException      if the io fails
      * @throws ArchiveException if creating or adding to the archive fails
