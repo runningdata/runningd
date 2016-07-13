@@ -1,5 +1,5 @@
 <html>
 <body>
-<h2>data api run</h2>
+<h2>Metamap Index</h2>
 </body>
 </html>

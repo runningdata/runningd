@@ -1,14 +1,10 @@
 package com.will.hivesolver.controller;
 
-import com.will.exception.MetaException;
 import com.will.hivesolver.entity.Meta;
 import com.will.hivesolver.service.MetaService;
 import com.will.hivesolver.util.JsonUtil;
-import com.will.hivesolver.util.ResultBean;
-import com.will.hivesolver.util.ResultBean.ResultStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,9 +22,9 @@ public class MetaController {
     @Resource(name = "metaService")
     private MetaService metaService;
 
-    @RequestMapping(value = "add",method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
+    @RequestMapping(value = "save",method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
     public @ResponseBody Object add(Meta meta) {
-        metaService.add(meta);
+        metaService.save(meta);
         return "{\"message\" :\"success\"}";
     }
 

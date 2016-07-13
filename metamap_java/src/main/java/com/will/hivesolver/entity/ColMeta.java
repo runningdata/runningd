@@ -1,6 +1,22 @@
 package com.will.hivesolver.entity;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.Date;
+
+@javax.persistence.Entity
+@DynamicUpdate
+@DynamicInsert
+@Table(name = "col_tbl_db")
 public class ColMeta {
+    @Id
+    @GeneratedValue
+    private int id;
     private int dbId;
     private String dbName;
     private int tblId;
@@ -8,6 +24,8 @@ public class ColMeta {
     private String colTypeName;
     private String colComment;
     private String colName;
+    @Column(updatable = false, insertable = false)
+    private Date ctime;
     public int getDbId() {
         return dbId;
     }
@@ -50,12 +68,20 @@ public class ColMeta {
     public void setColName(String colName) {
         this.colName = colName;
     }
-    @Override
-    public String toString() {
-        return "ColMeta [dbId=" + dbId + ", dbName=" + dbName + ", tblId="
-                + tblId + ", tblType=" + tblType + ", colTypeName="
-                + colTypeName + ", colComment=" + colComment + ", colName="
-                + colName + "]";
+
+    public int getId() {
+        return id;
     }
-    
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Date getCtime() {
+        return ctime;
+    }
+
+    public void setCtime(Date ctime) {
+        this.ctime = ctime;
+    }
 }

@@ -30,7 +30,7 @@ module.exports = {
   },
   addMeta: {
     name: '添加新版本的Meta, 或者更新已有的Meta',
-    path: '/meta/add',
+    path: '/meta/save',
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
   },
@@ -42,7 +42,7 @@ module.exports = {
   },
   addETL: {
     name: '添加新版本的ETL',
-    path: '/etl/add',
+    path: '/etl/save',
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
   },

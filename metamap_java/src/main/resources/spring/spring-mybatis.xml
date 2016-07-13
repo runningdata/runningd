@@ -19,9 +19,9 @@
 	<!-- mybatis -->
 	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="configLocation" value="classpath:mybatis-config.xml" />
-		<property name="mapperLocations" value="classpath:com/will/hivesolver/mapper/*Mapper.xml" />
+		<!--<property name="mapperLocations" value="classpath:com/will/hivesolver/mapper/*Mapper.xml" />-->
 		<property name="typeAliasesPackage" value="com.will.hivesolver.entity" />
-		<property name="dataSource" ref="hivemeta" />
+		<property name="dataSource" ref="metamapDatasource" />
 	</bean>
 	
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" >

@@ -12,16 +12,20 @@ module.exports = function (router) {
             params: req.query
           }, function (bloods) {
             var tempArr = [];
-            bloods.forEach(function(blood) {
-            if (blood.relatedEtlId == req.query.id) {
-              tempArr.push('style ' + blood.tblName.replace('@','___')  + ' fill:#f9f,stroke:#333,stroke-width:4px;');
-              console.log("got id : " + blood.tblName);
+            if (bloods) {
+              bloods.forEach(function(blood) {
+                if (blood.relatedEtlId == req.query.id) {
+                  tempArr.push('style ' + blood.tblName.replace('@','___')  + ' fill:#f9f,stroke:#333,stroke-width:4px;');
+                  console.log("got id : " + blood.tblName);
+                }
+                if (blood.parentTbl.length > 0 && blood.tblName.length > 0) {
+                  tempArr.push(blood.parentTbl.replace('@','___')  + '-->'+ blood.tblName.replace('@','___') + ';');
+                }
+              });
+            } else {
+              res.render('blood/dag', { bloods : false});
             }
-            if (blood.parentTbl.length > 0 && blood.tblName.length > 0) {
-              tempArr.push(blood.parentTbl.replace('@','___')  + '-->'+ blood.tblName.replace('@','___') + ';');
-            }
-         });
-        res.render('blood/dag', { bloods : tempArr.join(' ')});
+           res.render('blood/dag', { bloods : tempArr.join(' ')});
       });
     });
 

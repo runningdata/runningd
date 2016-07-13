@@ -1,12 +1,9 @@
 package com.will.hivesolver;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import com.will.hivesolver.entity.*;
+import com.will.hivesolver.entity.ETL;
+import com.will.hivesolver.entity.Node;
+import com.will.hivesolver.entity.TblBlood;
+import com.will.hivesolver.service.ETLService;
 import com.will.hivesolver.util.JsonUtil;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.hadoop.hive.metastore.api.MetaException;
@@ -18,26 +15,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.will.hivesolver.service.ETLService;
-import com.will.hivesolver.service.TblBloodService;
+import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("/spring/applicationContext.xml")
+@ContextConfiguration("/applicationContext.xml")
 public class ETLTest {
     private static Logger log = LoggerFactory.getLogger(ETLTest.class);
 
     @Autowired
     private ETLService etlService;
 
-    @Autowired
-    private TblBloodService tblBloodService;
-
     @Test
     public void testinsertEtl() {
         ETL etl = new ETL();
         etl.setAuthor("will");
-        etl.setCtime(System.currentTimeMillis() / 1000);
-        etl.setUtime(System.currentTimeMillis() / 1000);
         etl.setMeta("mymeta");
         etl.setTblName("my_table");
         etl.setPreSql("delete from default.tbl");
@@ -75,11 +66,6 @@ public class ETLTest {
         }
     }
 
-    @Test
-    public void testTblBlood() {
-        tblBloodService.resolveDependency();
-    }
-    
     @Test
     public void testGetTree() {
         etlService.getETLTree("mymeta@my_table");

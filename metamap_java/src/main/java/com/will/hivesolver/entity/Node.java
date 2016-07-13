@@ -34,7 +34,7 @@ public class Node implements Comparable<Node> {
     }
 
 //    public boolean addParent(Node parent) {
-//        return this.getParent().add(parent);
+//        return this.getParent().save(parent);
 //    }
     
     public boolean addChild(Node child) {

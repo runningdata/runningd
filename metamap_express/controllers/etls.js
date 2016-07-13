@@ -41,7 +41,7 @@ module.exports = function (router) {
         req: req,
         params: req.query
       }, function (body) {
-        body.ctimeFormat = common.formatDateTS(body.ctime, 'yymmdd hh:mm:ss');
+        body.ctimeFormat = common.formatDate(new Date(body.ctime), 'yymmdd hh:mm:ss');
         res.render('etls/edit', { etl : body});
       })
     });

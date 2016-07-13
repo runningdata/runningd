@@ -1,20 +1,32 @@
 package com.will.hivesolver.entity;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
+import javax.persistence.*;
+import java.util.Date;
+
 /**
  * Created by will on 16-7-11.
  */
+@javax.persistence.Entity
+@DynamicUpdate
+@DynamicInsert
+@Table(name = "metas")
 public class Meta {
     public static final int TYPE_MYSQL = 1;
     public static final int TYPE_HIVE = 2;
 
-
+    @Id
+    @GeneratedValue
     private int id;
     private String meta;
     private String db;
     private String settings;
     private int type; // 1. mysql 2. hive
     private int valid;
-    private long ctime;
+    @Column(updatable = false, insertable = false)
+    private Date ctime;
 
     public int getId() {
         return id;
@@ -48,13 +60,6 @@ public class Meta {
         this.valid = valid;
     }
 
-    public long getCtime() {
-        return ctime;
-    }
-
-    public void setCtime(long ctime) {
-        this.ctime = ctime;
-    }
 
     public int getType() {
         return type;

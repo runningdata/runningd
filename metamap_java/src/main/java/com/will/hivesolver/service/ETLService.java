@@ -6,6 +6,8 @@ import java.util.*;
 
 import javax.annotation.Resource;
 
+import com.will.hivesolver.repositories.ETLRepository;
+import com.will.hivesolver.repositories.TblBloodRepository;
 import com.will.hivesolver.util.SPELUtils;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
@@ -46,6 +48,12 @@ public class ETLService {
     @Resource(name = "tblBloodDao")
     private ITblBloodDao tblBloodDao;
 
+    @Resource
+    private TblBloodRepository tblBloodRepository;
+
+    @Resource
+    private ETLRepository etlRepository;
+
     /**
      * 获取所有的ETL
      *
@@ -62,12 +70,12 @@ public class ETLService {
     @Transactional
     public  void addETL(ETL etl) {
         // must after tbl blood analyse?
-        etlDao.makePreviousInvalid(etl.getTblName());
-        etlDao.insertSingleETL(etl);
-        int etlId = etlDao.getETLByTblName(etl.getTblName()).get(0).getId();
+        etlRepository.makePreviousInvalid(etl.getTblName());
+        etlRepository.save(etl);
+        int etlId = etlRepository.getETLByTblName(etl.getTblName()).get(0).getId();
 
 
-        tblBloodDao.makePreviousInvalid(etl.getTblName());
+        tblBloodRepository.makePreviousInvalid(etl.getTblName());
         Set<String> parents = HiveJdbcClient.get(etl.getQuery());
         TblBlood blood = null;
         for (String parent : parents) {
@@ -75,8 +83,8 @@ public class ETLService {
             blood.setParentTbl(parent);
             blood.setRelatedEtlId(etlId);
             blood.setTblName(etl.getTblName());
-            blood.setUtime(System.currentTimeMillis()/1000);
-            tblBloodDao.insertOne(blood);
+            blood.setUtime(new Date());
+            tblBloodRepository.save(blood);
         }
 
     }
@@ -340,7 +348,7 @@ public class ETLService {
                 StringBuffer sb  = new StringBuffer();
         sb.append("# job for " + etl.getTblName() + "\n");
         sb.append("# author : " + etl.getAuthor() + "\n");
-        sb.append("# create time : " + DateUtil.getDateTime(new Date(etl.getCtime()), "yyyyMMddHHmmss") + "\n");
+        sb.append("# create time : " + DateUtil.getDateTime(etl.getCtime(), "yyyyMMddHHmmss") + "\n");
         sb.append("# pre settings " +"\n");
         sb.append(etl.getPreSql() + "\n");
         sb.append(etl.getQuery());

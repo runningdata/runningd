@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 
 @Controller
-@RequestMapping("meta")
+@RequestMapping("/hivemeta")
 public class HiveMetaController {
     
     private static Logger log = LoggerFactory.getLogger(HiveMetaController.class);

@@ -1,10 +1,26 @@
 package com.will.hivesolver.entity;
+
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.Date;
+
 /**
  * 
  * @author will
  *
  */
+@javax.persistence.Entity
+@DynamicUpdate
+@DynamicInsert
+@Table(name = "etl")
 public class ETL {
+    @Id
+    @GeneratedValue
     private int id;
     private String query;
     private String meta;
@@ -14,8 +30,8 @@ public class ETL {
     private int priority;
     private int onSchedule;
     private int valid = 1;
-    private long ctime;
-    private long utime;
+    @Column(updatable = false, insertable = false)
+    private Date ctime;
     public int getId() {
         return id;
     }
@@ -65,22 +81,18 @@ public class ETL {
     public void setValid(int valid) {
         this.valid = valid;
     }
-    public long getCtime() {
-        return ctime;
-    }
-    public void setCtime(long ctime) {
-        this.ctime = ctime;
-    }
-    public long getUtime() {
-        return utime;
-    }
-    public void setUtime(long utime) {
-        this.utime = utime;
-    }
     public int getPriority() {
         return priority;
     }
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    public Date getCtime() {
+        return ctime;
+    }
+
+    public void setCtime(Date ctime) {
+        this.ctime = ctime;
     }
 }

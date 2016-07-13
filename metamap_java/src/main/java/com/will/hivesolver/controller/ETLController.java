@@ -24,7 +24,7 @@ public class ETLController {
     @Resource(name = "etlService")
     private ETLService etlService;
 
-    @RequestMapping(value = "add",method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
+    @RequestMapping(value = "save",method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
     public @ResponseBody Object addETL(ETL etl) {
         etl.setAuthor("will");
         etlService.addETL(etl);
@@ -35,6 +35,16 @@ public class ETLController {
     public @ResponseBody Object generateETLScript(int id) {
         try {
             return JsonUtil.writeValueAsString(etlService.generateETLScript(id));
+        } catch (Exception e) {
+            log.error("something happened when getMermaid");
+            return "error";
+        }
+    }
+
+    @RequestMapping(value = "generateJobScript",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
+    public @ResponseBody Object generateJobScript() {
+        try {
+            return JsonUtil.writeValueAsString(etlService.generateAzkabanDAG());
         } catch (Exception e) {
             log.error("something happened when getMermaid");
             return "error";
