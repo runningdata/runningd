@@ -352,12 +352,12 @@ public class ETLService {
     public Object generateETLScript(int id) throws Exception {
         Map<String, Object> result = new HashMap<String, Object>();
         ETL etl = etlDao.getETLById(id).get(0);
-        String location = TMP_SCRIPT_LOCATION + DateUtil.getDateTime(new Date(), "yyyyMMddHHmmss") + "-" + etl.getTblName() + ".sh";
+        String location = TMP_SCRIPT_LOCATION + DateUtil.getDateTime(new Date(), "yyyyMMddHHmmss") + "-" + etl.getTblName().replace("@","__") + ".hql";
         StringBuffer sb = new StringBuffer();
-        sb.append("# job for " + etl.getTblName() + "\n");
-        sb.append("# author : " + etl.getAuthor() + "\n");
-        sb.append("# create time : " + DateUtil.getDateTime(etl.getCtime(), "yyyyMMddHHmmss") + "\n");
-        sb.append("# pre settings " + "\n");
+        sb.append("-- job for " + etl.getTblName() + "\n");
+        sb.append("-- author : " + etl.getAuthor() + "\n");
+        sb.append("-- create time : " + DateUtil.getDateTime(etl.getCtime(), "yyyyMMddHHmmss") + "\n");
+        sb.append("-- pre settings " + "\n");
         sb.append(etl.getPreSql() + "\n");
         sb.append(etl.getQuery());
         String renderELTemplate = SPELUtils.getRenderELTemplate(sb.toString());
