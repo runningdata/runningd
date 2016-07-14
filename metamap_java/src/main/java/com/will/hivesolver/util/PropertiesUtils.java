@@ -6,7 +6,7 @@ import org.springframework.util.StringValueResolver;
 
 @Component
 public class PropertiesUtils implements EmbeddedValueResolverAware {
-    
+
     private StringValueResolver stringValueResolver;
 
     @Override
@@ -15,6 +15,7 @@ public class PropertiesUtils implements EmbeddedValueResolverAware {
     }
 
     public String getPropertiesValue(String name){
+
         return stringValueResolver.resolveStringValue(name);
     }
 }

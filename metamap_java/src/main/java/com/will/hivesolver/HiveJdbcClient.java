@@ -17,11 +17,13 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.will.hivesolver.util.JsonUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class HiveJdbcClient {
     private static String HIVE_SERVER_DRIVER = "org.apache.hive.jdbc.HiveDriver";
 
-    private static PropertiesUtils propertiesUtils = new PropertiesUtils();
+    @Autowired
+    private static PropertiesUtils propertiesUtils;
     private static String HIVE_SERVER_URL;
     private static String HIVE_SERVER_USER;
     private static String HIVE_SERVER_PWD;
