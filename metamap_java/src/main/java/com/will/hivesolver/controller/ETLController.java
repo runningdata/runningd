@@ -6,6 +6,8 @@ import com.will.hivesolver.service.ETLService;
 import com.will.hivesolver.util.JsonUtil;
 import com.will.hivesolver.util.ResultBean;
 import com.will.hivesolver.util.ResultBean.ResultStatus;
+import org.apache.commons.httpclient.util.ExceptionUtil;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
@@ -36,7 +38,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.generateETLScript(id));
         } catch (Exception e) {
-            log.error("something happened when generateETLScript");
+            log.error("something happened when generateETLScript", ExceptionUtils.getFullStackTrace(e));
             return "error";
         }
     }
@@ -56,7 +58,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.getETLMermaid(id));
         } catch (Exception e) {
-            log.error("something happened when getMermaid");
+            log.error("something happened when getMermaidById", ExceptionUtils.getFullStackTrace(e));
             return "error";
         }
     }
@@ -66,7 +68,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.getETLMermaid(tblName));
         } catch (Exception e) {
-            log.error("something happened when getMermaid");
+            log.error("something happened when getMermaid", ExceptionUtils.getFullStackTrace(e));
             return "error";
         }
     }
@@ -76,7 +78,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.getETLById(id));
         } catch (Exception e) {
-            log.error("something happened when getAllETLs");
+            log.error("something happened when getAllETLs", ExceptionUtils.getFullStackTrace(e));
             return "error";
         }
     }
@@ -86,7 +88,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.allETL());
         } catch (Exception e) {
-            log.error("something happened when getAllETLs");
+            log.error("something happened when getAllETLs", ExceptionUtils.getFullStackTrace(e));
             return "error";
         }
     }
