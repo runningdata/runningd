@@ -4,6 +4,7 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +38,10 @@ public class ETLTask implements Runnable{
                 executor.setExitValue(0);
 //                ExecuteWatchdog watchdog = new ExecuteWatchdog(60000);
 //                executor.setWatchdog(watchdog);
-                baos = new FileOutputStream(out);
+                baos = new FileOutputStream(out, true);
                 executor.setStreamHandler(new PumpStreamHandler(baos, baos));
                 int exitValue = executor.execute(cmdLine);
+                FileUtils.writeStringToFile(out, file + " job done\n", "utf8", true);
             } finally {
                 if (baos != null) {
                     baos.close();

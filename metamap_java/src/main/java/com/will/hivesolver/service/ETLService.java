@@ -329,6 +329,11 @@ public class ETLService {
                 }
             }
         }
+//        else {
+//            TblBlood uniParent = new TblBlood();
+//            uniParent.setTblName(blood.getParentTbl());
+//            tblBloods.add(uniParent);
+//        }
     }
 
     /**
@@ -366,6 +371,7 @@ public class ETLService {
         log.info("executing script: \n" + renderELTemplate);
         FileUtils.write(new File(scriptLocation), renderELTemplate, "utf8", false);
         String logLocation = scriptLocation + ".log";
+        FileUtils.writeStringToFile(new File(logLocation), renderELTemplate, "utf8", true);
         threadPool.submit(new ETLTask(scriptLocation, logLocation));
         result.put("message", "success");
         result.put("log", logLocation);
