@@ -96,17 +96,18 @@ public class ETLService {
     }
 
     public Set<TblBlood> getETLMermaid(int id) {
-        List<TblBlood> selectAllValidETL = tblBloodDao.selectByETLId(id);
+        List<TblBlood> selectAllValidETL = tblBloodDao.selectByRelETLId(id);
         Set<TblBlood> tblBloods = new HashSet<TblBlood>();
         if (selectAllValidETL.size() > 0) {
-            TblBlood blood = selectAllValidETL.get(0);
-            tblBloods.add(blood);
+            for (TblBlood blood : selectAllValidETL) {
+                tblBloods.add(blood);
 
-            // 找上游
-            getParent(blood, tblBloods);
+                // 找上游
+                getParent(blood, tblBloods);
 
-            // 找下游
-            getChildren(tblBloods, blood);
+                // 找下游
+                getChildren(tblBloods, blood);
+            }
         }
         return tblBloods;
     }
