@@ -8,19 +8,19 @@ import java.text.ParseException;
  * Created by will on 16-7-8.
  */
 public class ETLUtils {
-    public String getDateKeyStrFromNow(Integer delta) throws ParseException {
+    public String getDateKeyFromNow(Integer delta) throws ParseException {
         return DateUtil.getDateKeyStrFromNow(delta);
     }
 
-    public String getDateKeyStr(String date, Integer delta) throws ParseException {
+    public String getDateKey(String date, Integer delta) throws ParseException {
         return DateUtil.getDateKeyStr(date, delta);
     }
 
-    public String getDateKeyStrFromNowFormat(Integer delta, String format) throws ParseException {
-        return DateUtil.getDateKeyStrFromNowFormat(delta, format);
+    public String getDateFromNow(Integer delta) throws ParseException {
+        return DateUtil.getDateKeyStrFromNowFormat(delta, "yyyy-MM-dd");
     }
 
-    public String getDateKeyStrFormat(String date, Integer delta, String format) throws ParseException {
-        return DateUtil.getDateKeyStrFormat(date, delta, format);
+    public String getDate(String date, Integer delta) throws ParseException {
+        return DateUtil.getDateKeyStrFormat(date, delta, "yyyy-MM-dd");
     }
 }

@@ -33,14 +33,14 @@ import com.will.hivesolver.util.ZipUtils;
 public class ETLService {
 
     private static Logger log = LoggerFactory.getLogger(ETLService.class);
-    
+
     private final String AZKABAN_BASE_LOCATION = "/tmp/";
-    
+
     private final String AZKABAN_SCRIPT_LOCATION = "/var/azkaban-metamap/";
 
     private final String TMP_SCRIPT_LOCATION = "/var/metamap-tmp/";
 
-    Joiner joiner =  Joiner.on(",");
+    Joiner joiner = Joiner.on(",");
 
     @Resource(name = "etlDao")
     private IETLDao etlDao;
@@ -56,7 +56,7 @@ public class ETLService {
 
     /**
      * 获取所有的ETL
-     *
+     * <p>
      * TODO: 权限  +  分页
      */
     public Object allETL() {
@@ -65,10 +65,11 @@ public class ETLService {
 
     /**
      * 新增一个ETL
+     *
      * @param etl
      */
     @Transactional
-    public  void addETL(ETL etl) {
+    public void addETL(ETL etl) {
         // must after tbl blood analyse?
         etlRepository.makePreviousInvalid(etl.getTblName());
         etlRepository.save(etl);
@@ -123,6 +124,7 @@ public class ETLService {
 
     /**
      * 返回当前所有有效的ETL
+     *
      * @return
      */
     public Node getETLTree(String tbl_name) {
@@ -132,29 +134,29 @@ public class ETLService {
         if (selectAllValidETL.size() > 0) {
             root = new Node();
             root.setName("root");
-            
+
             TblBlood blood = selectAllValidETL.get(0);
             Node current = new Node();
             current.setCurrent(true);
             current.setName(blood.getTblName());
             nodeCache.put(blood.getTblName(), current);
-            
+
             // 找上游
             getParent(blood, nodeCache);
-            
+
             // 找下游
             getChildren(nodeCache, blood);
-            
+
             int maxLevel = 0;
             for (Node node : nodeCache.values()) {
                 if (maxLevel < node.getLevel()) {
                     maxLevel = node.getLevel();
                 }
             }
-            
+
             for (Node node : nodeCache.values()) {
                 if (maxLevel == node.getLevel()) {
-                    root.addChild( node);
+                    root.addChild(node);
                 }
             }
 
@@ -167,17 +169,18 @@ public class ETLService {
         }
         return root;
     }
-    
+
     /**
      * 生成azkaban job文件
-     * 
+     * <p>
      * 1. 找出没有被任何其他ETL以来的叶子节点
      * 2. 遍历所有叶子节点，找到这个叶子节点的所有有效依赖，放入dependencies里，
      * 如果尚未生成该ETL的job文件
      * 3. 向上递归执行，直到没有dependency的节点，也就是最上一层节点就停止。
+     *
      * @return
-     * @throws MetaException 
-     * @throws ArchiveException 
+     * @throws MetaException
+     * @throws ArchiveException
      */
     public String generateAzkabanDAG() throws MetaException, ArchiveException {
         try {
@@ -191,7 +194,7 @@ public class ETLService {
             TblBlood tbl = new TblBlood();
             tbl.setTblName("etl_done_" + serFolder);
             generateJobFile(tbl, leafBlood, serFolder);
-            ZipUtils.addFilesToZip(new File(serFolderLocation), 
+            ZipUtils.addFilesToZip(new File(serFolderLocation),
                     new File(serFolderLocation + ".zip"));
         } catch (IOException e) {
             log.error("error happends when generateAzkabanDAG");
@@ -200,7 +203,6 @@ public class ETLService {
         return null;
     }
 
-    
 
     private void loadLeafBloods(List<TblBlood> leafBlood, Set<String> doneBlood, String serFolder) throws IOException {
         for (TblBlood leaf : leafBlood) {
@@ -214,7 +216,7 @@ public class ETLService {
     }
 
 
-    private void generateJobFile(TblBlood currentBlood,  List<TblBlood> parentNode, String serFolder) throws IOException {
+    private void generateJobFile(TblBlood currentBlood, List<TblBlood> parentNode, String serFolder) throws IOException {
         String jobName = currentBlood.getTblName();
         File file;
         String command;
@@ -236,7 +238,7 @@ public class ETLService {
         } else {
             command = "echo " + jobName;
         }
-        
+
         // 生成job文件
         String jobType = "command";
         String content;
@@ -246,10 +248,10 @@ public class ETLService {
         }
         String jobDependencies = joiner.join(dependencies);
         content = "# " + jobName + "\n"
-                + "type=" + jobType +"\n"
-                        + "command=" + command + "\n";
+                + "type=" + jobType + "\n"
+                + "command=" + command + "\n";
         if (StringUtils.isNotBlank(jobDependencies)) {
-            content += "dependencies=" + jobDependencies +"\n";
+            content += "dependencies=" + jobDependencies + "\n";
         }
         file = new File(AZKABAN_BASE_LOCATION + serFolder + "/" + jobName + ".job");
         FileUtils.write(file, content, "utf8", false);
@@ -259,6 +261,7 @@ public class ETLService {
 
     /**
      * 当找不到任何子节点的时候迭代结束
+     *
      * @param nodeCache
      * @param blood
      */
@@ -266,13 +269,13 @@ public class ETLService {
         List<TblBlood> children = tblBloodDao.selectByParentTblName(blood.getTblName());
         if (children.size() > 0) {
             for (TblBlood tblBlood : children) {
-                    Node c = new Node();
-                    Node node = nodeCache.get(blood.getTblName());
-                    node.addChild(c);
-                    c.setLevel(node.getLevel() - 1);
-                    c.setName(tblBlood.getTblName());
-                    nodeCache.put(tblBlood.getTblName(), c);
-                    getChildren(nodeCache, tblBlood);
+                Node c = new Node();
+                Node node = nodeCache.get(blood.getTblName());
+                node.addChild(c);
+                c.setLevel(node.getLevel() - 1);
+                c.setName(tblBlood.getTblName());
+                nodeCache.put(tblBlood.getTblName(), c);
+                getChildren(nodeCache, tblBlood);
             }
         }
     }
@@ -280,11 +283,12 @@ public class ETLService {
 
     /**
      * 当找不到任何父节点的时候结束
+     *
      * @param blood
      * @param nodeCache
      */
     private void getParent(TblBlood blood,
-             Map<String, Node> nodeCache) {
+                           Map<String, Node> nodeCache) {
         List<TblBlood> parent = tblBloodDao.selectByTblName(blood.getParentTbl());
         if (parent.size() > 0) {
             for (TblBlood tblBlood : parent) {
@@ -303,9 +307,9 @@ public class ETLService {
     }
 
 
-
     /**
      * 当找不到任何父节点的时候结束
+     *
      * @param blood
      * @param tblBloods
      */
@@ -324,6 +328,7 @@ public class ETLService {
 
     /**
      * 当找不到任何子节点的时候迭代结束
+     *
      * @param tblBloods
      * @param blood
      */
@@ -345,14 +350,16 @@ public class ETLService {
         Map<String, Object> result = new HashMap<String, Object>();
         ETL etl = etlDao.getETLById(id).get(0);
         String location = TMP_SCRIPT_LOCATION + DateUtil.getDateTime(new Date(), "yyyyMMddHHmmss") + "-" + etl.getTblName() + ".sh";
-                StringBuffer sb  = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("# job for " + etl.getTblName() + "\n");
         sb.append("# author : " + etl.getAuthor() + "\n");
         sb.append("# create time : " + DateUtil.getDateTime(etl.getCtime(), "yyyyMMddHHmmss") + "\n");
-        sb.append("# pre settings " +"\n");
+        sb.append("# pre settings " + "\n");
         sb.append(etl.getPreSql() + "\n");
         sb.append(etl.getQuery());
-        FileUtils.write(new File(location), SPELUtils.getRenderELTemplate(sb.toString()), "utf8", false);
+        String renderELTemplate = SPELUtils.getRenderELTemplate(sb.toString());
+        log.info("executing script: \n" + renderELTemplate);
+        FileUtils.write(new File(location), renderELTemplate, "utf8", false);
         result.put("message", "success");
         result.put("location", location);
         return result;
