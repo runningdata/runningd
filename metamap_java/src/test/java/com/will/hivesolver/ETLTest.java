@@ -5,6 +5,7 @@ import com.will.hivesolver.entity.Node;
 import com.will.hivesolver.entity.TblBlood;
 import com.will.hivesolver.service.ETLService;
 import com.will.hivesolver.util.JsonUtil;
+import com.will.hivesolver.util.PropertiesUtils;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.InputStream;
 import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -94,5 +96,18 @@ public class ETLTest {
         System.out.println(JsonUtil.writeValueAsString(etlService.generateETLScript(1)));
     }
 
+
+    @Autowired
+    PropertiesUtils propertiesUtils;
+
+    @Test
+    public void testReadProperties() throws Exception {
+        System.out.println(propertiesUtils.getPropertiesValue("${jdbc.metamap.url}"));
+//        InputStream resourceAsStream = SpringELTest.class.getClass().getClassLoader().getResourceAsStream("jdbc.properties");
+//
+//        Properties properties = new Properties();
+//        properties.load(resourceAsStream);
+//        System.out.println(properties);
+    }
 
 }
