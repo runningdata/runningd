@@ -35,8 +35,8 @@ public class ETLTask implements Runnable{
                 CommandLine cmdLine = CommandLine.parse(line);
                 DefaultExecutor executor = new DefaultExecutor();
                 executor.setExitValue(0);
-                ExecuteWatchdog watchdog = new ExecuteWatchdog(60000);
-                executor.setWatchdog(watchdog);
+//                ExecuteWatchdog watchdog = new ExecuteWatchdog(60000);
+//                executor.setWatchdog(watchdog);
                 baos = new FileOutputStream(out);
                 executor.setStreamHandler(new PumpStreamHandler(baos, baos));
                 int exitValue = executor.execute(cmdLine);
