@@ -94,7 +94,7 @@ module.exports = function (router) {
         fs.readFile(req.query.location, 'utf8',function(err, data){
           if (err) throw err;
           console.log(data);
-          res.send({log: data, status: 1});
+          res.send({log: data.replace(/\n/g, '<br/>'), status: 1});
         });
     });
 
