@@ -33,6 +33,7 @@ public class HiveJdbcClient {
     }
 
     public static void main(String[] s) {
+
         String sql = "select count(1) as num,userid from jlc.invest_record group by userid limit 100";
         try {
             Class.forName(HIVE_SERVER_DRIVER);
@@ -81,6 +82,7 @@ public class HiveJdbcClient {
     }
 
     public static Set<String> get(String sql) {
+        sql = sql.substring(sql.toLowerCase().indexOf("select"), sql.length());
         try {
             Class.forName(HIVE_SERVER_DRIVER);
         } catch (ClassNotFoundException e) {
