@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.will.hivesolver.util.PropertiesUtils;
 import org.codehaus.jackson.JsonParseException;
@@ -30,29 +31,38 @@ public class HiveJdbcClient {
     private String HIVE_SERVER_URL;
     private String HIVE_SERVER_USER;
     private String HIVE_SERVER_PWD;
-    {
-        HIVE_SERVER_URL = propertiesUtils.getPropertiesValue("hive.server.url");
-        HIVE_SERVER_USER = propertiesUtils.getPropertiesValue("hive.server.user");
-        HIVE_SERVER_URL = propertiesUtils.getPropertiesValue("hive.server.password");
-        HIVE_SERVER_DRIVER = propertiesUtils.getPropertiesValue("hive.server.driver");
+
+    private AtomicBoolean initialed = new AtomicBoolean();
+
+    public boolean init() {
+        if (!initialed.get()) {
+            HIVE_SERVER_URL = propertiesUtils.getPropertiesValue("${hive.server.url}");
+            HIVE_SERVER_USER = propertiesUtils.getPropertiesValue("${hive.server.user}");
+            HIVE_SERVER_PWD = propertiesUtils.getPropertiesValue("${hive.server.password}");
+            HIVE_SERVER_DRIVER = propertiesUtils.getPropertiesValue("${hive.server.driver}");
+            initialed.set(true);
+        }
+        return initialed.get();
     }
 
 
+
     public Set<String> get(String sql) {
-        sql = sql.substring(sql.toLowerCase().indexOf("select"), sql.length());
-        try {
-            Class.forName(HIVE_SERVER_DRIVER);
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            System.exit(1);
-        }
-        Connection con = null;
-        Statement stmt = null;
-        try {
-            con = DriverManager.getConnection(HIVE_SERVER_URL, HIVE_SERVER_USER, HIVE_SERVER_PWD);
-            stmt = con.createStatement();
-            // show tables
+        if (init()) {
+            sql = sql.substring(sql.toLowerCase().indexOf("select"), sql.length()).replace(";","");
+            try {
+                Class.forName(HIVE_SERVER_DRIVER);
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                System.exit(1);
+            }
+            Connection con = null;
+            Statement stmt = null;
+            try {
+                con = DriverManager.getConnection(HIVE_SERVER_URL, HIVE_SERVER_USER, HIVE_SERVER_PWD);
+                stmt = con.createStatement();
+                // show tables
 //        String sql = "show tables ";
 //        System.out.println("Running: " + sql);
 //        ResultSet res = stmt.executeQuery(sql);
@@ -60,32 +70,33 @@ public class HiveJdbcClient {
 //          System.out.println(res.getString(1));
 //        }
 
-            // explain select
-            sql = "explain dependency " + sql;
-            System.out.println("Running: " + sql);
-            ResultSet res = stmt.executeQuery(sql);
-            if (res.next()) {
-                String json = res.getString(1);
-                System.out.println("json is : " + json);
-                ObjectMapper mapper = JsonUtil.getMapperInstance(false);
-                return getTbls(json, mapper);
-            }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (stmt != null && stmt.isClosed() == false) {
-                    stmt.close();
+                // explain select
+                sql = "explain dependency " + sql;
+                System.out.println("Running: " + sql);
+                ResultSet res = stmt.executeQuery(sql);
+                if (res.next()) {
+                    String json = res.getString(1);
+                    System.out.println("json is : " + json);
+                    ObjectMapper mapper = JsonUtil.getMapperInstance(false);
+                    return getTbls(json, mapper);
                 }
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
                 e.printStackTrace();
-            }
-            try {
-                if (con != null && con.isClosed() == false) {
-                    con.close();
+            } finally {
+                try {
+                    if (stmt != null && stmt.isClosed() == false) {
+                        stmt.close();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
+                try {
+                    if (con != null && con.isClosed() == false) {
+                        con.close();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return null;

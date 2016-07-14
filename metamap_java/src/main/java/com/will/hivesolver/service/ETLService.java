@@ -349,7 +349,7 @@ public class ETLService {
         return etlDao.getETLById(id).get(0);
     }
 
-    public Object generateETLScript(int id) throws IOException {
+    public Object generateETLScript(int id) throws Exception {
         Map<String, Object> result = new HashMap<String, Object>();
         ETL etl = etlDao.getETLById(id).get(0);
         String location = TMP_SCRIPT_LOCATION + DateUtil.getDateTime(new Date(), "yyyyMMddHHmmss") + "-" + etl.getTblName() + ".sh";

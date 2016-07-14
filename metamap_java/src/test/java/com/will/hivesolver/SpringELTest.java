@@ -117,9 +117,46 @@ public class SpringELTest extends TestCase {
         StandardEvaluationContext context = new StandardEvaluationContext(new ETLUtils());
 
         context.registerFunction("getDateKeyStr",
-                ETLUtils.class.getDeclaredMethod("getDateKeyStr", new Class[] { String.class, Integer.class }));
+                ETLUtils.class.getDeclaredMethod("getDateKey", new Class[] { String.class, Integer.class }));
         String getDateKeyStr = parser.parseExpression(
-                "random number is '#{getDateKeyStr('20150329',4)}'",
+                "random number is '#{getDateKey('20150329',4)}'",
+                new TemplateParserContext()).getValue(context, String.class);
+        System.out.println(getDateKeyStr);
+    }
+
+    /**
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testReallity3() throws Exception {
+        ExpressionParser parser = new SpelExpressionParser();
+        StandardEvaluationContext context = new StandardEvaluationContext(new ETLUtils());
+
+        String str =
+                "# job for mymeta@my_table_another_added4\n" +
+                "# author : will\n" +
+                "# create time : 20160714143830\n" +
+                "# pre settings \n" +
+                "create table if not exist `default.battttt`(\n" +
+                "`id` int,\n" +
+                "`dtdontquery` string,\n" +
+                "`name` string)\n" +
+                "PARTITIONED BY (\n" +
+                "`dt` string)\n" +
+                "STORED AS RCFILE\n" +
+                "select * from batting where name > '#{getDateFromNow(1)}'";
+
+        context.registerFunction("get_datekey",
+                ETLUtils.class.getDeclaredMethod("getDateKey", String.class, Integer.class));
+        context.registerFunction("get_nowdatekey",
+                ETLUtils.class.getDeclaredMethod("getDateKeyFromNow", Integer.class));
+        context.registerFunction("get_date",
+                ETLUtils.class.getDeclaredMethod("getDate", String.class, Integer.class));
+        context.registerFunction("get_nowdate",
+                ETLUtils.class.getDeclaredMethod("getDateFromNow", Integer.class));
+        String getDateKeyStr = parser.parseExpression(
+                str,
                 new TemplateParserContext()).getValue(context, String.class);
         System.out.println(getDateKeyStr);
     }

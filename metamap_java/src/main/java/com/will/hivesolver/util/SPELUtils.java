@@ -15,6 +15,7 @@ public class SPELUtils {
 
     public static final ExpressionParser parser = new SpelExpressionParser();
     public static final StandardEvaluationContext context = new StandardEvaluationContext(new ETLUtils());
+    public static final TemplateParserContext templContext = new TemplateParserContext();
 
     static {
         try {
@@ -31,9 +32,10 @@ public class SPELUtils {
         }
     }
 
-    public static String getRenderELTemplate(String content) {
+    public static String getRenderELTemplate(String content) throws Exception{
+        System.out.println(content);
         String getDateKeyStr = parser.parseExpression(content,
-                new TemplateParserContext()).getValue(context, String.class);
+                templContext).getValue(context, String.class);
         System.out.println(getDateKeyStr);
         return getDateKeyStr;
     }

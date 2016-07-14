@@ -36,7 +36,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.generateETLScript(id));
         } catch (Exception e) {
-            log.error("something happened when getMermaid");
+            log.error("something happened when generateETLScript");
             return "error";
         }
     }
