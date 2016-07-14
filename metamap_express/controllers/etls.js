@@ -61,7 +61,7 @@ module.exports = function (router) {
         req: req,
         params: req.query
       }, function (body) {
-        res.redirect('/get_exec?log=' + body.log + '&id=' + req.query.id);
+        res.redirect('/etls/get_exec?log=' + body.log + '&id=' + req.query.id);
       })
     });
 
