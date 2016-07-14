@@ -62,7 +62,7 @@ module.exports = function (router) {
         req: req,
         params: req.query
       }, function (body) {
-        worker.exec("hive -e " + body.location + " > " + body.location +".log 2>&1", { 
+        worker.exec("hive -f " + body.location + " > " + body.location +".log 2>&1", { 
           encoding: 'utf8',
           timeout: 0, /*子进程最长执行时间 */
           // maxBuffer: 200*1024,  /*stdout和stderr的最大长度*/

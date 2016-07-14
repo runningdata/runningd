@@ -19,9 +19,13 @@ public class SPELUtils {
     static {
         try {
             context.registerFunction("get_datekey",
-                    ETLUtils.class.getDeclaredMethod("getDateKeyStr", new Class[] { String.class, Integer.class }));
+                    ETLUtils.class.getDeclaredMethod("getDateKeyStr", String.class, Integer.class));
             context.registerFunction("get_nowdatekey",
-                    ETLUtils.class.getDeclaredMethod("getDateKeyStrFromNow", new Class[] { Integer.class }));
+                    ETLUtils.class.getDeclaredMethod("getDateKeyStrFromNow", Integer.class));
+            context.registerFunction("get_datekey_fmt",
+                    ETLUtils.class.getDeclaredMethod("getDateKeyStrFormat", String.class, Integer.class, String.class));
+            context.registerFunction("get_nowdatekey_fmt",
+                    ETLUtils.class.getDeclaredMethod("getDateKeyStrFromNowFormat", Integer.class, String.class));
         } catch (NoSuchMethodException e) {
             log.error("Error when resigter custom method to Sping EL Context");
         }
