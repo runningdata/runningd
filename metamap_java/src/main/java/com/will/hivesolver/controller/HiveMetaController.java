@@ -40,7 +40,7 @@ public class HiveMetaController {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             executor.setStreamHandler(new PumpStreamHandler(baos, baos));
 
-            executor.setExitValue(1);
+            executor.setExitValue(0);
             int exitValue = executor.execute(cmdLine);
             return baos.toString();
         } catch (IOException e) {
