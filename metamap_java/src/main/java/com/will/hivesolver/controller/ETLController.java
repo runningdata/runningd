@@ -58,7 +58,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.getETLMermaid(id));
         } catch (Exception e) {
-            log.error("something happened when getMermaidById", ExceptionUtils.getFullStackTrace(e));
+            log.error("something happened when getMermaidById : " + ExceptionUtils.getFullStackTrace(e), e);
             return "error";
         }
     }
