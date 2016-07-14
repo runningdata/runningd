@@ -47,7 +47,7 @@ var dev = {
 
 var prod = {
   hostIp: 'http://10.0.1.62',
-  port: 9090 || 80,
+  port: 8080 || 80,
   basePath: '/metamap'
 };
 
