@@ -54,6 +54,9 @@ public class ETLService {
     @Resource
     private ETLRepository etlRepository;
 
+    @Resource
+    HiveJdbcClient hiveJdbcClient;
+
     /**
      * 获取所有的ETL
      * <p>
@@ -77,7 +80,7 @@ public class ETLService {
 
 
         tblBloodRepository.makePreviousInvalid(etl.getTblName());
-        Set<String> parents = HiveJdbcClient.get(etl.getQuery());
+        Set<String> parents = hiveJdbcClient.get(etl.getQuery());
         TblBlood blood = null;
         for (String parent : parents) {
             blood = new TblBlood();

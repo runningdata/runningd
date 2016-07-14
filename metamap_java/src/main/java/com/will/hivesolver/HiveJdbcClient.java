@@ -18,72 +18,27 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import com.will.hivesolver.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class HiveJdbcClient {
-    private static String HIVE_SERVER_DRIVER = "org.apache.hive.jdbc.HiveDriver";
+    private String HIVE_SERVER_DRIVER = "org.apache.hive.jdbc.HiveDriver";
 
     @Autowired
-    private static PropertiesUtils propertiesUtils;
-    private static String HIVE_SERVER_URL;
-    private static String HIVE_SERVER_USER;
-    private static String HIVE_SERVER_PWD;
-    static {
+    private PropertiesUtils propertiesUtils;
+
+    private String HIVE_SERVER_URL;
+    private String HIVE_SERVER_USER;
+    private String HIVE_SERVER_PWD;
+    {
         HIVE_SERVER_URL = propertiesUtils.getPropertiesValue("hive.server.url");
         HIVE_SERVER_USER = propertiesUtils.getPropertiesValue("hive.server.user");
         HIVE_SERVER_URL = propertiesUtils.getPropertiesValue("hive.server.password");
         HIVE_SERVER_DRIVER = propertiesUtils.getPropertiesValue("hive.server.driver");
     }
 
-    public static void main(String[] s) {
 
-        String sql = "select count(1) as num,userid from jlc.invest_record group by userid limit 100";
-        try {
-            Class.forName(HIVE_SERVER_DRIVER);
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            System.exit(1);
-        }
-        Connection con = null;
-        Statement stmt = null;
-        try {
-            con = DriverManager.getConnection("jdbc:hive2://10.1.5.80:10000/default", "hdfs", "");
-            stmt = con.createStatement();
-            // show tables
-//        String sql = "show tables ";
-//        System.out.println("Running: " + sql);
-//        ResultSet res = stmt.executeQuery(sql);
-//        if (res.next()) {
-//          System.out.println(res.getString(1));
-//        }
-
-            // explain select
-            System.out.println("Running: " + sql);
-            ResultSet res = stmt.executeQuery(sql);
-            while (res.next()) {
-                System.out.println(res.getInt(1) + "-->" + res.getString(2));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (stmt != null && stmt.isClosed() == false) {
-                    stmt.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                if (con != null && con.isClosed() == false) {
-                    con.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public static Set<String> get(String sql) {
+    public Set<String> get(String sql) {
         sql = sql.substring(sql.toLowerCase().indexOf("select"), sql.length());
         try {
             Class.forName(HIVE_SERVER_DRIVER);
