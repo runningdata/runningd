@@ -8,13 +8,15 @@ import javax.annotation.Resource;
 
 import com.will.hivesolver.repositories.ETLRepository;
 import com.will.hivesolver.repositories.TblBloodRepository;
-import com.will.hivesolver.util.SPELUtils;
+import com.will.hivesolver.util.*;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +27,6 @@ import com.will.hivesolver.dao.ITblBloodDao;
 import com.will.hivesolver.entity.ETL;
 import com.will.hivesolver.entity.Node;
 import com.will.hivesolver.entity.TblBlood;
-import com.will.hivesolver.util.DateUtil;
-import com.will.hivesolver.util.JsonUtil;
-import com.will.hivesolver.util.ZipUtils;
 
 @Service("etlService")
 public class ETLService {
@@ -56,6 +55,9 @@ public class ETLService {
 
     @Resource
     HiveJdbcClient hiveJdbcClient;
+
+    @Autowired
+    ThreadPoolTaskExecutor threadPool;
 
     /**
      * 获取所有的ETL
@@ -352,7 +354,7 @@ public class ETLService {
     public Object generateETLScript(int id) throws Exception {
         Map<String, Object> result = new HashMap<String, Object>();
         ETL etl = etlDao.getETLById(id).get(0);
-        String location = TMP_SCRIPT_LOCATION + DateUtil.getDateTime(new Date(), "yyyyMMddHHmmss") + "-" + etl.getTblName().replace("@","__") + ".hql";
+        String scriptLocation = TMP_SCRIPT_LOCATION + DateUtil.getDateTime(new Date(), "yyyyMMddHHmmss") + "-" + etl.getTblName().replace("@","__") + ".hql";
         StringBuffer sb = new StringBuffer();
         sb.append("-- job for " + etl.getTblName() + "\n");
         sb.append("-- author : " + etl.getAuthor() + "\n");
@@ -362,9 +364,11 @@ public class ETLService {
         sb.append(etl.getQuery());
         String renderELTemplate = SPELUtils.getRenderELTemplate(sb.toString());
         log.info("executing script: \n" + renderELTemplate);
-        FileUtils.write(new File(location), renderELTemplate, "utf8", false);
+        FileUtils.write(new File(scriptLocation), renderELTemplate, "utf8", false);
+        String logLocation = scriptLocation + ".log";
+        threadPool.submit(new ETLTask(scriptLocation, logLocation));
         result.put("message", "success");
-        result.put("location", location);
+        result.put("log", logLocation);
         return result;
     }
 }

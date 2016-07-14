@@ -3,9 +3,9 @@
 	xmlns:c="http://www.springframework.org/schema/c" xmlns="http://www.springframework.org/schema/beans"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 	<bean id="threadPool" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
-		<property name="corePoolSize" value="5" />
-		<property name="maxPoolSize" value="20" />
-		<property name="queueCapacity" value="50" />
+		<property name="corePoolSize" value="3" />
+		<property name="maxPoolSize" value="10" />
+		<property name="queueCapacity" value="25" />
 		<property name="keepAliveSeconds" value="120" />
 		<property name="rejectedExecutionHandler">
 			<bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
