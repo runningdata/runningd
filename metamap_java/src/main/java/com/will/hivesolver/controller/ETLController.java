@@ -38,7 +38,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.generateETLScript(id));
         } catch (Exception e) {
-            log.error("something happened when generateETLScript", ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
             return "error";
         }
     }
@@ -48,7 +48,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.generateAzkabanDAG());
         } catch (Exception e) {
-            log.error("something happened when getMermaid");
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
             return "error";
         }
     }
@@ -58,7 +58,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.getETLMermaid(id));
         } catch (Exception e) {
-            log.error("something happened when getMermaidById : " + ExceptionUtils.getFullStackTrace(e), e);
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
             return "error";
         }
     }
@@ -68,7 +68,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.getETLMermaid(tblName));
         } catch (Exception e) {
-            log.error("something happened when getMermaid", ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
             return "error";
         }
     }
@@ -78,7 +78,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.getETLById(id));
         } catch (Exception e) {
-            log.error("something happened when getAllETLs", ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
             return "error";
         }
     }
@@ -88,7 +88,7 @@ public class ETLController {
         try {
             return JsonUtil.writeValueAsString(etlService.allETL());
         } catch (Exception e) {
-            log.error("something happened when getAllETLs", ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
             return "error";
         }
     }

@@ -75,7 +75,6 @@ module.exports = function (router) {
     router.get('/get_log', function (req, res) {
         fs.readFile(req.query.location, 'utf8',function(err, data){
           if (err) throw err;
-          console.log(data);
           res.send({log: data.replace(/\n/g, '<br/>'), status: 1});
         });
     });

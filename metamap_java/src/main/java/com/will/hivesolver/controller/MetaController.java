@@ -3,6 +3,7 @@ package com.will.hivesolver.controller;
 import com.will.hivesolver.entity.Meta;
 import com.will.hivesolver.service.MetaService;
 import com.will.hivesolver.util.JsonUtil;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -33,7 +34,7 @@ public class MetaController {
         try {
             return JsonUtil.writeValueAsString(metaService.getById(id));
         } catch (Exception e) {
-            log.error("something happened when getMetaById");
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
             return "error";
         }
     }
@@ -43,7 +44,7 @@ public class MetaController {
         try {
             return JsonUtil.writeValueAsString(metaService.getAll());
         } catch (Exception e) {
-            log.error("something happened when getAllETLs");
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
             return "error";
         }
     }

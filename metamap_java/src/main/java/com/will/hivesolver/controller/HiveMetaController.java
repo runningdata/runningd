@@ -5,6 +5,7 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -44,6 +45,7 @@ public class HiveMetaController {
             int exitValue = executor.execute(cmdLine);
             return baos.toString();
         } catch (IOException e) {
+            log.error("whoami: " + ExceptionUtils.getFullStackTrace(e), e);
             e.printStackTrace();
         }
 
