@@ -22,13 +22,13 @@ block content
       console.log('ending....');
     } 
     setInterval(function(){
-      if (status == 0) {
+      //- if (status == 0) {
         console.log('beginning. setInterval...' + status);
         getData();
         console.log('eeeing....');
-      } else {
-        console.log('ajax stops, cause status is ' + status);
-      }
+      //- } else {
+      //-   console.log('ajax stops, cause status is ' + status);
+      //- }
     }, 5000);
 
   .container.bg-primary
