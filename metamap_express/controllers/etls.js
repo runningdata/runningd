@@ -47,7 +47,7 @@ module.exports = function (router) {
 
     router.get('/exec', function (req, res) {
       common.getRequest({
-        urlsName:'generateEditScript',
+        urlsName:'execETLScript',
         req: req,
         params: req.query
       }, function (body) {

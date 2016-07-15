@@ -35,7 +35,7 @@ public class ETLController {
     }
 
     @RequestMapping(value = "execETLScript",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
-    public @ResponseBody Object generateETLScript(int id) {
+    public @ResponseBody Object execETLScript(int id) {
         try {
             return JsonUtil.writeValueAsString(etlService.execETLScript(id));
         } catch (Exception e) {

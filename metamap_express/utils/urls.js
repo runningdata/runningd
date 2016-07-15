@@ -64,9 +64,9 @@ module.exports = {
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
   },
-  generateEditScript: {
+  execETLScript: {
     name: '生成ETL脚本文件到临时目录',
-    path: '/etl/generateETLScript',
+    path: '/etl/execETLScript',
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
   },
