@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 public class DateUtil {
     protected static Logger log = LoggerFactory.getLogger(DateUtil.class);
 
-    private static String datePattern = "yyyy-MM-dd";
+    private static String datePattern = ETLConsts.DATE_FORMAT;
 
     private static String timePattern = "HH:mm";
 
@@ -23,29 +23,14 @@ public class DateUtil {
         return format.format(new Date());
     }
 
-    public static String getDateKeyStrFromNow(int delta) throws ParseException {
-        Calendar today = getToday();
-        today.add(Calendar.DATE, -delta);
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-        return format.format(today.getTime());
-    }
-
-    public static String getDateKeyStrFromNowFormat(int delta, String fmt) throws ParseException {
+    public static String getDateFromNowByFmt(int delta, String fmt) throws ParseException {
         Calendar today = getToday();
         today.add(Calendar.DATE, -delta);
         SimpleDateFormat format = new SimpleDateFormat(fmt);
         return format.format(today.getTime());
     }
 
-    public static String getDateKeyStr(String date, int delta) throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(format.parse(date));
-        calendar.add(Calendar.DATE, -delta);
-        return format.format(calendar.getTime());
-    }
-
-    public static String getDateKeyStrFormat(String date, int delta, String fmt) throws ParseException {
+    public static String getDateStrByFmt(String date, int delta, String fmt) throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat(fmt);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(format.parse(date));

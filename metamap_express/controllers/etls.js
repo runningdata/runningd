@@ -45,31 +45,31 @@ module.exports = function (router) {
       })
     });
 
-    router.get('/generate_script', function (req, res) {
-      common.getRequest({
-        urlsName:'generateEditScript',
-        req: req,
-        params: req.query
-      }, function (body) {
-        res.send('successed in location : ' + body.location);
-      })
-    });
-
     router.get('/exec', function (req, res) {
       common.getRequest({
         urlsName:'generateEditScript',
         req: req,
         params: req.query
       }, function (body) {
-        res.redirect('/etls/get_exec?log=' + body.log + '&id=' + req.query.id);
+        res.redirect('/etls/get_exec?id=' + body.exec);
       })
     });
 
     router.get('/get_exec', function (req, res) {
-        res.render('etls/exec', {
-            log: req.query.log,
-            id: req.query.id
-        });
+        // res.render('etls/exec', {
+        //     log: req.query.log,
+        //     id: req.query.id
+        // });
+        common.getRequest({
+          urlsName:'getExecution',
+          req: req,
+          params: req.query
+        }, function (body) {
+          res.render('etls/exec', {
+              log: req.query.logLocation,
+              id: req.query.id
+          });
+        })
     });
 
     router.get('/get_log', function (req, res) {

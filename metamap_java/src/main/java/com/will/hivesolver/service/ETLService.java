@@ -6,9 +6,12 @@ import java.util.*;
 
 import javax.annotation.Resource;
 
+import com.will.hivesolver.entity.Execution;
 import com.will.hivesolver.repositories.ETLRepository;
+import com.will.hivesolver.repositories.ExecutionRepository;
 import com.will.hivesolver.repositories.TblBloodRepository;
 import com.will.hivesolver.util.*;
+import com.will.hivesolver.util.enums.ExecutionStatusEnum;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -52,6 +55,9 @@ public class ETLService {
 
     @Resource
     private ETLRepository etlRepository;
+
+    @Resource
+    ExecutionRepository executionRepository;
 
     @Resource
     HiveJdbcClient hiveJdbcClient;
@@ -357,10 +363,16 @@ public class ETLService {
         return etlDao.getETLById(id).get(0);
     }
 
+    @Transactional
     public Object generateETLScript(int id) throws Exception {
         Map<String, Object> result = new HashMap<String, Object>();
         ETL etl = etlDao.getETLById(id).get(0);
         String scriptLocation = TMP_SCRIPT_LOCATION + DateUtil.getDateTime(new Date(), "yyyyMMddHHmmss") + "-" + etl.getTblName().replace("@","__") + ".hql";
+
+
+        /**
+         * Build the hql file.
+         */
         StringBuffer sb = new StringBuffer();
         sb.append("-- job for " + etl.getTblName() + "\n");
         sb.append("-- author : " + etl.getAuthor() + "\n");
@@ -370,12 +382,28 @@ public class ETLService {
         sb.append(etl.getQuery());
         String renderELTemplate = SPELUtils.getRenderELTemplate(sb.toString());
         log.info("executing script: \n" + renderELTemplate);
+        // save the hql file
         FileUtils.write(new File(scriptLocation), renderELTemplate, "utf8", false);
+
+        // create log file
         String logLocation = scriptLocation + ".log";
         FileUtils.writeStringToFile(new File(logLocation), renderELTemplate, "utf8", true);
+
+        // execution start
         threadPool.submit(new ETLTask(scriptLocation, logLocation));
+        Execution exec = new Execution();
+        exec.setJobId(etl.getId());
+        exec.setStatus(ExecutionStatusEnum.SUBMIITED.get());
+        exec.setLogLocation(logLocation);
+        executionRepository.save(exec);
+
         result.put("message", "success");
-        result.put("log", logLocation);
+        result.put("exec", exec.getId());
         return result;
+    }
+
+
+    public Execution getExecutionById(int id) {
+        return executionRepository.getOne(id);
     }
 }

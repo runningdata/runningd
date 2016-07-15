@@ -69,5 +69,11 @@ module.exports = {
     path: '/etl/generateETLScript',
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
+  },
+  getExecution: {
+    name: '获取正在执行的信息',
+    path: '/jobs/getExec',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
   }
 };
