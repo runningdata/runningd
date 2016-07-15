@@ -20,7 +20,7 @@ public class JobsController {
     
     private static Logger log = LoggerFactory.getLogger(JobsController.class);
 
-    @Resource
+    @Resource(name = "etlService")
     ETLService etlService;
 
     @RequestMapping(value = "getExec",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
