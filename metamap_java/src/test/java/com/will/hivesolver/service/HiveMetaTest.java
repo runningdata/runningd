@@ -1,6 +1,5 @@
-package com.will.hivesolver;
+package com.will.hivesolver.service;
 
-import com.will.hivesolver.service.HiveMetaService;
 import com.will.hivesolver.util.JsonUtil;
 import org.junit.Assert;
 import org.junit.Test;

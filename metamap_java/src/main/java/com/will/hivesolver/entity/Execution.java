@@ -15,9 +15,8 @@ import java.util.Date;
 @DynamicUpdate
 @Table(name = "executions")
 public class Execution {
-
-    @GeneratedValue
     @Id
+    @GeneratedValue
     private Integer id;
     private Integer jobId; // ETL或者sqoop 任务的id
     @Column(insertable = false, updatable = false)

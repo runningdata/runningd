@@ -57,7 +57,7 @@ public class ETLService {
     private ETLRepository etlRepository;
 
     @Resource
-    ExecutionRepository executionRepository;
+    private ExecutionRepository executionRepository;
 
     @Resource
     HiveJdbcClient hiveJdbcClient;
@@ -363,6 +363,10 @@ public class ETLService {
         return etlDao.getETLById(id).get(0);
     }
 
+    public ETL getETLBId(int id) {
+        return etlRepository.findOne(id);
+    }
+
     @Transactional
     public Object generateETLScript(int id) throws Exception {
         Map<String, Object> result = new HashMap<String, Object>();
@@ -404,6 +408,7 @@ public class ETLService {
 
 
     public Execution getExecutionById(int id) {
-        return executionRepository.getOne(id);
+        return executionRepository.findOne(id);
     }
+
 }

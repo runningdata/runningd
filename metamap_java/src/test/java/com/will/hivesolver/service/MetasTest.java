@@ -1,4 +1,4 @@
-package com.will.hivesolver;
+package com.will.hivesolver.service;
 
 import com.will.hivesolver.entity.Meta;
 import com.will.hivesolver.service.MetaService;
