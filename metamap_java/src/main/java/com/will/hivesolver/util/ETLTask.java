@@ -38,7 +38,7 @@ public class ETLTask implements Runnable{
     @Override
     public void run() {
         try {
-            ExecutionRepository executionRepository = (ExecutionRepository) ContextUtil.getBean("executionRepository");
+//            ExecutionRepository executionRepository = (ExecutionRepository) ContextUtil.getBean("executionRepository");
             FileOutputStream baos = null;
             try {
                 String line = "hive -f " + file;
@@ -55,7 +55,8 @@ public class ETLTask implements Runnable{
                 throw new Exception(e);
             } finally {
                 exec.setEndTime(new Date());
-                executionRepository.save(exec);
+                log.info(JsonUtil.writeValueAsString(exec));
+//                executionRepository.save(exec);
                 if (baos != null) {
                     baos.close();
                 }
