@@ -66,8 +66,8 @@ module.exports = function (router) {
           params: req.query
         }, function (body) {
           res.render('etls/exec', {
-              log: req.query.logLocation,
-              id: req.query.id
+              log: body.logLocation,
+              id: body.id
           });
         })
     });
