@@ -57,7 +57,7 @@ public class ETLService {
     private ETLRepository etlRepository;
 
     @Resource
-    ExecutionRepository executionRepository;
+    private ExecutionRepository executionRepository;
 
     @Resource
     HiveJdbcClient hiveJdbcClient;
