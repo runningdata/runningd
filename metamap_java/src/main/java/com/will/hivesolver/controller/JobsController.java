@@ -1,16 +1,11 @@
 package com.will.hivesolver.controller;
 
-import com.will.exception.MetaException;
-import com.will.hivesolver.entity.ETL;
 import com.will.hivesolver.entity.Execution;
 import com.will.hivesolver.service.ETLService;
 import com.will.hivesolver.util.JsonUtil;
-import com.will.hivesolver.util.ResultBean;
-import com.will.hivesolver.util.ResultBean.ResultStatus;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,7 +23,7 @@ public class JobsController {
     @Resource
     ETLService etlService;
 
-    @RequestMapping(value = "getExec",method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
+    @RequestMapping(value = "getExec",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
     public @ResponseBody Object getExec(int id) {
         try {
             Execution execution = etlService.getExecutionById(id);
