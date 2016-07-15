@@ -57,7 +57,7 @@ public class ETLService {
     private ETLRepository etlRepository;
 
     @Resource
-    private ExecutionRepository executionRepository;
+    ExecutionRepository executionRepository;
 
     @Resource
     HiveJdbcClient hiveJdbcClient;
@@ -368,7 +368,7 @@ public class ETLService {
     }
 
     @Transactional
-    public Object generateETLScript(int id) throws Exception {
+    public Object execETLScript(int id) throws Exception {
         Map<String, Object> result = new HashMap<String, Object>();
         ETL etl = etlDao.getETLById(id).get(0);
         String scriptLocation = TMP_SCRIPT_LOCATION + DateUtil.getDateTime(new Date(), "yyyyMMddHHmmss") + "-" + etl.getTblName().replace("@","__") + ".hql";
@@ -393,13 +393,13 @@ public class ETLService {
         String logLocation = scriptLocation + ".log";
         FileUtils.writeStringToFile(new File(logLocation), renderELTemplate, "utf8", true);
 
-        // execution start
-        threadPool.submit(new ETLTask(scriptLocation, logLocation));
         Execution exec = new Execution();
         exec.setJobId(etl.getId());
         exec.setStatus(ExecutionStatusEnum.SUBMIITED.get());
         exec.setLogLocation(logLocation);
         executionRepository.save(exec);
+        // execution start
+        threadPool.submit(new ETLTask(scriptLocation, exec));
 
         result.put("message", "success");
         result.put("exec", exec.getId());

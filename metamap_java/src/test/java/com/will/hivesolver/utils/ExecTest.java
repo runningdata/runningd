@@ -34,6 +34,7 @@ public class ExecTest extends TestCase {
                 baos = new FileOutputStream(new File("/usr/local/metamap/metamap_express/test.sh.log"));
                 executor.setStreamHandler(new PumpStreamHandler(baos, baos));
                 int exitValue = executor.execute(cmdLine);
+                System.out.println("dsfsfsdfsd");
             } finally {
                 if (baos != null) {
                     baos.close();

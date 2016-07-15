@@ -34,10 +34,10 @@ public class ETLController {
         return "{\"message\" :\"success\"}";
     }
 
-    @RequestMapping(value = "generateETLScript",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
+    @RequestMapping(value = "execETLScript",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
     public @ResponseBody Object generateETLScript(int id) {
         try {
-            return JsonUtil.writeValueAsString(etlService.generateETLScript(id));
+            return JsonUtil.writeValueAsString(etlService.execETLScript(id));
         } catch (Exception e) {
             log.error(ExceptionUtils.getFullStackTrace(e), e);
             return "error";

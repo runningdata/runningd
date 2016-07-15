@@ -6,7 +6,8 @@ package com.will.hivesolver.util.enums;
 public enum ExecutionStatusEnum {
     SUBMIITED("已提交", 0),
     RUNNING("运行中", 1),
-    DONE("完成", 2);
+    DONE("完成", 2),
+    FAILED("失败", 3);;
 
     private String name;
     private int index;
