@@ -15,8 +15,6 @@ import java.util.Date;
 @DynamicUpdate
 @Table(name = "executions")
 public class Execution {
-    @Id
-    @GeneratedValue
     private Integer id;
     @Column(insertable = false, updatable = false)
     private Date startTime;
@@ -26,6 +24,8 @@ public class Execution {
     private String logLocation;
     private ETL etl;
 
+    @Id
+    @GeneratedValue
     public Integer getId() {
         return id;
     }
@@ -66,7 +66,7 @@ public class Execution {
         this.logLocation = logLocation;
     }
 
-    @ManyToOne(cascade={CascadeType.MERGE,CascadeType.REFRESH},optional=false)
+    @ManyToOne()
     @JoinColumn(name = "job_id")
     public ETL getEtl() {
         return etl;
