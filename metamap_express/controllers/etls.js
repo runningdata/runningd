@@ -22,6 +22,7 @@ module.exports = function (router) {
             params: req.query
           }, function (execs) {
             execs.forEach(function(exec) {
+              console.log('end time - > ' + exec.endTime);
               exec.startTimeFormat = common.formatDate(new Date(exec.startTime), 'yymmdd hh:mm:ss');
               exec.endTimeFormat = common.formatDate(new Date(exec.endTime), 'yymmdd hh:mm:ss');
             });
