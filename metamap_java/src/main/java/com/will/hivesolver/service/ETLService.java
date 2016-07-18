@@ -31,16 +31,14 @@ import com.will.hivesolver.entity.ETL;
 import com.will.hivesolver.entity.Node;
 import com.will.hivesolver.entity.TblBlood;
 
+import static com.will.hivesolver.util.ETLConsts.AZKABAN_BASE_LOCATION;
+import static com.will.hivesolver.util.ETLConsts.AZKABAN_SCRIPT_LOCATION;
+import static com.will.hivesolver.util.ETLConsts.TMP_SCRIPT_LOCATION;
+
 @Service("etlService")
 public class ETLService {
 
     private static Logger log = LoggerFactory.getLogger(ETLService.class);
-
-    private final String AZKABAN_BASE_LOCATION = "/tmp/";
-
-    private final String AZKABAN_SCRIPT_LOCATION = "/var/azkaban-metamap/";
-
-    private final String TMP_SCRIPT_LOCATION = "/var/metamap-tmp/";
 
     Joiner joiner = Joiner.on(",");
 
@@ -109,10 +107,10 @@ public class ETLService {
                 tblBloods.add(blood);
 
                 // 找上游
-                getParent(blood, tblBloods);
+                getMermaidParent(blood, tblBloods);
 
                 // 找下游
-                getChildren(tblBloods, blood);
+                getMermaidChildren(tblBloods, blood);
             }
         }
         return tblBloods;
@@ -126,10 +124,10 @@ public class ETLService {
             tblBloods.add(blood);
 
             // 找上游
-            getParent(blood, tblBloods);
+            getMermaidParent(blood, tblBloods);
 
             // 找下游
-            getChildren(tblBloods, blood);
+            getMermaidChildren(tblBloods, blood);
         }
         return tblBloods;
     }
@@ -194,29 +192,24 @@ public class ETLService {
      * @throws MetaException
      * @throws ArchiveException
      */
-    public String generateAzkabanDAG() throws MetaException, ArchiveException {
-        try {
-            String serFolder = DateUtil.getTodayDateTime();
-            List<TblBlood> leafBlood = tblBloodDao.selectAllLeaf();
-            Set<String> doneBlood = new HashSet<String>();
-            String serFolderLocation = AZKABAN_BASE_LOCATION + serFolder;
-            if (leafBlood.size() > 0) {
-                loadLeafBloods(leafBlood, doneBlood, serFolder);
-            }
-            TblBlood tbl = new TblBlood();
-            tbl.setTblName("etl_done_" + serFolder);
-            generateJobFile(tbl, leafBlood, serFolder);
-            ZipUtils.addFilesToZip(new File(serFolderLocation),
-                    new File(serFolderLocation + ".zip"));
-        } catch (IOException e) {
-            log.error("error happends when generateAzkabanDAG");
-            throw new MetaException("error happends when generateAzkabanDAG");
+    public String generateAzkabanDAG() throws Exception {
+        String serFolder = DateUtil.getTodayDateTime();
+        List<TblBlood> leafBlood = tblBloodDao.selectAllLeaf();
+        Set<String> doneBlood = new HashSet<String>();
+        String serFolderLocation =  AZKABAN_BASE_LOCATION + serFolder;
+        if (leafBlood.size() > 0) {
+            loadLeafBloods(leafBlood, doneBlood, serFolder);
         }
+        TblBlood tbl = new TblBlood();
+        tbl.setTblName("etl_done_" + serFolder);
+        generateJobFile(tbl, leafBlood, serFolder);
+        ZipUtils.addFilesToZip(new File(serFolderLocation),
+                new File(serFolderLocation + ".zip"));
         return null;
     }
 
 
-    private void loadLeafBloods(List<TblBlood> leafBlood, Set<String> doneBlood, String serFolder) throws IOException {
+    private void loadLeafBloods(List<TblBlood> leafBlood, Set<String> doneBlood, String serFolder) throws Exception {
         for (TblBlood leaf : leafBlood) {
             List<TblBlood> parentNode = tblBloodDao.selectParentByTblName(leaf.getTblName());
             if (!doneBlood.contains(leaf.getTblName())) {
@@ -228,23 +221,16 @@ public class ETLService {
     }
 
 
-    private void generateJobFile(TblBlood currentBlood, List<TblBlood> parentNode, String serFolder) throws IOException {
+    private void generateJobFile(TblBlood currentBlood, List<TblBlood> parentNode, String serFolder) throws Exception {
         String jobName = currentBlood.getTblName();
         File file;
         String command;
         if (!jobName.startsWith("etl_done_")) {
             // 生成hql文件
             String hqlLocation = AZKABAN_SCRIPT_LOCATION + serFolder + "/" + jobName + ".hql";
-            file = new File(hqlLocation);
-            StringBuilder sb = new StringBuilder();
             List<ETL> currentETL = etlDao.getETLByTblName(jobName);
             if (!currentETL.isEmpty()) {
-                ETL etl = currentETL.get(0);
-                sb.append(etl.getPreSql()).append("\n");
-                sb.append(etl.getQuery());
-            }
-            if (sb.length() > 1) {
-                FileUtils.write(file, sb.toString(), "utf8", false);
+                buildHqlFile(currentETL.get(0), hqlLocation);
             }
             command = "hive -f " + hqlLocation;
         } else {
@@ -267,7 +253,7 @@ public class ETLService {
         }
         file = new File(AZKABAN_BASE_LOCATION + serFolder + "/" + jobName + ".job");
         FileUtils.write(file, content, "utf8", false);
-        System.out.println(">>>>>>>>>>>>>>>>>\n" + content);
+        log.debug(">>>>>>>>>>>>>>>>>\n" + content);
     }
 
 
@@ -325,22 +311,17 @@ public class ETLService {
      * @param blood
      * @param tblBloods
      */
-    private void getParent(TblBlood blood,
-                           Set<TblBlood> tblBloods) {
+    private void getMermaidParent(TblBlood blood,
+                                  Set<TblBlood> tblBloods) {
         List<TblBlood> parent = tblBloodDao.selectByTblName(blood.getParentTbl());
         if (parent.size() > 0) {
             for (TblBlood tblBlood : parent) {
                 tblBloods.add(tblBlood);
                 if (StringUtils.isNotBlank(tblBlood.getParentTbl())) {
-                    getParent(tblBlood, tblBloods);
+                    getMermaidParent(tblBlood, tblBloods);
                 }
             }
         }
-//        else {
-//            TblBlood uniParent = new TblBlood();
-//            uniParent.setTblName(blood.getParentTbl());
-//            tblBloods.add(uniParent);
-//        }
     }
 
     /**
@@ -349,12 +330,12 @@ public class ETLService {
      * @param tblBloods
      * @param blood
      */
-    private void getChildren(Set<TblBlood> tblBloods, TblBlood blood) {
+    private void getMermaidChildren(Set<TblBlood> tblBloods, TblBlood blood) {
         List<TblBlood> children = tblBloodDao.selectByParentTblName(blood.getTblName());
         if (children.size() > 0) {
             for (TblBlood tblBlood : children) {
                 tblBloods.add(tblBlood);
-                getChildren(tblBloods, tblBlood);
+                getMermaidChildren(tblBloods, tblBlood);
             }
         }
     }
@@ -377,17 +358,7 @@ public class ETLService {
         /**
          * Build the hql file.
          */
-        StringBuffer sb = new StringBuffer();
-        sb.append("-- job for " + etl.getTblName() + "\n");
-        sb.append("-- author : " + etl.getAuthor() + "\n");
-        sb.append("-- create time : " + DateUtil.getDateTime(etl.getCtime(), "yyyyMMddHHmmss") + "\n");
-        sb.append("-- pre settings " + "\n");
-        sb.append(etl.getPreSql() + "\n");
-        sb.append(etl.getQuery());
-        String renderELTemplate = SPELUtils.getRenderELTemplate(sb.toString());
-        log.info("executing script: \n" + renderELTemplate);
-        // save the hql file
-        FileUtils.write(new File(scriptLocation), renderELTemplate, "utf8", false);
+        String renderELTemplate = buildHqlFile(etl, scriptLocation);
 
         // create log file
         String logLocation = scriptLocation + ".log";
@@ -404,6 +375,21 @@ public class ETLService {
         result.put("message", "success");
         result.put("exec", exec.getId());
         return result;
+    }
+
+    private String buildHqlFile(ETL etl, String scriptLocation) throws Exception {
+        StringBuffer sb = new StringBuffer();
+        sb.append("-- job for " + etl.getTblName() + "\n");
+        sb.append("-- author : " + etl.getAuthor() + "\n");
+        sb.append("-- create time : " + DateUtil.getDateTime(etl.getCtime(), "yyyyMMddHHmmss") + "\n");
+        sb.append("-- pre settings " + "\n");
+        sb.append(etl.getPreSql() + "\n");
+        sb.append(etl.getQuery());
+        String renderELTemplate = SPELUtils.getRenderELTemplate(sb.toString());
+        log.info("executing script: \n" + renderELTemplate);
+        // save the hql file
+        FileUtils.write(new File(scriptLocation), renderELTemplate, "utf8", false);
+        return renderELTemplate;
     }
 
 
