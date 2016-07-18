@@ -82,11 +82,6 @@ public class HiveMetaService {
                     col_comment = comment.toString();
                 }
                 String col_name = list.get(i).get("col_name").toString();
-                try {
-                    log.info(JsonUtil.writeValueAsString(list.get(i)));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
                 ps.setString(1, db_name);
                 ps.setInt(2, db_id);
                 ps.setInt(3, tbl_id);
