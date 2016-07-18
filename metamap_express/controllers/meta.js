@@ -14,6 +14,16 @@ module.exports = function (router) {
           })
     });
 
+    router.get('/col_seach', function (req, res) {
+      common.getRequest({
+            urlsName:'searchCol',
+            req: req,
+            params: req.query
+          }, function (cols) {
+            res.render('meta/col_seach', { cols : cols});
+          })
+    });
+
     router.get('/add', function (req, res) {
       res.render('meta/edit');
     });

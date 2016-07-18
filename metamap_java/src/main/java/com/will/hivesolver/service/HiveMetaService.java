@@ -75,7 +75,7 @@ public class HiveMetaService {
                 int tbl_id = Integer.valueOf(list.get(i).get("tbl_id").toString());
                 String tbl_name = list.get(i).get("tbl_name").toString();
                 String tbl_type = list.get(i).get("tbl_type").toString();
-                String col_type_name = String.valueOf(list.get(i).get("col_type_name"));
+                String col_type_name = list.get(i).get("col_type_name").toString();
                 String col_comment = null;
                 Object comment = list.get(i).get("col_comment");
                 if (null != comment) {

@@ -21,11 +21,13 @@ public class ColMeta {
     private String dbName;
     private int tblId;
     private String tblType;
+    private String tblName;
     private String colTypeName;
     private String colComment;
     private String colName;
     @Column(updatable = false, insertable = false)
     private Date ctime;
+
     public int getDbId() {
         return dbId;
     }
@@ -83,5 +85,13 @@ public class ColMeta {
 
     public void setCtime(Date ctime) {
         this.ctime = ctime;
+    }
+
+    public String getTblName() {
+        return tblName;
+    }
+
+    public void setTblName(String tblName) {
+        this.tblName = tblName;
     }
 }

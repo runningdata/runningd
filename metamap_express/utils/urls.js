@@ -72,6 +72,12 @@ module.exports = {
   },
   
 
+  searchCol: {
+    name: '根据col名称搜相关col信息',
+    path: '/hivemeta/search',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
+  },
 
 
   executionList: {
