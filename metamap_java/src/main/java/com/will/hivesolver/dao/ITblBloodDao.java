@@ -28,7 +28,7 @@ public interface ITblBloodDao {
     public List<TblBlood> selectParentByTblName(@Param("tblName")String tblName);
     
     @Select("select a.* from "
-            + "(select * from tbl_blood where valid = 1 and on_schedule = 1) a"
+            + "(select * from tbl_blood where valid = 1) a"
             + " left outer join "
             + "(select distinct parent_tbl from tbl_blood where valid = 1) b"
             + " on a.tbl_name = b.parent_tbl"

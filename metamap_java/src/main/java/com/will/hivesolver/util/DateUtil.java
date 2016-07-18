@@ -150,18 +150,12 @@ public class DateUtil {
     /***************************************************************************
      * 将日期对象转换成代年日月时分的字符串格式
      *
-     * @param aDate日期类型
      * @return 返回类型为String 格式为yyyy-MM-dd HH:mm
      */
-    public static final String getDateTime(Date aDate, String datetimePattern) {
+    public static final String getDateTime(Date aDate, String datetimePattern){
         SimpleDateFormat df = new SimpleDateFormat(datetimePattern);
         String returnValue = "";
-
-        if (aDate == null) {
-            log.error("aDate is null!");
-        } else {
-            returnValue = df.format(aDate);
-        }
+        returnValue = df.format(aDate);
         return (returnValue);
     }
 
