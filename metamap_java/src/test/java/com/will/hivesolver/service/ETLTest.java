@@ -79,7 +79,7 @@ public class ETLTest {
     }
     
     @Test
-    public void testGenerateAzkabanTree() throws MetaException, ArchiveException {
+    public void testGenerateAzkabanTree() throws Exception {
         etlService.generateAzkabanDAG();
     }
 
