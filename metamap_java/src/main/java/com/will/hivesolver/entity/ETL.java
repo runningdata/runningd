@@ -3,11 +3,11 @@ package com.will.hivesolver.entity;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * 
@@ -19,6 +19,8 @@ import java.util.Set;
 @DynamicInsert
 @Table(name = "etl")
 public class ETL {
+    @Id
+    @GeneratedValue
     private int id;
     private String query;
     private String meta;
@@ -30,10 +32,6 @@ public class ETL {
     private int valid = 1;
     @Column(updatable = false, insertable = false)
     private Date ctime;
-    private Set<Execution> executions = new HashSet<Execution>();
-
-    @Id
-    @GeneratedValue
     public int getId() {
         return id;
     }
@@ -96,14 +94,5 @@ public class ETL {
 
     public void setCtime(Date ctime) {
         this.ctime = ctime;
-    }
-
-    @OneToMany(mappedBy="etl", fetch = FetchType.LAZY)
-    public Set<Execution> getExecutions() {
-        return executions;
-    }
-
-    public void setExecutions(Set<Execution> executions) {
-        this.executions = executions;
     }
 }

@@ -365,8 +365,7 @@ public class ETLService {
         FileUtils.writeStringToFile(new File(logLocation), renderELTemplate, "utf8", true);
 
         Execution exec = new Execution();
-//        exec.setJobId(etl.getId());
-        exec.setEtl(etl);
+        exec.setJobId(etl.getId());
         exec.setStatus(ExecutionStatusEnum.SUBMIITED.get());
         exec.setLogLocation(logLocation);
         executionRepository.save(exec);
@@ -403,8 +402,11 @@ public class ETLService {
         return executionRepository.findOne(id);
     }
 
-    public Set<Execution> getExecutionListByETLId(int id) {
-        return etlRepository.findOne(id).getExecutions();
+    public Map<String, Object> getExecutionListByETLId(int id) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("execs", executionRepository.findByJobId(id));
+        result.put("etl", etlRepository.findOne(id));
+        return result;
     }
 
 }

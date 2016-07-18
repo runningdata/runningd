@@ -4,7 +4,7 @@ block content
   head
     title Execution列表
     
-  h2 #{exec[0].etl.tblName}
+  h2 #{etl.tblName}
 
   if execs.length
     table.table.table-striped
@@ -19,7 +19,7 @@ block content
               center 操作
       tbody
         each exec in execs
-          tr
+          t r
             td #{exec.id}
             td #{exec.startTimeFormat}
             td #{exec.endTimeFormat}

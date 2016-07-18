@@ -20,13 +20,14 @@ module.exports = function (router) {
             urlsName:'executionList',
             req: req,
             params: req.query
-          }, function (execs) {
+          }, function (data) {
+            var execs = data.execs;
             execs.forEach(function(exec) {
               console.log('end time - > ' + exec.endTime);
               exec.startTimeFormat = common.formatDate(new Date(exec.startTime), 'yymmdd hh:mm:ss');
               exec.endTimeFormat = common.formatDate(new Date(exec.endTime), 'yymmdd hh:mm:ss');
             });
-            res.render('etls/exec_list', { execs : execs});
+            res.render('etls/exec_list', { execs : execs, etl: data.etl});
           })
     });
 
