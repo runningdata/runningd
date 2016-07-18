@@ -15,6 +15,16 @@ module.exports = function (router) {
           })
     });
 
+    router.get('/exec_list', function (req, res) {
+      common.getRequest({
+            urlsName:'executionList',
+            req: req,
+            params: req.query
+          }, function (execs) {
+            res.render('jobs/list', { execs : execs});
+          })
+    });
+
     router.get('/add', function (req, res) {
           res.render('etls/edit');
     });

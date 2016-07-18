@@ -397,4 +397,8 @@ public class ETLService {
         return executionRepository.findOne(id);
     }
 
+    public List<Execution> getExecutionListByETLId(int id) {
+        return executionRepository.findByJobId(id);
+    }
+
 }
