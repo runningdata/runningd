@@ -5,7 +5,9 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 
@@ -30,9 +32,8 @@ public class ETL {
     private int valid = 1;
     @Column(updatable = false, insertable = false)
     private Date ctime;
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    private List<Execution> executions;
+    @OneToMany(mappedBy="etl", fetch = FetchType.LAZY)
+    private Set<Execution> executions = new HashSet<Execution>();
 
     public int getId() {
         return id;
@@ -96,5 +97,13 @@ public class ETL {
 
     public void setCtime(Date ctime) {
         this.ctime = ctime;
+    }
+
+    public Set<Execution> getExecutions() {
+        return executions;
+    }
+
+    public void setExecutions(Set<Execution> executions) {
+        this.executions = executions;
     }
 }
