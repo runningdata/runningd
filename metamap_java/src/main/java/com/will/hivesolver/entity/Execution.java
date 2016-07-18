@@ -18,7 +18,7 @@ public class Execution {
     @Id
     @GeneratedValue
     private Integer id;
-    private Integer jobId; // ETL或者sqoop 任务的id
+//    private Integer jobId; // ETL或者sqoop 任务的id
     @Column(insertable = false, updatable = false)
     private Date startTime;
     private Date endTime;
@@ -38,13 +38,13 @@ public class Execution {
         this.id = id;
     }
 
-    public Integer getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(Integer jobId) {
-        this.jobId = jobId;
-    }
+//    public Integer getJobId() {
+//        return jobId;
+//    }
+//
+//    public void setJobId(Integer jobId) {
+//        this.jobId = jobId;
+//    }
 
     public Date getStartTime() {
         return startTime;
@@ -76,5 +76,13 @@ public class Execution {
 
     public void setLogLocation(String logLocation) {
         this.logLocation = logLocation;
+    }
+
+    public ETL getEtl() {
+        return etl;
+    }
+
+    public void setEtl(ETL etl) {
+        this.etl = etl;
     }
 }
