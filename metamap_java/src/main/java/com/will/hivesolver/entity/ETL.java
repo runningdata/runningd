@@ -32,7 +32,6 @@ public class ETL {
     private int valid = 1;
     @Column(updatable = false, insertable = false)
     private Date ctime;
-    @OneToMany(mappedBy="etl", fetch = FetchType.LAZY)
     private Set<Execution> executions = new HashSet<Execution>();
 
     public int getId() {
@@ -99,6 +98,7 @@ public class ETL {
         this.ctime = ctime;
     }
 
+    @OneToMany(mappedBy="etl", fetch = FetchType.LAZY)
     public Set<Execution> getExecutions() {
         return executions;
     }

@@ -24,8 +24,6 @@ public class Execution {
     private Integer status;
     @Column(updatable = false)
     private String logLocation;
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "job_id")
     private ETL etl;
 
     public Integer getId() {
@@ -68,6 +66,8 @@ public class Execution {
         this.logLocation = logLocation;
     }
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "job_id")
     public ETL getEtl() {
         return etl;
     }

@@ -4,15 +4,14 @@ block content
   head
     title Execution列表
     
-  h2 Execution列表
+  h2 #{exec.etl.tblName}
 
   if execs.length
     table.table.table-striped
-      caption Execution列表
+      caption Execution列表 
         thead 
           tr
             td ID
-            td Job
             td 开始时间
             td 结束时间
             td 结果状态
@@ -22,7 +21,6 @@ block content
         each exec in execs
           tr
             td #{exec.id}
-            td #{exec.etl.tblName}
             td #{exec.startTimeFormat}
             td #{exec.endTimeFormat}
             td #{exec.status}
