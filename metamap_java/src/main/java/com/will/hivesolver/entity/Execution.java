@@ -26,6 +26,10 @@ public class Execution {
     @Column(updatable = false)
     private String logLocation;
 
+    @ManyToOne
+    @JoinColumn(name="jobId")
+    private ETL etl;
+
     public Integer getId() {
         return id;
     }

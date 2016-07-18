@@ -12,18 +12,20 @@ block content
         thead 
           tr
             td ID
-            td JobId
+            td Job
             td 开始时间
             td 结束时间
+            td 结果状态
             td 
               center 操作
       tbody
         each exec in execs
           tr
             td #{exec.id}
-            td #{exec.jobId}
+            td #{exec.etl.tblName}
             td #{exec.startTimeFormat}
             td #{exec.endTimeFormat}
+            td #{exec.status}
             td 
               center 
                 a.btn.btn-primary.btn-sm(href="/etls/get_exec?id=#{exec.jobId}") 详情
