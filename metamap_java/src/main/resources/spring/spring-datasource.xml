@@ -98,6 +98,7 @@
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="metamapDatasource"/>
         <property name="jpaVendorAdapter" ref="hibernateJpaVendorAdapter"/>
+        <property name="packagesToScan" value="com.will.hivesolver"/>
         <property name="jpaProperties">
             <props>
                 <prop key="hibernate.cache.use_second_level_cache">false</prop>
