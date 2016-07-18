@@ -15,6 +15,8 @@ import java.util.Date;
 @DynamicUpdate
 @Table(name = "executions")
 public class Execution {
+    @Id
+    @GeneratedValue
     private Integer id;
     @Column(insertable = false, updatable = false)
     private Date startTime;
@@ -22,10 +24,10 @@ public class Execution {
     private Integer status;
     @Column(updatable = false)
     private String logLocation;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "job_id")
     private ETL etl;
 
-    @Id
-    @GeneratedValue
     public Integer getId() {
         return id;
     }
@@ -66,8 +68,6 @@ public class Execution {
         this.logLocation = logLocation;
     }
 
-    @ManyToOne()
-    @JoinColumn(name = "job_id")
     public ETL getEtl() {
         return etl;
     }

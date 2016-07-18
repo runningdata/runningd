@@ -19,6 +19,8 @@ import java.util.Set;
 @DynamicInsert
 @Table(name = "etl")
 public class ETL {
+    @Id
+    @GeneratedValue
     private int id;
     private String query;
     private String meta;
@@ -30,10 +32,10 @@ public class ETL {
     private int valid = 1;
     @Column(updatable = false, insertable = false)
     private Date ctime;
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id")
     private Set<Execution> executions = new HashSet<Execution>();
 
-    @Id
-    @GeneratedValue
     public int getId() {
         return id;
     }
@@ -98,7 +100,6 @@ public class ETL {
         this.ctime = ctime;
     }
 
-    @OneToMany(mappedBy="etl", fetch = FetchType.LAZY)
     public Set<Execution> getExecutions() {
         return executions;
     }

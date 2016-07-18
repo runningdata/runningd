@@ -403,8 +403,8 @@ public class ETLService {
         return executionRepository.findOne(id);
     }
 
-    public List<Execution> getExecutionListByETLId(int id) {
-        return executionRepository.findByJobId(id);
+    public Set<Execution> getExecutionListByETLId(int id) {
+        return etlRepository.findOne(id).getExecutions();
     }
 
 }

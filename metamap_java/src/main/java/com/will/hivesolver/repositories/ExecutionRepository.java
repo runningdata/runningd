@@ -9,5 +9,4 @@ import java.util.List;
  * Created by will on 16-7-13.
  */
 public interface ExecutionRepository extends JpaRepository<Execution, Integer>{
-    public List<Execution> findByJobId(int id);
 }
