@@ -98,7 +98,7 @@ public class ETL {
         this.ctime = ctime;
     }
 
-    @OneToMany(mappedBy="etl", fetch = FetchType.LAZY)
+    @OneToMany(targetEntity=Execution.class, mappedBy="etl", fetch = FetchType.LAZY)
     public Set<Execution> getExecutions() {
         return executions;
     }
