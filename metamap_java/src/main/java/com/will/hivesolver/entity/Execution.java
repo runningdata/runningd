@@ -1,5 +1,6 @@
 package com.will.hivesolver.entity;
 
+import com.will.hivesolver.util.enums.ExecutionStatusEnum;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -23,6 +24,8 @@ public class Execution {
     private Date startTime;
     private Date endTime;
     private Integer status;
+    @Transient
+    private String statusReadable;
     @Column(updatable = false)
     private String logLocation;
 
@@ -73,4 +76,9 @@ public class Execution {
     public void setLogLocation(String logLocation) {
         this.logLocation = logLocation;
     }
+
+    public String getStatusReadable() {
+        return ExecutionStatusEnum.getName(status);
+    }
+
 }

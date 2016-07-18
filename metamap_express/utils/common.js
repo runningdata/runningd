@@ -117,7 +117,7 @@ proto.formatDate = function (date, params) {
       dateStr += y + (m > 9 ? "" : "0") + m + d;
       break;
     case "yymmdd hh:mm:ss":
-      dateStr += y + (m > 9 ? "" : "0") + (m) + (d) + ' ' + (h > 9 ? "" : "0") + (h) + ':' + (mm > 9 ? "" : "0") + (mm) + ':' +   (s > 9 ? "" : "0") + (s);
+      dateStr += y + (m > 9 ? "" : "0") + '-' +  (m) + '-' +  (d) + ' ' + (h > 9 ? "" : "0") + (h) + ':' + (mm > 9 ? "" : "0") + (mm) + ':' +   (s > 9 ? "" : "0") + (s);
       break;
   }
   return dateStr;

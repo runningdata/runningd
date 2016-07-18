@@ -23,7 +23,7 @@ block content
             td #{exec.id}
             td #{exec.startTimeFormat}
             td #{exec.endTimeFormat}
-            td #{exec.status}
+            td #{exec.statusReadable}
             td 
               center 
                 a.btn.btn-primary.btn-sm(href="/etls/get_exec?id=#{exec.id}") 详情
