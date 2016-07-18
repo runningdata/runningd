@@ -365,7 +365,7 @@ public class ETLService {
         FileUtils.writeStringToFile(new File(logLocation), renderELTemplate, "utf8", true);
 
         Execution exec = new Execution();
-        exec.setEtl(etl);
+        exec.setJobId(etl.getId());
         exec.setStatus(ExecutionStatusEnum.SUBMIITED.get());
         exec.setLogLocation(logLocation);
         executionRepository.save(exec);

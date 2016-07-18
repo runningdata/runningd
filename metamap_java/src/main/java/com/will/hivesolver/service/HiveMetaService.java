@@ -98,5 +98,9 @@ public class HiveMetaService {
         });
         return "success";
     }
+
+    public List<ColMeta> search(String colName) {
+        return colMetaRepository.findByColName(colName);
+    }
     
 }

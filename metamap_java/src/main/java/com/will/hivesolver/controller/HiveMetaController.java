@@ -1,5 +1,6 @@
 package com.will.hivesolver.controller;
 
+import com.will.hivesolver.entity.ColMeta;
 import com.will.hivesolver.service.HiveMetaService;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.ws.rs.Path;
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequestMapping("/hivemeta")
@@ -45,11 +47,33 @@ public class HiveMetaController {
             int exitValue = executor.execute(cmdLine);
             return baos.toString();
         } catch (IOException e) {
-            log.error("whoami: " + ExceptionUtils.getFullStackTrace(e), e);
-            e.printStackTrace();
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
         }
 
         return cmdStr;
+    }
+
+    @RequestMapping(value = "/prepare",method = RequestMethod.GET)
+    public @ResponseBody Object prepare() {
+        String cmdStr = "fail";
+        try {
+            return hiveMetaService.prepareColMeta();
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
+        }
+
+        return cmdStr;
+    }
+
+    @RequestMapping(value = "/search",method = RequestMethod.GET)
+    public @ResponseBody Object search(String colName) {
+        try {
+            return hiveMetaService.search(colName);
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
+        }
+
+        return null;
     }
 
 }
