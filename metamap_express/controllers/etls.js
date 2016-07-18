@@ -21,6 +21,10 @@ module.exports = function (router) {
             req: req,
             params: req.query
           }, function (execs) {
+            execs.forEach(function(exec) {
+              exec.startTimeFormat = common.formatDate(new Date(exec.startTime), 'yymmdd hh:mm:ss');
+              exec.endTimeFormat = common.formatDate(new Date(exec.endTime), 'yymmdd hh:mm:ss');
+            });
             res.render('jobs/list', { execs : execs});
           })
     });

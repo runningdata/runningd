@@ -22,8 +22,8 @@ block content
           tr
             td #{exec.id}
             td #{exec.jobId}
-            td #{exec.startTime}
-            td #{exec.endTime}
+            td #{exec.startTimeFormat}
+            td #{exec.endTimeFormat}
             td 
               center 
                 a.btn.btn-primary.btn-sm(href="/etls/get_exec?id=#{exec.jobId}") 详情

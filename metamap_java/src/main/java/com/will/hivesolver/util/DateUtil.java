@@ -153,6 +153,10 @@ public class DateUtil {
      * @return 返回类型为String 格式为yyyy-MM-dd HH:mm
      */
     public static final String getDateTime(Date aDate, String datetimePattern){
+        if (aDate == null) {
+            log.warn("aDate is null");
+            return "";
+        }
         SimpleDateFormat df = new SimpleDateFormat(datetimePattern);
         String returnValue = "";
         returnValue = df.format(aDate);

@@ -381,7 +381,12 @@ public class ETLService {
         StringBuffer sb = new StringBuffer();
         sb.append("-- job for " + etl.getTblName() + "\n");
         sb.append("-- author : " + etl.getAuthor() + "\n");
-        sb.append("-- create time : " + DateUtil.getDateTime(etl.getCtime(), "yyyyMMddHHmmss") + "\n");
+        Date ctime = etl.getCtime();
+        if (ctime != null) {
+            sb.append("-- create time : " + DateUtil.getDateTime(ctime, "yyyyMMddHHmmss") + "\n");
+        } else {
+            sb.append("-- cannot find ctime");
+        }
         sb.append("-- pre settings " + "\n");
         sb.append(etl.getPreSql() + "\n");
         sb.append(etl.getQuery());
