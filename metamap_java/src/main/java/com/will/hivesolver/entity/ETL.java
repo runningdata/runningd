@@ -3,11 +3,9 @@ package com.will.hivesolver.entity;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 
@@ -32,6 +30,10 @@ public class ETL {
     private int valid = 1;
     @Column(updatable = false, insertable = false)
     private Date ctime;
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id")
+    private List<Execution> executions;
+
     public int getId() {
         return id;
     }
