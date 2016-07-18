@@ -16,7 +16,6 @@ block content
             td 表名
             td 
               center 操作
-            td 血统
       tbody
         each etl in etls
           tr
@@ -29,8 +28,8 @@ block content
                 &nbsp;&nbsp;
                 a.btn.btn-primary.btn-sm(href="exec?id=#{etl.id}") 测试执行
                 &nbsp;&nbsp;
-                a.btn.btn-primary.btn-sm(href="exec_list?id=#{etl.id}") 测试执行
-            td
-              a.btn.btn-primary.btn-sm(href="/blood?id=#{etl.id}") Blood
+                a.btn.btn-primary.btn-sm(href="exec_list?jobId=#{etl.id}") 执行记录
+                &nbsp;&nbsp;
+                a.btn.btn-primary.btn-sm(href="/blood?id=#{etl.id}") 查看血统
   else
      |No ETL Found

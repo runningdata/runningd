@@ -35,9 +35,9 @@ public class JobsController {
     }
 
     @RequestMapping(value = "execList",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
-    public @ResponseBody Object execList(int jobid) {
+    public @ResponseBody Object execList(int jobId) {
         try {
-            return JsonUtil.writeValueAsString(etlService.getExecutionListByETLId(jobid));
+            return JsonUtil.writeValueAsString(etlService.getExecutionListByETLId(jobId));
         } catch (Exception e) {
             log.error(ExceptionUtils.getFullStackTrace(e), e);
             return "error";
