@@ -64,7 +64,7 @@ public class HiveMetaService {
 
 
         String insert = "insert into col_tbl_db(db_name, db_id,tbl_id,tbl_name" +
-                ",tbl_type,col_type_name,col_comment,col_name) " +
+                ",col_type_name,col_comment,col_name,tbl_type) " +
                 "values(?,?,?,?,?,?,?,?)";
         metamapJdbcTemplate.batchUpdate(insert, new BatchPreparedStatementSetter() {
             @Override
@@ -88,7 +88,7 @@ public class HiveMetaService {
                 ps.setString(5, col_type_name);
                 ps.setString(6, col_comment);
                 ps.setString(7, col_name);
-                ps.setString(8, db_name);
+                ps.setString(8, tbl_type);
             }
 
             @Override
