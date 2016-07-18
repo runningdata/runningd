@@ -2,6 +2,7 @@ package com.will.hivesolver.controller;
 
 import com.will.hivesolver.entity.ColMeta;
 import com.will.hivesolver.service.HiveMetaService;
+import com.will.hivesolver.util.JsonUtil;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
@@ -68,7 +69,7 @@ public class HiveMetaController {
     @RequestMapping(value = "/search",method = RequestMethod.GET)
     public @ResponseBody Object search(String colName) {
         try {
-            return hiveMetaService.search(colName);
+            return JsonUtil.writeValueAsString(hiveMetaService.search(colName));
         } catch (Exception e) {
             log.error(ExceptionUtils.getFullStackTrace(e), e);
         }
