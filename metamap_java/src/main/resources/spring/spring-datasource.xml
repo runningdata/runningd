@@ -96,6 +96,7 @@
     </bean>
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceXmlLocation" value="classpath:META-INF/persistence.xml"/>
         <property name="dataSource" ref="metamapDatasource"/>
         <property name="jpaVendorAdapter" ref="hibernateJpaVendorAdapter"/>
         <property name="jpaProperties">
