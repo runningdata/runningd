@@ -1,6 +1,7 @@
 package com.will.hivesolver.util;
 
 import com.will.hivesolver.entity.Execution;
+import com.will.hivesolver.repositories.ExecutionRepository;
 import com.will.hivesolver.util.enums.ExecutionStatusEnum;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -35,7 +36,7 @@ public class ETLTask implements Runnable{
     @Override
     public void run() {
         try {
-//            ExecutionRepository executionRepository = (ExecutionRepository) ContextUtil.getBean("executionRepository");
+            ExecutionRepository executionRepository = (ExecutionRepository) SpringContextUtil.getBean("executionRepository");
             FileOutputStream baos = null;
             try {
                 String line = "hive -f " + file;
@@ -53,7 +54,7 @@ public class ETLTask implements Runnable{
             } finally {
                 exec.setEndTime(new Date());
                 log.info(JsonUtil.writeValueAsString(exec));
-//                executionRepository.save(exec);
+                executionRepository.save(exec);
                 if (baos != null) {
                     baos.close();
                 }
