@@ -66,7 +66,7 @@ public class Execution {
         this.logLocation = logLocation;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(targetEntity = ETL.class,fetch = FetchType.EAGER)
     @JoinColumn(name = "job_id")
     public ETL getEtl() {
         return etl;
