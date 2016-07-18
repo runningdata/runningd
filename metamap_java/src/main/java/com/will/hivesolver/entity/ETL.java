@@ -19,8 +19,6 @@ import java.util.Set;
 @DynamicInsert
 @Table(name = "etl")
 public class ETL {
-    @Id
-    @GeneratedValue
     private int id;
     private String query;
     private String meta;
@@ -34,6 +32,8 @@ public class ETL {
     private Date ctime;
     private Set<Execution> executions = new HashSet<Execution>();
 
+    @Id
+    @GeneratedValue
     public int getId() {
         return id;
     }
