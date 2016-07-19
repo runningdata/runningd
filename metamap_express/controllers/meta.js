@@ -14,7 +14,7 @@ module.exports = function (router) {
           })
     });
 
-    router.get('/col_seach', function (req, res) {
+    router.get('/col_search', function (req, res) {
       common.getRequest({
             urlsName:'searchCol',
             req: req,
@@ -24,7 +24,7 @@ module.exports = function (router) {
           })
     });
 
-    router.get('/tbl_seach', function (req, res) {
+    router.get('/tbl_search', function (req, res) {
       common.getRequest({
             urlsName:'searchTbl',
             req: req,
