@@ -77,4 +77,15 @@ public class HiveMetaController {
         return null;
     }
 
+    @RequestMapping(value = "/tblinfo",method = RequestMethod.GET)
+    public @ResponseBody Object tblInfo(ColMeta col) {
+        try {
+            return JsonUtil.writeValueAsString(hiveMetaService.tblInfo(col));
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getFullStackTrace(e), e);
+        }
+
+        return null;
+    }
+
 }

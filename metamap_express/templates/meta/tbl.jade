@@ -1,0 +1,26 @@
+extends ../layout
+
+block content
+  head
+    title 表信息
+    
+  h2 表信息
+
+  | #{tbl.createTime}
+
+  a.btn.btn-primary.btn-sm(href="edit?id=#{col.id}") 血统
+  
+  if cols.length
+    table.table.table-striped
+      caption 表信息 : #{tbl.tbl_name}
+        thead 
+          tr
+            td ID
+            td 名称
+            td 类型
+      tbody
+        each col in cols
+          tr
+            td #{col.id}
+            td #{col.colName}
+            td #{col.colTypeName}

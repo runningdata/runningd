@@ -2,6 +2,7 @@ package com.will.hivesolver.service;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -103,5 +104,14 @@ public class HiveMetaService {
     public List<ColMeta> search(String colName) {
         return colMetaRepository.findByColName(colName);
     }
-    
+
+    public Map tblInfo(ColMeta meta) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        List<ColMeta> cols = colMetaRepository.findByDbIdAndTblId(meta.getDbId(), meta.getTblId());
+
+        Map<String, Object> tbl = hivemetaJdbcTemplate.queryForMap("select * from tbls where tbl_id = " + meta.getTblId());
+        result.put("cols", cols);
+        result.put("tbl", tbl);
+        return result;
+    }
 }

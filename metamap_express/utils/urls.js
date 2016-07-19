@@ -77,6 +77,11 @@ module.exports = {
     path: '/hivemeta/search',
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
+  },getTableInfo: {
+    name: '获取col所在table的信息',
+    path: '/hivemeta/tblinfo',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
   },
 
 
