@@ -32,7 +32,7 @@ module.exports = function (router) {
           }, function (data) {
             var tbl = data.tbl;
             var cols = data.cols;
-            console.log('tbl is : ' + tbl);
+            console.log('tbl is : ' + JSON.parse(tbl));
             tbl.createTime = common.formatDate(new Date(tbl.create_time * 1000), 'yymmdd hh:mm:ss');
             res.render('meta/tbl', { cols : cols, tbl: tbl});
           })
