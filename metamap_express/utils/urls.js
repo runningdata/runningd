@@ -64,6 +64,12 @@ module.exports = {
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
   },
+  bloodDAGByName: {
+    name: '血统DAG',
+    path: '/etl/getMermaid',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
+  },
   execETLScript: {
     name: '生成ETL脚本文件到临时目录',
     path: '/etl/execETLScript',

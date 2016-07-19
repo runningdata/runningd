@@ -22,6 +22,8 @@ block content
             td ID
             td 数据库名称
             td 表名称
+            td 字段名称
+            td 类型
             td 
               center 操作
       tbody
@@ -30,6 +32,8 @@ block content
             td #{col.id}
             td #{col.dbName}
             td #{col.tblName}
+            td #{col.colName}
+            td #{col.colTypeName}
             td 
               center 
               a.btn.btn-primary.btn-sm(href="tblinfo?dbId=#{col.dbId}&tblId=#{col.tblId}") 表信息

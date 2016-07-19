@@ -8,6 +8,9 @@ block content
 
   | #{tbl.createTime}
   
+  a(link="/blood/blood?tblName=#{tbl.db_name}@#{tbl.TBL_NAME}") XUETONG
+
+
   if cols.length
     table.table.table-striped
       caption 表信息 : #{tbl.TBL_NAME}
