@@ -20,7 +20,7 @@ module.exports = function (router) {
             req: req,
             params: req.query
           }, function (cols) {
-            res.render('meta/col_seach', { cols : cols});
+            res.render('meta/col_seach', { cols : cols, colName: req.query.colName});
           })
     });
 

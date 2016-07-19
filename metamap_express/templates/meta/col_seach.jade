@@ -6,9 +6,17 @@ block content
     
   h2 Col列表
 
+  form.navbar-form(role="search")
+    div.input-group.add-on
+      input.form-control(placeholder="输入字段名称: city", name="colName" ,type="text")
+      div.input-group-btn
+        //- button.btn.btn-default(type="submit") 查询 
+        button.btn.btn-default(type="submit")
+         i.glyphicon.glyphicon-search
+
   if cols.length
     table.table.table-striped
-      caption Col列表
+      caption Col列表 : #{colName}
         thead 
           tr
             td ID
@@ -25,5 +33,3 @@ block content
             td 
               center 
                 a.btn.btn-primary.btn-sm(href="edit?id=#{col.id}") Edit
-  else
-     |No col Found
