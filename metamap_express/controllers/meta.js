@@ -20,7 +20,7 @@ module.exports = function (router) {
             req: req,
             params: req.query
           }, function (cols) {
-            res.render('meta/col_seach', { cols : cols, colName: req.query.colName});
+            res.render('meta/col_search', { cols : cols, colName: req.query.colName});
           })
     });
 
@@ -30,7 +30,7 @@ module.exports = function (router) {
             req: req,
             params: req.query
           }, function (cols) {
-            res.render('meta/tbl_seach', { cols : cols, tblName: req.query.tblName});
+            res.render('meta/tbl_search', { cols : cols, tblName: req.query.tblName});
           })
     });
 
