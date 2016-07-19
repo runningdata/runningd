@@ -109,7 +109,7 @@ public class HiveMetaService {
         Map<String, Object> result = new HashMap<String, Object>();
         List<ColMeta> cols = colMetaRepository.findByDbIdAndTblId(meta.getDbId(), meta.getTblId());
 
-        Map<String, Object> tbl = hivemetaJdbcTemplate.queryForMap("select * from tbls where tbl_id = " + meta.getTblId());
+        Map<String, Object> tbl = hivemetaJdbcTemplate.queryForMap("select * from hive1.TBLS where tbl_id = " + meta.getTblId());
         result.put("cols", cols);
         result.put("tbl", tbl);
         return result;
