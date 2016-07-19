@@ -109,8 +109,9 @@ public class HiveMetaService {
         Map<String, Object> result = new HashMap<String, Object>();
         List<ColMeta> cols = colMetaRepository.findByDbIdAndTblId(meta.getDbId(), meta.getTblId());
 
-        Map<String, Object> tbl = hivemetaJdbcTemplate.queryForMap("select tbl*,db.name as db_name from hive1.TBLS tbl" +
-                " join hive1.DBS db on db.id = tbl.db_id  where tbl.tbl_id = " + meta.getTblId());
+        Map<String, Object> tbl = hivemetaJdbcTemplate.queryForMap("select tbl.*,db.name as db_name from hive1.TBLS tbl" +
+                " join hive1.DBS db on db.id = tbl.db_id " +
+                " where tbl.tbl_id = " + meta.getTblId());
         result.put("cols", cols);
         result.put("tbl", tbl);
         return result;
