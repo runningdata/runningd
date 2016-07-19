@@ -26,7 +26,7 @@ public class ETLTest {
     private ETLService etlService;
 
     @Test
-    public void testinsertEtl() {
+    public void testinsertEtl() throws Exception {
         ETL etl = new ETL();
         etl.setAuthor("will");
         etl.setMeta("mymeta");

@@ -78,7 +78,7 @@ public class ETLService {
      * @param etl
      */
     @Transactional
-    public void addETL(ETL etl) {
+    public void addETL(ETL etl) throws Exception {
         // must after tbl blood analyse?
         etlRepository.makePreviousInvalid(etl.getTblName());
         etlRepository.save(etl);

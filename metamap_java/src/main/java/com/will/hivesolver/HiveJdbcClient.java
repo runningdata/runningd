@@ -47,7 +47,7 @@ public class HiveJdbcClient {
 
 
 
-    public Set<String> get(String sql) {
+    public Set<String> get(String sql) throws Exception {
         if (init()) {
             sql = sql.substring(sql.toLowerCase().indexOf("select"), sql.length()).replace(";","");
             try {
@@ -81,21 +81,21 @@ public class HiveJdbcClient {
                     return getTbls(json, mapper);
                 }
             } catch (SQLException | IOException e) {
-                e.printStackTrace();
+                throw new Exception(e);
             } finally {
                 try {
                     if (stmt != null && stmt.isClosed() == false) {
                         stmt.close();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    throw new Exception(e);
                 }
                 try {
                     if (con != null && con.isClosed() == false) {
                         con.close();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    throw new Exception(e);
                 }
             }
         }

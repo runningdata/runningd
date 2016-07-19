@@ -28,7 +28,7 @@ public class ETLController {
     private ETLService etlService;
 
     @RequestMapping(value = "save",method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
-    public @ResponseBody Object addETL(ETL etl) {
+    public @ResponseBody Object addETL(ETL etl) throws Exception{
         etl.setAuthor("will");
         etlService.addETL(etl);
         return "{\"message\" :\"success\"}";

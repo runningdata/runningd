@@ -13,8 +13,10 @@ class ETL(models.Model):
     priority = models.IntegerField(default=5, blank=True)
     onSchedule = models.IntegerField(default=1, db_column='on_schedule')
     valid = models.IntegerField(default=1)
+
     def __str__(self):
         return self.query
+
     def was_published_recently(self):
         return self.ctime >= timezone.now() - datetime.timedelta(days=1)
 
@@ -25,5 +27,6 @@ class TblBlood(models.Model):
     relatedEtlId = models.IntegerField(db_column='related_etl_id')
     ctime = models.DateTimeField(default=timezone.now())
     valid = models.IntegerField(default=1)
+
     def __str__(self):
         return self.parentTbl + '-->' + self.tblName
