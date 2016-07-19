@@ -105,6 +105,10 @@ public class HiveMetaService {
         return colMetaRepository.findByColName(colName);
     }
 
+    public List<ColMeta> findByTblNameLike(String tblName) {
+        return colMetaRepository.findByTblNameLike(tblName);
+    }
+
     public Map tblInfo(ColMeta meta) {
         Map<String, Object> result = new HashMap<String, Object>();
         List<ColMeta> cols = colMetaRepository.findByDbIdAndTblId(meta.getDbId(), meta.getTblId());

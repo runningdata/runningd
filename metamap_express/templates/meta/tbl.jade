@@ -6,9 +6,9 @@ block content
     
   h2 表信息
 
-  | #{tbl.createTime}
+  h3 创建时间 #{tbl.createTime}
   
-  a.btn.btn-primary.btn-sm(href="/blood/blood?tblName=#{tbl.db_name}@#{tbl.TBL_NAME}") XUETONG
+  a.btn.btn-primary.btn-sm(href="/blood/blood?tblName=#{tbl.db_name}@#{tbl.TBL_NAME}") 血统
 
 
   if cols.length

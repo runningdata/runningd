@@ -24,6 +24,16 @@ module.exports = function (router) {
           })
     });
 
+    router.get('/tbl_seach', function (req, res) {
+      common.getRequest({
+            urlsName:'searchTbl',
+            req: req,
+            params: req.query
+          }, function (cols) {
+            res.render('meta/tbl_seach', { cols : cols, tblName: req.query.tblName});
+          })
+    });
+
     router.get('/tblinfo', function (req, res) {
       common.getRequest({
             urlsName:'getTableInfo',

@@ -12,4 +12,6 @@ public interface ColMetaRepository extends JpaRepository<ColMeta, Integer>{
     public List<ColMeta> findByColName(String colName);
 
     List<ColMeta> findByDbIdAndTblId(int dbId, int tblId);
+
+    List<ColMeta> findByTblNameLike(String tblName);
 }

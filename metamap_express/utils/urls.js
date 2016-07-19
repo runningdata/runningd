@@ -83,6 +83,11 @@ module.exports = {
     path: '/hivemeta/search',
     mock_data: mockPath + '/part_time/chart.json',
     ifMock: false
+  },searchTbl: {
+    name: '根据table名称搜相关table信息',
+    path: '/hivemeta/searchTbl',
+    mock_data: mockPath + '/part_time/chart.json',
+    ifMock: false
   },getTableInfo: {
     name: '获取col所在table的信息',
     path: '/hivemeta/tblinfo',
