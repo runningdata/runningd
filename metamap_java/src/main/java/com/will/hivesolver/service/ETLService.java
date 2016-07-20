@@ -205,7 +205,7 @@ public class ETLService {
         generateJobFile(tbl, leafBlood, serFolder);
         ZipUtils.addFilesToZip(new File(serFolderLocation),
                 new File(serFolderLocation + ".zip"));
-        return null;
+        return serFolder;
     }
 
 
