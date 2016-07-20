@@ -200,9 +200,9 @@ public class ETLService {
         if (leafBlood.size() > 0) {
             loadLeafBloods(leafBlood, doneBlood, serFolder);
         }
-//        TblBlood tbl = new TblBlood();
-//        tbl.setTblName("etl_done_" + serFolder);
-//        generateJobFile(tbl, leafBlood, serFolder);
+        TblBlood tbl = new TblBlood();
+        tbl.setTblName("etl_done_" + serFolder);
+        generateJobFile(tbl, leafBlood, serFolder);
         ZipUtils.addFilesToZip(new File(serFolderLocation),
                 new File(serFolderLocation + ".zip"));
         return serFolder;
