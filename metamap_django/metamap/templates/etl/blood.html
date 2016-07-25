@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+
+{% block title %}血统{% endblock %}
+
+{% load staticfiles %}
+
+
+{% block content %}
+<div class="container text-center"><title>血统详情</title>
+    <script src="{% static 'js/mermaid.min.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/mermaid.css' %}" />
+    <script type="text/jaascript">
+        mermaid.initialize({startOnLoad:true});
+    </script>
+    <h2>血统详情</h2>
+    <div class="mermaid">
+        graph TD;
+        {% for blood in bloods %}
+            {{ blood.parentTbl }} --> {{ blood.tblName }}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

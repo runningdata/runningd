@@ -1,24 +1,35 @@
 {% include 'components/header.html' %}
 <div class="container">
-<h2>alter ETL</h2>
+    <h2>alter ETL</h2>
+    {% csrf_token %}
+    <form action="." method="POST">
+        <div class="form-group">
+            <input name="id" value="{{ etl.id }}" type="hidden" class="form-control">
+            <label>ETL名称</label>
+            <input name="tblName" value="{{ etl.tblName }}" type="text" class="form-control">
 
-<form>
-  <div class="form-group">
-    <label>名称</label>
-    <input value="{{etl.tblName}}" type="text" class="form-control">
-  </div>
-  <div class="form-group">     
-     <label>sql</label>
-     <input value="{{etl.query}}" type="text" class="form-control">
-  </div>
-   <div class="form-group">
-    <label>Presql</label>
-    <input value="{{etl.preSql}}" type="text" class="form-control">
-  </div>
-  <div class="form-group">  
-  <label>是否参与每日调度</label>   
-    <input value="{{etl.onSchedule}}" type="text" class="form-control">
-  </div> 
-  <button type="submit" class="btn btn-primary">提交</button>
-</form>
+            <label>查询SQL</label>
+            <textarea name="query" rows="13" class="form-control">{{ etl.query }}</textarea>
+            <label>配置</label>
+            <textarea name="setting" rows="5" class="form-control">{{ etl.setting }}</textarea>
+            <label>先行SQL（针对target）</label>
+            <textarea name="preSql" rows="13" class="form-control">{{ etl.preSql }}</textarea>
+            <label>是否参与每日调度</label>
+            <div class="radio-inline">
+                <input id="optionsRadios1" type="radio" name="onSchedule"
+                        {% if etl.onSchedule == 1 %}
+                       checked="checked"
+                        {% endif %}
+                       value="1">是
+            </div>
+            <div class="radio-inline">
+                <input id="optionsRadios3" type="radio" name="onSchedule"
+                        {% if etl.onSchedule == 0 %}
+                       checked="checked"
+                        {% endif %}
+                       value="0">否
+            </div>
+            <button type="submit" class="btn btn-primary">提交</button>
+        </div>
+    </form>
 </div>

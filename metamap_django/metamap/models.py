@@ -9,10 +9,13 @@ class ETL(models.Model):
     tblName = models.CharField(max_length=30, db_column='tbl_name')
     author = models.CharField(max_length=20, blank=True, null=True)
     preSql = models.CharField(max_length=2000, db_column='pre_sql', blank=True, null=True)
-    ctime = models.DateTimeField(default=timezone.now())
+    ctime = models.DateTimeField(default=timezone.now)
     priority = models.IntegerField(default=5, blank=True)
     onSchedule = models.IntegerField(default=1, db_column='on_schedule')
     valid = models.IntegerField(default=1)
+    setting = models.CharField(max_length=200, default='')
+
+    __str__ = query
 
     def __str__(self):
         return self.query
@@ -22,10 +25,12 @@ class ETL(models.Model):
 
 
 class TblBlood(models.Model):
+    class Meta:
+        unique_together = (('tblName', 'parentTbl', 'valid'),)
     tblName = models.CharField(max_length=30, db_column='tbl_name')
     parentTbl = models.CharField(max_length=30, db_column='parent_tbl')
     relatedEtlId = models.IntegerField(db_column='related_etl_id')
-    ctime = models.DateTimeField(default=timezone.now())
+    ctime = models.DateTimeField(default=timezone.now)
     valid = models.IntegerField(default=1)
 
     def __str__(self):

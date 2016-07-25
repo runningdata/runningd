@@ -1,45 +1,43 @@
-{% include 'components/header.html' %}
+{% extends 'layout.html' %}
+
+{% block title %}ETL列表{% endblock %}
+
+{% block content %}
 <div class="container">
-<h2>ETL</h2>
+    <h2>ETL</h2>
 
 
-
-<table class="table table-striped">
-<caption>ETL list</caption>
-   <thead>
-      <tr>
-         <th>ID</th>
-         <th>META</th>
-         <th>tblName</th>
-         <th>author</th>
-         <th>preSql</th>
-         <th>SQL</th>
-         <th>onSchedule</th>
-         <th>priority</th>
-         <th>ctime</th>
-         <th>caozuo</th>
-      </tr>
-   </thead>
-   <tbody>
-{% if latest_etl_list %}
-    {% for etl in latest_etl_list %}
+    <table class="table table-striped">
+        <caption>ETL list</caption>
+        <thead>
         <tr>
-            <td>{{etl.id}}</td>
-            <td>{{etl.meta}}</td>
-            <td>{{etl.tblName}}</td>
-            <td>{{etl.author}}</td>
-            <td>{{etl.preSql}}</td>
-            <td>{{etl.query}}</td>
-            <td>{{etl.onSchedule}}</td>
-            <td>{{etl.priority}}</td>
-            <td>{{etl.ctime}}</td>
-            <td>
-                <a href="etl/{{ etl.id }}/">EDIT{{etl.meta}}</a> </td>
+            <th>ID</th>
+            <th>META</th>
+            <th>表名</th>
+            <th>创建时间</th>
+            <th>操作</th>
         </tr>
+        </thead>
+        <tbody>
+        {% if etls %}
+            {% for etl in etls %}
+                <tr>
+                    <td>{{ etl.id }}</td>
+                    <td>{{ etl.meta }}</td>
+                    <td>{{ etl.tblName }}</td>
+                    <td>{{ etl.ctime|date:"Y年m月d日 H时i分" }}</td>
+                    <td>
+                        <a class="btn btn-primary btn-sm" href="/metamap/etls/{{ etl.id }}/">编辑</a>
+                        <a class="btn btn-primary btn-sm" href="/metamap/etls/exec/{{ etl.id }}/">测试执行</a>
+                        <a class="btn btn-primary btn-sm" href="/metamap/etls/exec_list/{{ etl.id }}/">执行记录</a>
+                        <a class="btn btn-primary btn-sm" href="/metamap/etls/blood/{{ etl.id }}/">血统</a>
+                    </td>
+                </tr>
             {% endfor %}
-      {% else %}
-    <p>No polls are available.</p>
-{% endif %}
-  </tbody>
-</table>
+        {% else %}
+            <p>No polls are available.</p>
+        {% endif %}
+        </tbody>
+    </table>
 </div>
+{% endblock %}
