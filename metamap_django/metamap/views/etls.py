@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*
 import logging
+import os
 
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import render, redirect
 from django.views import generic
 
-from metamap.models import TblBlood, ETL
-from metamap.utils import hivecli, httputils, dateutils
+from metamap.models import TblBlood, ETL, Executions
+from metamap.utils import hivecli, httputils, dateutils, threadpool
 from metamap.utils.constants import *
+from metamap.utils.enums import EXECUTION_STATUS
 
 logger = logging.getLogger(__name__)
+work_manager = threadpool.WorkManager(10, 3)
 
 
 class IndexView(generic.ListView):
@@ -84,7 +87,7 @@ def clean_blood(blood, current=0):
     blood.parentTbl = blood.parentTbl.replace('@', '__')
     blood.tblName = blood.tblName.replace('@', '__')
     if current > 0:
-        blood.tblName += ';style ' + blood.tblName.replace('@', '__') + ' fill:#f9f,stroke:#333,stroke-width:4px;'
+        blood.tblName += 'style ' + blood.tblName.replace('@', '__') + ' fill:#f9f,stroke:#333,stroke-width:4px'
     return blood
 
 
@@ -114,7 +117,56 @@ def edit(request, pk):
         return render(request, 'etl/edit.html', {'etl': etl})
 
 
-def exec_job(reques, etlid):
+@transaction.atomic
+def exec_job(request, etlid):
     etl = ETL.objects.get(id=etlid)
     location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-' + etl.tblName.replace('@', '__') + '.hql'
+    str = list()
+    str.append("-- job for " + etl.tblName)
+    str.append("-- author : " + etl.author)
+    ctime = etl.ctime
+    if (ctime != None):
+        str.append("-- create time : " + dateutils.format_day(ctime))
+    else:
+        str.append("-- cannot find ctime")
+    str.append("-- pre settings ")
+    str.append(etl.preSql)
+    str.append(etl.query)
+    with open(location, 'a') as f:
+        print('dddddd : %s ' % '\n'.join(str))
+        f.write('\n'.join(str))
 
+    log_location = location.replace('hql', 'log')
+    # cmd = 'sh ' + location
+    os.mknod(log_location)
+    work_manager.add_job(threadpool.do_job, 'sh ' + location, log_location)
+    logger.info(
+        'job for %s has been executed, current pool size is %d' % (etl.tblName, work_manager.work_queue.qsize()))
+    execution = Executions(logLocation=log_location, jobId=etlid, status=EXECUTION_STATUS.RUNNING)
+    execution.save()
+    return redirect('metamap:execlog', execid=execution.id)
+
+
+def exec_log(request, execid):
+    '''
+    获取指定execution的log内容
+    :param request:
+    :param execid:
+    :return:
+    '''
+    execution = Executions.objects.get(pk=execid)
+    with open(execution.logLocation, 'r') as log:
+        content = log.read().replace('\n', '<br/>')
+    return render(request, 'etl/exec_log.html', {'execid':execid, 'content': content})
+
+def get_exec_log(request, execid):
+    '''
+    获取指定execution的log内容
+    :param request:
+    :param execid:
+    :return:
+    '''
+    execution = Executions.objects.get(pk=execid)
+    with open(execution.logLocation, 'r') as log:
+        content = log.read().replace('\n', '<br/>')
+    return HttpResponse(content)

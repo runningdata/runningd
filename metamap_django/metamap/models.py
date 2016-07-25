@@ -1,3 +1,5 @@
+# !/usr/bin/env python
+# -*- coding:utf-8 -*-
 from django.db import models
 import datetime
 from django.utils import timezone
@@ -35,3 +37,16 @@ class TblBlood(models.Model):
 
     def __str__(self):
         return self.parentTbl + '-->' + self.tblName
+
+class Executions(models.Model):
+    '''
+    任务执行记录
+    '''
+    logLocation = models.CharField(max_length=120, db_column='log_location')
+    jobId = models.IntegerField(db_column='job_id')
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(null=True)
+    status = models.IntegerField(default=-1)
+
+    def __str__(self):
+        return self.logLocation
