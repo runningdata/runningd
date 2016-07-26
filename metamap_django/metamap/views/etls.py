@@ -87,7 +87,7 @@ def clean_blood(blood, current=0):
     blood.parentTbl = blood.parentTbl.replace('@', '__')
     blood.tblName = blood.tblName.replace('@', '__')
     if current > 0:
-        blood.tblName += 'style ' + blood.tblName.replace('@', '__') + ' fill:#f9f,stroke:#333,stroke-width:4px'
+        blood.tblName += ';style ' + blood.tblName.replace('@', '__') + ' fill:#f9f,stroke:#333,stroke-width:4px'
     return blood
 
 
@@ -157,7 +157,8 @@ def exec_log(request, execid):
     execution = Executions.objects.get(pk=execid)
     with open(execution.logLocation, 'r') as log:
         content = log.read().replace('\n', '<br/>')
-    return render(request, 'etl/exec_log.html', {'execid':execid, 'content': content})
+    return render(request, 'etl/exec_log.html', {'execid': execid})
+
 
 def get_exec_log(request, execid):
     '''
@@ -170,3 +171,13 @@ def get_exec_log(request, execid):
     with open(execution.logLocation, 'r') as log:
         content = log.read().replace('\n', '<br/>')
     return HttpResponse(content)
+
+
+def exec_list(request, jobid):
+    '''
+    返回指定job的所有执行记录
+    :param request:
+    :param jobid:
+    :return:
+    '''
+    return render(request, 'etl/executions.html', {'executions': Executions.objects.filter(jobId=jobid).order_by('-start_time')})

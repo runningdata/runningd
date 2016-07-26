@@ -1,8 +1,0 @@
-2016-07-25 11:20:50,996 [Thread-7:-1277060288] [metamap.utils.threadpool:91] [threadpool:run] [ERROR]- got error :'unicode' object has no attribute 'fileno'
-2016-07-25 11:21:26,490 [Thread-8:-1285715136] [metamap.utils.threadpool:91] [threadpool:run] [ERROR]- got error :'unicode' object has no attribute 'fileno'
-2016-07-25 11:21:47,774 [Thread-9:-1294107840] [metamap.utils.threadpool:91] [threadpool:run] [ERROR]- got error :'unicode' object has no attribute 'fileno'
-2016-07-25 11:22:38,544 [Thread-7:-1277060288] [metamap.utils.threadpool:91] [threadpool:run] [ERROR]- got error :'module' object has no attribute '__getitem__'
-2016-07-25 11:24:14,511 [Thread-7:-1277846720] [metamap.utils.threadpool:91] [threadpool:run] [ERROR]- got error :'module' object has no attribute '__getitem__'
-2016-07-25 11:26:32,889 [Thread-7:-1277060288] [metamap.utils.threadpool:91] [threadpool:run] [ERROR]- got error :'module' object has no attribute '__getitem__'
-2016-07-25 11:26:57,225 [Thread-8:-1285715136] [metamap.utils.threadpool:91] [threadpool:run] [ERROR]- got error :'module' object has no attribute '__getitem__'
-2016-07-25 11:28:18,074 [Thread-8:-1285715136] [metamap.utils.threadpool:91] [threadpool:run] [ERROR]- got error :'module' object has no attribute '__getitem__'

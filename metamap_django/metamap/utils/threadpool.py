@@ -82,12 +82,14 @@ class Work(threading.Thread):
                 self.work_queue.task_done()  # 通知系统任务完成
                 location = ''.join(args[1])
                 execution = Executions.objects.get(logLocation=location)
-                execution.end_time = timezone.now
-                execution.status = enums['完成']
+                execution.end_time = timezone.now()
+                execution.status = enums.EXECUTION_STATUS.DONE
                 execution.save()
             except Queue.Empty:
                 time.sleep(3)
-            except Exception as e:
+            except Executions.DoesNotExist:
+                self.logger.error('cannot find execution from db for location %s' % location)
+            except Exception, e:
                 self.logger.error('got error :%s' % str(e))
                 break
 

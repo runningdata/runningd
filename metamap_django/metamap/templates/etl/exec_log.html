@@ -15,6 +15,7 @@
             });
             console.log('ending....');
         }
+        getData();
         setInterval(function () {
             //- if (status == 0) {
             console.log('beginning. setInterval...' + status);
@@ -31,6 +32,5 @@
 {% block content %}
 
     <div id="log" class="container bg-info">
-        {{ content }}
     </div>
 {% endblock %}
