@@ -166,7 +166,7 @@ def exec_job(request, etlid):
     work_manager.add_job(threadpool.do_job, 'sh ' + location, log_location)
     logger.info(
         'job for %s has been executed, current pool size is %d' % (etl.tblName, work_manager.work_queue.qsize()))
-    execution = Executions(logLocation=log_location, jobId=etlid, status=EXECUTION_STATUS.RUNNING)
+    execution = Executions(logLocation=log_location, job_id=etlid, status=EXECUTION_STATUS.RUNNING)
     execution.save()
     return redirect('metamap:execlog', execid=execution.id)
 
@@ -205,4 +205,4 @@ def exec_list(request, jobid):
     :return:
     '''
     return render(request, 'etl/executions.html',
-                  {'executions': Executions.objects.filter(jobId=jobid).order_by('-start_time')})
+                  {'executions': Executions.objects.filter(job_id=jobid).order_by('-start_time')})

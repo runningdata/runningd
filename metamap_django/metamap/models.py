@@ -47,7 +47,8 @@ class Executions(models.Model):
     任务执行记录
     '''
     logLocation = models.CharField(max_length=120, db_column='log_location')
-    jobId = models.IntegerField(db_column='job_id')
+    # jobId = models.IntegerField(db_column='job_id')
+    job = models.ForeignKey(ETL, on_delete=models.CASCADE)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)
     status = models.IntegerField(default=-1)
