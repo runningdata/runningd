@@ -15,4 +15,6 @@ urlpatterns = [
     url(r'^etls/getexeclog/(?P<execid>[0-9]+)/$', etls.get_exec_log, name='getexeclog'),
     url(r'^etls/exec_list/(?P<jobid>[0-9]+)/$', etls.exec_list, name='exec_list'),
 
+    url(r'^etls/generate_job_dag/$', etls.generate_job_dag, name='generate_job_dag'),
+
 ]

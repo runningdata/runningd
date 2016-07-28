@@ -55,3 +55,17 @@ class Executions(models.Model):
 
     def __str__(self):
         return self.logLocation
+
+class Meta(models.Model):
+    '''
+       数据库对应meta
+    '''
+    meta = models.CharField(max_length=30, unique=True)
+    db = models.CharField(max_length=30)
+    settings = models.CharField(max_length=300, null=True)
+    type = valid = models.IntegerField(default=1)
+    ctime = models.DateTimeField(default=timezone.now)
+    valid = models.IntegerField(default=1)
+
+    def __str__(self):
+        return self.meta

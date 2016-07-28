@@ -9,11 +9,12 @@ from django.shortcuts import render, redirect
 from django.views import generic
 
 from metamap.models import TblBlood, ETL, Executions
-from metamap.utils import hivecli, httputils, dateutils, threadpool
+from metamap.helpers import bloodhelper, etlhelper
+from metamap.utils import hivecli, httputils, dateutils, threadpool, ziputils
 from metamap.utils.constants import *
 from metamap.utils.enums import EXECUTION_STATUS
 from django.template import Context, Template
-
+import zipfile
 logger = logging.getLogger(__name__)
 work_manager = threadpool.WorkManager(10, 3)
 
@@ -42,54 +43,14 @@ class EditView(generic.DetailView):
 #         exclude = ['id', 'ctime']
 
 
-def find_parent_mermaid(blood, final_bloods, current=0):
-    '''
-    # 循环遍历当前节点的父节点
-    :param blood:
-    :param final_bloods:
-    :return:
-    '''
-    bloods = TblBlood.objects.filter(tblName=blood.parentTbl)
-    if bloods.count() > 0:
-        for bld in bloods:
-            final_bloods.add(clean_blood(bld, current))
-            find_parent_mermaid(bld, final_bloods)
-
-
-def find_child_mermaid(blood, final_bloods, current=0):
-    '''
-    循环遍历当前节点的子节点
-    :param blood:
-    :param final_bloods:
-    :return:
-    '''
-    bloods = TblBlood.objects.filter(parentTbl=blood.tblName)
-    if bloods.count() > 0:
-        for bld in bloods:
-            final_bloods.add(clean_blood(bld, current))
-            find_parent_mermaid(bld, final_bloods)
-
 
 def blood(request, etlid):
     blood = TblBlood.objects.filter(relatedEtlId=int(etlid), valid=1).get()
     final_bloods = set()
-    final_bloods.add(clean_blood(blood, etlid))
-    find_parent_mermaid(blood, final_bloods, etlid)
-    find_child_mermaid(blood, final_bloods, etlid)
+    final_bloods.add(bloodhelper.clean_blood(blood, etlid))
+    bloodhelper.find_parent_mermaid(blood, final_bloods, etlid)
+    bloodhelper.find_child_mermaid(blood, final_bloods, etlid)
     return render(request, 'etl/blood.html', {'bloods': final_bloods})
-
-
-def clean_blood(blood, current=0):
-    '''
-    为了方便mermaid显示，把blood里的@替换为__
-    :param blood:
-    :return:
-    '''
-    blood.parentTbl = blood.parentTbl.replace('@', '__')
-    blood.tblName = blood.tblName.replace('@', '__')
-    if current > 0:
-        blood.tblName += ';style ' + blood.tblName.replace('@', '__') + ' fill:#f9f,stroke:#333,stroke-width:4px'
-    return blood
 
 
 @transaction.atomic
@@ -139,29 +100,8 @@ def edit(request, pk):
 def exec_job(request, etlid):
     etl = ETL.objects.get(id=etlid)
     location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-' + etl.tblName.replace('@', '__') + '.hql'
-    str = list()
-    str.append('{% load etlutils %}')
-    str.append(etl.variables)
-    str.append("-- job for " + etl.tblName)
-    str.append("-- author : " + etl.author)
-    ctime = etl.ctime
-    if (ctime != None):
-        str.append("-- create time : " + dateutils.format_day(ctime))
-    else:
-        str.append("-- cannot find ctime")
-    str.append("-- pre settings ")
-    str.append(etl.preSql)
-    str.append(etl.query)
-
-    template = Template('\n'.join(str));
-    final_result = template.render(Context())
-
-    with open(location, 'a') as f:
-        print('hql content : %s ' % final_result)
-        f.write(final_result)
-
+    etlhelper.generate_etl_file(etl, location)
     log_location = location.replace('hql', 'log')
-    # cmd = 'sh ' + location
     os.mknod(log_location)
     work_manager.add_job(threadpool.do_job, 'sh ' + location, log_location)
     logger.info(
@@ -206,3 +146,31 @@ def exec_list(request, jobid):
     '''
     return render(request, 'etl/executions.html',
                   {'executions': Executions.objects.filter(job_id=jobid).order_by('-start_time')})
+
+
+def generate_job_dag(request):
+    '''
+    抽取所有有效的ETL,生成azkaban调度文件
+    :param request:
+    :return:
+    '''
+    try:
+        done_blood = set()
+        folder = dateutils.now_datetime()
+        leafs = TblBlood.objects.raw("select a.* from "
+                                     + "(select * from metamap_tblblood where valid = 1) a"
+                                     + " left outer join "
+                                     + "(select distinct parent_tbl from metamap_tblblood where valid = 1) b"
+                                     + " on a.tbl_name = b.parent_tbl"
+                                     + " where b.parent_tbl is null")
+        os.mkdir(AZKABAN_BASE_LOCATION + folder)
+        os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
+
+        etlhelper.load_nodes(leafs, folder, done_blood)
+        tbl = TblBlood(tblName='etl_done_' + folder)
+        etlhelper.generate_job_file(tbl, leafs, folder)
+        ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
+        return HttpResponse(dateutils.now_datetime())
+    except Exception, e:
+        logger.error('error : %s ' % e)
+        return HttpResponse('error')
