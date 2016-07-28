@@ -16,11 +16,15 @@ class ETL(models.Model):
     onSchedule = models.IntegerField(default=1, db_column='on_schedule')
     valid = models.IntegerField(default=1)
     setting = models.CharField(max_length=200, default='')
+    variables = models.CharField(max_length=200, default='')
 
     __str__ = query
 
     def __str__(self):
         return self.query
+
+    def test_add(self, a, b):
+        return a + b;
 
     def was_published_recently(self):
         return self.ctime >= timezone.now() - datetime.timedelta(days=1)

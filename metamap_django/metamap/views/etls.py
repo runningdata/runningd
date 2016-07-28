@@ -12,6 +12,7 @@ from metamap.models import TblBlood, ETL, Executions
 from metamap.utils import hivecli, httputils, dateutils, threadpool
 from metamap.utils.constants import *
 from metamap.utils.enums import EXECUTION_STATUS
+from django.template import Context, Template
 
 logger = logging.getLogger(__name__)
 work_manager = threadpool.WorkManager(10, 3)
@@ -92,6 +93,23 @@ def clean_blood(blood, current=0):
 
 
 @transaction.atomic
+def add(request):
+    if request.method == 'POST':
+        etl = ETL()
+        httputils.post2obj(etl, request.POST, 'id')
+        etl.save()
+        logger.info('ETL has been created successfully : %s ' % etl)
+        deps = hivecli.getTbls(etl.query)
+        for dep in deps:
+            tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+            tblBlood.save()
+            logger.info('Tblblood has been created successfully : %s' % tblBlood)
+        return HttpResponseRedirect(reverse('metamap:index'))
+    else:
+        return render(request, 'etl/edit.html')
+
+
+@transaction.atomic
 def edit(request, pk):
     if request.method == 'POST':
 
@@ -111,7 +129,7 @@ def edit(request, pk):
             tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
             tblBlood.save()
             logger.info('Tblblood has been created successfully : %s' % tblBlood)
-        return HttpResponseRedirect(reverse('metamap:index2'))
+        return HttpResponseRedirect(reverse('metamap:index'))
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
@@ -122,6 +140,8 @@ def exec_job(request, etlid):
     etl = ETL.objects.get(id=etlid)
     location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-' + etl.tblName.replace('@', '__') + '.hql'
     str = list()
+    str.append('{% load etlutils %}')
+    str.append(etl.variables)
     str.append("-- job for " + etl.tblName)
     str.append("-- author : " + etl.author)
     ctime = etl.ctime
@@ -132,9 +152,13 @@ def exec_job(request, etlid):
     str.append("-- pre settings ")
     str.append(etl.preSql)
     str.append(etl.query)
+
+    template = Template('\n'.join(str));
+    final_result = template.render(Context())
+
     with open(location, 'a') as f:
-        print('dddddd : %s ' % '\n'.join(str))
-        f.write('\n'.join(str))
+        print('hql content : %s ' % final_result)
+        f.write(final_result)
 
     log_location = location.replace('hql', 'log')
     # cmd = 'sh ' + location
@@ -180,4 +204,5 @@ def exec_list(request, jobid):
     :param jobid:
     :return:
     '''
-    return render(request, 'etl/executions.html', {'executions': Executions.objects.filter(jobId=jobid).order_by('-start_time')})
+    return render(request, 'etl/executions.html',
+                  {'executions': Executions.objects.filter(jobId=jobid).order_by('-start_time')})
