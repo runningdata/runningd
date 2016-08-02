@@ -13,7 +13,7 @@ urlpatterns = [
     url(r'^etls/exec/(?P<etlid>[0-9]+)/$', etls.exec_job, name='exec'),
     url(r'^etls/execlog/(?P<execid>[0-9]+)/$', etls.exec_log, name='execlog'),
     url(r'^etls/getexeclog/(?P<execid>[0-9]+)/$', etls.get_exec_log, name='getexeclog'),
-    url(r'^etls/exec_list/(?P<jobid>[0-9]+)/$', etls.exec_list, name='exec_list'),
+    url(r'^etls/exec_list/(?P<jobid>[0-9]+)/$', etls.ExecLogView.as_view(), name='exec_list'),
 
     url(r'^etls/generate_job_dag/$', etls.generate_job_dag, name='generate_job_dag'),
 

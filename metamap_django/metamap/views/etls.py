@@ -15,6 +15,7 @@ from metamap.utils.constants import *
 from metamap.utils.enums import EXECUTION_STATUS
 from django.template import Context, Template
 import zipfile
+
 logger = logging.getLogger(__name__)
 work_manager = threadpool.WorkManager(10, 3)
 
@@ -22,11 +23,11 @@ work_manager = threadpool.WorkManager(10, 3)
 class IndexView(generic.ListView):
     template_name = 'index.html'
     context_object_name = 'etls'
+    paginate_by = DEFAULT_PAGE_SIEZE
+    model = ETL
 
     def get_queryset(self):
-        etls = ETL.objects.filter(valid=1)
-        print etls
-        return etls
+        return ETL.objects.filter(valid=1)
 
 
 class EditView(generic.DetailView):
@@ -137,16 +138,20 @@ def get_exec_log(request, execid):
     return HttpResponse(content)
 
 
-def exec_list(request, jobid):
+class ExecLogView(generic.ListView):
     '''
     返回指定job的所有执行记录
-    :param request:
     :param jobid:
     :return:
     '''
-    return render(request, 'etl/executions.html',
-                  {'executions': Executions.objects.filter(job_id=jobid).order_by('-start_time')})
+    template_name = 'etl/executions.html'
+    context_object_name = 'executions'
+    model = Executions
+    paginate_by = DEFAULT_PAGE_SIEZE
 
+    def get_queryset(self):
+        jobid_ = self.kwargs['jobid']
+        return Executions.objects.filter(job_id=jobid_).order_by('-start_time')
 
 def generate_job_dag(request):
     '''
