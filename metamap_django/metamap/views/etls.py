@@ -2,19 +2,18 @@
 import logging
 import os
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.views import generic
 
-from metamap.models import TblBlood, ETL, Executions
 from metamap.helpers import bloodhelper, etlhelper
+from metamap.models import TblBlood, ETL, Executions
 from metamap.utils import hivecli, httputils, dateutils, threadpool, ziputils
 from metamap.utils.constants import *
 from metamap.utils.enums import EXECUTION_STATUS
-from django.template import Context, Template
-import zipfile
 
 logger = logging.getLogger(__name__)
 work_manager = threadpool.WorkManager(10, 3)
@@ -23,11 +22,20 @@ work_manager = threadpool.WorkManager(10, 3)
 class IndexView(generic.ListView):
     template_name = 'index.html'
     context_object_name = 'etls'
-    paginate_by = DEFAULT_PAGE_SIEZE
     model = ETL
 
     def get_queryset(self):
+        if 'search' in self.request.GET and self.request.GET['search'] != '':
+            tbl_name_ = self.request.GET['search']
+            return ETL.objects.filter(valid=1, tblName__contains=tbl_name_)
+        self.paginate_by = DEFAULT_PAGE_SIEZE
         return ETL.objects.filter(valid=1)
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        if 'search' in self.request.GET and self.request.GET['search'] != '':
+            context['search'] = self.request.GET['search']
+        return context
 
 
 class EditView(generic.DetailView):
@@ -52,6 +60,15 @@ def blood(request, etlid):
     bloodhelper.find_parent_mermaid(blood, final_bloods, etlid)
     bloodhelper.find_child_mermaid(blood, final_bloods, etlid)
     return render(request, 'etl/blood.html', {'bloods': final_bloods})
+
+
+def blood_by_name(request):
+    etl_name = request.GET['tblName']
+    try:
+        etl = ETL.objects.filter(valid=1).get(tblName=etl_name)
+        return blood(request, etl.id)
+    except ObjectDoesNotExist:
+        return HttpResponse(u'%s 不存在' % etl_name)
 
 
 @transaction.atomic
@@ -152,6 +169,7 @@ class ExecLogView(generic.ListView):
     def get_queryset(self):
         jobid_ = self.kwargs['jobid']
         return Executions.objects.filter(job_id=jobid_).order_by('-start_time')
+
 
 def generate_job_dag(request):
     '''

@@ -87,6 +87,14 @@ DATABASES = {
         'USER': 'root',
         'HOST': '127.0.0.1', 
         'PORT': '3306', 
+    },
+    'hivemeta' :{
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'hivedb',
+        'PASSWORD': 'Zjy@yinker20150309',
+        'USER': 'root',
+        'HOST': '10.1.5.113',
+        'PORT': '3306',
     }
 }
 

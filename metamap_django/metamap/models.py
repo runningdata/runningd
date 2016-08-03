@@ -33,6 +33,7 @@ class ETL(models.Model):
 class TblBlood(models.Model):
     class Meta:
         unique_together = (('tblName', 'parentTbl', 'valid'),)
+
     tblName = models.CharField(max_length=30, db_column='tbl_name')
     parentTbl = models.CharField(max_length=30, db_column='parent_tbl')
     relatedEtlId = models.IntegerField(db_column='related_etl_id')
@@ -41,6 +42,7 @@ class TblBlood(models.Model):
 
     def __str__(self):
         return self.parentTbl + '-->' + self.tblName
+
 
 class Executions(models.Model):
     '''
@@ -56,6 +58,7 @@ class Executions(models.Model):
     def __str__(self):
         return self.logLocation
 
+
 class Meta(models.Model):
     '''
        数据库对应meta
@@ -68,4 +71,5 @@ class Meta(models.Model):
     valid = models.IntegerField(default=1)
 
     def __str__(self):
-        return self.meta
+        return self.metad
+
