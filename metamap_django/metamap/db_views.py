@@ -6,6 +6,10 @@ created by will
 from django.db import models
 import datetime
 from django.utils import timezone
+
+from metamap.utils.fileds import Long2Date
+
+
 class DB(models.Model):
     db_id = models.BigIntegerField(max_length=20, primary_key=True)
     desc = models.CharField(max_length=4000)
@@ -20,7 +24,7 @@ class DB(models.Model):
 class TBL(models.Model):
     db = models.ForeignKey(DB, on_delete=models.DO_NOTHING)
     tbl_id = models.BigIntegerField(max_length=20, primary_key=True)
-    create_time = models.DateTimeField
+    create_time = Long2Date()
     owner = models.CharField(max_length=767)
     tbl_name = models.CharField(max_length=128)
     class Meta:

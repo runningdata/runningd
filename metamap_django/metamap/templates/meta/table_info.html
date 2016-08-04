@@ -4,7 +4,7 @@
 {% block content %}
     <div class="container">
         <h2>{{ result.tbl_name }} 表信息</h2>
-        <h4>创建时间：{{ result.create_time|date }} </h4>
+        <h4>创建时间：{{ result.create_time }} </h4>
         <a href="/metamap/etls/blood/?tblName={{ result.db.name }}@{{ result.tbl_name }}" class="btn btn-primary btn-sm">血统</a>
         <table class="table table-striped">
             <caption></caption>
