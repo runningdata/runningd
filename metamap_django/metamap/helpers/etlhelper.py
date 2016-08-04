@@ -11,7 +11,7 @@ from metamap.utils import dateutils
 from metamap.utils.constants import *
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('info')
 
 
 def generate_etl_file(etl, location):
@@ -74,7 +74,6 @@ def generate_job_file(blood, parent_node, folder):
     job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
     with open(job_file,'w') as f:
         f.write(content)
-    logger.debug('>>>> file : %s \n content: %s' % (job_file, content))
 
 def load_nodes(leafs, folder, done_blood):
     '''

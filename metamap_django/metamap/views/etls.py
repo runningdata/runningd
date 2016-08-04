@@ -2,6 +2,7 @@
 import logging
 import os
 
+import django
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -15,7 +16,7 @@ from metamap.utils import hivecli, httputils, dateutils, threadpool, ziputils
 from metamap.utils.constants import *
 from metamap.utils.enums import EXECUTION_STATUS
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('info')
 work_manager = threadpool.WorkManager(10, 3)
 
 

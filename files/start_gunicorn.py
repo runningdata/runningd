@@ -1,7 +1,6 @@
 #!/bin/bash
 NAME="metamap" # application名称
 DJANGODIR=/usr/local/metamap/metamap_django # Django project目录
-SOCKFILE=$DiJANGODIR/gunicorn.sock # we will communicte using this unix socket
 USER=root # 使用什么用户运行
 GROUP=root # 使用什么用户组运行
 NUM_WORKERS=3 # Gunicorn程序启动多少个并发worker
@@ -21,10 +20,4 @@ RUNDIR=$(dirname $SOCKFILE)
 test -d $RUNDIR || mkdir -p $RUNDIR
 
 # 启动程序
-# Programs meant to be run under supervisor should not daemonize themselves (do not use --daemon)
-exec ../bin/gunicorn metamap_django.wsgi:application \
---name $NAME \
---workers $NUM_WORKERS \
---user=$USER --group=$GROUP \
---log-level=debug \
---bind=unix:$SOCKFILE
+gunicorn metamap_django.wsgi:application -c gunicorn_settings.py

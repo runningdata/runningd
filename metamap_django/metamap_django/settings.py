@@ -28,7 +28,7 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+EEE = 'default_DEV'
 ALLOWED_HOSTS = []
 
 
@@ -139,10 +139,11 @@ STATIC_URL = '/static/'
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
-       'standard': {
-            'format': '%(asctime)s [%(threadName)s:%(thread)d] [%(name)s:%(lineno)d] [%(module)s:%(funcName)s] [%(levelname)s]- %(message)s'}  #日志格式
+        'standard': {
+            'format': '%(asctime)s [%(threadName)s:%(thread)d] [%(name)s:%(lineno)d] [%(module)s:%(funcName)s] [%(levelname)s]- %(message)s'}
+        # 日志格式
     },
     'filters': {
     },
@@ -153,41 +154,33 @@ LOGGING = {
             'include_html': True,
         },
         'default': {
-            'level':'DEBUG',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filename': 'metamap/log/all.log',     #日志输出文件
-            'maxBytes': 1024*1024*5,                  #文件大小
-            'backupCount': 5,                         #备份份数
-            'formatter':'standard',                   #使用哪种formatters日志格式
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'metamap/log/metamap_all.log',  # 日志输出文件
+            'maxBytes': 1024 * 1024 * 5,  # 文件大小
+            'backupCount': 5,  # 备份份数
+            'formatter': 'standard',  # 使用哪种formatters日志格式
         },
-        'error': {
-            'level':'ERROR',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filename': 'metamap/log/error.log',
-            'maxBytes':1024*1024*5,
+        'error_handler': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'metamap/log/metamap_error.log',
+            'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
-            'formatter':'standard',
+            'formatter': 'standard',
         },
-        'console':{
+        'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'standard'
         },
-        'request_handler': {
-            'level':'DEBUG',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filename': 'metamap/log/script.log',
-            'maxBytes': 1024*1024*5,
-            'backupCount': 5,
-            'formatter':'standard',
-        },
         'scprits_handler': {
-            'level':'DEBUG',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filename':'metamap/log/script.log',
-            'maxBytes': 1024*1024*5,
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'metamap/log/metamap_script.log',
+            'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
-            'formatter':'standard',
+            'formatter': 'standard',
         }
     },
     'loggers': {
@@ -196,8 +189,8 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False
         },
-        'django.request': {
-            'handlers': ['request_handler'],
+        'info': {
+            'handlers': ['default'],
             'level': 'DEBUG',
             'propagate': False,
         },
@@ -206,13 +199,13 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False
         },
-        'metamap.views': {
-            'handlers': ['default', 'error'],
-            'level': 'DEBUG',
+        'error': {
+            'handlers': ['default', 'error_handler'],
+            'level': 'ERROR',
             'propagate': True
         },
-        'metamap.utils':{
-            'handlers': ['error'],
+        'metamap.utils': {
+            'handlers': ['error_handler'],
             'level': 'ERROR',
             'propagate': True
         }
