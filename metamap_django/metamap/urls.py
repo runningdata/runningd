@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from views import etls, metas
+from views import etls, metas, common
 
 app_name = 'metamap'
 urlpatterns = [

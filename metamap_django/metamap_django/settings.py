@@ -137,6 +137,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = "/usr/local/metamap/static"
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

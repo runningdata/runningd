@@ -20,3 +20,8 @@ urlpatterns = [
     url(r'^metamap/', include('metamap.urls')),
     url(r'^admin/', admin.site.urls),
 ]
+
+
+handler500 = 'metamap.views.common.h500'
+
+# handler404 = 'metamap.views.common.h404'

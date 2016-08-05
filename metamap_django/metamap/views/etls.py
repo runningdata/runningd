@@ -69,7 +69,8 @@ def blood_by_name(request):
         etl = ETL.objects.filter(valid=1).get(tblName=etl_name)
         return blood(request, etl.id)
     except ObjectDoesNotExist:
-        return HttpResponse(u'%s 不存在' % etl_name)
+        message = u'%s 不存在' % etl_name
+        return render(request, 'common/message.html', {'message': message})
 
 
 @transaction.atomic
