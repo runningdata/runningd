@@ -1,5 +1,9 @@
+import logging
+
+from django.core.exceptions import ObjectDoesNotExist
+
 from metamap.db_views import ColMeta, TBL
-from metamap.models import TblBlood, ETL
+from metamap.models import TblBlood, ETL, Meta
 from django.shortcuts import get_object_or_404, render
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -8,11 +12,51 @@ from django.utils import timezone
 import datetime
 from django.db import connections
 
+from metamap.utils import httputils
 from metamap.utils.constants import DEFAULT_PAGE_SIEZE
 
+logger = logging.getLogger('info')
 
-class MetaView(generic.ListView):
-    template_name = 'meta/list.html'
+class MetaListView(generic.ListView):
+    template_name = 'meta/meta_list.html'
+    context_object_name = 'metas'
+
+    def get_queryset(self):
+        if 'search' in self.request.GET and self.request.GET['search'] != '':
+            search = self.request.GET['search']
+            return Meta.objects.filter(meta__contains=search).order_by('ctime')
+        self.paginate_by = DEFAULT_PAGE_SIEZE
+        return Meta.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(MetaListView, self).get_context_data(**kwargs)
+        if 'search' in self.request.GET and self.request.GET['search'] != '':
+            context['search'] = self.request.GET['search']
+        return context
+
+def add(request):
+    if request.method == 'POST':
+        meta = Meta()
+        httputils.post2obj(meta, request.POST, 'id')
+        meta.save()
+        logger.info('Meta has been created successfully : %s ' % meta)
+        return HttpResponseRedirect(reverse('metamap:meta_list'))
+    else:
+        return render(request, 'meta/edit.html')
+
+def edit(request, pk):
+    if request.method == 'POST':
+        meta = Meta.objects.filter(valid=1).get(pk=int(pk))
+        httputils.post2obj(meta, request.POST, 'id')
+        meta.save()
+        logger.info('Meta has been created successfully : %s ' % meta)
+        return HttpResponseRedirect(reverse('metamap:meta_list'))
+    else:
+        etl = Meta.objects.get(pk=pk)
+        return render(request, 'meta/edit.html', {'etl': etl})
+
+class ColView(generic.ListView):
+    template_name = 'meta/col_list.html'
     context_object_name = 'metas'
 
     def get_queryset(self):
@@ -23,7 +67,7 @@ class MetaView(generic.ListView):
         return ColMeta.objects.using('hivemeta').all()
 
     def get_context_data(self, **kwargs):
-        context = super(MetaView, self).get_context_data(**kwargs)
+        context = super(ColView, self).get_context_data(**kwargs)
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             context['search'] = self.request.GET['search']
         return context
@@ -71,7 +115,12 @@ class TBLView(generic.ListView):
 
 def get_table(request, tblid):
     tbl = TBL.objects.using('hivemeta').get(pk=tblid)
-    return render(request, 'meta/table_info.html', {'result': tbl})
+    has_blood = True
+    try:
+        ETL.objects.get(valid=1, tblName=tbl.db.name + '@' + tbl.tbl_name)
+    except ObjectDoesNotExist, e:
+        has_blood = False
+    return render(request, 'meta/table_info.html', {'result': tbl, 'has_blood': has_blood})
 
     # cursor = connections['hivemeta'].cursor()
     # result = dict()

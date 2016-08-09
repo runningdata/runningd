@@ -19,7 +19,10 @@ urlpatterns = [
     url(r'^etls/generate_job_dag/$', etls.generate_job_dag, name='generate_job_dag'),
 
 
-    url(r'^meta/col_search/$', metas.MetaView.as_view(), name='col_list'),
+    url(r'^meta/list/$', metas.MetaListView.as_view(), name='meta_list'),
+    url(r'^meta/add/$', metas.add, name='add_meta'),
+    url(r'^meta/(?P<pk>[0-9]+)/$', metas.edit, name='edit_meta'),
+    url(r'^meta/col_search/$', metas.ColView.as_view(), name='col_list'),
     url(r'^meta/tbl_search/$', metas.TBLView.as_view(), name='tbl_list'),
     url(r'^meta/tbl_search/(?P<tblid>[0-9]+)/$', metas.get_table, name='tbl_info'),
 ]

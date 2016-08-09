@@ -50,7 +50,7 @@ class Executions(models.Model):
     '''
     logLocation = models.CharField(max_length=120, db_column='log_location')
     # jobId = models.IntegerField(db_column='job_id')
-    job = models.ForeignKey(ETL, on_delete=models.CASCADE)
+    job = models.ForeignKey(ETL, on_delete=models.CASCADE, null=False)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)
     status = models.IntegerField(default=-1)
@@ -71,5 +71,4 @@ class Meta(models.Model):
     valid = models.IntegerField(default=1)
 
     def __str__(self):
-        return self.metad
-
+        return self.meta
