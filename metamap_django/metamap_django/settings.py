@@ -90,10 +90,10 @@ DATABASES = {
     },
     'hivemeta' :{
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hivedb',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'root',
-        'HOST': '10.1.5.113',
+        'NAME': 'hive',
+        'PASSWORD': 'ambari',
+        'USER': 'ambari',
+        'HOST': '10.1.5.82',
         'PORT': '3306',
     }
 }

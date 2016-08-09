@@ -102,12 +102,18 @@ def edit(request, pk):
         privious_etl.id = None
         etl = privious_etl
         httputils.post2obj(etl, request.POST, 'id')
+        find_ = etl.tblName.find('@')
+        etl.meta = etl.tblName[0: find_]
 
         etl.save()
         logger.info('ETL has been created successfully : %s ' % etl)
         deps = hivecli.getTbls(etl.query)
         for dep in deps:
-            tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+            try:
+                tblBlood = TblBlood.objects.get(tblName=etl.tblName, parentTbl=dep, valid=1)
+                tblBlood.relatedEtlId = etl.id
+            except ObjectDoesNotExist:
+                tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
             tblBlood.save()
             logger.info('Tblblood has been created successfully : %s' % tblBlood)
         return HttpResponseRedirect(reverse('metamap:index'))

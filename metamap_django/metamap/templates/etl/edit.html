@@ -33,6 +33,23 @@
                         {% endif %}
                        value="0">否
             </div>
+            <br/>
+            <label>是否生效</label>
+            <div class="radio-inline">
+                <input id="optionsRadios1" type="radio" name="valid"
+                        {% if etl.valid == 1 %}
+                       checked="checked"
+                        {% endif %}
+                       value="1">是
+            </div>
+            <div class="radio-inline">
+                <input id="optionsRadios3" type="radio" name="valid"
+                        {% if etl.valid == 0 %}
+                       checked="checked"
+                        {% endif %}
+                       value="0">否
+            </div>
+        <br/>
             <button type="submit" class="btn btn-primary">提交</button>
         </div>
     </form>
