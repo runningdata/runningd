@@ -78,12 +78,15 @@ class Work(threading.Thread):
                 do, args = self.work_queue.get_nowait()  # 任务异步出队，Queue内部实现了同步机制
                 self.logger.info('%s method ' % do)
                 self.logger.info('%s find job ....... %s ' % (self.getName(), ''.join(args[0])))
-                do(args)
+                returncode = do(args)
                 self.work_queue.task_done()  # 通知系统任务完成
                 location = ''.join(args[1])
                 execution = Executions.objects.get(logLocation=location)
                 execution.end_time = timezone.now()
-                execution.status = enums.EXECUTION_STATUS.DONE
+                if returncode == 0:
+                    execution.status = enums.EXECUTION_STATUS.DONE
+                else:
+                    execution.status = enums.EXECUTION_STATUS.FAILED
                 execution.save()
             except Queue.Empty:
                 time.sleep(3)
@@ -102,6 +105,7 @@ def do_job(*args):
     p = Popen([''.join(command)], stdout=open(log, 'a'), stderr=subprocess.STDOUT, shell=True, universal_newlines=True)
     p.wait()
     print threading.current_thread(), list(args)
+    return p.returncode
 
 
 if __name__ == '__main__':

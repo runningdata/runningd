@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% load etlutils %}
 
 {% block title %}ETL执行记录{% endblock %}
 
@@ -24,7 +25,7 @@
                         <td>{{ execution.id }}</td>
                         <td>{{ execution.start_time|date:"Y年m月d日 H时i分" }}</td>
                         <td>{{ execution.end_time|date:"Y年m月d日 H时i分" }}</td>
-                        <td>{{ execution.status }}</td>
+                        <td>{% readable_status execution.status %}</td>
                         <td>
                             <a class="btn btn-primary btn-sm" href="/metamap/etls/execlog/{{ execution.id }}/">详情</a>
                         </td>

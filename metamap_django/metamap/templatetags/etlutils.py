@@ -52,3 +52,11 @@ def current_date_add(date, num):
     d = datetime.datetime.strptime(date, '%Y-%m-%d') + datetime.timedelta(days=num)
     return d.strftime('%Y-%m-%d')
 
+status_dic = dict()
+status_dic[0] = u'运行中'
+status_dic[1] = u'完成'
+status_dic[2] = u'失败'
+
+@register.simple_tag
+def readable_status(status):
+    return status_dic[status]
