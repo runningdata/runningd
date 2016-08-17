@@ -83,17 +83,17 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'metamap1',
-        'PASSWORD': '',
-        'USER': 'root',
-        'HOST': '127.0.0.1',
+        'PASSWORD': 'Zjy@yinker20150309',
+        'USER': 'zjy',
+        'HOST': '10.0.1.73',
         'PORT': '3306',
     },
     'hivemeta': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hivedb',
+        'NAME': 'hive1',
         'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'root',
-        'HOST': '10.1.5.113',
+        'USER': 'zjy',
+        'HOST': '10.0.1.73',
         'PORT': '3306',
     }
 }
