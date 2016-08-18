@@ -54,12 +54,13 @@ class EditView(generic.DetailView):
 
 
 
-def blood(request, etlid):
-    blood = TblBlood.objects.filter(relatedEtlId=int(etlid), valid=1).get()
+def blood_dag(request, etlid):
+    bloods = TblBlood.objects.filter(relatedEtlId=int(etlid), valid=1)
     final_bloods = set()
-    final_bloods.add(bloodhelper.clean_blood(blood, etlid))
-    bloodhelper.find_parent_mermaid(blood, final_bloods, etlid)
-    bloodhelper.find_child_mermaid(blood, final_bloods, etlid)
+    for blood in bloods:
+        final_bloods.add(bloodhelper.clean_blood(blood, etlid))
+        bloodhelper.find_parent_mermaid(blood, final_bloods, etlid)
+        bloodhelper.find_child_mermaid(blood, final_bloods, etlid)
     return render(request, 'etl/blood.html', {'bloods': final_bloods})
 
 

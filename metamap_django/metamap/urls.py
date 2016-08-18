@@ -9,7 +9,7 @@ urlpatterns = [
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
     url(r'^etls/add/$', etls.add, name='add'),
     url(r'^etls/blood/$', etls.blood_by_name, name='blood_by_name'),
-    url(r'^etls/blood/(?P<etlid>[0-9]+)/$', etls.blood, name='blood'),
+    url(r'^etls/blood/(?P<etlid>[0-9]+)/$', etls.blood_dag, name='blood'),
 
     url(r'^etls/exec/(?P<etlid>[0-9]+)/$', etls.exec_job, name='exec'),
     url(r'^etls/execlog/(?P<execid>[0-9]+)/$', etls.exec_log, name='execlog'),
