@@ -1,12 +1,13 @@
 import pyhs2, json
+from django.conf import settings
 
 def getTbls(sql):
     result = set()
-    with pyhs2.connect(host='10.1.5.80',
-                       port=10000,
+    with pyhs2.connect(host=settings.HIVE_SERVER['host'],
+                       port=settings.HIVE_SERVER['port'],
                        authMechanism="PLAIN",
-                       user='hdfs',
-                       password='test',
+                       user=settings.HIVE_SERVER['user'],
+                       password=settings.HIVE_SERVER['password'],
                        database='default') as conn:
         with conn.cursor() as cur:
             sql = sql[sql.index('select'):]

@@ -32,6 +32,14 @@ EEE = 'PROD'
 
 ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83']
 
+
+HIVE_SERVER = {
+    'host': '10.0.1.84',
+    'port': 10000,
+    'user': 'hdfs',
+    'password': '',
+}
+
 # Application definition
 
 INSTALLED_APPS = [
