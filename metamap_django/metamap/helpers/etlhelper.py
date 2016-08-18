@@ -13,10 +13,9 @@ import logging
 
 logger = logging.getLogger('info')
 
-
-def generate_etl_file(etl, location):
+def generate_etl_sql(etl):
     '''
-    生成hql文件
+    预览HSQL内容
     :param etl:
     :param location:
     :return:
@@ -33,12 +32,22 @@ def generate_etl_file(etl, location):
     else:
         str.append("-- cannot find ctime")
     str.append("-- pre settings ")
+    str.append(etl.setting)
     str.append(etl.preSql)
     str.append(etl.query)
 
     template = Template('\n'.join(str));
-    final_result = template.render(Context())
+    return template.render(Context())
 
+
+def generate_etl_file(etl, location):
+    '''
+    生成hql文件
+    :param etl:
+    :param location:
+    :return:
+    '''
+    final_result = generate_etl_sql(etl)
     with open(location, 'w') as f:
         print('hql content : %s ' % final_result)
         f.write(final_result)

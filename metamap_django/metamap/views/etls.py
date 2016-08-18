@@ -131,13 +131,21 @@ def exec_job(request, etlid):
     location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-' + etl.tblName.replace('@', '__') + '.hql'
     etlhelper.generate_etl_file(etl, location)
     log_location = location.replace('hql', 'log')
-    os.mknod(log_location)
+    with open(log_location, 'a') as log:
+        with open(location, 'r') as hql:
+            log.write(hql.read())
     work_manager.add_job(threadpool.do_job, 'hive -f ' + location, log_location)
     logger.info(
         'job for %s has been executed, current pool size is %d' % (etl.tblName, work_manager.work_queue.qsize()))
     execution = Executions(logLocation=log_location, job_id=etlid, status=EXECUTION_STATUS.RUNNING)
     execution.save()
     return redirect('metamap:execlog', execid=execution.id)
+
+
+def review_sql(request, etlid):
+    etl = ETL.objects.get(id=etlid)
+    hql = etlhelper.generate_etl_sql(etl)
+    return render(request, 'etl/review_sql.html', {'obj': etl, 'hql': hql})
 
 
 def exec_log(request, execid):

@@ -27,7 +27,8 @@
                     <td>{{ etl.ctime|date:"Y年m月d日 H时i分" }}</td>
                     <td>
                         <a class="btn btn-primary btn-sm" href="/metamap/etls/{{ etl.id }}/">编辑</a>
-                        <a class="btn btn-primary btn-sm" href="/metamap/etls/exec/{{ etl.id }}/">测试执行</a>
+                        <a target="view_window" class="btn btn-primary btn-sm" href="/metamap/etls/review_sql/{{ etl.id }}/">预览SQL</a>
+                        <a target="view_window" class="btn btn-primary btn-sm" href="/metamap/etls/exec/{{ etl.id }}/">测试执行</a>
                         <a class="btn btn-primary btn-sm" href="/metamap/etls/exec_list/{{ etl.id }}/">执行记录</a>
                         <a class="btn btn-primary btn-sm" href="/metamap/etls/blood/{{ etl.id }}/">血统</a>
                     </td>
