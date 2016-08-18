@@ -16,7 +16,7 @@ class ETL(models.Model):
     onSchedule = models.IntegerField(default=1, db_column='on_schedule')
     valid = models.IntegerField(default=1)
     setting = models.CharField(max_length=200, default='')
-    variables = models.CharField(max_length=200, default='')
+    variables = models.CharField(max_length=2000, default='')
 
     __str__ = query
 
