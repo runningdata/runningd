@@ -204,7 +204,7 @@ def generate_job_dag(request):
         tbl = TblBlood(tblName='etl_done_' + folder)
         etlhelper.generate_job_file(tbl, leafs, folder)
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
-        return HttpResponse('\" %s \"' % folder)
+        return HttpResponse(folder)
     except Exception, e:
         logger.error('error : %s ' % e)
         return HttpResponse('error')
