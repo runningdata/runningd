@@ -9,6 +9,10 @@ from django import template
 register = template.Library()
 
 @register.simple_tag
+def var(var):
+    return var
+
+@register.simple_tag
 def now_datetime():
     return datetime.datetime.now().strftime('%Y%m%d%I%M%S')
 
