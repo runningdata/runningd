@@ -78,6 +78,8 @@ def add(request):
     if request.method == 'POST':
         etl = ETL()
         httputils.post2obj(etl, request.POST, 'id')
+        find_ = etl.tblName.find('@')
+        etl.meta = etl.tblName[0: find_]
         etl.save()
         logger.info('ETL has been created successfully : %s ' % etl)
         deps = hivecli.getTbls(etl.query)
@@ -129,7 +131,7 @@ def exec_job(request, etlid):
     etlhelper.generate_etl_file(etl, location)
     log_location = location.replace('hql', 'log')
     os.mknod(log_location)
-    work_manager.add_job(threadpool.do_job, 'sh ' + location, log_location)
+    work_manager.add_job(threadpool.do_job, 'hive -f ' + location, log_location)
     logger.info(
         'job for %s has been executed, current pool size is %d' % (etl.tblName, work_manager.work_queue.qsize()))
     execution = Executions(logLocation=log_location, job_id=etlid, status=EXECUTION_STATUS.RUNNING)
