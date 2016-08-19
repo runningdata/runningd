@@ -6,11 +6,11 @@ from django.utils import timezone
 
 
 class ETL(models.Model):
-    query = models.CharField(max_length=2000)
+    query = models.TextField()
     meta = models.CharField(max_length=20)
     tblName = models.CharField(max_length=30, db_column='tbl_name')
     author = models.CharField(max_length=20, blank=True, null=True)
-    preSql = models.CharField(max_length=2000, db_column='pre_sql', blank=True, null=True)
+    preSql = models.TextField(db_column='pre_sql', blank=True, null=True)
     ctime = models.DateTimeField(default=timezone.now)
     priority = models.IntegerField(default=5, blank=True)
     onSchedule = models.IntegerField(default=1, db_column='on_schedule')
