@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.views import generic
+from pyhs2.error import Pyhs2Exception
 
 from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions
@@ -74,9 +75,11 @@ def blood_by_name(request):
         message = u'%s 不存在' % etl_name
         return render(request, 'common/message.html', {'message': message})
 
+
 def his(request, tblName):
     etls = ETL.objects.filter(tblName=tblName).order_by('-ctime')
-    return render(request, 'etl/his.html', {'etls': etls, 'tblName' : tblName })
+    return render(request, 'etl/his.html', {'etls': etls, 'tblName': tblName})
+
 
 @transaction.atomic
 def add(request):
@@ -87,12 +90,15 @@ def add(request):
         etl.meta = etl.tblName[0: find_]
         etl.save()
         logger.info('ETL has been created successfully : %s ' % etl)
-        deps = hivecli.getTbls(etl.query)
-        for dep in deps:
-            tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
-            tblBlood.save()
-            logger.info('Tblblood has been created successfully : %s' % tblBlood)
-        return HttpResponseRedirect(reverse('metamap:index'))
+        try:
+            deps = hivecli.getTbls(etl.query)
+            for dep in deps:
+                tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+                tblBlood.save()
+                logger.info('Tblblood has been created successfully : %s' % tblBlood)
+            return HttpResponseRedirect(reverse('metamap:index'))
+        except Pyhs2Exception, e:
+            return render(request, 'common/500.html', {'msg': e})
     else:
         return render(request, 'etl/edit.html')
 
@@ -115,16 +121,19 @@ def edit(request, pk):
 
         etl.save()
         logger.info('ETL has been created successfully : %s ' % etl)
-        deps = hivecli.getTbls(etl.query)
-        for dep in deps:
-            try:
-                tblBlood = TblBlood.objects.get(tblName=etl.tblName, parentTbl=dep, valid=1)
-                tblBlood.relatedEtlId = etl.id
-            except ObjectDoesNotExist:
-                tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
-            tblBlood.save()
-            logger.info('Tblblood has been created successfully : %s' % tblBlood)
-        return HttpResponseRedirect(reverse('metamap:index'))
+        try:
+            deps = hivecli.getTbls(etl.query)
+            for dep in deps:
+                try:
+                    tblBlood = TblBlood.objects.get(tblName=etl.tblName, parentTbl=dep, valid=1)
+                    tblBlood.relatedEtlId = etl.id
+                except ObjectDoesNotExist:
+                    tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+                tblBlood.save()
+                logger.info('Tblblood has been created successfully : %s' % tblBlood)
+            return HttpResponseRedirect(reverse('metamap:index'))
+        except Pyhs2Exception, e:
+            return render(request, 'common/500.html', {'msg': e})
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
