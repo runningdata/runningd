@@ -1,6 +1,7 @@
 import pyhs2, json
 from django.conf import settings
 
+
 def getTbls(sql):
     result = set()
     with pyhs2.connect(host=settings.HIVE_SERVER['host'],
@@ -10,7 +11,7 @@ def getTbls(sql):
                        password=settings.HIVE_SERVER['password'],
                        database='default') as conn:
         with conn.cursor() as cur:
-            sql = sql.replace('{', '').replace('{%', '')
+            sql = sql.replace('{', '').replace('{%', '').replace('}', '').replace('%}', '')
             sql = sql[sql.lower().index('select'):]
             # Execute query
             cur.execute("explain dependency " + sql)
@@ -18,9 +19,10 @@ def getTbls(sql):
             # Fetch table results
             deps = json.loads(cur.fetchone()[0])
             tables_ = deps['input_tables']
-            for tbl in  tables_:
+            for tbl in tables_:
                 result.add(tbl['tablename'])
     return result
+
 
 if __name__ == '__main__':
     heh = getTbls("insert into xxsx select * from batting full join jlc.bank_card")
