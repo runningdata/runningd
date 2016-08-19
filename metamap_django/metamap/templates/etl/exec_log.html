@@ -11,6 +11,7 @@
                 url: urlB,
                 success: function (data) {
                     $("#log").html(data);
+                    $("html, body").animate({ scrollTop: $(document).height()-$(window).height() });
                 }
             });
             console.log('ending....');

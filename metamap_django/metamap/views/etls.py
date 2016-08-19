@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from django.views import generic
 
 from metamap.helpers import bloodhelper, etlhelper
@@ -68,11 +69,14 @@ def blood_by_name(request):
     etl_name = request.GET['tblName']
     try:
         etl = ETL.objects.filter(valid=1).get(tblName=etl_name)
-        return blood(request, etl.id)
+        return blood_dag(request, etl.id)
     except ObjectDoesNotExist:
         message = u'%s 不存在' % etl_name
         return render(request, 'common/message.html', {'message': message})
 
+def his(request, tblName):
+    etls = ETL.objects.filter(tblName=tblName).order_by('-ctime')
+    return render(request, 'etl/his.html', {'etls': etls, 'tblName' : tblName })
 
 @transaction.atomic
 def add(request):
@@ -103,6 +107,7 @@ def edit(request, pk):
 
         privious_etl.valid = 1
         privious_etl.id = None
+        privious_etl.ctime = timezone.now()
         etl = privious_etl
         httputils.post2obj(etl, request.POST, 'id')
         find_ = etl.tblName.find('@')

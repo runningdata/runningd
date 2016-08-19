@@ -11,7 +11,7 @@ class ETL(models.Model):
     tblName = models.CharField(max_length=30, db_column='tbl_name')
     author = models.CharField(max_length=20, blank=True, null=True)
     preSql = models.TextField(db_column='pre_sql', blank=True, null=True)
-    ctime = models.DateTimeField(default=timezone.now)
+    ctime = models.DateTimeField(default=timezone.now())
     priority = models.IntegerField(default=5, blank=True)
     onSchedule = models.IntegerField(default=1, db_column='on_schedule')
     valid = models.IntegerField(default=1)
