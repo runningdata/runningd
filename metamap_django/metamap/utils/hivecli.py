@@ -10,8 +10,7 @@ def getTbls(sql):
                        password=settings.HIVE_SERVER['password'],
                        database='default') as conn:
         with conn.cursor() as cur:
-            sql = sql.replace('{', '').replace('')
-            sql = sql.replace('{%', '').replace('')
+            sql = sql.replace('{', '').replace('{%', '')
             sql = sql[sql.lower().index('select'):]
             # Execute query
             cur.execute("explain dependency " + sql)

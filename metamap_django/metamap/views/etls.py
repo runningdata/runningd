@@ -97,7 +97,7 @@ def add(request):
                 tblBlood.save()
                 logger.info('Tblblood has been created successfully : %s' % tblBlood)
             return HttpResponseRedirect(reverse('metamap:index'))
-        except Pyhs2Exception, e:
+        except Exception, e:
             return render(request, 'common/500.html', {'msg': e})
     else:
         return render(request, 'etl/edit.html')
@@ -132,7 +132,7 @@ def edit(request, pk):
                 tblBlood.save()
                 logger.info('Tblblood has been created successfully : %s' % tblBlood)
             return HttpResponseRedirect(reverse('metamap:index'))
-        except Pyhs2Exception, e:
+        except Exception, e:
             return render(request, 'common/500.html', {'msg': e})
     else:
         etl = ETL.objects.get(pk=pk)
