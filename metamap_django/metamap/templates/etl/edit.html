@@ -21,7 +21,7 @@
             <label>是否参与每日调度</label>
             <div class="radio-inline">
                 <input id="optionsRadios1" type="radio" name="onSchedule"
-                        {% if etl.onSchedule == 1 %}
+                        {% if etl.onSchedule != 0 %}
                        checked="checked"
                         {% endif %}
                        value="1">是
@@ -37,7 +37,7 @@
             <label>是否生效</label>
             <div class="radio-inline">
                 <input id="optionsRadios1" type="radio" name="valid"
-                        {% if etl.valid == 1 %}
+                        {% if etl.valid != 0 %}
                        checked="checked"
                         {% endif %}
                        value="1">是
