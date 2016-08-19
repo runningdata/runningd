@@ -162,7 +162,7 @@ def exec_log(request, execid):
     '''
     execution = Executions.objects.get(pk=execid)
     with open(execution.logLocation, 'r') as log:
-        content = log.read().replace('\n', '<br/>')
+        content = log.read().replace('\n', '<br>')
     return render(request, 'etl/exec_log.html', {'execid': execid})
 
 
@@ -175,7 +175,7 @@ def get_exec_log(request, execid):
     '''
     execution = Executions.objects.get(pk=execid)
     with open(execution.logLocation, 'r') as log:
-        content = log.read().replace('\n', '<br/>')
+        content = log.read().replace('\n', '<br>')
     return HttpResponse(content)
 
 
