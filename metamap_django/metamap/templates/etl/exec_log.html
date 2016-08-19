@@ -10,8 +10,12 @@
             $.ajax({
                 url: urlB,
                 success: function (data) {
-                    $("#log").html(data);
-                    $("html, body").animate({ scrollTop: $(document).height()-$(window).height() });
+                    if ($("#log").html().length < data.length) {
+                        console.log('current lenth is : ' + $("#log").html().length +
+                            '  , and new data length is ' + data.length);
+                        $("#log").html(data);
+                        $("html, body").animate({scrollTop: $(document).height() - $(window).height()});
+                    }
                 }
             });
             console.log('ending....');
