@@ -7,7 +7,8 @@ from pyhs2.error import Pyhs2Exception
 from metamap.helpers import etlhelper
 
 
-def getTbls(sql):
+def getTbls(etl):
+    sql = etlhelper.generate_etl_sql(etl)
     result = set()
     try:
         with pyhs2.connect(host=settings.HIVE_SERVER['host'],
@@ -17,7 +18,6 @@ def getTbls(sql):
                            password=settings.HIVE_SERVER['password'],
                            database='default') as conn:
             with conn.cursor() as cur:
-                sql = Template(sql).render(Context())
                 sql = sql[sql.lower().index('select'):]
                 # Execute query
                 cur.execute("explain dependency " + sql)

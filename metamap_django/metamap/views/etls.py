@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*
 import logging
 import os
+import traceback
 
 import django
 from django.core.exceptions import ObjectDoesNotExist
@@ -91,7 +92,7 @@ def add(request):
         etl.save()
         logger.info('ETL has been created successfully : %s ' % etl)
         try:
-            deps = hivecli.getTbls(etl.query)
+            deps = hivecli.getTbls(etl)
             for dep in deps:
                 tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
                 tblBlood.save()
@@ -122,7 +123,7 @@ def edit(request, pk):
         etl.save()
         logger.info('ETL has been created successfully : %s ' % etl)
         try:
-            deps = hivecli.getTbls(etl.query)
+            deps = hivecli.getTbls(etl)
             for dep in deps:
                 try:
                     tblBlood = TblBlood.objects.get(tblName=etl.tblName, parentTbl=dep, valid=1)
@@ -133,7 +134,7 @@ def edit(request, pk):
                 logger.info('Tblblood has been created successfully : %s' % tblBlood)
             return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
-            return render(request, 'common/500.html', {'msg': e})
+            return render(request, 'common/500.html', {'msg': traceback.format_exc()})
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
