@@ -7,6 +7,7 @@ from django import template
 
 register = template.Library()
 
+
 @register.simple_tag(takes_context=True)
-def ifdef(context, var):
+def has_def(context, var):
     return var in context and context[var] is not None
