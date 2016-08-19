@@ -107,7 +107,7 @@ def add(request):
 def edit(request, pk):
     if request.method == 'POST':
 
-        privious_etl = ETL.objects.filter(valid=1).get(pk=int(pk))
+        privious_etl = ETL.objects.get(pk=int(pk))
         privious_etl.valid = 0
         privious_etl.save()
 
