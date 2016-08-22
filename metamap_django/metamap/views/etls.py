@@ -112,10 +112,9 @@ def edit(request, pk):
         privious_etl.valid = 0
         privious_etl.save()
 
-        privious_etl.valid = 1
+        etl = privious_etl
         privious_etl.id = None
         privious_etl.ctime = timezone.now()
-        etl = privious_etl
         httputils.post2obj(etl, request.POST, 'id')
         find_ = etl.tblName.find('@')
         etl.meta = etl.tblName[0: find_]
