@@ -9,13 +9,13 @@ import subprocess
 import threading
 import time, os
 from django.utils import timezone
-from subprocess import Popen, PIPE
+from subprocess import Popen
 
 from metamap.models import Executions
 
 from metamap.utils import enums
 
-
+logger = logging.getLogger('default')
 class WorkManager(object):
     def __init__(self, work_num=1000, thread_num=2):
         self.work_queue = Queue.Queue()
@@ -63,7 +63,6 @@ class WorkManager(object):
 
 
 class Work(threading.Thread):
-    logger = logging.getLogger(__name__)
 
     def __init__(self, work_queue):
         threading.Thread.__init__(self)
@@ -76,13 +75,14 @@ class Work(threading.Thread):
             location = ''
             try:
                 do, args = self.work_queue.get_nowait()  # 任务异步出队，Queue内部实现了同步机制
-                self.logger.info('%s method ' % do)
-                self.logger.info('%s find job ....... %s ' % (self.getName(), ''.join(args[0])))
+                logger.info('%s method ' % do)
+                logger.info('%s find job ....... %s ' % (self.getName(), ''.join(args[0])))
                 returncode = do(args)
                 self.work_queue.task_done()  # 通知系统任务完成
                 location = ''.join(args[1])
                 execution = Executions.objects.get(logLocation=location)
                 execution.end_time = timezone.now()
+                logger.info('%s return code is %d' % (self.getName(), returncode))
                 if returncode == 0:
                     execution.status = enums.EXECUTION_STATUS.DONE
                 else:
@@ -91,20 +91,19 @@ class Work(threading.Thread):
             except Queue.Empty:
                 time.sleep(3)
             except Executions.DoesNotExist:
-                self.logger.error('cannot find execution from db for location %s' % location)
+                logger.error('cannot find execution from db for location %s' % location)
             except Exception, e:
-                self.logger.error('got error :%s' % str(e))
+                logger.error('got error :%s' % str(e))
                 break
 
 
 # 具体要做的任务
 def do_job(*args):
-    print args
+    logger.debug(args)
     log = args[0][1]
     command = args[0][0]
     p = Popen([''.join(command)], stdout=open(log, 'a'), stderr=subprocess.STDOUT, shell=True, universal_newlines=True)
     p.wait()
-    print threading.current_thread(), list(args)
     return p.returncode
 
 

@@ -9,6 +9,7 @@ urlpatterns = [
 
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
     url(r'^etls/add/$', etls.add, name='add'),
+    url(r'^etls/running/$', etls.RunningJobView.as_view(), name='add'),
     url(r'^etls/his/(?P<tblName>.*)/$', etls.his, name='his'),
     url(r'^etls/blood/$', etls.blood_by_name, name='blood_by_name'),
     url(r'^etls/blood/(?P<etlid>[0-9]+)/$', etls.blood_dag, name='blood'),

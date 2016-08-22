@@ -41,6 +41,14 @@ class IndexView(generic.ListView):
             context['search'] = self.request.GET['search']
         return context
 
+class RunningJobView(generic.ListView):
+    template_name = 'etl/executions_running.html'
+    context_object_name = 'executions'
+    model = Executions
+
+    def get_queryset(self):
+        self.paginate_by = DEFAULT_PAGE_SIEZE
+        return Executions.objects.filter(status=0)
 
 class EditView(generic.DetailView):
     template_name = 'etl/edit.html'
