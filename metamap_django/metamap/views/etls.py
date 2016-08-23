@@ -3,7 +3,6 @@ import logging
 import os
 import traceback
 
-import django
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -11,16 +10,14 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.views import generic
-from pyhs2.error import Pyhs2Exception
 
 from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions
-from metamap.utils import hivecli, httputils, dateutils, threadpool, ziputils
+from metamap.utils import hivecli, httputils, dateutils, ziputils
 from metamap.utils.constants import *
-from metamap.utils.enums import EXECUTION_STATUS
 
 logger = logging.getLogger('info')
-work_manager = threadpool.WorkManager(10, 3)
+# work_manager = threadpool.WorkManager(10, 3)
 
 
 class IndexView(generic.ListView):
@@ -156,12 +153,15 @@ def exec_job(request, etlid):
     with open(log_location, 'a') as log:
         with open(location, 'r') as hql:
             log.write(hql.read())
-    work_manager.add_job(threadpool.do_job, 'hive -f ' + location, log_location)
-    logger.info(
-        'job for %s has been executed, current pool size is %d' % (etl.tblName, work_manager.work_queue.qsize()))
-    execution = Executions(logLocation=log_location, job_id=etlid, status=EXECUTION_STATUS.RUNNING)
+    # work_manager.add_job(threadpool.do_job, 'hive -f ' + location, log_location)
+    # logger.info(
+    #     'job for %s has been executed, current pool size is %d' % (etl.tblName, work_manager.work_queue.qsize()))
+    execution = Executions(logLocation=log_location, job_id=etlid, status=0)
     execution.save()
+    from metamap import taske
+    taske.exec_etl.delay('hive -f ' + location, log_location)
     return redirect('metamap:execlog', execid=execution.id)
+    # return redirect('metamap:execlog', execid=1)
 
 
 def review_sql(request, etlid):
@@ -177,9 +177,6 @@ def exec_log(request, execid):
     :param execid:
     :return:
     '''
-    execution = Executions.objects.get(pk=execid)
-    with open(execution.logLocation, 'r') as log:
-        content = log.read().replace('\n', '<br>')
     return render(request, 'etl/exec_log.html', {'execid': execid})
 
 

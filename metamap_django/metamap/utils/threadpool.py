@@ -15,7 +15,7 @@ from metamap.models import Executions
 
 from metamap.utils import enums
 
-logger = logging.getLogger('default')
+logger = logging.getLogger('django')
 class WorkManager(object):
     def __init__(self, work_num=1000, thread_num=2):
         self.work_queue = Queue.Queue()

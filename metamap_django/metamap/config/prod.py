@@ -40,6 +40,16 @@ HIVE_SERVER = {
     'password': '',
 }
 
+BROKER_URL = 'redis://10.0.1.97:6379'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Shanghai'
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
+CELERY_IMPORTS = ("metamap.taske",)
+
+
 # Application definition
 
 INSTALLED_APPS = [
