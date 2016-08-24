@@ -2,43 +2,52 @@
 {% block title %}ETL列表{% endblock %}
 
 {% block content %}
-<div class="container">
+    <div class="container">
 
-    {% include 'components/search.html' %}
+        {% include 'components/search.html' %}
 
         {% if etls %}
-    <table class="table table-striped">
-        <caption></caption>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>META</th>
-            <th>表名</th>
-            <th>创建时间</th>
-            <th>操作</th>
-        </tr>
-        </thead>
-        <tbody>
-            {% for etl in etls %}
+            <table class="table table-striped">
+                <caption></caption>
+                <thead>
                 <tr>
-                    <td>{{ etl.id }}</td>
-                    <td>{{ etl.meta }}</td>
-                    <td>{{ etl.tblName }}</td>
-                    <td>{{ etl.ctime|date:"Y年m月d日 H时i分" }}</td>
-                    <td>
-                        <a class="btn btn-primary btn-sm" href="/metamap/etls/{{ etl.id }}/">编辑</a>
-                        <a target="view_window" class="btn btn-primary btn-sm" href="/metamap/etls/review_sql/{{ etl.id }}/">预览SQL</a>
-                        <a target="view_window" class="btn btn-primary btn-sm" href="/metamap/etls/exec/{{ etl.id }}/">测试执行</a>
-                        <a class="btn btn-primary btn-sm" href="/metamap/etls/exec_list/{{ etl.id }}/">执行记录</a>
-                        <a class="btn btn-primary btn-sm" href="/metamap/etls/blood/{{ etl.id }}/">血统</a>
-                        <a class="btn btn-primary btn-sm" href="/metamap/etls/his/{{ etl.tblName }}/">历史版本</a>
-                    </td>
+                    <th>ID</th>
+                    <th>META</th>
+                    <th>表名</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                {% for etl in etls %}
+                    <tr>
+                        <td>{{ etl.id }}</td>
+                        <td>{{ etl.meta }}</td>
+                        <td>{{ etl.tblName }}</td>
+                        <td>{{ etl.ctime|date:"Y年m月d日 H时i分" }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    操作 <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/metamap/etls/{{ etl.id }}/">编辑</a></li>
+                                    <li><a target="view_window" href="/metamap/etls/review_sql/{{ etl.id }}/">预览SQL</a>
+                                    </li>
+                                    <li><a target="view_window" href="/metamap/etls/exec/{{ etl.id }}/">测试执行</a></li>
+                                    <li><a href="/metamap/etls/exec_list/{{ etl.id }}/">执行记录</a></li>
+                                    <li><a href="/metamap/etls/blood/{{ etl.id }}/">血统</a></li>
+                                    <li><a href="/metamap/etls/his/{{ etl.tblName }}/">历史版本</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         {% else %}
             <p>没有找到相关ETL</p>
         {% endif %}
-</div>
+    </div>
 {% endblock %}

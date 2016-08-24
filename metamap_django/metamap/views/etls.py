@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.views import generic
+from django.views.generic.list import MultipleObjectMixin, MultipleObjectTemplateResponseMixin
 
 from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions
@@ -17,6 +18,8 @@ from metamap.utils import hivecli, httputils, dateutils, ziputils
 from metamap.utils.constants import *
 
 logger = logging.getLogger('info')
+
+
 # work_manager = threadpool.WorkManager(10, 3)
 
 
@@ -28,9 +31,9 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            return ETL.objects.filter(valid=1, tblName__contains=tbl_name_)
+            return ETL.objects.filter(valid=1, tblName__contains=tbl_name_).order_by('-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return ETL.objects.filter(valid=1)
+        return ETL.objects.filter(valid=1).order_by('-ctime')
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
@@ -38,14 +41,30 @@ class IndexView(generic.ListView):
             context['search'] = self.request.GET['search']
         return context
 
-class RunningJobView(generic.ListView):
-    template_name = 'etl/executions_running.html'
+class StatusJobView(generic.ListView):
+    template_name = 'etl/executions_status.html'
     context_object_name = 'executions'
     model = Executions
 
-    def get_queryset(self):
+    def get(self, request, status):
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return Executions.objects.filter(status=0)
+        self.object_list = Executions.objects.filter(status=status).order_by('-start_time')
+        allow_empty = self.get_allow_empty()
+
+        if not allow_empty:
+            # When pagination is enabled and object_list is a queryset,
+            # it's better to do a cheap query than to load the unpaginated
+            # queryset in memory.
+            if (self.get_paginate_by(self.object_list) is not None
+                and hasattr(self.object_list, 'exists')):
+                is_empty = not self.object_list.exists()
+            else:
+                is_empty = len(self.object_list) == 0
+            if is_empty:
+                raise Exception("Empty list and '%(class_name)s.allow_empty' is False.")
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
 
 class EditView(generic.DetailView):
     template_name = 'etl/edit.html'
