@@ -8,7 +8,7 @@ from django.utils import timezone
 class ETL(models.Model):
     query = models.TextField()
     meta = models.CharField(max_length=20)
-    tblName = models.CharField(max_length=30, db_column='tbl_name')
+    tblName = models.CharField(max_length=40, db_column='tbl_name')
     author = models.CharField(max_length=20, blank=True, null=True)
     preSql = models.TextField(db_column='pre_sql', blank=True, null=True)
     ctime = models.DateTimeField(default=timezone.now())
