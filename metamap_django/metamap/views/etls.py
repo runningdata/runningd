@@ -141,24 +141,21 @@ def edit(request, pk):
         logger.info('Tblbloods for %s has been deleted successfully' % (pk))
 
         if request.POST['valid'] == 1:
-            try:
-                etl = privious_etl
-                privious_etl.id = None
-                privious_etl.ctime = timezone.now()
-                httputils.post2obj(etl, request.POST, 'id')
-                find_ = etl.tblName.find('@')
-                etl.meta = etl.tblName[0: find_]
+            etl = privious_etl
+            privious_etl.id = None
+            privious_etl.ctime = timezone.now()
+            httputils.post2obj(etl, request.POST, 'id')
+            find_ = etl.tblName.find('@')
+            etl.meta = etl.tblName[0: find_]
 
-                etl.save()
-                logger.info('ETL has been created successfully : %s ' % etl)
-                deps = hivecli.getTbls(etl)
-                for dep in deps:
-                    tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
-                    tblBlood.save()
-                    logger.info('Tblblood has been created successfully : %s' % tblBlood)
-            except Exception, e:
-                return render(request, 'common/500.html', {'msg': traceback.format_exc()})
-            
+            etl.save()
+            logger.info('ETL has been created successfully : %s ' % etl)
+            deps = hivecli.getTbls(etl)
+            for dep in deps:
+                tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+                tblBlood.save()
+                logger.info('Tblblood has been created successfully : %s' % tblBlood)
+
         return HttpResponseRedirect(reverse('metamap:index'))
     else:
         etl = ETL.objects.get(pk=pk)
