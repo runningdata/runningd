@@ -9,7 +9,7 @@ from __future__ import absolute_import
 import logging
 import subprocess
 
-from celery import shared_task
+from celery import shared_task, task
 from django.utils import timezone
 
 from metamap.models import ETL, Executions
@@ -17,6 +17,9 @@ from metamap.utils import enums
 
 logger = logging.getLogger('django')
 
+@task
+def xx():
+    return 'sdfsdf'
 
 @shared_task
 def add(x, y):

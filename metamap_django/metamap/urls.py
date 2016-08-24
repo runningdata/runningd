@@ -6,6 +6,7 @@ app_name = 'metamap'
 urlpatterns = [
     url(r'^$', etls.IndexView.as_view(), name='index'),
 
+    url(r'^xx/$', etls.xx, name='xx'),
 
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
     url(r'^etls/add/$', etls.add, name='add'),

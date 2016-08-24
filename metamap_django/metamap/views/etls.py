@@ -158,8 +158,8 @@ def exec_job(request, etlid):
     #     'job for %s has been executed, current pool size is %d' % (etl.tblName, work_manager.work_queue.qsize()))
     execution = Executions(logLocation=log_location, job_id=etlid, status=0)
     execution.save()
-    from metamap import taske
-    taske.exec_etl.delay('hive -f ' + location, log_location)
+    from metamap import tasks
+    tasks.exec_etl.delay('hive -f ' + location, log_location)
     return redirect('metamap:execlog', execid=execution.id)
     # return redirect('metamap:execlog', execid=1)
 
@@ -169,6 +169,9 @@ def review_sql(request, etlid):
     hql = etlhelper.generate_etl_sql(etl)
     return render(request, 'etl/review_sql.html', {'obj': etl, 'hql': hql})
 
+def xx(request):
+    from metamap.tasks import xx
+    return HttpResponse(xx.delay())
 
 def exec_log(request, execid):
     '''

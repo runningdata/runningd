@@ -37,14 +37,17 @@ HIVE_SERVER = {
     'password': '',
 }
 
+import djcelery
+djcelery.setup_loader()
+
 BROKER_URL = 'redis://localhost:6379'
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Asia/Shanghai'
-CELERY_TIMEZONE = 'UTC'
-CELERY_ENABLE_UTC = True
-CELERY_IMPORTS = ("metamap.taske",)
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'Asia/Shanghai'
+# CELERY_TIMEZONE = 'UTC'
+# CELERY_ENABLE_UTC = True
+# CELERY_IMPORTS = ("metamap.taske",)
 
 # Application definition
 
@@ -56,6 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djcelery',
 ]
 
 MIDDLEWARE_CLASSES = [
