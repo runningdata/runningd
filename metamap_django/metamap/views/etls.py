@@ -157,9 +157,9 @@ def edit(request, pk):
                     tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
                     tblBlood.save()
                     logger.info('Tblblood has been created successfully : %s' % tblBlood)
-                return HttpResponseRedirect(reverse('metamap:index'))
             except Exception, e:
                 return render(request, 'common/500.html', {'msg': traceback.format_exc()})
+        return HttpResponseRedirect(reverse('metamap:index'))
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
