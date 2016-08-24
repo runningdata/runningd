@@ -148,8 +148,7 @@ def edit(request, pk):
         logger.info('ETL has been created successfully : %s ' % etl)
 
         deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
-        if deleted:
-            logger.info('%d Tblbloods for %d has been deleted successfully' % (rows, pk))
+        logger.info('Tblbloods for %d has been deleted successfully' % (pk))
 
         if etl.valid == 1:
             try:
