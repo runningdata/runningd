@@ -41,6 +41,23 @@ class IndexView(generic.ListView):
             context['search'] = self.request.GET['search']
         return context
 
+class InvalidView(generic.ListView):
+    template_name = 'index.html'
+    context_object_name = 'etls'
+    model = ETL
+
+    def get_queryset(self):
+        if 'search' in self.request.GET and self.request.GET['search'] != '':
+            tbl_name_ = self.request.GET['search']
+            return ETL.objects.filter(valid=1, tblName__contains=tbl_name_).order_by('-ctime')
+        self.paginate_by = DEFAULT_PAGE_SIEZE
+        return ETL.objects.filter(valid=1).order_by('-ctime')
+
+    def get_context_data(self, **kwargs):
+        context = super(InvalidView, self).get_context_data(**kwargs)
+        if 'search' in self.request.GET and self.request.GET['search'] != '':
+            context['search'] = self.request.GET['search']
+        return context
 
 class StatusJobView(generic.ListView):
     template_name = 'etl/executions_status.html'

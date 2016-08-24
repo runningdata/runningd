@@ -8,6 +8,7 @@ urlpatterns = [
 
 
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
+    url(r'^etls/invalid/$', etls.InvalidView.as_view(), name='invalid'),
     url(r'^etls/add/$', etls.add, name='add'),
     url(r'^etls/status/(?P<status>[0-9]+)/$', etls.StatusJobView.as_view(), name='status'),
     url(r'^etls/his/(?P<tblName>.*)/$', etls.his, name='his'),
