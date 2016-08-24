@@ -129,34 +129,36 @@ def add(request):
         return render(request, 'etl/edit.html')
 
 
-@transaction.atomic
 def edit(request, pk):
     if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                privious_etl = ETL.objects.get(pk=int(pk))
+                privious_etl.valid = 0
+                privious_etl.save()
 
-        privious_etl = ETL.objects.get(pk=int(pk))
-        privious_etl.valid = 0
-        privious_etl.save()
+                deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
+                logger.info('Tblbloods for %s has been deleted successfully' % (pk))
 
-        deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
-        logger.info('Tblbloods for %s has been deleted successfully' % (pk))
+                if request.POST['valid'] == 1:
+                    etl = privious_etl
+                    privious_etl.id = None
+                    privious_etl.ctime = timezone.now()
+                    httputils.post2obj(etl, request.POST, 'id')
+                    find_ = etl.tblName.find('@')
+                    etl.meta = etl.tblName[0: find_]
 
-        if request.POST['valid'] == 1:
-            etl = privious_etl
-            privious_etl.id = None
-            privious_etl.ctime = timezone.now()
-            httputils.post2obj(etl, request.POST, 'id')
-            find_ = etl.tblName.find('@')
-            etl.meta = etl.tblName[0: find_]
+                    etl.save()
+                    logger.info('ETL has been created successfully : %s ' % etl)
+                    deps = hivecli.getTbls(etl)
+                    for dep in deps:
+                        tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+                        tblBlood.save()
+                        logger.info('Tblblood has been created successfully : %s' % tblBlood)
 
-            etl.save()
-            logger.info('ETL has been created successfully : %s ' % etl)
-            deps = hivecli.getTbls(etl)
-            for dep in deps:
-                tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
-                tblBlood.save()
-                logger.info('Tblblood has been created successfully : %s' % tblBlood)
-
-        return HttpResponseRedirect(reverse('metamap:index'))
+                return HttpResponseRedirect(reverse('metamap:index'))
+        except Exception, e:
+            return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
