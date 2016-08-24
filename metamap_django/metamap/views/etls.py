@@ -41,6 +41,7 @@ class IndexView(generic.ListView):
             context['search'] = self.request.GET['search']
         return context
 
+
 class StatusJobView(generic.ListView):
     template_name = 'etl/executions_status.html'
     context_object_name = 'executions'
@@ -145,19 +146,21 @@ def edit(request, pk):
 
         etl.save()
         logger.info('ETL has been created successfully : %s ' % etl)
-        try:
-            deps = hivecli.getTbls(etl)
-            for dep in deps:
-                try:
-                    tblBlood = TblBlood.objects.get(tblName=etl.tblName, parentTbl=dep, valid=1)
-                    tblBlood.relatedEtlId = etl.id
-                except ObjectDoesNotExist:
+
+        deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
+        if deleted:
+            logger.info('%d Tblbloods for %d has been deleted successfully' % (rows, pk))
+
+        if etl.valid == 1:
+            try:
+                deps = hivecli.getTbls(etl)
+                for dep in deps:
                     tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
-                tblBlood.save()
-                logger.info('Tblblood has been created successfully : %s' % tblBlood)
-            return HttpResponseRedirect(reverse('metamap:index'))
-        except Exception, e:
-            return render(request, 'common/500.html', {'msg': traceback.format_exc()})
+                    tblBlood.save()
+                    logger.info('Tblblood has been created successfully : %s' % tblBlood)
+                return HttpResponseRedirect(reverse('metamap:index'))
+            except Exception, e:
+                return render(request, 'common/500.html', {'msg': traceback.format_exc()})
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
