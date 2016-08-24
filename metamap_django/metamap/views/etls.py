@@ -51,7 +51,7 @@ class InvalidView(generic.ListView):
             tbl_name_ = self.request.GET['search']
             return ETL.objects.filter(valid=0, tblName__contains=tbl_name_).order_by('-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return ETL.objects.filter(valid=1).order_by('-ctime')
+        return ETL.objects.filter(valid=0).order_by('-ctime')
 
     def get_context_data(self, **kwargs):
         context = super(InvalidView, self).get_context_data(**kwargs)
