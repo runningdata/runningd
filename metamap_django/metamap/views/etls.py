@@ -157,7 +157,7 @@ def edit(request, pk):
                 deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
                 logger.info('Tblbloods for %s has been deleted successfully' % (pk))
 
-                if request.POST['valid'] == 1:
+                if int(request.POST['valid']) == 1:
                     etl = privious_etl
                     privious_etl.id = None
                     privious_etl.ctime = timezone.now()
