@@ -202,10 +202,14 @@ def exec_job(request, etlid):
 
 
 def review_sql(request, etlid):
-    etl = ETL.objects.get(id=etlid)
-    hql = etlhelper.generate_etl_sql(etl)
-    return render(request, 'etl/review_sql.html', {'obj': etl, 'hql': hql})
-
+    try:
+        etl = ETL.objects.get(id=etlid)
+        hql = etlhelper.generate_etl_sql(etl)
+        # return render(request, 'etl/review_sql.html', {'obj': etl, 'hql': hql})
+        return HttpResponse(hql.replace('\n', '<br>'))
+    except Exception, e:
+        logger.error(e)
+        return HttpResponse(e)
 
 def exec_log(request, execid):
     '''
