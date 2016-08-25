@@ -71,3 +71,8 @@ def is_valid(value):
     if is_valid == 1:
         return '是'
     return '否'
+
+
+@register.filter
+def clean_blood(value):
+    return value.replace('@', '__');

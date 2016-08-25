@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^etls/status/(?P<status>[0-9]+)/$', etls.StatusJobView.as_view(), name='status'),
     url(r'^etls/his/(?P<tblName>.*)/$', etls.his, name='his'),
     url(r'^etls/blood/$', etls.blood_by_name, name='blood_by_name'),
+    url(r'^etls/preview_dag/$', etls.preview_job_dag, name='preview_job_dag'),
     url(r'^etls/blood/(?P<etlid>[0-9]+)/$', etls.blood_dag, name='blood'),
 
     url(r'^etls/review_sql/(?P<etlid>[0-9]+)/$', etls.review_sql, name='review_sql'),

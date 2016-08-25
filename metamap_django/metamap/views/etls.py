@@ -249,6 +249,13 @@ class ExecLogView(generic.ListView):
         jobid_ = self.kwargs['jobid']
         return Executions.objects.filter(job_id=jobid_).order_by('-start_time')
 
+def preview_job_dag(request):
+    try:
+        bloods = TblBlood.objects.filter(valid=1).all()
+        return render(request, 'etl/blood.html', {'bloods': bloods})
+    except Exception, e:
+        logger.error('error : %s ' % e)
+        return HttpResponse('error')
 
 def generate_job_dag(request):
     '''
