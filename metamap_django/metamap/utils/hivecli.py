@@ -8,7 +8,7 @@ from metamap.helpers import etlhelper
 
 
 def getTbls(etl):
-    sql = etlhelper.generate_etl_sql(etl)
+    sql = etlhelper.get_etl_sql(etl)
     result = set()
     try:
         with pyhs2.connect(host=settings.HIVE_SERVER['host'],

@@ -15,7 +15,9 @@ from django.utils import timezone
 from metamap.models import ETL, Executions
 from metamap.utils import enums
 
-logger = logging.getLogger('django')
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger(__name__)
 
 
 @shared_task

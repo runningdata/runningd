@@ -13,11 +13,24 @@ import logging
 
 logger = logging.getLogger('info')
 
+def get_etl_sql(etl):
+    '''
+    获取替换变量后的sql内容
+    :param etl:
+    :return:
+    '''
+    str = list()
+    str.append('{% load etlutils %}')
+    str.append(etl.variables)
+    str.append(etl.query)
+
+    template = Template('\n'.join(str));
+    return template.render(Context()).strip()
+
 def generate_etl_sql(etl):
     '''
     预览HSQL内容
     :param etl:
-    :param location:
     :return:
     '''
     str = list()
@@ -31,13 +44,15 @@ def generate_etl_sql(etl):
         str.append("-- create time : " + dateutils.format_day(ctime))
     else:
         str.append("-- cannot find ctime")
-    str.append("-- pre settings ")
+    str.append("\n---------------------------------------- pre settings ")
     str.append(etl.setting)
+    str.append("\n---------------------------------------- preSql ")
     str.append(etl.preSql)
+    str.append("\n---------------------------------------- query ")
     str.append(etl.query)
 
     template = Template('\n'.join(str));
-    return template.render(Context())
+    return template.render(Context()).strip()
 
 
 def generate_etl_file(etl, location):

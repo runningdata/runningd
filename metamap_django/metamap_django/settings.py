@@ -45,6 +45,7 @@ CELERY_TIMEZONE = 'Asia/Shanghai'
 CELERY_TIMEZONE = 'UTC'
 CELERY_ENABLE_UTC = True
 CELERY_IMPORTS = ("metamap.taske",)
+CELERY_IGNORE_RESULT = True
 
 # Application definition
 

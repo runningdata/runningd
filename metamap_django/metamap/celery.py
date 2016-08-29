@@ -22,7 +22,9 @@ app = Celery('metamap')
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
-
+# bind表示这个函数是一个bound方法，这样就可以访问task类型实例上的属性和方法了
 @app.task(bind=True)
 def debug_task(self):
+    print('Executing task id {0.id}, args: {0.args!r} kwargs: {0.kwargs!r}'.format(
+        self.request))
     print('Request: {0!r}'.format(self.request))
