@@ -64,3 +64,15 @@ status_dic[2] = u'失败'
 @register.simple_tag
 def readable_status(status):
     return status_dic[status]
+
+
+@register.filter
+def is_valid(value):
+    if is_valid == 1:
+        return '是'
+    return '否'
+
+
+@register.filter
+def clean_blood(value):
+    return value.replace('@', '__');

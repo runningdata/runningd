@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.views import generic
+from django.views.generic.list import MultipleObjectMixin, MultipleObjectTemplateResponseMixin
 
 from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions
@@ -17,6 +18,8 @@ from metamap.utils import hivecli, httputils, dateutils, ziputils
 from metamap.utils.constants import *
 
 logger = logging.getLogger('info')
+
+
 # work_manager = threadpool.WorkManager(10, 3)
 
 
@@ -28,9 +31,9 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            return ETL.objects.filter(valid=1, tblName__contains=tbl_name_)
+            return ETL.objects.filter(valid=1, tblName__contains=tbl_name_).order_by('-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return ETL.objects.filter(valid=1)
+        return ETL.objects.filter(valid=1).order_by('-ctime')
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
@@ -38,14 +41,48 @@ class IndexView(generic.ListView):
             context['search'] = self.request.GET['search']
         return context
 
-class RunningJobView(generic.ListView):
-    template_name = 'etl/executions_running.html'
+class InvalidView(generic.ListView):
+    template_name = 'index.html'
+    context_object_name = 'etls'
+    model = ETL
+
+    def get_queryset(self):
+        if 'search' in self.request.GET and self.request.GET['search'] != '':
+            tbl_name_ = self.request.GET['search']
+            return ETL.objects.filter(valid=0, tblName__contains=tbl_name_).order_by('-ctime')
+        self.paginate_by = DEFAULT_PAGE_SIEZE
+        return ETL.objects.filter(valid=0).order_by('-ctime')
+
+    def get_context_data(self, **kwargs):
+        context = super(InvalidView, self).get_context_data(**kwargs)
+        if 'search' in self.request.GET and self.request.GET['search'] != '':
+            context['search'] = self.request.GET['search']
+        return context
+
+class StatusJobView(generic.ListView):
+    template_name = 'etl/executions_status.html'
     context_object_name = 'executions'
     model = Executions
 
-    def get_queryset(self):
+    def get(self, request, status):
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return Executions.objects.filter(status=0)
+        self.object_list = Executions.objects.filter(status=status).order_by('-start_time')
+        allow_empty = self.get_allow_empty()
+
+        if not allow_empty:
+            # When pagination is enabled and object_list is a queryset,
+            # it's better to do a cheap query than to load the unpaginated
+            # queryset in memory.
+            if (self.get_paginate_by(self.object_list) is not None
+                and hasattr(self.object_list, 'exists')):
+                is_empty = not self.object_list.exists()
+            else:
+                is_empty = len(self.object_list) == 0
+            if is_empty:
+                raise Exception("Empty list and '%(class_name)s.allow_empty' is False.")
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
 
 class EditView(generic.DetailView):
     template_name = 'etl/edit.html'
@@ -109,36 +146,36 @@ def add(request):
         return render(request, 'etl/edit.html')
 
 
-@transaction.atomic
 def edit(request, pk):
     if request.method == 'POST':
-
-        privious_etl = ETL.objects.get(pk=int(pk))
-        privious_etl.valid = 0
-        privious_etl.save()
-
-        etl = privious_etl
-        privious_etl.id = None
-        privious_etl.ctime = timezone.now()
-        httputils.post2obj(etl, request.POST, 'id')
-        find_ = etl.tblName.find('@')
-        etl.meta = etl.tblName[0: find_]
-
-        etl.save()
-        logger.info('ETL has been created successfully : %s ' % etl)
         try:
-            deps = hivecli.getTbls(etl)
-            for dep in deps:
-                try:
-                    tblBlood = TblBlood.objects.get(tblName=etl.tblName, parentTbl=dep, valid=1)
-                    tblBlood.relatedEtlId = etl.id
-                except ObjectDoesNotExist:
-                    tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
-                tblBlood.save()
-                logger.info('Tblblood has been created successfully : %s' % tblBlood)
-            return HttpResponseRedirect(reverse('metamap:index'))
+            with transaction.atomic():
+                privious_etl = ETL.objects.get(pk=int(pk))
+                privious_etl.valid = 0
+                privious_etl.save()
+
+                deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
+                logger.info('Tblbloods for %s has been deleted successfully' % (pk))
+
+                if int(request.POST['valid']) == 1:
+                    etl = privious_etl
+                    privious_etl.id = None
+                    privious_etl.ctime = timezone.now()
+                    httputils.post2obj(etl, request.POST, 'id')
+                    find_ = etl.tblName.find('@')
+                    etl.meta = etl.tblName[0: find_]
+
+                    etl.save()
+                    logger.info('ETL has been created successfully : %s ' % etl)
+                    deps = hivecli.getTbls(etl)
+                    for dep in deps:
+                        tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+                        tblBlood.save()
+                        logger.info('Tblblood has been created successfully : %s' % tblBlood)
+
+                return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
-            return render(request, 'common/500.html', {'msg': traceback.format_exc()})
+            return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
@@ -165,9 +202,14 @@ def exec_job(request, etlid):
 
 
 def review_sql(request, etlid):
-    etl = ETL.objects.get(id=etlid)
-    hql = etlhelper.generate_etl_sql(etl)
-    return render(request, 'etl/review_sql.html', {'obj': etl, 'hql': hql})
+    try:
+        etl = ETL.objects.get(id=etlid)
+        hql = etlhelper.generate_etl_sql(etl)
+        # return render(request, 'etl/review_sql.html', {'obj': etl, 'hql': hql})
+        return HttpResponse(hql.replace('\n', '<br>'))
+    except Exception, e:
+        logger.error(e)
+        return HttpResponse(e)
 
 def xx(request):
     from metamap.tasks import xx
@@ -211,6 +253,13 @@ class ExecLogView(generic.ListView):
         jobid_ = self.kwargs['jobid']
         return Executions.objects.filter(job_id=jobid_).order_by('-start_time')
 
+def preview_job_dag(request):
+    try:
+        bloods = TblBlood.objects.filter(valid=1).all()
+        return render(request, 'etl/blood.html', {'bloods': bloods})
+    except Exception, e:
+        logger.error('error : %s ' % e)
+        return HttpResponse('error')
 
 def generate_job_dag(request):
     '''

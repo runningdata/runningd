@@ -3,6 +3,7 @@
 {% block title %}血统{% endblock %}
 
 {% load staticfiles %}
+{% load etlutils %}
 
 
 {% block content %}
@@ -16,7 +17,7 @@
     <div class="mermaid">
         graph TD;
         {% for blood in bloods %}
-            {{ blood.parentTbl }} --> {{ blood.tblName }}
+            {{ blood.parentTbl| clean_blood }} --> {{ blood.tblName | clean_blood }}
         {% endfor %}
     </div>
 </div>

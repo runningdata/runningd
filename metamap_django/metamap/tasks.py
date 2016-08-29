@@ -15,7 +15,9 @@ from django.utils import timezone
 from metamap.models import ETL, Executions
 from metamap.utils import enums
 
-logger = logging.getLogger('django')
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger(__name__)
 
 @task
 def xx():
@@ -33,19 +35,23 @@ def mul(x, y):
 
 @shared_task
 def exec_etl(command, log):
-    p = subprocess.Popen([''.join(command)], stdout=open(log, 'a'), stderr=subprocess.STDOUT, shell=True,
-                         universal_newlines=True)
-    p.wait()
-    returncode = p.returncode
     execution = Executions.objects.get(logLocation=log)
     execution.end_time = timezone.now()
-    logger.info('%s return code is %d' % (command, returncode))
-    if returncode == 0:
-        execution.status = enums.EXECUTION_STATUS.DONE
-    else:
+    try:
+        p = subprocess.Popen([''.join(command)], stdout=open(log, 'a'), stderr=subprocess.STDOUT, shell=True,
+                             universal_newlines=True)
+        p.wait()
+        returncode = p.returncode
+        logger.info('%s return code is %d' % (command, returncode))
+        if returncode == 0:
+            execution.status = enums.EXECUTION_STATUS.DONE
+        else:
+            execution.status = enums.EXECUTION_STATUS.FAILED
+    except Exception, e:
+        logger.error(e)
         execution.status = enums.EXECUTION_STATUS.FAILED
     execution.save()
-    return ETL.objects.all()
+
 
 @shared_task
 def xsum(numbers):
