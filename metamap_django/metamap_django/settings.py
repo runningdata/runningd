@@ -37,10 +37,9 @@ HIVE_SERVER = {
     'password': '',
 }
 
-import djcelery
-djcelery.setup_loader()
 
 BROKER_URL = 'redis://localhost:6379'
+
 # CELERY_TASK_SERIALIZER = 'json'
 # CELERY_ACCEPT_CONTENT = ['application/json']
 # CELERY_RESULT_SERIALIZER = 'json'
@@ -49,10 +48,13 @@ BROKER_URL = 'redis://localhost:6379'
 # CELERY_ENABLE_UTC = True
 # CELERY_IMPORTS = ("metamap.taske",)
 
+# Celery Beat 设置
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
 # Application definition
 
 INSTALLED_APPS = [
-    'metamap.apps.MetamapConfig',
+    'metamap',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -60,7 +62,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djcelery',
+    'rest_framework',
 ]
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
+
+import djcelery
+djcelery.setup_loader()
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',

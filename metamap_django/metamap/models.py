@@ -4,6 +4,8 @@ from django.db import models
 import datetime
 from django.utils import timezone
 
+from metamap.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
+
 
 class ETL(models.Model):
     query = models.TextField()
@@ -72,3 +74,26 @@ class Meta(models.Model):
 
     def __str__(self):
         return self.meta
+
+
+
+class PeriodicTask(models.Model):
+    name = models.CharField(unique=True, max_length=200)
+    task = models.CharField(max_length=200)
+    args = models.TextField()
+    kwargs = models.TextField()
+    queue = models.CharField(max_length=200, blank=True, null=True)
+    exchange = models.CharField(max_length=200, blank=True, null=True)
+    routing_key = models.CharField(max_length=200, blank=True, null=True)
+    expires = models.DateTimeField(blank=True, null=True)
+    enabled = models.IntegerField()
+    last_run_at = models.DateTimeField(blank=True, null=True)
+    total_run_count = models.IntegerField()
+    date_changed = models.DateTimeField()
+    description = models.TextField()
+    crontab = models.ForeignKey(DjceleryCrontabschedule, models.DO_NOTHING, blank=True, null=True)
+    interval = models.ForeignKey(DjceleryIntervalschedule, models.DO_NOTHING, blank=True, null=True)
+    etl = models.ForeignKey(ETL, models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        db_table = 'djcelery_periodictask'

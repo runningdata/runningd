@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% block title %}{{ etl.tblName }} -> 调度列表{% endblock %}
+{% load ifdef %}
+{% block content %}
+    <div class="container">
+        {% has_def 'etl' as has_etl %}
+        {% if has_etl %}
+        <h2>{{ etl.tblName }} の 调度列表</h2>
+        <a href="{% url 'metamap:sche_add_from_etl' etl.id %}" class="btn btn-info">添加</a>
+        {% endif %}
+        <table class="table table-striped">
+            <caption></caption>
+            <thead>
+            <tr>
+                <th>名称</th>
+                <th>cron</th>
+                <th>间隔</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if objs %}
+                {% for obj in objs %}
+                    <tr>
+                        <td>{{ obj.name }}</td>
+                        <td>{{ obj.crontab }}</td>
+                        <td>{{ obj.interval }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,9 +1,12 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 
+from metamap.views import celery_view
 from views import etls, metas
 
 app_name = 'metamap'
+from metamap.views.etls import router
 urlpatterns = [
+
     url(r'^$', etls.IndexView.as_view(), name='index'),
 
     url(r'^xx/$', etls.xx, name='xx'),
@@ -32,4 +35,15 @@ urlpatterns = [
     url(r'^meta/col_search/$', metas.ColView.as_view(), name='col_list'),
     url(r'^meta/tbl_search/$', metas.TBLView.as_view(), name='tbl_list'),
     url(r'^meta/tbl_search/(?P<tblid>[0-9]+)/$', metas.get_table, name='tbl_info'),
+
+    url(r'^tasks/tasks/$', celery_view.get_all_tasks, name='tasks'),
+    url(r'^tasks/update/$', celery_view.update_tasks_interval, name='update_tasks_interval'),
+
+    url(r'^sche/$', celery_view.sche_list, name='sche_list'),
+    url(r'^sche/add/$', celery_view.add, name='sche_add'),
+    url(r'^sche/add/(?P<etlid>[0-9]+)/$', celery_view.add, name='sche_add_from_etl'),
+    url(r'^sche/(?P<etlid>[0-9]+)/$', celery_view.sche_etl_list, name='sche_etl'),
+
+    url(r'^rest/', include(router.urls)),
+    url(r'^json/', etls.get_json),
 ]

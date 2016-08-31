@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*
+import json
 import logging
 import os
 import traceback
 
+from StringIO import StringIO
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -10,7 +12,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.views import generic
-from django.views.generic.list import MultipleObjectMixin, MultipleObjectTemplateResponseMixin
+from rest_framework import routers
 
 from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions
@@ -41,6 +43,32 @@ class IndexView(generic.ListView):
             context['search'] = self.request.GET['search']
         return context
 
+
+from rest_framework import routers, serializers, viewsets
+
+
+class ETLSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ETL
+        fields = ('tblName', 'valid', 'id')
+
+
+class ETLViewSet(viewsets.ModelViewSet):
+    queryset = ETL.objects.filter(valid=1).order_by('-ctime')
+    serializer_class = ETLSerializer
+
+
+router = routers.DefaultRouter()
+router.register(r'etls', ETLViewSet)
+
+def get_json(request):
+    queryset = ETL.objects.filter(valid=1).order_by('-ctime')
+    io = StringIO()
+    json.dump(queryset, io)
+    from django.core import serializers
+    data = serializers.serialize('json', queryset)
+    return HttpResponse(data, mimetype="application/json")
+
 class InvalidView(generic.ListView):
     template_name = 'index.html'
     context_object_name = 'etls'
@@ -58,6 +86,7 @@ class InvalidView(generic.ListView):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             context['search'] = self.request.GET['search']
         return context
+
 
 class StatusJobView(generic.ListView):
     template_name = 'etl/executions_status.html'
@@ -211,9 +240,11 @@ def review_sql(request, etlid):
         logger.error(e)
         return HttpResponse(e)
 
+
 def xx(request):
     from metamap.tasks import xx
     return HttpResponse(xx.delay())
+
 
 def exec_log(request, execid):
     '''
@@ -253,6 +284,7 @@ class ExecLogView(generic.ListView):
         jobid_ = self.kwargs['jobid']
         return Executions.objects.filter(job_id=jobid_).order_by('-start_time')
 
+
 def preview_job_dag(request):
     try:
         bloods = TblBlood.objects.filter(valid=1).all()
@@ -260,6 +292,7 @@ def preview_job_dag(request):
     except Exception, e:
         logger.error('error : %s ' % e)
         return HttpResponse('error')
+
 
 def generate_job_dag(request):
     '''

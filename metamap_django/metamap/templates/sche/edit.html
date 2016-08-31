@@ -1,0 +1,129 @@
+{% extends 'layout.html' %}
+{% load ifdef %}
+{% load staticfiles %}
+{% block title %}调度任务{% endblock %}
+
+{% block scripts %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-select.min.css' %}"/>
+    <script src="{% static 'js/bootstrap-select.min.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+    {% has_def 'task' as has_task %}
+    {% if has_task %}
+        <form action="." method="POST">
+            <div class="form-group">
+                <input name="id" value="{{ etl.id }}" type="hidden" class="form-control">
+                <label>任务名称</label>
+                <input name="tblName" value="{{ etl.tblName }}" type="text" class="form-control">
+                <label>预设变量</label>
+                <textarea name="variables" rows="5" class="form-control">{{ etl.variables }}</textarea>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="onSchedule"
+                            {% if etl.onSchedule == 0 %}
+                           checked="checked"
+                            {% endif %}
+                           value="0">否
+                </div>
+                <br/>
+                <label>是否生效</label>
+                <div class="radio-inline">
+                    <input id="optionsRadios1" type="radio" name="enabled"
+                            {% if etl.valid != 0 %}
+                           checked="checked"
+                            {% endif %}
+                           value="True">是
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="enabled"
+                            {% if etl.valid == 0 %}
+                           checked="checked"
+                            {% endif %}
+                           value="False">否
+                </div>
+                <br/>
+                <button type="submit" class="btn btn-primary">提交</button>
+            </div>
+        </form>
+    {% else %}
+        <form action="." method="POST">
+            <div class="form-group">
+                <input name="id" value="" type="hidden" class="form-control">
+                <label>调度名称</label>
+                <input name="name" value="" type="text" class="form-control">
+            </div>
+            <div class="form-group">
+
+                <label>关联ETL</label>
+
+                <select id="lunch" class="selectpicker form-control" data-live-search="true">
+                    <option class="bs-title-option" value="">选择....</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>预设变量</label>
+                <textarea name="variables" rows="5" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+                <label>是否生效</label>
+                <div class="radio-inline">
+                    <input id="optionsRadios1" type="radio" name="enabled"
+                           checked="checked"
+                           value="True">是
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="enabled" value="False">否
+                </div>
+            </div>
+            <div class="form-group">
+                <label>调度方式</label>
+                <div class="radio-inline">
+                    <input id="optionsRadios1" type="radio" name="schedule"
+                           checked="checked"
+                           value="day">周【每周第一天】
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="schedule" value="month">月【每月第一天】
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="schedule" value="season">季度【每季第一天】
+                </div>
+                <div class="radio-inline">
+                    <div class="input-group">
+                        <input type="radio" aria-label="自定义" name="schedule" value="custom">自定义【cron】
+                        <input type="text" class="inline" name="cronexp">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+
+                <button type="submit" class="btn btn-primary">提交</button>
+            </div>
+        </form>
+    {% endif %}
+
+    <script type="application/javascript">
+        var id = {{ etl.id }}
+        $.ajax({
+                    type: "get",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    url: "http://127.0.0.1:8088/metamap/rest/etls/?format=json",
+                    success: function (result) {
+                        $.each(result, function (index, etl) {
+                            if (id == etl.id) {
+                                $("#lunch").append("<option selected='selected' value='" + etl.id + "'>" + etl.tblName + "</option>");
+                            } else {
+                                $("#lunch").append("<option value='" + etl.id + "'>" + etl.tblName + "</option>");
+                            }
+                        })
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(errorThrown);
+                    },
+                    async: false             //false表示同步
+                }
+        );
+    </script>
+{% endblock %}
