@@ -6,6 +6,7 @@ created by will
 import hashlib
 import os
 
+from django.core.files import File
 from django.http import HttpResponse
 from django.db import transaction
 from django.shortcuts import render, redirect
@@ -18,6 +19,7 @@ from metamap.models import ETL, PeriodicTask
 from metamap.utils import dateutils
 from metamap.utils.constants import DEFAULT_PAGE_SIEZE, TMP_EXPORT_FILE_LOCATION
 
+ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
 
 def get_all_tasks(request):
     all_periodic_task = PeriodicTask.objects.all()
@@ -60,19 +62,35 @@ def export(request):
         header = header.replace(',', '\t')
         part = name + '-' + t
         location = TMP_EXPORT_FILE_LOCATION + part
-        PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
-        lo = unicode(PROJECT_ROOT, 'UTF-8') + location
+        lo = unicode(ROOT_PATH, 'UTF-8') + location
         hql = lo + '.hql'
         with open(hql, 'w') as hf:
             hf.write(sql)
         tasks.exec_etl_cli.delay('hive -f ' + hql, header, lo)
-        return redirect('export:execlog', loc=location)
+        return redirect('export:execlog', loc=part)
     else:
         return render(request, 'export/edit.html')
 
 
 def execlog(request, loc):
-    return HttpResponse('<a href = "' + loc + '"> loc </a>')
+    if os.path.exists(ROOT_PATH + TMP_EXPORT_FILE_LOCATION + loc + '.done'):
+        result = u'<a href = "/export/' + loc + u'"> 获取文件 </a>'
+        return HttpResponse(result)
+    else:
+        return HttpResponse('<h2>Loading....')
+
+def getfile(request, filename):
+
+    loc = ROOT_PATH + TMP_EXPORT_FILE_LOCATION + filename
+    wrapper = File(file(loc))
+    response = HttpResponse(wrapper, content_type='text/plain')
+    t = type(filename)
+    re1 = 'attachment;filename=%s.csv' % filename
+    en = re1.encode('utf-8')
+    response['Content-Length'] = os.path.getsize(loc)
+    response['Content-Encoding'] = 'utf-8'
+    response['Content-Disposition'] = en
+    return response
 
 @transaction.atomic
 def add(request, etlid=-1):

@@ -7,6 +7,7 @@ created by will
 from __future__ import absolute_import
 
 import logging
+import os
 import subprocess
 
 from celery import shared_task, task
@@ -55,10 +56,13 @@ def exec_etl_cli(command, header, result):
     print 'command is ', command
     with open(result, 'w') as wa:
         wa.write(header.encode('UTF-8'))
+        wa.write('\n')
     error_file = result + '.error'
     p = subprocess.Popen([''.join(command)], shell=True, stderr=open(error_file, 'a'),
                          stdout=open(result, 'a'), universal_newlines=True)
     p.wait()
+    done_file = result + '.done'
+    os.mknod(done_file.encode('UTF-8'))
     returncode = p.returncode
     logger.info('%s return code is %d' % (command, returncode))
 

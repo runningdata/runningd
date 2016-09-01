@@ -8,5 +8,5 @@ from metamap.views.etls import router
 urlpatterns = [
     url(r'^$', celery_view.export, name='export'),
     url(r'^execlog/(?P<loc>.+)/$', celery_view.execlog, name='execlog'),
-    # url(r'^(?P<loc>.+)/$', celery_view.getfile, name='getfile'),
+    url(r'^(?P<filename>.+)/$', celery_view.getfile, name='getfile'),
 ]
