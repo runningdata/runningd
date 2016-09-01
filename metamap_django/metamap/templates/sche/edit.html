@@ -109,7 +109,7 @@
                     type: "get",
                     dataType: "json",
                     contentType: "application/json;charset=utf-8",
-                    url: "http://127.0.0.1:8088/metamap/rest/etls/?format=json",
+                    url: "/metamap/rest/etls/?format=json",
                     success: function (result) {
                         $.each(result, function (index, etl) {
                             if (id == etl.id) {
