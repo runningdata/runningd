@@ -77,7 +77,10 @@ def execlog(request, loc):
         result = u'<a href = "/export/' + loc + u'"> 获取文件 </a>'
         return HttpResponse(result)
     else:
-        return HttpResponse('<h2>Loading....')
+        result = 'loading'
+        with open(ROOT_PATH + TMP_EXPORT_FILE_LOCATION + loc + '.error', 'r') as f:
+            result = f.read()
+        return HttpResponse(result)
 
 def getfile(request, filename):
 
