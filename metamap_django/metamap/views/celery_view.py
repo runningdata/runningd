@@ -89,9 +89,9 @@ def getfile(request, filename):
     response = HttpResponse(wrapper, content_type='text/plain')
     t = type(filename)
     re1 = 'attachment;filename=%s.csv' % filename
-    en = re1.encode('utf-8')
+    en = re1.encode('gbk')
     response['Content-Length'] = os.path.getsize(loc)
-    response['Content-Encoding'] = 'utf-8'
+    response['Content-Encoding'] = 'gbk'
     response['Content-Disposition'] = en
     return response
 
