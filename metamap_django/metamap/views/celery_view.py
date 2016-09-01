@@ -80,7 +80,7 @@ def execlog(request, loc):
         result = 'loading'
         with open(ROOT_PATH + TMP_EXPORT_FILE_LOCATION + loc + '.error', 'r') as f:
             result = f.read()
-        return HttpResponse(result)
+        return HttpResponse('<pre>' + result + '</pre>')
 
 def getfile(request, filename):
 
