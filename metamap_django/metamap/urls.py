@@ -26,7 +26,7 @@ urlpatterns = [
     url(r'^etls/getexeclog/(?P<execid>[0-9]+)/$', etls.get_exec_log, name='getexeclog'),
     url(r'^etls/exec_list/(?P<jobid>[0-9]+)/$', etls.ExecLogView.as_view(), name='exec_list'),
 
-    url(r'^etls/generate_job_dag/$', etls.generate_job_dag, name='generate_job_dag'),
+    url(r'^etls/generate_job_dag/(?P<schedule>[0-9])/$', etls.generate_job_dag, name='generate_job_dag'),
 
 
     url(r'^meta/list/$', metas.MetaListView.as_view(), name='meta_list'),
@@ -39,10 +39,11 @@ urlpatterns = [
     url(r'^tasks/tasks/$', celery_view.get_all_tasks, name='tasks'),
     url(r'^tasks/update/$', celery_view.update_tasks_interval, name='update_tasks_interval'),
 
-    url(r'^sche/$', celery_view.sche_list, name='sche_list'),
+    url(r'^sche/$', celery_view.ScheDepListView.as_view(), name='sche_list'),
+    url(r'^sche/(?P<pk>[0-9]+)/$', celery_view.edit, name='sche_edit'),
+    url(r'^sche/etl/(?P<etlid>[0-9]+)/$', celery_view.sche_etl_list, name='sche_etl_list'),
+    url(r'^schecron/$', celery_view.sche_cron_list, name='sche_cron_list'),
     url(r'^sche/add/$', celery_view.add, name='sche_add'),
-    url(r'^sche/add/(?P<etlid>[0-9]+)/$', celery_view.add, name='sche_add_from_etl'),
-    url(r'^sche/(?P<etlid>[0-9]+)/$', celery_view.sche_etl_list, name='sche_etl'),
 
     url(r'^rest/', include(router.urls)),
     url(r'^json/', etls.get_json),

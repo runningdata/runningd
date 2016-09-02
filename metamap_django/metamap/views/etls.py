@@ -61,6 +61,7 @@ class ETLViewSet(viewsets.ModelViewSet):
 router = routers.DefaultRouter()
 router.register(r'etls', ETLViewSet)
 
+
 def get_json(request):
     queryset = ETL.objects.filter(valid=1).order_by('-ctime')
     io = StringIO()
@@ -68,6 +69,7 @@ def get_json(request):
     from django.core import serializers
     data = serializers.serialize('json', queryset)
     return HttpResponse(data, mimetype="application/json")
+
 
 class InvalidView(generic.ListView):
     template_name = 'index.html'
@@ -229,7 +231,6 @@ def exec_job(request, etlid):
     return redirect('metamap:execlog', execid=execution.id)
     # return redirect('metamap:execlog', execid=1)
 
-
 def review_sql(request, etlid):
     try:
         etl = ETL.objects.get(id=etlid)
@@ -294,7 +295,7 @@ def preview_job_dag(request):
         return HttpResponse('error')
 
 
-def generate_job_dag(request):
+def generate_job_dag(request, schedule):
     '''
     抽取所有有效的ETL,生成azkaban调度文件
     :param request:
@@ -304,7 +305,10 @@ def generate_job_dag(request):
         done_blood = set()
         folder = dateutils.now_datetime()
         leafs = TblBlood.objects.raw("select a.* from "
+                                     + " (select etl_id from metamap_willdependencytask where schedule=" + int(schedule) + " and valid=1) s "
+                                     + " left outer join "
                                      + "(select * from metamap_tblblood where valid = 1) a"
+                                     + " on s.etl_id = a.related_etl_id"
                                      + " left outer join "
                                      + "(select distinct parent_tbl from metamap_tblblood where valid = 1) b"
                                      + " on a.tbl_name = b.parent_tbl"

@@ -1,6 +1,4 @@
-{% load ifdef %}
-{% has_def 'is_paginated' as has_page %}
-{% if has_page %}
+{% if is_paginated %}
     <nav>
         <ul class="pagination">
             {% if page_obj.has_previous %}

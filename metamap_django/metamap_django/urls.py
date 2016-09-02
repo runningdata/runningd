@@ -18,7 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^export/', include('metamap.xcurls')),
-    url(r'^metamap/', include('metamap.urls')),
+    url(r'^metamap/', include('metamap.urls', namespace='metamap')),
     url(r'^admin/', admin.site.urls),
 ]
 

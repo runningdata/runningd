@@ -6,7 +6,7 @@ created by will
 
 from django.template import Context, Template
 
-from metamap.models import TblBlood, ETL
+from metamap.models import TblBlood, ETL, WillDependencyTask
 from metamap.utils import dateutils
 from metamap.utils.constants import *
 import logging
@@ -27,7 +27,7 @@ def get_etl_sql(etl):
     template = Template('\n'.join(str));
     return template.render(Context()).strip()
 
-def generate_etl_sql(etl):
+def generate_etl_sql(etl, schedule = -1):
     '''
     预览HSQL内容
     :param etl:
@@ -35,7 +35,11 @@ def generate_etl_sql(etl):
     '''
     str = list()
     str.append('{% load etlutils %}')
-    str.append(etl.variables)
+    if schedule == -1:
+        str.append(etl.variables)
+    else:
+        task = WillDependencyTask.objects.get(etl_id=etl.id, schedule=schedule)
+        str.append(task.variables)
     str.append("-- job for " + etl.tblName)
     if etl.author:
         str.append("-- author : " + etl.author)
@@ -55,20 +59,20 @@ def generate_etl_sql(etl):
     return template.render(Context()).strip()
 
 
-def generate_etl_file(etl, location):
+def generate_etl_file(etl, location, schedule = -1):
     '''
     生成hql文件
     :param etl:
     :param location:
     :return:
     '''
-    final_result = generate_etl_sql(etl)
+    final_result = generate_etl_sql(etl, schedule)
     with open(location, 'w') as f:
         print('hql content : %s ' % final_result)
         f.write(final_result)
 
 
-def generate_job_file(blood, parent_node, folder):
+def generate_job_file(blood, parent_node, folder, schedule = -1):
     '''
     生成azkaban job文件
     :param blood:
@@ -81,7 +85,7 @@ def generate_job_file(blood, parent_node, folder):
         # 生成hql文件
         etl = ETL.objects.get(tblName=job_name, valid=1)
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
-        generate_etl_file(etl, location)
+        generate_etl_file(etl, location, schedule)
         command = "hive -f " + location
     else:
         command = "echo " + job_name
@@ -99,7 +103,7 @@ def generate_job_file(blood, parent_node, folder):
     with open(job_file,'w') as f:
         f.write(content)
 
-def load_nodes(leafs, folder, done_blood):
+def load_nodes(leafs, folder, done_blood, schedule):
     '''
     遍历加载节点
     :param leafs:
@@ -111,8 +115,10 @@ def load_nodes(leafs, folder, done_blood):
         parent_node = TblBlood.objects.raw("select b.* from"
                                            + " metamap_tblblood a join metamap_tblblood b"
                                            + " on a.parent_tbl = b.tbl_name and b.valid = 1"
+                                           + " JOIN metamap_willdependencytask s "
+                                           + " on s.schedule " + schedule + "= and s.etl_id = b.related_etl_id"
                                            + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
         if parent_node not in done_blood:
-            generate_job_file(leaf, parent_node, folder)
+            generate_job_file(leaf, parent_node, folder, schedule)
             done_blood.add(leaf.tblName)
-        load_nodes(parent_node, folder, done_blood)
+        load_nodes(parent_node, folder, done_blood, schedule)

@@ -13,7 +13,7 @@ class ETL(models.Model):
     tblName = models.CharField(max_length=100, db_column='tbl_name')
     author = models.CharField(max_length=20, blank=True, null=True)
     preSql = models.TextField(db_column='pre_sql', blank=True, null=True)
-    ctime = models.DateTimeField(default=timezone.now())
+    ctime = models.DateTimeField(default=timezone.now)
     priority = models.IntegerField(default=5, blank=True)
     onSchedule = models.IntegerField(default=1, db_column='on_schedule')
     valid = models.IntegerField(default=1)
@@ -29,7 +29,7 @@ class ETL(models.Model):
         return a + b;
 
     def was_published_recently(self):
-        return self.ctime >= timezone.now() - datetime.timedelta(days=1)
+        return self.ctime >= timezone.now - datetime.timedelta(days=1)
 
 
 class TblBlood(models.Model):
@@ -76,6 +76,17 @@ class Meta(models.Model):
         return self.meta
 
 
+class WillDependencyTask(models.Model):
+    name = models.CharField(unique=True, max_length=200)
+    etl = models.ForeignKey(ETL, models.DO_NOTHING)
+    schedule = models.IntegerField(null=False, default=1)  # 0 天 1 周 2 月 3 季度
+    valid = models.IntegerField(default=1)
+    ctime = models.DateTimeField(default=timezone.now)
+    utime = models.DateTimeField(null=True)
+    variables = models.TextField()
+    desc = models.TextField()
+    class Meta:
+        unique_together = (('etl', 'schedule'),)
 
 class PeriodicTask(models.Model):
     name = models.CharField(unique=True, max_length=200)
@@ -97,3 +108,4 @@ class PeriodicTask(models.Model):
 
     class Meta:
         db_table = 'djcelery_periodictask'
+        managed = False

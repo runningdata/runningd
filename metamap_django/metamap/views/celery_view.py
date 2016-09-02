@@ -13,13 +13,14 @@ from django.shortcuts import render, redirect
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views import generic
 from djcelery.models import IntervalSchedule, CrontabSchedule
-
+from metamap.utils import httputils
 from metamap import tasks
-from metamap.models import ETL, PeriodicTask
+from metamap.models import ETL, PeriodicTask, WillDependencyTask
 from metamap.utils import dateutils
 from metamap.utils.constants import DEFAULT_PAGE_SIEZE, TMP_EXPORT_FILE_LOCATION
 
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
+
 
 def get_all_tasks(request):
     all_periodic_task = PeriodicTask.objects.all()
@@ -44,11 +45,30 @@ def update_tasks_interval(request):
 
 def sche_etl_list(request, etlid):
     etl = ETL.objects.get(pk=etlid)
-    queryset = PeriodicTask.objects.filter(etl_id=etlid)
-    return render(request, 'sche/list.html', {'etl': etl, 'objs': queryset})
+    queryset = WillDependencyTask.objects.filter(etl_id=etlid)
+    return render(request, 'sche/list.html', {'objs': queryset, 'etl': etl})
 
 
-def sche_list(request):
+class ScheDepListView(generic.ListView):
+    template_name = 'sche/list.html'
+    context_object_name = 'objs'
+    model = WillDependencyTask
+
+    def get_queryset(self):
+        if 'search' in self.request.GET and self.request.GET['search'] != '':
+            tbl_name_ = self.request.GET['search']
+            return WillDependencyTask.objects.filter(etl__tblName__contains=tbl_name_).order_by('-valid', '-ctime')
+        self.paginate_by = DEFAULT_PAGE_SIEZE
+        return WillDependencyTask.objects.all().order_by('-valid', '-ctime')
+
+    def get_context_data(self, **kwargs):
+        context = super(ScheDepListView, self).get_context_data(**kwargs)
+        if 'search' in self.request.GET and self.request.GET['search'] != '':
+            context['search'] = self.request.GET['search']
+        return context
+
+
+def sche_cron_list(request):
     queryset = PeriodicTask.objects.all()
     return render(request, 'sche/list.html', {'objs': queryset})
 
@@ -82,8 +102,8 @@ def execlog(request, loc):
             result = f.read()
         return HttpResponse('<pre>' + result + '</pre>')
 
-def getfile(request, filename):
 
+def getfile(request, filename):
     loc = ROOT_PATH + TMP_EXPORT_FILE_LOCATION + filename
     wrapper = File(file(loc))
     response = HttpResponse(wrapper, content_type='text/plain')
@@ -95,26 +115,32 @@ def getfile(request, filename):
     response['Content-Disposition'] = en
     return response
 
+
 @transaction.atomic
-def add(request, etlid=-1):
+def add(request):
     if request.POST:
-        name = request.POST['name']
-        # result, create = PeriodicTask.objects.get_or_create(name=name)
-        # if create:
-        #     interval = IntervalSchedule.objects.create(every=request.POST['every'], period=request.POST['seconds'])
-        #     interval.save()
-        #     result.interval = interval
-        #     result.enabled = True
-        #     result.save()
-        # else:
-        #     result.interval.every = 15
-        #     result.interval.save()
-        #     result.enabled = True
-        #     result.save()
-        return HttpResponse('todo')
+        task = WillDependencyTask()
+        httputils.post2obj(task, request.POST, 'id')
+        task.save()
+        return redirect('metamap:sche_list')
     else:
-        if etlid != -1:
-            etl = ETL.objects.get(pk=etlid)
-            return render(request, 'sche/edit.html', {'etl': etl})
-        else:
-            return render(request, 'sche/edit.html')
+        return render(request, 'sche/edit.html')
+
+
+@transaction.atomic
+def edit(request, pk):
+    if request.POST:
+        task = WillDependencyTask.objects.get(pk=pk)
+        httputils.post2obj(task, request.POST, 'id')
+        task.save()
+        return redirect('metamap:sche_list')
+    else:
+        obj = WillDependencyTask.objects.get(pk=pk)
+        return render(request, 'sche/edit.html', {'task': obj})
+
+
+@transaction.atomic
+def migrate_jobs(request):
+    etls = ETL.objects.filter(valid=1, onSchedule=1)
+    for etl in etls:
+        WillDependencyTask.objects.get_or_create(schedule=0, etl_id=etl.id, name=etl.tblName, variables=etl.variables)
