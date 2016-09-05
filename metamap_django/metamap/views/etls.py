@@ -323,4 +323,5 @@ def generate_job_dag(request, schedule):
         return HttpResponse(folder)
     except Exception, e:
         logger.error('error : %s ' % e)
+        logger.error('traceback is : %s ' % traceback.format_exc())
         return HttpResponse('error')
