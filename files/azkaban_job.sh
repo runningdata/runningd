@@ -21,7 +21,7 @@ metamap_host=10.0.1.62:8088
 project_desc=${prefix}_schedule
 
 # 调用生成job的任务，返回任务名称或者失败信息
-curl -X GET http://${metamap_host}/metamap/etls/generate_job_dag/${num} > ${etl_tmp}
+curl -X GET http://${metamap_host}/metamap/etls/generate_job_dag/${num}/ > ${etl_tmp}
 filename=`cat ${etl_tmp}`
 if [ $filename == "error" -o ${#filename} -ne 14 ]; then
         echo "error happends when generate Job Scripts. ori_filename is ${filename}"
