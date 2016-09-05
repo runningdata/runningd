@@ -19,7 +19,7 @@ from metamap.models import TblBlood, ETL, Executions
 from metamap.utils import hivecli, httputils, dateutils, ziputils
 from metamap.utils.constants import *
 
-logger = logging.getLogger('info')
+logger = logging.getLogger('django')
 
 
 # work_manager = threadpool.WorkManager(10, 3)
@@ -305,7 +305,7 @@ def generate_job_dag(request, schedule):
         done_blood = set()
         folder = dateutils.now_datetime()
         leafs = TblBlood.objects.raw("select a.* from "
-                                     + " (select etl_id from metamap_willdependencytask where schedule=" + int(schedule) + " and valid=1) s "
+                                     + " (select etl_id from metamap_willdependencytask where schedule=" + schedule + " and valid=1) s "
                                      + " left outer join "
                                      + "(select * from metamap_tblblood where valid = 1) a"
                                      + " on s.etl_id = a.related_etl_id"
@@ -316,7 +316,7 @@ def generate_job_dag(request, schedule):
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-        etlhelper.load_nodes(leafs, folder, done_blood)
+        etlhelper.load_nodes(leafs, folder, done_blood, schedule)
         tbl = TblBlood(tblName='etl_done_' + folder)
         etlhelper.generate_job_file(tbl, leafs, folder)
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
