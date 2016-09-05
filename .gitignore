@@ -2,4 +2,3 @@
 **/*.pyc
 .ropeproject
 metamap_flask/config.pyc
-**/migrations
