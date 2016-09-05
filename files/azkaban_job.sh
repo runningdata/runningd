@@ -1,12 +1,27 @@
 #!/bin/bash
 
-etl_tmp=/tmp/etl_tmp_log
+num=$1
+prefix=$1
+if [ $prefix == 0 ]; then
+	prefix=day
+elif [ $prefix == 1 ]; then
+	prefix=week
+elif [ $prefix == 2 ]; then
+	prefix=month
+elif [ $prefix == 3 ]; then
+	prefix=season
+else
+	echo "not support for $1"
+	exit 1
+fi
+
+etl_tmp=/tmp/etl_${prefix}_tmp_log
 host=10.0.1.62:8081
 metamap_host=10.0.1.62:8088
-project_desc=daily_schedule
+project_desc=${prefix}_schedule
 
 # 调用生成job的任务，返回任务名称或者失败信息
-curl -X GET http://${metamap_host}/metamap/etls/generate_job_dag/0 > ${etl_tmp}
+curl -X GET http://${metamap_host}/metamap/etls/generate_job_dag/${num} > ${etl_tmp}
 filename=`cat ${etl_tmp}`
 if [ $filename == "error" -o ${#filename} -ne 14 ]; then
         echo "error happends when generate Job Scripts. ori_filename is ${filename}"
@@ -14,7 +29,7 @@ if [ $filename == "error" -o ${#filename} -ne 14 ]; then
         exit 1
 fi
 
-project_name=etl_${filename}
+project_name=etl_${prefix}_${filename}
 project_zip_file=/tmp/${filename}.zip
 
 echo "project_name is ${project_name}"
@@ -51,7 +66,7 @@ echo "uploading project ${project_name} successfully"
 #
 function check_exec_status(){
 	execid=$1
-	sleep 1h
+	sleep 20m
 	#查看前execution的执行状态，完成后退出
 	status=RUNNING
 	until [ $status == '"SUCCEEDED"' ]
@@ -82,3 +97,4 @@ do
 echo "$flow execution done"
 done
 echo "all flows for project ${project_name} has been executed"
+rm -vf ${etl_tmp}
