@@ -116,7 +116,7 @@ def load_nodes(leafs, folder, done_blood, schedule):
                                            + " metamap_tblblood a join metamap_tblblood b"
                                            + " on a.parent_tbl = b.tbl_name and b.valid = 1"
                                            + " JOIN metamap_willdependencytask s "
-                                           + " on s.schedule " + schedule + "= and s.etl_id = b.related_etl_id"
+                                           + " on s.schedule = " + schedule + " and s.etl_id = b.related_etl_id"
                                            + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
         if parent_node not in done_blood:
             generate_job_file(leaf, parent_node, folder, schedule)
