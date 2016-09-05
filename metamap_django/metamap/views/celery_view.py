@@ -144,3 +144,4 @@ def migrate_jobs(request):
     etls = ETL.objects.filter(valid=1, onSchedule=1)
     for etl in etls:
         WillDependencyTask.objects.get_or_create(schedule=0, etl_id=etl.id, name=etl.tblName, variables=etl.variables)
+    return HttpResponse('success')

@@ -44,6 +44,7 @@ urlpatterns = [
     url(r'^sche/etl/(?P<etlid>[0-9]+)/$', celery_view.sche_etl_list, name='sche_etl_list'),
     url(r'^schecron/$', celery_view.sche_cron_list, name='sche_cron_list'),
     url(r'^sche/add/$', celery_view.add, name='sche_add'),
+    url(r'^sche/migrate/$', celery_view.migrate_jobs, name='migrate'),
 
     url(r'^rest/', include(router.urls)),
     url(r'^json/', etls.get_json),
