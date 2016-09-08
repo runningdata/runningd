@@ -1,45 +1,61 @@
-{% load staticfiles %}
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/html">
-<head>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}"/>
-    <script src="{% static 'js/jquery.js' %}"></script>
-    <script src="{% static 'js/bootstrap.js' %}"></script>
-    {% block scripts %}{% endblock %}
-    <title>{% block title %}这里是标题{% endblock %}</title>
-</head>
-<div role="navigation" class="navbar navbar-inverse">
+{% extends 'export/layout.html' %}
+{% load ifdef %}
+{% block content %}
     <div class="container">
-        <div class="navbar-header">
-            <button type="button" data-toggle="collapse" data-target=".navbar-collapse" class="navbar-toggle collapsed">
-                <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span
-                    class="icon-bar"></span><span class="icon-bar"></span></button>
-            <a href="/export/" class="navbar-brand">Export</a></div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/export/">.</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="./"> </a>
-                </li>
-            </ul>
-        </div>
+        {% csrf_token %}
+        {% has_def 'etl' as has_etl %}
+        {% if has_etl %}
+            <form action="." method="POST">
+                <div class="form-group">
+                    <label>名字</label>
+                    <input name="name" value="{{ obj.name }}" type="text" class="form-control">
+                    <label>表头[英文逗号隔开]</label>
+                    <input name="header" value="{{ obj.header }}" type="text" class="form-control">
+                    <label>查询SQL</label>
+                    <textarea name="query" rows="13" class="form-control">{{ obj.query }}</textarea>
+                    <label>预设变量</label>
+                    <textarea name="variables" rows="5" class="form-control">{{ obj.variables }}</textarea>
+                    <label>是否生效</label>
+                    <div class="radio-inline">
+                        <input id="optionsRadios1" type="radio" name="valid"
+                               checked="checked"
+                               value="1">是
+                    </div>
+                    <div class="radio-inline">
+                        <input id="optionsRadios3" type="radio" name="valid"
+                               checked="checked"
+                               value="0">否
+                    </div>
+                    <br/>
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </div>
+            </form>
+        {% else %}
+            <form action="." method="POST">
+                <div class="form-group">
+                    <label>名字</label>
+                    <input name="name" value="" type="text" class="form-control">
+                    <label>表头[英文逗号隔开]</label>
+                    <input name="header" value="" type="text" class="form-control">
+                    <label>查询SQL</label>
+                    <textarea name="query" rows="13" class="form-control"></textarea>
+                    <label>预设变量</label>
+                    <textarea name="variables" rows="5" class="form-control"></textarea>
+                    <label>是否生效</label>
+                    <div class="radio-inline">
+                        <input id="optionsRadios1" type="radio" name="valid"
+                               checked="checked"
+                               value="1">是
+                    </div>
+                    <div class="radio-inline">
+                        <input id="optionsRadios3" type="radio" name="valid"
+                               checked="checked"
+                               value="0">否
+                    </div>
+                    <br/>
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </div>
+            </form>
+        {% endif %}
     </div>
-</div>
-<body>
-<div class="container">
-    <form action="." method="POST">
-        <div class="form-group">
-            <label>名字</label>
-            <input name="name" value="" type="text" class="form-control">
-            <label>表头[英文逗号隔开]</label>
-            <input name="header" value="" type="text" class="form-control">
-            <label>查询SQL</label>
-            <textarea name="sql" rows="13" class="form-control"></textarea>
-            <button type="submit" class="btn btn-primary">提交</button>
-        </div>
-    </form>
-</div>
-</body>
+{% endblock %}

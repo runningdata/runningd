@@ -1,15 +1,20 @@
 from django.conf.urls import url, include
+from rest_framework import routers
 
-from metamap.views import celery_view
+from metamap.views import sche_etl, export
+from metamap.views.export import AnaETLViewSet
+from metamap.views.etls import ETLViewSet
 from views import etls, metas
 
 app_name = 'metamap'
-from metamap.views.etls import router
+
+router = routers.DefaultRouter()
+router.register(r'etls', ETLViewSet)
+router.register(r'emails', AnaETLViewSet)
+
 urlpatterns = [
 
     url(r'^$', etls.IndexView.as_view(), name='index'),
-
-    url(r'^xx/$', etls.xx, name='xx'),
 
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
     url(r'^etls/invalid/$', etls.InvalidView.as_view(), name='invalid'),
@@ -36,15 +41,16 @@ urlpatterns = [
     url(r'^meta/tbl_search/$', metas.TBLView.as_view(), name='tbl_list'),
     url(r'^meta/tbl_search/(?P<tblid>[0-9]+)/$', metas.get_table, name='tbl_info'),
 
-    url(r'^tasks/tasks/$', celery_view.get_all_tasks, name='tasks'),
-    url(r'^tasks/update/$', celery_view.update_tasks_interval, name='update_tasks_interval'),
+    url(r'^tasks/tasks/$', sche_etl.get_all_tasks, name='tasks'),
+    url(r'^tasks/update/$', sche_etl.update_tasks_interval, name='update_tasks_interval'),
 
-    url(r'^sche/$', celery_view.ScheDepListView.as_view(), name='sche_list'),
-    url(r'^sche/(?P<pk>[0-9]+)/$', celery_view.edit, name='sche_edit'),
-    url(r'^sche/etl/(?P<etlid>[0-9]+)/$', celery_view.sche_etl_list, name='sche_etl_list'),
-    url(r'^schecron/$', celery_view.sche_cron_list, name='sche_cron_list'),
-    url(r'^sche/add/$', celery_view.add, name='sche_add'),
-    url(r'^sche/migrate/$', celery_view.migrate_jobs, name='migrate'),
+    url(r'^sche/$', sche_etl.ScheDepListView.as_view(), name='sche_list'),
+    url(r'^sche/(?P<pk>[0-9]+)/$', sche_etl.edit, name='sche_edit'),
+    url(r'^sche/etl/(?P<etlid>[0-9]+)/$', sche_etl.sche_etl_list, name='sche_etl_list'),
+    url(r'^schecron/$', sche_etl.sche_cron_list, name='sche_cron_list'),
+    url(r'^sche/add/$', sche_etl.add, name='sche_add'),
+    url(r'^sche/migrate/$', sche_etl.migrate_jobs, name='migrate'),
+
 
     url(r'^rest/', include(router.urls)),
     url(r'^json/', etls.get_json),

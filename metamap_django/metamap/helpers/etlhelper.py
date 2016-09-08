@@ -38,7 +38,7 @@ def generate_etl_sql(etl, schedule = -1):
     if schedule == -1:
         str.append(etl.variables)
     else:
-        task = WillDependencyTask.objects.get(etl_id=etl.id, schedule=schedule)
+        task = WillDependencyTask.objects.get(rel_id=etl.id, schedule=schedule)
         str.append(task.variables)
     str.append("-- job for " + etl.tblName)
     if etl.author:
@@ -116,7 +116,7 @@ def load_nodes(leafs, folder, done_blood, schedule):
                                            + " metamap_tblblood a join metamap_tblblood b"
                                            + " on a.parent_tbl = b.tbl_name and b.valid = 1"
                                            + " JOIN metamap_willdependencytask s "
-                                           + " on s.schedule = " + schedule + " and s.etl_id = b.related_etl_id"
+                                           + " on s.type = 1 and s.schedule = " + schedule + " and s.rel_id = b.related_etl_id"
                                            + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
         if parent_node not in done_blood:
             generate_job_file(leaf, parent_node, folder, schedule)

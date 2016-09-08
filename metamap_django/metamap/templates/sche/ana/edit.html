@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'export/layout.html' %}
 {% load ifdef %}
 {% load staticfiles %}
 {% block title %}调度任务{% endblock %}
@@ -177,7 +177,7 @@
                     type: "get",
                     dataType: "json",
                     contentType: "application/json;charset=utf-8",
-                    url: "/metamap/rest/etls/?format=json",
+                    url: "/metamap/rest/emails/?format=json",
                     success: function (result) {
                         $.each(result, function (index, etl) {
                             if (id == etl.id) {

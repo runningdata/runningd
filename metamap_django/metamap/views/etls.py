@@ -16,6 +16,7 @@ from rest_framework import routers
 
 from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions
+from metamap.serializers import ETLSerializer
 from metamap.utils import hivecli, httputils, dateutils, ziputils
 from metamap.utils.constants import *
 
@@ -44,22 +45,13 @@ class IndexView(generic.ListView):
         return context
 
 
-from rest_framework import routers, serializers, viewsets
-
-
-class ETLSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = ETL
-        fields = ('tblName', 'valid', 'id')
+from rest_framework import viewsets
 
 
 class ETLViewSet(viewsets.ModelViewSet):
     queryset = ETL.objects.filter(valid=1).order_by('-ctime')
     serializer_class = ETLSerializer
 
-
-router = routers.DefaultRouter()
-router.register(r'etls', ETLViewSet)
 
 
 def get_json(request):
@@ -231,6 +223,7 @@ def exec_job(request, etlid):
     return redirect('metamap:execlog', execid=execution.id)
     # return redirect('metamap:execlog', execid=1)
 
+
 def review_sql(request, etlid):
     try:
         etl = ETL.objects.get(id=etlid)
@@ -240,11 +233,6 @@ def review_sql(request, etlid):
     except Exception, e:
         logger.error(e)
         return HttpResponse(e)
-
-
-def xx(request):
-    from metamap.tasks import xx
-    return HttpResponse(xx.delay())
 
 
 def exec_log(request, execid):
@@ -305,10 +293,10 @@ def generate_job_dag(request, schedule):
         done_blood = set()
         folder = dateutils.now_datetime()
         leafs = TblBlood.objects.raw("select a.* from "
-                                     + " (select etl_id from metamap_willdependencytask where schedule=" + schedule + " and valid=1) s "
-                                     + " left outer join "
                                      + "(select * from metamap_tblblood where valid = 1) a"
-                                     + " on s.etl_id = a.related_etl_id"
+                                     + " join "
+                                     + " (select rel_id from metamap_willdependencytask where schedule=" + schedule + " and valid=1 and type = 1) s "
+                                     + " on s.rel_id = a.related_etl_id"
                                      + " left outer join "
                                      + "(select distinct parent_tbl from metamap_tblblood where valid = 1) b"
                                      + " on a.tbl_name = b.parent_tbl"

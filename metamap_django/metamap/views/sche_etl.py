@@ -3,20 +3,19 @@
 '''
 created by will 
 '''
-import hashlib
 import os
 
 from django.core.files import File
-from django.http import HttpResponse
 from django.db import transaction
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.utils.datastructures import MultiValueDictKeyError
 from django.views import generic
-from djcelery.models import IntervalSchedule, CrontabSchedule
-from metamap.utils import httputils
+from djcelery.models import IntervalSchedule
+
 from metamap import tasks
 from metamap.models import ETL, PeriodicTask, WillDependencyTask
 from metamap.utils import dateutils
+from metamap.utils import httputils
 from metamap.utils.constants import DEFAULT_PAGE_SIEZE, TMP_EXPORT_FILE_LOCATION
 
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
@@ -45,7 +44,7 @@ def update_tasks_interval(request):
 
 def sche_etl_list(request, etlid):
     etl = ETL.objects.get(pk=etlid)
-    queryset = WillDependencyTask.objects.filter(etl_id=etlid)
+    queryset = WillDependencyTask.objects.filter(rel_id=etlid, type=1)
     return render(request, 'sche/list.html', {'objs': queryset, 'etl': etl})
 
 
@@ -57,9 +56,9 @@ class ScheDepListView(generic.ListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            return WillDependencyTask.objects.filter(etl__tblName__contains=tbl_name_).order_by('-valid', '-ctime')
+            return WillDependencyTask.objects.filter(type=1, etl__tblName__contains=tbl_name_).order_by('-valid', '-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return WillDependencyTask.objects.all().order_by('-valid', '-ctime')
+        return WillDependencyTask.objects.filter(type=1).order_by('-valid', '-ctime')
 
     def get_context_data(self, **kwargs):
         context = super(ScheDepListView, self).get_context_data(**kwargs)

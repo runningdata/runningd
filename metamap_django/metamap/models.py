@@ -7,6 +7,21 @@ from django.utils import timezone
 from metamap.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
 
 
+class AnaETL(models.Model):
+    name = models.CharField(max_length=20)
+    headers = models.TextField(null=False, blank=False)
+    query = models.TextField()
+    author = models.CharField(max_length=20, blank=True, null=True)
+    ctime = models.DateTimeField(default=timezone.now)
+    utime = models.DateTimeField(null=True)
+    priority = models.IntegerField(default=5, blank=True)
+    valid = models.IntegerField(default=1)
+
+    __str__ = query
+
+    def __str__(self):
+        return self.name
+
 class ETL(models.Model):
     query = models.TextField()
     meta = models.CharField(max_length=20)
@@ -24,9 +39,6 @@ class ETL(models.Model):
 
     def __str__(self):
         return self.query
-
-    def test_add(self, a, b):
-        return a + b;
 
     def was_published_recently(self):
         return self.ctime >= timezone.now - datetime.timedelta(days=1)
@@ -78,15 +90,18 @@ class Meta(models.Model):
 
 class WillDependencyTask(models.Model):
     name = models.CharField(unique=True, max_length=200)
-    etl = models.ForeignKey(ETL, models.DO_NOTHING)
     schedule = models.IntegerField(null=False, default=1)  # 0 天 1 周 2 月 3 季度
     valid = models.IntegerField(default=1)
     ctime = models.DateTimeField(default=timezone.now)
     utime = models.DateTimeField(null=True)
     variables = models.TextField()
     desc = models.TextField()
+    rel_id = models.IntegerField(null=True, blank=False, help_text="ETL or Email id")
+    type = models.IntegerField(default=1, blank=False, null=False, help_text="1 ETL; 2 EMAIL;")
+
     class Meta:
-        unique_together = (('etl', 'schedule'),)
+        unique_together = (('rel_id', 'schedule'),)
+
 
 class PeriodicTask(models.Model):
     name = models.CharField(unique=True, max_length=200)
@@ -104,7 +119,7 @@ class PeriodicTask(models.Model):
     description = models.TextField()
     crontab = models.ForeignKey(DjceleryCrontabschedule, models.DO_NOTHING, blank=True, null=True)
     interval = models.ForeignKey(DjceleryIntervalschedule, models.DO_NOTHING, blank=True, null=True)
-    etl = models.ForeignKey(ETL, models.DO_NOTHING, blank=True, null=True)
+    task = models.ForeignKey(WillDependencyTask, models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         db_table = 'djcelery_periodictask'

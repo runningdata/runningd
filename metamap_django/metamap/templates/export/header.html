@@ -1,0 +1,35 @@
+<div role="navigation" class="navbar navbar-inverse">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" data-toggle="collapse" data-target=".navbar-collapse" class="navbar-toggle collapsed">
+                <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span
+                    class="icon-bar"></span><span class="icon-bar"></span></button>
+            <a href="/export/" class="navbar-brand">Export</a></div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                                        class="dropdown-toggle">Email <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'export:index' %}">列表</a></li>
+                        <li><a href="{% url 'export:add' %}">新增</a></li>
+                        <li><a href="/metamap/etls/status/0/">执行中</a></li>
+                        <li><a href="/metamap/etls/status/1/">已完成</a></li>
+                        <li><a href="/metamap/etls/status/2/">最近失败</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                                        class="dropdown-toggle">调度 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'export:sche_list' %}">列表</a></li>
+                        <li><a href="{% url 'export:sche_add' %}">新增</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="./"> </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,12 +1,15 @@
-from django.conf.urls import url, include
+from django.conf.urls import url
 
-from metamap.views import celery_view
-from views import etls, metas
+from metamap.views import sche_etl, sche_ana, export
 
 app_name = 'export'
-from metamap.views.etls import router
 urlpatterns = [
-    url(r'^$', celery_view.export, name='export'),
-    url(r'^execlog/(?P<loc>.+)/$', celery_view.execlog, name='execlog'),
-    url(r'^(?P<filename>.+)/$', celery_view.getfile, name='getfile'),
+    url(r'^$', export.IndexView.as_view(), name='index'),
+    url(r'^add/$', export.add, name='add'),
+
+    url(r'^execlog/(?P<loc>.+)/$', sche_etl.execlog, name='execlog'),
+    url(r'^sche/$', sche_ana.ScheDepListView.as_view(), name='sche_list'),
+    url(r'^sche/(?P<pk>[0-9]+)/$', sche_ana.edit, name='sche_edit'),
+    url(r'^sche/add/$', sche_ana.add, name='sche_add'),
+    url(r'^(?P<filename>.+)/$', sche_etl.getfile, name='getfile'),
 ]
