@@ -305,9 +305,9 @@ def generate_job_dag(request, schedule):
         done_blood = set()
         folder = dateutils.now_datetime()
         leafs = TblBlood.objects.raw("select a.* from "
-                                     + " (select etl_id from metamap_willdependencytask where schedule=" + schedule + " and valid=1) s "
-                                     + " left outer join "
                                      + "(select * from metamap_tblblood where valid = 1) a"
+                                     + " join "
+                                     + " (select etl_id from metamap_willdependencytask where schedule=" + schedule + " and valid=1) s "
                                      + " on s.etl_id = a.related_etl_id"
                                      + " left outer join "
                                      + "(select distinct parent_tbl from metamap_tblblood where valid = 1) b"
