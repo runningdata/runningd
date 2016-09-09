@@ -9,11 +9,12 @@ from time import timezone
 
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import render, redirect
 from django.views import generic
 from rest_framework import viewsets
 
+from metamap.helpers import etlhelper
 from metamap.models import AnaETL
 from metamap.serializers import AnaETLSerializer
 from metamap.utils import httputils
@@ -50,9 +51,18 @@ def add(request):
         httputils.post2obj(obj, request.POST, 'id')
         obj.save()
         logger.info('ETL has been created successfully : %s ' % obj)
+        return HttpResponseRedirect(reverse('export:index'))
     else:
         return render(request, 'export/edit.html')
 
+def review_sql(request, pk):
+    try:
+        obj = AnaETL.objects.get(id=pk)
+        hql = etlhelper.generate_sql(obj.variables, obj.query)
+        return HttpResponse(hql.replace('\n', '<br>'))
+    except Exception, e:
+        logger.error(e)
+        return HttpResponse(e)
 
 def edit(request, pk):
     if request.method == 'POST':
@@ -61,21 +71,9 @@ def edit(request, pk):
                 obj = AnaETL.objects.get(pk=int(pk))
                 obj.valid = 0
                 obj.save()
-
-                if int(request.POST['valid']) == 1:
-                    etl = obj
-                    obj.id = None
-                    obj.ctime = timezone.now()
-                    httputils.post2obj(etl, request.POST, 'id')
-                    find_ = etl.tblName.find('@')
-                    etl.meta = etl.tblName[0: find_]
-
-                    etl.save()
-                    logger.info('ETL has been created successfully : %s ' % etl)
-
                 return HttpResponseRedirect(reverse('export:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
-        etl = AnaETL.objects.get(pk=pk)
-        return render(request, 'export/edit.html', {'etl': etl})
+        obj = AnaETL.objects.get(pk=pk)
+        return render(request, 'export/edit.html', {'obj': obj})

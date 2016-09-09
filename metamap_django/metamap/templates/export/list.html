@@ -1,9 +1,9 @@
 {% extends 'export/layout.html' %}
-{% block title %}ETL列表{% endblock %}
+{% block title %}obj列表{% endblock %}
 {% block scripts %}
     <script type="text/javascript">
-        function preview(etlid) {
-            urlB = '/metamap/etls/review_sql/' + etlid + '/';
+        function preview(objid) {
+            urlB = '/export/review_sql/' + objid + '/';
             $.ajax({
                 url: urlB,
                 success: function (data) {
@@ -37,25 +37,21 @@
 
         {% include 'components/search.html' %}
 
-        {% if etls %}
+        {% if objs %}
             <table class="table table-striped table-hover">
                 <caption></caption>
                 <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>META</th>
-                    <th>表名</th>
+                    <th>名称</th>
                     <th>创建时间</th>
                     <th>操作</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for etl in etls %}
+                {% for obj in objs %}
                     <tr>
-                        <td>{{ etl.id }}</td>
-                        <td>{{ etl.meta }}</td>
-                        <td>{{ etl.tblName }}</td>
-                        <td>{{ etl.ctime|date:"Y年m月d日 H时i分" }}</td>
+                        <td>{{ obj.name }}</td>
+                        <td>{{ obj.ctime|date:"Y年m月d日 H时i分" }}</td>
                         <td>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"
@@ -63,16 +59,9 @@
                                     操作 <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a href="/metamap/etls/{{ etl.id }}/">编辑</a></li>
-{#                                                                        <li><a target="_self" href="/metamap/etls/review_sql/{{ etl.id }}/">预览SQL</a>#}
-{#                                                                        </li>#}
+                                    <li><a href="{% url 'export:edit' obj.id %}">编辑</a></li>
                                     <li><a href="#" data-toggle="modal" data-target="#previewsql"
-                                           onclick="preview({{ etl.id }})">预览SQL</a></li>
-                                    <li><a target="view_window" href="/metamap/etls/exec/{{ etl.id }}/">测试执行</a></li>
-                                    <li><a href="/metamap/etls/exec_list/{{ etl.id }}/">执行记录</a></li>
-                                    <li><a href="{% url 'metamap:blood' etl.id %}">血统</a></li>
-                                    <li><a href="/metamap/etls/his/{{ etl.tblName }}/">历史版本</a></li>
-                                    <li><a href="/metamap/sche/etl/{{ etl.id }}/">调度列表</a></li>
+                                           onclick="preview({{ obj.id }})">预览SQL</a></li>
                                 </ul>
                             </div>
                         </td>
@@ -81,7 +70,7 @@
                 </tbody>
             </table>
         {% else %}
-            <p>没有找到相关ETL</p>
+            <p>没有找到相关obj</p>
         {% endif %}
     </div>
 {% endblock %}

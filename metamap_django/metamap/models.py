@@ -15,6 +15,7 @@ class AnaETL(models.Model):
     ctime = models.DateTimeField(default=timezone.now)
     utime = models.DateTimeField(null=True)
     priority = models.IntegerField(default=5, blank=True)
+    variables = models.CharField(max_length=2000, default='')
     valid = models.IntegerField(default=1)
 
     __str__ = query

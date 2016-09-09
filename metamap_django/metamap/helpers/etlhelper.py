@@ -27,6 +27,20 @@ def get_etl_sql(etl):
     template = Template('\n'.join(str));
     return template.render(Context()).strip()
 
+def generate_sql(variables, query):
+    '''
+    预览HSQL内容
+    :param etl:
+    :return:
+    '''
+    str = list()
+    str.append('{% load etlutils %}')
+    str.append(variables)
+    str.append(query)
+
+    template = Template('\n'.join(str));
+    return template.render(Context()).strip()
+
 def generate_etl_sql(etl, schedule = -1):
     '''
     预览HSQL内容

@@ -3,14 +3,14 @@
 {% block content %}
     <div class="container">
         {% csrf_token %}
-        {% has_def 'etl' as has_etl %}
+        {% has_def 'obj' as has_etl %}
         {% if has_etl %}
             <form action="." method="POST">
                 <div class="form-group">
                     <label>名字</label>
                     <input name="name" value="{{ obj.name }}" type="text" class="form-control">
                     <label>表头[英文逗号隔开]</label>
-                    <input name="header" value="{{ obj.header }}" type="text" class="form-control">
+                    <input name="headers" value="{{ obj.headers }}" type="text" class="form-control">
                     <label>查询SQL</label>
                     <textarea name="query" rows="13" class="form-control">{{ obj.query }}</textarea>
                     <label>预设变量</label>
@@ -36,7 +36,7 @@
                     <label>名字</label>
                     <input name="name" value="" type="text" class="form-control">
                     <label>表头[英文逗号隔开]</label>
-                    <input name="header" value="" type="text" class="form-control">
+                    <input name="headers" value="" type="text" class="form-control">
                     <label>查询SQL</label>
                     <textarea name="query" rows="13" class="form-control"></textarea>
                     <label>预设变量</label>
