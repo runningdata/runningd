@@ -15,7 +15,7 @@ from django.views import generic
 from rest_framework import routers
 
 from metamap.helpers import bloodhelper, etlhelper
-from metamap.models import TblBlood, ETL, Executions
+from metamap.models import TblBlood, ETL, Executions, WillDependencyTask
 from metamap.utils import hivecli, httputils, dateutils, ziputils
 from metamap.utils.constants import *
 
@@ -198,6 +198,12 @@ def edit(request, pk):
 
                     etl.save()
                     logger.info('ETL has been created successfully : %s ' % etl)
+
+                    tasks = WillDependencyTask.objects.filter(etl_id=pk)
+                    for task in tasks:
+                        task.etl_id = etl.id
+                        task.save()
+
                     deps = hivecli.getTbls(etl)
                     for dep in deps:
                         tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
