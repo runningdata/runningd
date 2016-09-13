@@ -5,3 +5,11 @@ celery multi start will -A metamap \
   --loglevel=info
 
 tail -20 /var/log/celery/will.log
+
+celery beat --loglevel=info --logfile="/var/log/celery/beat.log" \
+ --pidfile="/var/run/celery/beat.pid" \
+ --settings=metamap.config.prod \
+ --detach
+
+
+tail -20 /var/log/celery/beat.log
