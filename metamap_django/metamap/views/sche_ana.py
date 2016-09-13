@@ -3,11 +3,16 @@
 '''
 created by will 
 '''
+import json
+
 from django.db import transaction
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from django.views import generic
 
-from metamap.models import WillDependencyTask
+from metamap.djcelery_models import DjceleryCrontabschedule, DjceleryPeriodictasks
+from metamap.helpers import cronhelper
+from metamap.models import WillDependencyTask, PeriodicTask, AnaETL
 from metamap.utils import httputils
 from metamap.utils.constants import DEFAULT_PAGE_SIEZE
 
@@ -37,7 +42,25 @@ def add(request):
         task = WillDependencyTask()
         httputils.post2obj(task, request.POST, 'id')
         task.type = 2
+        task.schedule = 4
         task.save()
+
+        cron_task = PeriodicTask.objects.create()
+        cron_task.name = task.name
+        cron_task.willtask = task
+        cron_task.task = 'metamap.tasks.exec_etl_cli'
+        cron_task.args = '[' + task.id + ']'
+
+        cron = DjceleryCrontabschedule.objects.create()
+        cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(request.POST['cronexp'])
+        cron_task.crontab = cron
+        cron.save()
+
+        cron_task.save()
+
+        tasks = DjceleryPeriodictasks.objects.get(ident=1)
+        tasks.last_update = timezone.now()
+        tasks.save()
         return redirect('export:sche_list')
     else:
         return render(request, 'sche/ana/edit.html')
@@ -49,6 +72,20 @@ def edit(request, pk):
         task = WillDependencyTask.objects.get(pk=pk)
         httputils.post2obj(task, request.POST, 'id')
         task.save()
+
+        cron_task = PeriodicTask.objects.get(willtask_id=pk)
+        cron_task.name = task.name
+        cron_task.save()
+
+        cron = DjceleryCrontabschedule.objects.get(pk=cron_task.crontab_id)
+        cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(
+            request.POST['cronexp'])
+        cron.save()
+
+        tasks = DjceleryPeriodictasks.objects.get(ident=1)
+        tasks.last_update = timezone.now()
+        tasks.save()
+
         return redirect('export:sche_list')
     else:
         obj = WillDependencyTask.objects.get(pk=pk)

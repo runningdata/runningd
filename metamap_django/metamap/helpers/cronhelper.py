@@ -10,7 +10,7 @@ from metamap.utils.constants import CRON_NAME_LIST
 
 def cron_from_str(str):
     p = re.compile('\s')
-    return p.split(str)
+    return p.split(str.strip())
 
 if __name__ == '__main__':
     a = cron_from_str('3/* * * * *')

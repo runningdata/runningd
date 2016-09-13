@@ -9,17 +9,21 @@ from __future__ import absolute_import
 import logging
 import os
 import subprocess
+import traceback
 
 from celery import shared_task, task
 from django.utils import timezone
 
-from metamap.models import ETL, Executions
-from metamap.utils import enums
+from metamap.helpers import etlhelper
+from metamap.models import ETL, Executions, WillDependencyTask, AnaETL, Exports
+from metamap.utils import enums, dateutils
 
 from celery.utils.log import get_task_logger
 
-logger = get_task_logger(__name__)
+from metamap.utils.constants import TMP_EXPORT_FILE_LOCATION
 
+logger = get_task_logger(__name__)
+ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/metamap/'
 
 @task
 def xx():
@@ -52,19 +56,37 @@ def exec_etl(command, log):
 
 
 @shared_task
-def exec_etl_cli(command, header, result):
-    print 'command is ', command
-    with open(result, 'w') as wa:
-        wa.write(header.encode('UTF-8'))
-        wa.write('\n')
-    error_file = result + '.error'
-    p = subprocess.Popen([''.join(command)], shell=True, stderr=open(error_file, 'a'),
-                         stdout=open(result, 'a'), universal_newlines=True)
-    p.wait()
-    done_file = result + '.done'
-    os.mknod(done_file.encode('UTF-8'))
-    returncode = p.returncode
-    logger.info('%s return code is %d' % (command, returncode))
+def exec_etl_cli(task_id):
+
+    export = Exports.objects.create(task_id=task_id)
+    try:
+        will_task = WillDependencyTask.objects.get(pk=task_id)
+        ana_etl = AnaETL.objects.get(pk=will_task.rel_id)
+        part = ana_etl.name + '-' + dateutils.now_datetime()
+        sql = etlhelper.generate_sql(will_task.variables, ana_etl.query)
+        command = 'hive -e \"' + sql + '\"'
+        result = unicode(ROOT_PATH, 'UTF-8') + TMP_EXPORT_FILE_LOCATION + part
+        print 'command is ', command
+        with open(result, 'w') as wa:
+            header = ana_etl.headers.replace(',', '\t')
+            wa.write(header.encode('UTF-8'))
+            wa.write('\n')
+        error_file = result + '.error'
+        p = subprocess.Popen([''.join(command)], shell=True, stderr=open(error_file, 'a'),
+                             stdout=open(result, 'a'), universal_newlines=True)
+        p.wait()
+        returncode = p.returncode
+        export.end_time = timezone.now()
+        export.command = command
+        export.file_loc = part
+        export.save()
+        logger.info('%s return code is %d' % (command, returncode))
+    except Exception, e:
+        logger.error('ERROR: %s' % traceback.format_exc())
+        export.end_time = timezone.now()
+        export.file_loc = part
+        export.command = traceback.format_exc()
+        export.save()
 
 
 @shared_task

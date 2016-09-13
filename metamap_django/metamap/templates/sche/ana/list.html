@@ -20,6 +20,7 @@
             <tr>
                 <th>名称</th>
                 <th>策略</th>
+                <th>表达式(分、时、天、月、周)</th>
                 <th>创建时间</th>
                 <th>操作</th>
             </tr>
@@ -30,6 +31,7 @@
                     <tr>
                         <td>{{ obj.name }}</td>
                         <td>{% readable_schedule obj.schedule %}</td>
+                        <td>{{ obj.get_schedule }}</td>
                         <td>{{ obj.ctime | date:"Y年m月d日 H时i分" }}</td>
                         <td>
                             <div class="btn-group">
@@ -38,7 +40,7 @@
                                     操作 <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a href="{% url 'export:email_edit' pk=obj.id %}">编辑</a></li>
+                                    <li><a href="{% url 'export:sche_edit' pk=obj.id %}">编辑</a></li>
                                 </ul>
                             </div>
                         </td>

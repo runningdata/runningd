@@ -69,7 +69,7 @@ def edit(request, pk):
         try:
             with transaction.atomic():
                 obj = AnaETL.objects.get(pk=int(pk))
-                obj.valid = 0
+                httputils.post2obj(obj, request.POST, 'id')
                 obj.save()
                 return HttpResponseRedirect(reverse('export:index'))
         except Exception, e:

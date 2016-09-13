@@ -7,6 +7,7 @@ from django.utils import timezone
 from metamap.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
 
 
+
 class AnaETL(models.Model):
     name = models.CharField(max_length=20)
     headers = models.TextField(null=False, blank=False)
@@ -61,10 +62,9 @@ class TblBlood(models.Model):
 
 class Executions(models.Model):
     '''
-    任务执行记录
+    单次任务执行记录
     '''
     logLocation = models.CharField(max_length=120, db_column='log_location')
-    # jobId = models.IntegerField(db_column='job_id')
     job = models.ForeignKey(ETL, on_delete=models.CASCADE, null=False)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)
@@ -91,7 +91,7 @@ class Meta(models.Model):
 
 class WillDependencyTask(models.Model):
     name = models.CharField(unique=True, max_length=200)
-    schedule = models.IntegerField(null=False, default=1)  # 0 天 1 周 2 月 3 季度
+    schedule = models.IntegerField(null=False, default=1)  # 0 天 1 周 2 月 3 季度 4 cron
     valid = models.IntegerField(default=1)
     ctime = models.DateTimeField(default=timezone.now)
     utime = models.DateTimeField(null=True)
@@ -101,27 +101,49 @@ class WillDependencyTask(models.Model):
     type = models.IntegerField(default=1, blank=False, null=False, help_text="1 ETL; 2 EMAIL;")
 
     class Meta:
-        unique_together = (('rel_id', 'schedule'),)
+        unique_together = (('rel_id', 'schedule', 'type'),)
+
+    def get_schedule(self):
+        task = PeriodicTask.objects.get(willtask_id=self.id)
+        if self.schedule == 4:
+            cron = task.crontab
+            return cron.minute + ' ' + cron.hour + ' ' + cron.day_of_month + ' ' + cron.month_of_year + ' ' + cron.day_of_week
+        else:
+            return ''
 
 
 class PeriodicTask(models.Model):
     name = models.CharField(unique=True, max_length=200)
     task = models.CharField(max_length=200)
-    args = models.TextField()
-    kwargs = models.TextField()
+    args = models.TextField(default='[]')
+    kwargs = models.TextField(default='{}')
     queue = models.CharField(max_length=200, blank=True, null=True)
     exchange = models.CharField(max_length=200, blank=True, null=True)
     routing_key = models.CharField(max_length=200, blank=True, null=True)
     expires = models.DateTimeField(blank=True, null=True)
-    enabled = models.IntegerField()
+    enabled = models.IntegerField(default=1)
     last_run_at = models.DateTimeField(blank=True, null=True)
-    total_run_count = models.IntegerField()
-    date_changed = models.DateTimeField()
+    total_run_count = models.IntegerField(default=0)
+    date_changed = models.DateTimeField(default=timezone.now)
     description = models.TextField()
     crontab = models.ForeignKey(DjceleryCrontabschedule, models.DO_NOTHING, blank=True, null=True)
     interval = models.ForeignKey(DjceleryIntervalschedule, models.DO_NOTHING, blank=True, null=True)
-    task = models.ForeignKey(WillDependencyTask, models.DO_NOTHING, blank=True, null=True)
+    willtask = models.ForeignKey(WillDependencyTask, models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         db_table = 'djcelery_periodictask'
         managed = False
+
+
+class Exports(models.Model):
+    '''
+    定时任务执行记录
+    '''
+    file_loc = models.CharField(max_length=120, db_column='file_loc')
+    task = models.ForeignKey(WillDependencyTask, on_delete=models.CASCADE, null=False)
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(null=True)
+    command = models.TextField()
+
+    def __str__(self):
+        return self.file_loc

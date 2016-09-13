@@ -42,6 +42,7 @@
                 <caption></caption>
                 <thead>
                 <tr>
+                    <th>版本号</th>
                     <th>名称</th>
                     <th>创建时间</th>
                     <th>操作</th>
@@ -50,6 +51,7 @@
                 <tbody>
                 {% for obj in objs %}
                     <tr>
+                        <td>{{ obj.id }}</td>
                         <td>{{ obj.name }}</td>
                         <td>{{ obj.ctime|date:"Y年m月d日 H时i分" }}</td>
                         <td>
