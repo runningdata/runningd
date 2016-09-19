@@ -7,7 +7,7 @@ DATEKEY_FORMAT = "%Y%m%d"
 AZKABAN_BASE_LOCATION = "/tmp/"
 AZKABAN_SCRIPT_LOCATION = "/var/azkaban-metamap/"
 TMP_SCRIPT_LOCATION = "/var/metamap-tmp/"
-TMP_EXPORT_FILE_LOCATION = "/static/files/"
+TMP_EXPORT_FILE_LOCATION = "/var/metamapfiles/"
 
 # 调度时间
 CRON_EVERY_WEEK = '0 9 0 * *'
