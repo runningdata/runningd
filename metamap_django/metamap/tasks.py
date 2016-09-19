@@ -26,8 +26,8 @@ logger = get_task_logger(__name__)
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/metamap/'
 
 @task
-def xx():
-    return 'sdfsdf'
+def getroot():
+    return ROOT_PATH
 
 
 @shared_task
