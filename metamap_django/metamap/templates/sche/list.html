@@ -19,7 +19,6 @@
             <thead>
             <tr>
                 <th>名称</th>
-                <th>etl</th>
                 <th>策略</th>
                 <th>创建时间</th>
                 <th>操作</th>
@@ -30,7 +29,6 @@
                 {% for obj in objs %}
                     <tr>
                         <td>{{ obj.name }}</td>
-                        <td>{{ obj.etl.tblName }}</td>
                         <td>{% readable_schedule obj.schedule %}</td>
                         <td>{{ obj.ctime | date:"Y年m月d日 H时i分" }}</td>
                         <td>
