@@ -4,6 +4,7 @@ from rest_framework import routers
 from metamap.views import sche_etl, export
 from metamap.views.export import AnaETLViewSet
 from metamap.views.etls import ETLViewSet
+from metamap.views.sche_ana import ExportsViewSet
 from views import etls, metas
 
 app_name = 'metamap'
@@ -11,6 +12,7 @@ app_name = 'metamap'
 router = routers.DefaultRouter()
 router.register(r'etls', ETLViewSet)
 router.register(r'emails', AnaETLViewSet)
+router.register(r'exports', ExportsViewSet)
 
 urlpatterns = [
 
