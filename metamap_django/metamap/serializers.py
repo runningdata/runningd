@@ -5,13 +5,18 @@ created by will
 '''
 from rest_framework import serializers
 
-from metamap.models import ETL, AnaETL, Exports, WillDependencyTask
+from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser
 
 
 class ETLSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ETL
         fields = ('tblName', 'valid', 'id')
+
+class BIUserSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = BIUser
+        fields = ('username',)
 
 class AnaETLSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

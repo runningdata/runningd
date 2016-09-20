@@ -10,11 +10,13 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.views import generic
 from rest_framework import viewsets
+from rest_framework.decorators import list_route
+from rest_framework.response import Response
 
 from metamap.djcelery_models import DjceleryCrontabschedule, DjceleryPeriodictasks
 from metamap.helpers import cronhelper
-from metamap.models import WillDependencyTask, PeriodicTask, AnaETL, Exports
-from metamap.serializers import ExportsSerializer
+from metamap.models import WillDependencyTask, PeriodicTask, AnaETL, Exports, BIUser
+from metamap.serializers import ExportsSerializer, BIUserSerializer
 from metamap.utils import httputils
 from metamap.utils.constants import DEFAULT_PAGE_SIEZE
 
@@ -70,6 +72,23 @@ def add(request):
 class ExportsViewSet(viewsets.ModelViewSet):
     queryset = Exports.objects.all().order_by('-start_time')
     serializer_class = ExportsSerializer
+
+    @list_route(methods=['GET'])
+    def get_all(self, request):
+        user = request.query_params['user']
+        objs = Exports.objects.all()
+        result = list()
+        for export in objs:
+            ana_id = export.task.rel_id
+            ana_etl = AnaETL.objects.get(pk=ana_id)
+            if ana_etl.is_auth(user):
+                result.append(export)
+        serializer = self.get_serializer(result, many=True)
+        return Response(serializer.data)
+
+class BIUserViewSet(viewsets.ModelViewSet):
+    queryset = BIUser.objects.using('ykx_wd').all()
+    serializer_class = BIUserSerializer
 
 @transaction.atomic
 def edit(request, pk):

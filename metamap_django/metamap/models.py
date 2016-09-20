@@ -18,8 +18,18 @@ class AnaETL(models.Model):
     priority = models.IntegerField(default=5, blank=True)
     variables = models.CharField(max_length=2000, default='')
     valid = models.IntegerField(default=1)
+    auth_users = models.TextField(default='',null=False, blank=False)
 
     __str__ = query
+
+    def is_auth(self, user):
+        if len(self.auth_users) == 0 :
+            return True
+        else:
+            split = self.auth_users.split(',')
+            if user in split:
+                return True
+        return False
 
     def __str__(self):
         return self.name
@@ -134,6 +144,11 @@ class PeriodicTask(models.Model):
         db_table = 'djcelery_periodictask'
         managed = False
 
+class BIUser(models.Model):
+    username = models.CharField(max_length=200, blank=True, null=True)
+    class Meta:
+        db_table = 'sys_users'
+        managed = False
 
 class Exports(models.Model):
     '''
