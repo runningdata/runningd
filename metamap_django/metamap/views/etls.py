@@ -192,7 +192,7 @@ def edit(request, pk):
 
                     tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
                     for task in tasks:
-                        task.etl_id = etl.id
+                        task.rel_id = etl.id
                         task.save()
 
                     deps = hivecli.getTbls(etl)
