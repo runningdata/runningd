@@ -38,9 +38,7 @@ fi
 #################################
 
 cd /server/metamap \
-    && git stash \
-    && git pull \
-    && git stash pop
+    && git pull
 
 ######################################
 ###  3. 使用virtualenv启动gunicorn ####
