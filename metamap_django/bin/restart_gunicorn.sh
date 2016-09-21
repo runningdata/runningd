@@ -50,4 +50,5 @@ cd /server/metamap/metamap_django
     metamap_django.wsgi:application \
      -c gunicorn_settings.py
 echo "##########   log  ############"
+sleep 3s
 tail -20 /tmp/gunicorn_error.log
