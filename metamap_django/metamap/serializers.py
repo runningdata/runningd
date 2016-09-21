@@ -31,6 +31,8 @@ class WillTaskSerializer(serializers.HyperlinkedModelSerializer):
 
 class ExportsSerializer(serializers.HyperlinkedModelSerializer):
     task = WillTaskSerializer(required=True)
+    start_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    end_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     class Meta:
         model = Exports
         fields = ('file_loc', 'start_time', 'end_time', 'command', 'task')
