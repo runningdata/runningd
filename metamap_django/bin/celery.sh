@@ -34,12 +34,27 @@ function stop() {
     fi
 }
 
+#################################
+###  1. pull最新代码           ####
+#################################
+
+cd /server/metamap \
+    && git pull
+
 
 cd /server/metamap/metamap_django
 
+
+#################################
+###  2. 关闭正在运行的服务           ####
+#################################
 stop worker
 stop beat
 
+
+#################################
+###  3. 启动新的服务           ####
+#################################
 export C_FORCE_ROOT=true
 
 /server/metamap_virenv/bin/python manage.py celery multi start will -A metamap \

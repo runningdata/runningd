@@ -1,5 +1,7 @@
 #! /bin/bash
 
+
+
 ## 检查当前进程中是否还有gunicorn进程活着
 function check_gunicorn() {
     lines=`ps -ef |grep -c  /server/metamap_virenv/bin/gunicorn`
@@ -13,8 +15,16 @@ function check_gunicorn() {
     fi
 }
 
+
 #################################
-###  1. 停止所有gunicorn进程   ####
+###  1. pull最新代码           ####
+#################################
+
+cd /server/metamap \
+    && git pull
+
+#################################
+###  2. 停止所有gunicorn进程   ####
 #################################
 pid=`ps -ef | grep gunicorn | awk '{if($3 == '1') print $2}'`
 if [[ $pid > 0 ]]; then
@@ -33,12 +43,6 @@ else
     echo "Cannot find master pid for gunicorn"
 fi
 
-#################################
-###  2. pull最新代码           ####
-#################################
-
-cd /server/metamap \
-    && git pull
 
 ######################################
 ###  3. 使用virtualenv启动gunicorn ####
