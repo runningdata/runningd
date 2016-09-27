@@ -49,7 +49,6 @@ cd /server/metamap/metamap_django
 ###  2. 关闭正在运行的服务           ####
 #################################
 stop worker
-stop beat
 
 
 #################################
@@ -64,12 +63,4 @@ export C_FORCE_ROOT=true
   --loglevel=info
 
 tail -20 /var/log/celery/will.log
-
-/server/metamap_virenv/bin/python manage.py celery beat --loglevel=info --logfile="/var/log/celery/beat.log" \
- --pidfile="/var/run/celery/beat.pid" \
- --settings=metamap.config.prod \
- --detach
-
-
-tail -20 /var/log/celery/beat.log
 
