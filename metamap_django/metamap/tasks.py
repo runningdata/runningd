@@ -64,7 +64,7 @@ def exec_etl_cli(task_id):
         ana_etl = AnaETL.objects.get(pk=will_task.rel_id)
         part = ana_etl.name + '-' + dateutils.now_datetime()
         sql = etlhelper.generate_sql(will_task.variables, ana_etl.query)
-        command = 'hive -e \"' + sql + '\"'
+        command = 'hive -e \"' + sql.replace('"', '\\"') + '\"'
         result = TMP_EXPORT_FILE_LOCATION + part
         print 'command is ', command
         with open(result, 'w') as wa:
