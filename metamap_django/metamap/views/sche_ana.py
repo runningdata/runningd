@@ -52,6 +52,7 @@ def add(request):
         cron_task = PeriodicTask.objects.create()
         cron_task.name = task.name
         cron_task.willtask = task
+        cron_task.enabled = task.valid
         cron_task.task = 'metamap.tasks.exec_etl_cli'
         cron_task.args = '[' + str(task.id) + ']'
 
@@ -105,6 +106,10 @@ def edit(request, pk):
         cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(
             request.POST['cronexp'])
         cron.save()
+
+        ptask = PeriodicTask.objects.get(willtask=pk)
+        ptask.enabled = task.valid
+        ptask.save()
 
         tasks = DjceleryPeriodictasks.objects.get(ident=1)
         tasks.last_update = timezone.now()

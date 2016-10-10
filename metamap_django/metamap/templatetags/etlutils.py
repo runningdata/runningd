@@ -66,6 +66,45 @@ def current_date_add(date, num):
     return d.strftime('%Y-%m-%d')
 
 
+@register.simple_tag
+def last_month_start(date):
+    y, m = get_year_and_month(date)
+    if m == 1:  # 如果是1月
+        start_date = datetime.date(y - 1, 12, 1)
+    else:
+        start_date = datetime.date(y, m - 1, 1)
+    return start_date.strftime('%Y-%m-%d')
+
+
+@register.simple_tag
+def last_month_end(date):
+    y, m = get_year_and_month(date)
+    days_ = datetime.date(y, m, 1) - datetime.timedelta(days=1)
+    return days_.strftime('%Y-%m-%d')
+
+@register.simple_tag
+def current_month_start(date):
+    y, m = get_year_and_month(date)
+    month_start_dt = datetime.date(y, m, 1)
+    return month_start_dt.strftime('%Y-%m-%d')
+
+@register.simple_tag
+def current_month_end(date):
+    y, m = get_year_and_month(date)
+    if m == 12:
+        month_end_dt = datetime.date(y + 1, 1, 1) - datetime.timedelta(days=1)
+    else:
+        month_end_dt = datetime.date(y, m + 1, 1) - datetime.timedelta(days=1)
+    return month_end_dt.strftime('%Y-%m-%d')
+
+
+def get_year_and_month(date):
+    date1 = datetime.datetime.strptime(date, '%Y-%m-%d')
+    y = date1.year
+    m = date1.month
+    return y, m
+
+
 status_dic = dict()
 status_dic[0] = u'运行中'
 status_dic[1] = u'完成'
