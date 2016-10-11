@@ -3,8 +3,7 @@
 '''
 created by will 
 '''
-import json
-
+import datetime
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -71,13 +70,17 @@ def add(request):
         return render(request, 'sche/ana/edit.html')
 
 class ExportsViewSet(viewsets.ModelViewSet):
-    queryset = Exports.objects.all().order_by('-start_time')
+    now = timezone.now()
+    days = now - datetime.timedelta(days=7)
+    queryset = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
     serializer_class = ExportsSerializer
 
     @list_route(methods=['GET'])
     def get_all(self, request):
+        now = timezone.now()
+        days = now - datetime.timedelta(days=7)
         user = request.query_params['user']
-        objs = Exports.objects.all()
+        objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
         result = list()
         for export in objs:
             ana_id = export.task.rel_id
