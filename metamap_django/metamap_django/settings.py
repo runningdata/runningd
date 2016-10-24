@@ -31,7 +31,7 @@ EEE = 'default_DEV'
 ALLOWED_HOSTS = []
 
 HIVE_SERVER = {
-    'host': '10.1.5.80',
+    'host': '10.1.5.63',
     'port': 10000,
     'user': 'hdfs',
     'password': '',

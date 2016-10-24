@@ -12,10 +12,10 @@ def clean_blood(blood, current=0):
     :param blood:
     :return:
     '''
-    blood.parentTbl = blood.parentTbl.replace('@', '__')
-    blood.tblName = blood.tblName.replace('@', '__')
+    blood.parentTbl = blood.parentTbl.replace('@', '__').replace('class', 'calss')
+    blood.tblName = blood.tblName.replace('@', '__').replace('class', 'calss')
     if current > 0:
-        blood.tblName += ';style ' + blood.tblName.replace('@', '__') + ' fill:#f9f,stroke:#333,stroke-width:4px'
+        blood.tblName += ';style ' + blood.tblName.replace('@', '__').replace('class', 'calss') + ' fill:#f9f,stroke:#333,stroke-width:4px'
     return blood
 
 def find_parent_mermaid(blood, final_bloods, current=0):

@@ -146,24 +146,24 @@ def his(request, tblName):
     return render(request, 'etl/his.html', {'etls': etls, 'tblName': tblName})
 
 
-@transaction.atomic
 def add(request):
     if request.method == 'POST':
-        etl = ETL()
-        httputils.post2obj(etl, request.POST, 'id')
-        find_ = etl.tblName.find('@')
-        etl.meta = etl.tblName[0: find_]
-        etl.save()
-        logger.info('ETL has been created successfully : %s ' % etl)
         try:
-            deps = hivecli.getTbls(etl)
-            for dep in deps:
-                tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
-                tblBlood.save()
-                logger.info('Tblblood has been created successfully : %s' % tblBlood)
-            return HttpResponseRedirect(reverse('metamap:index'))
+            with transaction.atomic():
+                etl = ETL()
+                httputils.post2obj(etl, request.POST, 'id')
+                find_ = etl.tblName.find('@')
+                etl.meta = etl.tblName[0: find_]
+                etl.save()
+                logger.info('ETL has been created successfully : %s ' % etl)
+                deps = hivecli.getTbls(etl)
+                for dep in deps:
+                    tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+                    tblBlood.save()
+                    logger.info('Tblblood has been created successfully : %s' % tblBlood)
+                return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
-            return render(request, 'common/500.html', {'msg': e})
+            return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
         return render(request, 'etl/edit.html')
 
