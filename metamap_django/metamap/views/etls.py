@@ -158,9 +158,10 @@ def add(request):
                 logger.info('ETL has been created successfully : %s ' % etl)
                 deps = hivecli.getTbls(etl)
                 for dep in deps:
-                    tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
-                    tblBlood.save()
-                    logger.info('Tblblood has been created successfully : %s' % tblBlood)
+                    if etl.tblName != dep:
+                        tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+                        tblBlood.save()
+                        logger.info('Tblblood has been created successfully : %s' % tblBlood)
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
@@ -197,10 +198,10 @@ def edit(request, pk):
 
                     deps = hivecli.getTbls(etl)
                     for dep in deps:
-                        tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
-                        tblBlood.save()
-                        logger.info('Tblblood has been created successfully : %s' % tblBlood)
-
+                        if etl.tblName != dep:
+                            tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+                            tblBlood.save()
+                            logger.info('Tblblood has been created successfully : %s' % tblBlood)
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
