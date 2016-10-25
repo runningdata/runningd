@@ -56,9 +56,21 @@ class ScheDepListView(generic.ListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            return WillDependencyTask.objects.filter(type=1, name__contains=tbl_name_).order_by('-valid', '-ctime')
+            objs = WillDependencyTask.objects.filter(type=1, name__contains=tbl_name_).order_by('-valid', '-ctime')
+            for obj in objs:
+                pk = obj.rel_id
+                etl = ETL.objects.get(id=pk)
+                if etl.valid != 1:
+                    objs = objs.exclude(id=obj.id)
+            return objs
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return WillDependencyTask.objects.filter(type=1).order_by('-valid', '-ctime')
+        objs = WillDependencyTask.objects.filter(type=1).order_by('-valid', '-ctime')
+        for obj in objs:
+            pk = obj.rel_id
+            etl = ETL.objects.get(id=pk)
+            if etl.valid != 1:
+                objs = objs.exclude(id=obj.id)
+        return objs
 
     def get_context_data(self, **kwargs):
         context = super(ScheDepListView, self).get_context_data(**kwargs)
