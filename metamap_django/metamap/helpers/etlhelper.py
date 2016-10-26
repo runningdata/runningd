@@ -69,7 +69,7 @@ def generate_etl_sql(etl, schedule = -1):
     str.append("\n---------------------------------------- query ")
     str.append(etl.query)
 
-    template = Template('\n'.join(str));
+    template = Template('\n'.join(str))
     return template.render(Context()).strip()
 
 

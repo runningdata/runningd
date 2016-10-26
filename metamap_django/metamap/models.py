@@ -37,13 +37,13 @@ class AnaETL(models.Model):
 class ETL(models.Model):
     query = models.TextField()
     meta = models.CharField(max_length=20)
-    tblName = models.CharField(max_length=100, db_column='tbl_name')
+    tblName = models.CharField(max_length=100, db_column='tbl_name', verbose_name=u"ETL名称")
     author = models.CharField(max_length=20, blank=True, null=True)
     preSql = models.TextField(db_column='pre_sql', blank=True, null=True)
     ctime = models.DateTimeField(default=timezone.now)
     priority = models.IntegerField(default=5, blank=True)
     onSchedule = models.IntegerField(default=1, db_column='on_schedule')
-    valid = models.IntegerField(default=1)
+    valid = models.IntegerField(default=1, verbose_name=u"是否生效")
     setting = models.CharField(max_length=200, default='')
     variables = models.CharField(max_length=2000, default='')
 
