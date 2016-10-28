@@ -5,12 +5,14 @@ import os
 import traceback
 from StringIO import StringIO
 
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views import generic
 
 from metamap.helpers import bloodhelper, etlhelper
@@ -24,7 +26,7 @@ logger = logging.getLogger('django')
 
 # work_manager = threadpool.WorkManager(10, 3)
 
-
+@method_decorator(login_required, name='dispatch')
 class IndexView(generic.ListView):
     template_name = 'index.html'
     context_object_name = 'etls'

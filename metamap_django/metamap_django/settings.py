@@ -51,9 +51,16 @@ BROKER_URL = 'redis://localhost:6379'
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
+# 设置cas服务器地址
+CAS_SERVER_URL = "http://127.0.0.1:8081/casserver/"
+# CAS_LOGOUT_COMPLETELY = True
+CAS_PROVIDE_URL_TO_LOGOUT = True
+# CAS_GATEWAY = True
+
 # Application definition
 
 INSTALLED_APPS = [
+    'cas',
     'metamap',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -77,15 +84,26 @@ import djcelery
 djcelery.setup_loader()
 
 MIDDLEWARE_CLASSES = [
+    'metamap.middleware.viewexception.ViewException',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'cas.middleware.CASMiddleware', # cas中间件
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'metamap.middleware.accesstracer.AccessTracer',
 ]
+
+
+### Add authentication backends for cas
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'cas.backends.CASBackend',
+)
 
 ROOT_URLCONF = 'metamap_django.urls'
 
