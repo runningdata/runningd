@@ -1,4 +1,5 @@
 import pyhs2, json
+import re
 from django.conf import settings
 from django.template import Context
 from django.template.backends.django import Template
@@ -18,7 +19,12 @@ def getTbls(etl):
                            password=settings.HIVE_SERVER['password'],
                            database='default') as conn:
             with conn.cursor() as cur:
+
                 sql = sql[sql.lower().index('select'):]
+                matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
+                if matchObj:
+                    sql = sql.replace(matchObj.group(1), '-999')
+
                 # Execute query
                 cur.execute("explain dependency " + sql)
 
