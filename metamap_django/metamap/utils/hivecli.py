@@ -21,9 +21,9 @@ def getTbls(etl):
             with conn.cursor() as cur:
 
                 sql = sql[sql.lower().index('select'):]
-                matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
-                if matchObj:
-                    sql = sql.replace(matchObj.group(1), '-999')
+                # matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
+                # if matchObj:
+                #     sql = sql.replace(matchObj.group(1), '-999')
 
                 # Execute query
                 cur.execute("explain dependency " + sql)
