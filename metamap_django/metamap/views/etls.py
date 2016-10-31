@@ -196,12 +196,16 @@ def edit(request, pk):
                         task.rel_id = etl.id
                         task.save()
 
+                    logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
+
                     deps = hivecli.getTbls(etl)
                     for dep in deps:
+                        logger.info("dep is %s, tblName is %s " % (dep, etl.tblName))
                         if etl.tblName != dep:
                             tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
                             tblBlood.save()
                             logger.info('Tblblood has been created successfully : %s' % tblBlood)
+                    logger.info('Tblblood for %s has been created successfully' % (pk))
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
