@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+{% block title %}ETL列表{% endblock %}
+
+{% block content %}
+    <div class="container">
+
+        <h2>{{ tblName }} 版本记录</h2>
+        {% if etls %}
+            <table class="table table-striped">
+                <caption></caption>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>META</th>
+                    <th>表名</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for etl in etls %}
+                    <tr>
+                        <td>{{ etl.id }}</td>
+                        <td>{{ etl.meta }}</td>
+                        <td>{{ etl.tblName }}</td>
+                        <td>{{ etl.ctime|date:"Y年m月d日 H时i分" }}</td>
+                        <td>
+                            <a class="btn btn-primary btn-sm" href="/metamap/etls/{{ etl.id }}/">编辑</a>
+                            <a target="view_window" class="btn btn-primary btn-sm"
+                               href="/metamap/etls/review_sql/{{ etl.id }}/">预览SQL</a>
+                            <a target="view_window" class="btn btn-primary btn-sm"
+                            <a class="btn btn-primary btn-sm" href="/metamap/etls/exec_list/{{ etl.id }}/">执行记录</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>没有找到相关ETL</p>
+        {% endif %}
+    </div>
+{% endblock %}

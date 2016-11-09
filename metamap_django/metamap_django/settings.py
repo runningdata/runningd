@@ -54,6 +54,10 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 # Application definition
 
 INSTALLED_APPS = [
+    'djcelery',
+    'rest_framework',
+    'will_common',
+    # 'dqms',
     'metamap',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -61,8 +65,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'djcelery',
-    'rest_framework',
 ]
 
 REST_FRAMEWORK = {
@@ -87,7 +89,8 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'metamap_django.urls'
+# ROOT_URLCONF = 'metamap_django.dqms_urls'
+ROOT_URLCONF = 'metamap_django.metamap_urls'
 
 TEMPLATES = [
     {

@@ -14,9 +14,9 @@ from djcelery.models import IntervalSchedule
 
 from metamap import tasks
 from metamap.models import ETL, PeriodicTask, WillDependencyTask
-from metamap.utils import dateutils
-from metamap.utils import httputils
-from metamap.utils.constants import DEFAULT_PAGE_SIEZE, TMP_EXPORT_FILE_LOCATION
+from will_common.utils import dateutils
+from will_common.utils import httputils
+from will_common.utils.constants import DEFAULT_PAGE_SIEZE, TMP_EXPORT_FILE_LOCATION
 
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
 

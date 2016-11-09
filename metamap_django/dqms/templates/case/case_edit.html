@@ -1,0 +1,726 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>用例编辑</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/page/check_manager/index.css' %}"/>
+    {% include 'component/js.html' %}
+    <script>
+        var case_id;
+        var case_name;
+        var seqId = 0;
+        var seqIdList = new Array();
+        var curr_rule = -1;
+
+        var ruleInfoMap = {
+            Set: function (key, value) {
+                this[key] = value
+            },
+            Get: function (key) {
+                return this[key]
+            },
+            Contains: function (key) {
+                return this.Get(key) == null ? false : true
+            },
+            Remove: function (key) {
+                delete this[key]
+            }
+        }
+
+
+        /**
+         *删除指标规则
+         */
+        function deleteRule(seqId) {
+            alert('rule is : ' + seqId);
+            alert('rule list : ' + seqIdList.join(','));
+            seqIdList.splice(seqIdList.indexOf(seqId), 1);
+            ruleInfoMap.Remove(seqId);
+
+            var ruledata = "";
+            for (var time in seqIdList) {
+                ruledata += ruleInfoMap.Get(seqIdList[time]);
+            }
+            $("#rule_list_table").html(ruledata);
+        }
+
+        /**
+         *编辑指标规则
+         */
+        function editRule(seqId, measure_name, measure_column, measure_type, rule_type, min, max) {
+            curr_rule = seqId;
+            $("#index_name").attr('value', measure_name);
+            $("#col_name").attr('value', measure_column);
+            $("#alarm_min").attr('value', min);
+            $("#alarm_max").attr('value', max);
+
+            $("#createRuleModal").modal('show');
+
+            var count = $("#data_type option").length;
+            for (var i = 0; i < count; i++) {
+                if ($("#data_type").get(0).options[i].text == measure_type) {
+                    $("#data_type").get(0).options[i].selected = true;
+                    break;
+                }
+            }
+            count = $("#rule_type option").length;
+            for (var i = 0; i < count; i++) {
+                if ($("#rule_type").get(0).options[i].text == rule_type) {
+                    $("#rule_type").get(0).options[i].selected = true;
+                    break;
+                }
+            }
+        }
+
+
+        function deleteDataSrc() {
+            $("#src_list_table").html("");
+        }
+
+        /**
+         * 解析URL参数
+         */
+        function parseUrlParams(msg) {
+            var params = {};
+            var str = decodeURIComponent(msg);
+            if (str.charAt(0) == '?')
+                str = str.substring(1);
+            var strs = str.split('&');
+            for (var i = 0; i < strs.length; i++) {
+                if (strs[i].indexOf('=') > 0) {
+                    var temp = strs[i].split('=');
+                    params[temp[0]] = temp[1];
+                } else if (strs[i] != null && strs[i] != '') {
+                    params[strs[i]] = true;
+                }
+            }
+
+            return params;
+        }
+        //获取当前管理的数据源
+        function getAllDataSrc() {
+            var page = 1;
+            var rows = 20;
+            $.ajax({
+                type: "get",
+                measure_type: "json",
+                contentType: "application/json;charset=utf-8",
+                url: "/dqms/rest/datasrc/?format=json",
+                success: function (result) {
+                    var src_data = "";
+                    $.each(result, function (index, etl) {
+                        src_data += "<tr>" +
+                                "<td Name='srcId'class='id'>" + etl.id + "</td>" +
+                                "<td class='name'>" + etl.src_name + "</td>" +
+                                "<td>" +
+                                "<button class='btn btn-default btn-xs' onclick=\"addDataSrc(" + etl.id + ",'" + etl.src_name + "')\">添加</button>" +
+                                "</td>" +
+                                "</tr>";
+                    });
+                    $("#all_src_list_table").html(src_data);
+                    $("#addSrcsModal").modal('show');
+                }
+            });
+        }
+        //一个任务只能关联一个数据源
+        function addDataSrc(srcId, srcName) {
+            var src_data = "";
+            src_data += "<tr>" +
+                    "<td Name='srcId' class='id'>" + srcId + "</td>" +
+                    "<td class='name'>" + srcName + "</td>" +
+                    "<td>" +
+                    "<button class='btn btn-default btn-xs' onclick=\"deleteDataSrc()\">删除</button>" +
+                    "</td>" +
+                    "</tr>";
+            $("#src_list_table").html(src_data);
+        }
+
+        // 新建指标规则
+        function createRule() {
+            $("#createRuleModal").modal('show');
+        }
+
+        //取消新建规则
+        function cancelRule() {
+            curr_rule = -1;
+            $("#createRuleModal").modal('hide');
+
+        }
+
+        //保存新建规则
+        function saveRule() {
+            var measure_name = $("#index_name").val();
+            var measure_column = $("#col_name").val();
+            var min = $("#alarm_min").val();
+            var max = $("#alarm_max").val();
+            var obj = document.getElementById('data_type');
+            var measure_type = obj.options[obj.selectedIndex].text;
+            obj = document.getElementById('rule_type');
+            var rule_type = obj.options[obj.selectedIndex].text;
+
+            //新建规则的保存
+            if (curr_rule == -1) {
+                seqId = seqId + 1;
+                curr_rule = seqId;
+                seqIdList.push(seqId);
+            } else {
+                //编辑已经存在的规则，然后保存
+                ruleInfoMap.Remove(curr_rule);
+            }
+            var ruledata = "<tr>" +
+                    "<td class='id'>" + curr_rule + "</td>" +
+                    "<td Name='measure_name' class='name'>" + measure_name + "</td>" +
+                    "<td Name='measure_column'>" + measure_column + "</td>" +
+                    "<td Name='measure_type'>" + measure_type + "</td>" +
+                    "<td Name='rule_type'>" + rule_type + "</td>" +
+                    "<td Name='min'>" + min + "</td>" +
+                    "<td Name='max'>" + max + "</td>" +
+                    "<td>" +
+                    "<button class='btn btn-default btn-xs' onclick=\"deleteRule(" + curr_rule + ")\">删除</button>" +
+                    "<button class='btn btn-default btn-xs' onclick=\"editRule(" + curr_rule + ",'" + measure_name + "','" + measure_column + "','" + measure_type + "','" + rule_type + "','" + min + "','" + max + "')\">编辑</button>" +
+                    "</td>" +
+                    "</tr>";
+            ruleInfoMap.Set(curr_rule, ruledata);
+            ruledata = "";
+            for (var time in seqIdList) {
+                ruledata += ruleInfoMap.Get(seqIdList[time]);
+            }
+            curr_rule = -1;
+            $("#rule_list_table").html(ruledata);
+            $("#createRuleModal").modal('hide');
+
+        }
+
+        function dqmsEncodeURI(sqlPattern) {
+            sqlPattern = sqlPattern.replace(/\+/g, "%2B");
+            sqlPattern = sqlPattern.replace(/&/g, "%26");
+            sqlPattern = sqlPattern.replace(/%/g, "%25");
+            return sqlPattern;
+        }
+
+        //保存新建case用例
+        function saveCase() {
+            var caseName = $("#case_name").val();
+            var remark = $("#remark").val();
+            var sqlPattern = $("#sqlPattern").val()
+            var columnName = $("#datameasure_column").val();
+            var dataDimension = $("#dataDimension").val();
+            var dataSrc = GetTableData(document.getElementById('src_table'));
+            if (dataSrc == null) {
+                $("#failedModal").modal('show');
+                $("#casefail").html("没有选择数据源");
+                return;
+            }
+            var ruleIndexs = GetTableAllData(document.getElementById('rule_table'));
+
+            case_id = $("#case_id").val();
+            $.ajax({
+                url: "/dqms/case/save/",
+                type: "post",
+                data: "id=" + case_id
+                + "&case_name=" + caseName
+                + "&remark=" + remark
+                + "&sql_pattern=" + sqlPattern
+                + "&column_name=" + columnName
+                + "&data_dimension=" + dataDimension
+                + "&datasrc_id=" + dataSrc
+                + "&ruleIndexs=" + ruleIndexs,
+                success: function (resp) {
+                    if (resp.code == 1) { //调用服务失败
+                        $("#failedModal").modal('show');
+                        $("#casefail").html(resp.msg);
+                        return;
+                    }
+                    window.parent.select_page('case', null);
+
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    $("#failedModal").modal('show');
+                    $("#casefail").html(errorThrown);
+                    return;
+                }
+            });
+
+        }
+
+        //取消新建用例
+        function cancelCase() {
+            window.parent.select_page('case');
+        }
+
+    </script>
+
+</head>
+<body>
+<div class="panel-dash">
+    <!-- breadcrumb start -->
+    <div id="breadcrumb">
+        <ul class="breadcrumb">
+            <li>用例管理</li>
+        </ul>
+    </div>
+    <!-- breadcrumb end -->
+    {% if obj %}
+        <!-- first-step panel start -->
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4>
+                    <span class="badge">1</span>
+                    用例定义
+                </h4>
+            </div>
+            <input id="case_id" type="hidden" name="case_id" value="{{ obj.id }}"/>
+            <div class="panel-body">
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        用例名称<span style="color:#F00;margin-left: 8px;">*</span>
+                    </label>
+                    <div class="m-search-detail">
+                        <input id="case_name" type="text" class="form-control" placeholder="必填项，支持中英文字符，不超过30个汉字"
+                               maxlength="30" name="name" value="{{ obj.case_name }}">
+                    </div>
+                </div>
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        用例描述
+                    </label>
+                    <div class="m-search-detailm-search-detail">
+                    <textarea class="form-control" id="remark" rows="3" placeholder="选填项，不超过100个汉字" maxlength="100"
+                              name="remark" value="{{ obj.remark }}">{{ obj.remark }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="loading-overlay">
+                <i class="loading-icon fa fa-refresh fa-spin fa-lg"></i>
+            </div>
+        </div>
+        <!-- first-step panel end -->
+
+        <!-- second-step panel start -->
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4>
+                    <span class="badge">2</span>
+                    数据源配置
+                </h4>
+            </div>
+            <div class="panel-body">
+                <div>
+                    <button type="button" class="btn btn-success" id="j-addsrc" onclick="getAllDataSrc()">
+                        选择数据源<span style="color:#F00;margin-left: 8px;">*</span>
+                    </button>
+                </div>
+                <div id="src-search-list">
+
+                    <table id="src_table" class="table table-bordered " style="margin-top: 8px">
+                        <thead>
+                        <tr>
+                            <th>数据源编号</th>
+                            <th>数据源名称</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="src_list_table">
+                        <tr>
+                            <td Name='srcId' class='id'> {{ obj.datasrc_id }}</td>
+                            <td class='name'> {{ obj.datasrc.src_name }}</td>
+                            <td>
+                                <button class='btn btn-default btn-xs' onclick="deleteDataSrc()">删除</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        sql描述<span style="color:#F00;margin-left: 8px;">*</span>
+                    </label>
+                    <div class="m-search-detail">
+                    <textarea class="form-control" id="sqlPattern" rows="5" placeholder="必填项" maxlength="10000"
+                              name="describe">{{ obj.sql_pattern }}</textarea>
+                    </div>
+                </div>
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        数据列<span style="color:#F00;margin-left: 8px;">*</span>
+                    </label>
+                    <div class="m-search-detail">
+                    <textarea class="form-control" id="datameasure_column" rows="3" placeholder="必填项，sql中所有的列。列与列之间用,隔开"
+                              maxlength="1000" name="datameasure_column">{{ obj.column_name }}</textarea>
+                    </div>
+                </div>
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        数据维度<span style="color:#F00;margin-left: 8px;">*</span>
+                    </label>
+                    <div class="m-search-detail">
+                    <textarea class="form-control" id="dataDimension" rows="3"
+                              placeholder="sql中涉及的维度列,列之间用,隔开.如果质检用例不包含维度,为空" maxlength="500"
+                              name="datameasure_column">{{ obj.data_dimension }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- second-step panel end -->
+
+
+        <!-- third-step panel start -->
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4>
+                    <span class="badge">3</span>
+                    规则管理
+                </h4>
+            </div>
+            <div class="panel-body">
+                <div>
+                    <button type="button" class="btn btn-success" id="j-addrule" onclick="createRule()">添加规则</button>
+                </div>
+                <div id="j-search-list">
+                    <table id="rule_table" class="table table-bordered " style="margin-top: 8px">
+                        <thead>
+                        <tr>
+                            <th>指标编号</th>
+                            <th>指标名称</th>
+                            <th>数据列</th>
+                            <th>数据类型</th>
+                            <th>规则类型</th>
+                            <th>警报下界</th>
+                            <th>警报上界</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="rule_list_table">
+{#                        {% for rule in obj.dqmsrule_set.all %}#}
+{#                            <tr>#}
+{#                                <td class='id'>  {{ forloop.counter }} </td>#}
+{#                                <td Name='measure_name'#}
+{#                                    class='name'>  {{ rule.measure_name| default_if_none:"-" }}  </td>#}
+{#                                <td Name='measure_column'>  {{ rule.measure_column| default_if_none:"-" }}  </td>#}
+{#                                <td Name='measure_type'>  {{ rule.measure_type }}  </td>#}
+{#                                <td Name='rule_type'>  {{ rule.rule_type }}  </td>#}
+{#                                <td Name='min'>  {{ rule.min }} </td>#}
+{#                                <td Name='max'>  {{ rule.max }}  </td>#}
+{#                                <td>#}
+{#                                    <button class='btn btn-default btn-xs' onclick="deleteRule({{ rule.id }})">删除#}
+{#                                    </button>#}
+{#                                    <button class='btn btn-default btn-xs'#}
+{#                                            onclick="editRule({{ rule.id }},'{{ rule.measure_name }}','{{ rule.measure_column }}', '{{ rule.measure_type }}','{{ rule.rule_type }}', {{ rule.min }}, {{ rule.max }})">#}
+{#                                        编辑#}
+{#                                    </button>#}
+{#                                </td>#}
+{#                            </tr>#}
+{#                        {% endfor %}#}
+
+                        </tbody>
+
+                        <script>
+                            $.ajax({
+                                url: "/dqms/rest/ruleforcase/get_all/",
+                                data: "id=" + {{ obj.id }} + '&format=json',
+                                type: "get",
+                                success: function (data) {
+                                    var index_data="";
+                                    for (i = 0; i < data.length; i++) {
+                                        seqId = seqId + 1;
+                                        var ruledata = "<tr>" +
+                                                "<td class='id'>" + seqId + "</td>" +
+                                                "<td Name='measure_name' class='name'>" + data[i].measure_name + "</td>" +
+                                                "<td Name='measure_column'>" + data[i].measure_column + "</td>" +
+                                                "<td Name='measure_type'>" + data[i].measure_type + "</td>" +
+                                                "<td Name='rule_type'>" + data[i].rule_type + "</td>" +
+                                                "<td Name='min'>" + data[i].min + "</td>" +
+                                                "<td Name='max'>" + data[i].max + "</td>" +
+                                                "<td>" +
+                                                "<button class='btn btn-default btn-xs' onclick=\"deleteRule(" + seqId + ")\">删除</button>" +
+                                                "<button class='btn btn-default btn-xs' onclick=\"editRule(" + seqId + ",'" + data[i].measure_name + "','" + data[i].measure_column + "','" + data[i].measure_type + "','" + data[i].rule_type + "','" + data[i].min + "','" + data[i].max + "')\">编辑</button>" +
+                                                "</td>" +
+                                                "</tr>";
+                                        seqIdList.push(seqId);
+                                        ruleInfoMap.Set(seqId, ruledata);
+                                    }
+                                    for (var time in seqIdList) {
+                                        index_data += ruleInfoMap.Get(seqIdList[time]);
+                                    }
+                                    $("#rule_list_table").html(index_data);
+                                }
+                            });
+                        </script>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <!-- third-step panel end -->
+    {% else %}
+        <!-- first-step panel start -->
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4>
+                    <span class="badge">1</span>
+                    用例定义
+                </h4>
+            </div>
+            <input id="case_id" type="hidden" name="case_id" value="-1"/>
+            <div class="panel-body">
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        用例名称<span style="color:#F00;margin-left: 8px;">*</span>
+                    </label>
+                    <div class="m-search-detail">
+                        <input id="case_name" type="text" class="form-control" placeholder="必填项，支持中英文字符，不超过30个汉字"
+                               maxlength="30" name="name">
+                    </div>
+                </div>
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        用例描述
+                    </label>
+                    <div class="m-search-detailm-search-detail">
+                    <textarea class="form-control" id="remark" rows="3" placeholder="选填项，不超过100个汉字" maxlength="100"
+                              name="remark"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="loading-overlay">
+                <i class="loading-icon fa fa-refresh fa-spin fa-lg"></i>
+            </div>
+        </div>
+        <!-- first-step panel end -->
+
+        <!-- second-step panel start -->
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4>
+                    <span class="badge">2</span>
+                    数据源配置
+                </h4>
+            </div>
+            <div class="panel-body">
+                <div>
+                    <button type="button" class="btn btn-success" id="j-addsrc" onclick="getAllDataSrc()">
+                        选择数据源<span style="color:#F00;margin-left: 8px;">*</span>
+                    </button>
+                </div>
+                <div id="src-search-list">
+
+                    <table id="src_table" class="table table-bordered " style="margin-top: 8px">
+                        <thead>
+                        <tr>
+                            <th>数据源编号</th>
+                            <th>数据源名称</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="src_list_table">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        sql描述<span style="color:#F00;margin-left: 8px;">*</span>
+                    </label>
+                    <div class="m-search-detail">
+                    <textarea class="form-control" id="sqlPattern" rows="5" placeholder="必填项" maxlength="10000"
+                              name="describe"></textarea>
+                    </div>
+                </div>
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        数据列<span style="color:#F00;margin-left: 8px;">*</span>
+                    </label>
+                    <div class="m-search-detail">
+                    <textarea class="form-control" id="datameasure_column" rows="3" placeholder="必填项，sql中所有的列。列与列之间用,隔开"
+                              maxlength="1000" name="datameasure_column"></textarea>
+                    </div>
+                </div>
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        数据维度<span style="color:#F00;margin-left: 8px;">*</span>
+                    </label>
+                    <div class="m-search-detail">
+                    <textarea class="form-control" id="dataDimension" rows="3"
+                              placeholder="sql中涉及的维度列,列之间用,隔开.如果质检用例不包含维度,为空" maxlength="500" name="datameasure_column"
+                    ></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- second-step panel end -->
+
+
+        <!-- third-step panel start -->
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4>
+                    <span class="badge">3</span>
+                    规则管理
+                </h4>
+            </div>
+            <div class="panel-body">
+                <div>
+                    <button type="button" class="btn btn-success" id="j-addrule" onclick="createRule()">添加规则</button>
+                </div>
+                <div id="j-search-list">
+                    <table id="rule_table" class="table table-bordered " style="margin-top: 8px">
+                        <thead>
+                        <tr>
+                            <th>指标编号</th>
+                            <th>指标名称</th>
+                            <th>数据列</th>
+                            <th>数据类型</th>
+                            <th>规则类型</th>
+                            <th>警报下界</th>
+                            <th>警报上界</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="rule_list_table">
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <!-- third-step panel end -->
+    {% endif %}
+    <div class="text-center">
+        <button class="btn btn-success j-cancel" type="submit" onclick="cancelCase()">取消</button>
+        <button class="btn btn-success j-save" type="submit" onclick="saveCase()">保存</button>
+    </div>
+</div>
+
+<!-- Modal HTML -->
+<!-- 获取测试用例数据源任务 -->
+<div id="addSrcsModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="srcTitle" class="modal-title">质检数据源</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered " style="margin-top: 8px">
+                    <thead>
+                    <tr>
+                        <th>数据源编号</th>
+                        <th>数据源名称</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="all_src_list_table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal HTML -->
+<!-- 创建指标规则 -->
+<div id="createRuleModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="ruleTitle" class="modal-title">新建指标规则</h4>
+            </div>
+            <div class="modal-body" id="body">
+                <table class="table table-bordered " style="margin-top: 8px">
+                    <div class="m-search-group">
+                        <label class="m-search-label">
+                            指标名称<span style="color:#F00;margin-left: 8px;">*</span>
+                        </label>
+                        <div class="m-search-detail">
+                            <input id="index_name" type="text" class="form-control" placeholder="必填项，支持中英文字符，不超过20个汉字"
+                                   maxlength="50" name="name" value="">
+                        </div>
+                    </div>
+
+                    <div class="m-search-group">
+                        <label class="m-search-label">
+                            数据列<span style="color:#F00;margin-left: 8px;">*</span>
+                        </label>
+                        <div class="m-search-detail">
+                            <input id="col_name" type="text" class="form-control" placeholder="必填项，sql中对应的数据列"
+                                   maxlength="100" name="name" value="">
+                        </div>
+                    </div>
+
+                    <div class="m-search-group">
+                        <label class="m-search-label">
+                            数据类型<span style="color:#F00;margin-left: 8px;">*</span>
+                        </label>
+                        <div class="input-group">
+                            <select class="from-control" name="data_type" id="data_type">
+                                <option value="1">double</option>
+                                <option value="2">int</option>
+                                <option value="3">String</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="m-search-group">
+                        <label class="m-search-label">
+                            规则类型<span style="color:#F00;margin-left: 8px;">*</span>
+                        </label>
+                        <div class="input-group">
+                            <select class="from-control" name="rule_type" id="rule_type">
+                                <option value="1">非空规则</option>
+                                <option value="4">值域规则</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="m-search-group">
+                        <label class="m-search-label">
+                            警报下界
+                        </label>
+                        <div class="m-search-detail">
+                            <input id="alarm_min" type="text" class="form-control" placeholder="必填项，必须为数值"
+                                   maxlength="30" name="name" value="">
+                        </div>
+                    </div>
+                    <div class="m-search-group">
+                        <label class="m-search-label">
+                            警报上界
+                        </label>
+                        <div class="m-search-detail">
+                            <input id="alarm_max" type="text" class="form-control" placeholder="必填项，必须为数值"
+                                   maxlength="30" name="name" value="">
+                        </div>
+                    </div>
+
+                </table>
+
+                <div class="text-center">
+                    <button class="btn btn-success j-cancel" type="submit" onclick="cancelRule()">取消</button>
+                    <button class="btn btn-success j-save" type="submit" onclick="saveRule()">保存</button>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--失败弹窗-->
+<div id="failedModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">失败</h4>
+            </div>
+            <div class="modal-body">
+                <p id="casefail">调用服务失败，请联系管理员。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

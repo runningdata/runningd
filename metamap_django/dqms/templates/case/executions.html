@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+{% load etlutils %}
+{% load ifdef %}
+{% block title %}ETL执行记录{% endblock %}
+
+{% block content %}
+    {% has_def 'executions'  as has %}
+    {% if has %}
+    <div class="container">
+        <h2>{{ executions.first.job.tblName }} 执行记录</h2>
+        <table class="table table-striped">
+            <caption>执行记录</caption>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>开始时间</th>
+                <th>结束时间</th>
+                <th>结果状态</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if executions %}
+                {% for execution in executions %}
+                    <tr>
+                        <td>{{ execution.id }}</td>
+                        <td>{{ execution.start_time|date:"Y年m月d日 H时i分" }}</td>
+                        <td>{{ execution.end_time|date:"Y年m月d日 H时i分" }}</td>
+                        <td>{% readable_status execution.status %}</td>
+                        <td>
+                            <a class="btn btn-primary btn-sm" href="/metamap/etls/execlog/{{ execution.id }}/">详情</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <p>暂时没有执行记录</p>
+            {% endif %}
+            </tbody>
+        </table>
+        
+    </div>
+    {% endif %}
+{% endblock %}

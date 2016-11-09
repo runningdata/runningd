@@ -7,7 +7,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 from django.utils.timezone import utc
 import django.utils.timezone
-import metamap.utils.fileds
+import will_common.utils.fileds
 
 
 class Migration(migrations.Migration):
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
             name='TBL',
             fields=[
                 ('tbl_id', models.BigIntegerField(max_length=20, primary_key=True, serialize=False)),
-                ('create_time', metamap.utils.fileds.Long2Date()),
+                ('create_time', will_common.utils.fileds.Long2Date()),
                 ('owner', models.CharField(max_length=767)),
                 ('tbl_name', models.CharField(max_length=128)),
             ],

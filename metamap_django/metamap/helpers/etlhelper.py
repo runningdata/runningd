@@ -7,8 +7,8 @@ created by will
 from django.template import Context, Template
 
 from metamap.models import TblBlood, ETL, WillDependencyTask
-from metamap.utils import dateutils
-from metamap.utils.constants import *
+from will_common.utils import dateutils
+from will_common.utils.constants import *
 import logging
 
 logger = logging.getLogger('info')

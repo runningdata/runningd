@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+
+{% block title %}预览SQL{% endblock %}
+
+{% block content %}
+    <h2>HQL: {{ obj.tblName }}</h2>
+    <br/>
+ <pre> {{ hql }}</pre>
+{% endblock %}

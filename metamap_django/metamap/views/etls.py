@@ -16,8 +16,8 @@ from django.views import generic
 from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions, WillDependencyTask
 from metamap.serializers import ETLSerializer
-from metamap.utils import hivecli, httputils, dateutils, ziputils
-from metamap.utils.constants import *
+from will_common.utils import hivecli, httputils, dateutils, ziputils
+from will_common.utils.constants import *
 
 logger = logging.getLogger('django')
 
@@ -58,7 +58,7 @@ def get_json(request):
     io = StringIO()
     json.dump(queryset, io)
     from django.core import serializers
-    data = serializers.serialize('json', queryset)
+    data = serializers.serialize('json ', queryset)
     return HttpResponse(data, mimetype="application/json")
 
 

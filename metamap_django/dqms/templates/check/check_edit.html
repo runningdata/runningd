@@ -1,0 +1,518 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>质检定义编辑</title>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/page/check_manager/index.css' %}"/>
+
+    {% include 'component/js.html' %}
+    <script>
+        var PAGE_ROWS = 50;
+        var PAGE_NUM = 1;
+        var CHECK_ID = "chk_id";
+        var CHECK_NAME = "chk_name";
+        var chk_id;
+        var chk_name = "";
+        var creator = "";
+        var caseList = new Array();
+
+        var caseInfoMap = {
+            Set: function (key, value) {
+                this[key] = value
+            },
+            Get: function (key) {
+                return this[key]
+            },
+            Contains: function (key) {
+                return this.Get(key) == null ? false : true
+            },
+            Remove: function (key) {
+                delete this[key]
+            }
+        }
+
+
+        $(document).ready(function () {
+            var params = parseUrlParams(location.search);
+            chk_id = params[CHECK_ID];
+            chk_name = params[CHECK_NAME];
+            creator = params["creator"];
+        });
+
+        /**
+         * 解析URL参数
+         */
+        function parseUrlParams(msg) {
+            var params = {};
+            var str = decodeURIComponent(msg);
+            if (str.charAt(0) == '?')
+                str = str.substring(1);
+            var strs = str.split('&');
+            for (var i = 0; i < strs.length; i++) {
+                if (strs[i].indexOf('=') > 0) {
+                    var temp = strs[i].split('=');
+                    params[temp[0]] = temp[1];
+                } else if (strs[i] != null && strs[i] != '') {
+                    params[strs[i]] = true;
+                }
+            }
+
+            return params;
+        }
+
+        /**
+         * 获取质检任务对应的测试用例
+         */
+        function getAllCasesWithCheck() {
+            $.ajax({
+                url: "case/queryCasesByCheckId",
+                type: "get",
+                data: "page=" + PAGE_NUM + "&rows=" + PAGE_ROWS + "&chkId=" + chk_id,
+                success: function (resp) {
+                    data = resp.data;
+                    if (resp.code == 1) { //调用服务失败
+                        $("#checkfail").html(resp.msg);
+                        $("#failedModal").modal('show');
+                        return;
+                    }
+                    for (i = 0; i < data.list.length; i++) {
+                        var remark = "";
+                        if (data[i].remark == null || data[i].remark == "null")
+                            remark = "";
+
+                        var case_data = "<tr>" +
+                                "<td Name='caseId' class='id'>" + data[i].caseId + "</td>" +
+                                "<td class='name'>" + data[i].case_name + "</td>" +
+                                "<td>" + data[i].ctime + "</td>" +
+                                "<td>" + (data[i].remark == null ? "" : data[i].remark) + "</td>" +
+                                "<td>" +
+                                "<button class='btn btn-default btn-xs' onclick='getCaseDetail(" + data[i].caseId + ")'>查看</button>" +
+                                "<button class='btn btn-default btn-xs' onclick='deleteCheckCase(" + data[i].caseId + ")'>删除</button>" +
+                                "</td>" +
+                                "</tr>";
+                        if (caseList.length == 0 || caseList.indexOf(data[i].caseId) < 0) {
+                            caseList.push(data[i].caseId);
+                            caseInfoMap.Set(data[i].caseId, case_data);
+                        }
+                    }
+                    reloadCaseList();
+                }
+            });
+        }
+
+        function getCaseDetail(caseId) {
+            var params = 'case_id=' + caseId;
+            window.parent.select_page('case_edit', params);
+        }
+
+        function getCaseSql(caseId, columnName, sqlPattern) {
+            $.ajax({
+                url: "datasrc/querySrcByCaseId",
+                data: "caseId=" + caseId,
+                type: "get",
+                success: function (resp) {
+                    var data = resp.data;
+                    if (resp.code == 1) { //调用服务失败
+                        $("#checkfail").html(resp.msg);
+                        $("#failedModal").modal('show');
+                        return;
+                    }
+                    $('#dataSrc').attr('value', data.srcName);
+                }
+            });
+            document.getElementById('sqlPattern').innerText = sqlPattern;
+            document.getElementById('dataColName').innerText = columnName;
+            $('#getCasesModal').modal('show');
+        }
+
+        function reloadCaseList() {
+            var case_data = "";
+            for (var time in caseList) {
+                var caseInfo = caseInfoMap.Get(caseList[time]);
+                case_data += caseInfo;
+            }
+            $("#case_list_table").html(case_data);
+        }
+
+        function deleteCheckCase(caseId) {
+            if (caseList.indexOf(caseId) < 0)
+                return;
+            caseList.splice(caseList.indexOf(caseId), 1);
+            caseInfoMap.Remove(caseId);
+            reloadCaseList();
+        }
+
+        function addCheckCase(caseId, case_name, ctime, remark) {
+            if (remark == null || remark == "null") {
+                remark = "";
+            }
+            var case_data = "<tr>" +
+                    "<td Name='caseId' class='id'>" + caseId + "</td>" +
+                    "<td class='name'>" + case_name + "</td>" +
+                    "<td>" + ctime + "</td>" +
+                    "<td>" + remark + "</td>" +
+                    "<td>" +
+                    "<button class='btn btn-default btn-xs' onclick='getCaseDetail(" + caseId + ")'>查看</button>" +
+                    "<button class='btn btn-default btn-xs' onclick='deleteCheckCase(" + caseId + ")'>删除</button>" +
+                    "</td>" +
+                    "</tr>";
+            if (caseList.length == 0 || caseList.indexOf(caseId) < 0) {
+                caseList.push(caseId);
+                caseInfoMap.Set(caseId, case_data);
+            }
+            else
+                return;
+            reloadCaseList();
+        }
+
+        function getAllCases() {
+            $.ajax({
+                url: "/dqms/rest/getcase/?format=json",
+                type: "get",
+                success: function (data) {
+                    var case_data = "";
+                    for (i = 0; i < data.length; i++) {
+                        case_data += "<tr>" +
+                                "<td class='id'>" + data[i].id + "</td>" +
+                                "<td class='name'>" + data[i].case_name + "</td>" +
+                                "<td>" + data[i].ctime + "</td>" +
+                                "<td>" + (data[i].remark == null ? "" : data[i].remark) + "</td>" +
+                                "<td>" +
+//									"<button class='btn btn-default btn-xs' onclick=\"getCaseSql(" + data[i].caseId + ",'" + data[i].columnName + "','" + data[i].sqlPattern + "')\">预览用例</button>" +
+                                "<button class='btn btn-default btn-xs' onclick=\"addCheckCase(" + data[i].id + ",'" + data[i].case_name + "','" + data[i].ctime + "','" + data[i].remark + "')\">添加</button>" +
+                                "</td>" +
+                                "</tr>";
+                    }
+
+                    $("#all_case_list_table").html(case_data);
+                    $("#addCasesModal").modal('show');
+                }
+            });
+        }
+
+        function cancelCheck() {
+            window.parent.select_page('check', null);
+        }
+
+        function GetRowData(row) {
+            var rowData = "";
+            var name = row.parentNode.rows[0].cells[0].getAttribute("Name");
+            if (name) {
+                var value = row.cells[0].getAttribute("Value");
+                if (!value) {
+                    value = row.cells[0].innerHTML;
+                }
+                rowData = value;
+                console.info(rowData);
+            }
+            return rowData;
+        }
+
+        function GetCaseIdData(table) {
+            var tableData = new Array();
+            for (var i = 1; i < table.rows.length; i++) {
+                tableData.push(GetRowData(table.rows[i]));
+            }
+            return tableData;
+        }
+        function saveCheck() {
+
+            var chkName = $("#chk_name").val();
+            var remark = $("#remark").val();
+            var cron = $("#cron").val();
+            var caseIds = GetCaseIdData(document.getElementById('case_table'));
+            //需要对字段进行合法性判断
+            if (chk_id == null) {
+                chk_id = -1;
+            }
+            $.ajax({
+                url: "/dqms/check/save/",
+                type: 'post',
+                data: "id=" + chk_id + "&chk_name=" + chkName + "&remark=" + remark + "&schedule=" + cron + "&case_ids=" + caseIds,
+                success: function (resp) {
+                    if (resp.code == 1) { //调用服务失败
+                        $("#checkfail").html(resp.msg);
+                        $("#failedModal").modal('show');
+                        return;
+                    }
+                    window.parent.select_page('check', null);
+                }
+            });
+        }
+
+        /**
+         * 创建质检任务时,同时创建质检用例
+         */
+        function createNewCase() {
+            window.parent.select_page('case_edit', null);
+        }
+    </script>
+
+</head>
+<body>
+<div class="panel-dash">
+    <!-- breadcrumb start -->
+    <div id="breadcrumb">
+        <ul class="breadcrumb">
+            <li>质检管理</li>
+        </ul>
+    </div>
+    <!-- breadcrumb end -->
+    <!-- first-step panel start -->
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h4>
+                <span class="badge">1</span>
+                质检任务定义
+            </h4>
+        </div>
+        <div class="panel-body">
+            <div class="m-search-group">
+                <label class="m-search-label">
+                    质检名称<span style="color:#F00;margin-left: 8px;">*</span>
+                </label>
+                <div class="m-search-detail">
+                    <input id="chk_name" type="text" class="form-control" placeholder="必填项，支持中英文字符，不超过30个汉字"
+                           maxlength="30"
+                           name="name" value="{{ obj.chk_name }}" required="required">
+                </div>
+            </div>
+            <div class="m-search-group">
+                <label class="m-search-label">
+                    质检描述<span style="color:#F00;margin-left: 8px;">*</span>
+                </label>
+                <div class="m-search-detail">
+	                    <textarea class="form-control" id="remark" rows="3" placeholder="选填项，不超过100个汉字" maxlength="100"
+                                  name="remark" required="required">{{ obj.remark }}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="loading-overlay">
+            <i class="loading-icon fa fa-refresh fa-spin fa-lg"></i>
+        </div>
+    </div>
+    <!-- first-step panel end -->
+
+    <!-- second-step panel start -->
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h4>
+                <span class="badge">2</span>
+                调度配置
+            </h4>
+        </div>
+        <div class="panel-body">
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#">定时任务</a></li>
+                <li><a href="#">按天任务</a></li>
+            </ul>
+            <div class="m-line-body">
+                <div id="sch1" class="tab-pane fade in active">
+
+                    <div class="m-search-group">
+                        <label class="m-search-label">
+                            表达式<span style="color:#F00;margin-left: 8px;">*</span>
+                        </label>
+                        <div class="m-search-detail">
+                            <input type="text" id="cron" class="form-control"
+                                   placeholder="例：00 30 07 * * ? * ([秒] [分] [小时] [日] [月] [周] [年])"
+                                   maxlength="30" name="name" value="{{ obj.schedule }}" required="required">
+                        </div>
+                    </div>
+                </div>
+                <div id="sch2" class="tab-pane fade">
+                    <h3>HOME</h3>
+                    <p></p>
+                </div>
+            </div>
+
+            <!--<div class="m-search-group">-->
+            <!--<label class="m-search-label">-->
+            <!--通知方式-->
+            <!--</label>-->
+            <!--<div class="m-search-detail" data="2,1,0">-->
+            <!--<label class="label-checkbox inline j-all">-->
+            <!--<input id="alarmType" type="checkbox" name="alarmType" value="1">-->
+            <!--<span class="custom-checkbox"></span>-->
+            <!--大象-->
+            <!--</label>-->
+            <!--</div>-->
+            <!--</div>-->
+        </div>
+    </div>
+    <!-- second-step panel end -->
+
+
+    <!-- third-step panel start -->
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h4>
+                <span class="badge">3</span>
+                质检用例选择
+            </h4>
+        </div>
+        <!--<div class="panel-body">-->
+        <!--<div><button type="button" class="btn btn-success" id="j-newcase" onclick="createNewCase()">新建用例</button></div>-->
+        <!--<div id="case_search-list">-->
+
+        <!--<table id="case_table_new" class="table table-bordered " style="margin-top: 8px">-->
+        <!--<thead>-->
+        <!--<tr>-->
+        <!--<th>用例编号</th>-->
+        <!--<th>用例名称</th>-->
+        <!--<th>创建时间</th>-->
+        <!--<th>备注</th>-->
+        <!--<th>操作</th>-->
+        <!--</tr>-->
+        <!--</thead>-->
+        <!--<tbody id="case_list_table_new"></tbody>-->
+        <!--</table>-->
+        <!--</div>-->
+        <!--</div>-->
+        <div class="panel-body">
+            <div>
+                <button type="button" class="btn btn-success" id="j-addcase" onclick="getAllCases()">添加用例</button>
+            </div>
+            <div id="j-search-list">
+
+                <table id="case_table" class="table table-bordered " style="margin-top: 8px">
+                    <thead>
+                    <tr>
+                        <th>用例编号</th>
+                        <th>用例名称</th>
+                        <th>创建时间</th>
+                        <th>备注</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="case_list_table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- third-step panel end -->
+
+    <div class="text-center">
+        <button class="btn btn-success j-cancel" type="submit" onclick="cancelCheck()">取消</button>
+        <button class="btn btn-success j-save" type="submit" onclick="saveCheck()">保存</button>
+    </div>
+</div>
+
+<!-- Modal HTML -->
+<!-- 获取测试用例任务 -->
+<div id="addCasesModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="caseTitle" class="modal-title">质检实例</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered" style="margin-top: 8px">
+                    <thead>
+                    <tr>
+                        <th>测试用例编号</th>
+                        <th>测试用例名称</th>
+                        <th>创建时间</th>
+                        <th>备注</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="all_case_list_table">
+                    </tbody>
+
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $.ajax({
+        url: "/dqms/rest/caseforcheck/get_all/",
+        data: "id=" + {{ obj.id }} +'&format=json',
+        type: "get",
+        success: function (data) {
+            var index_data = "";
+            for (i = 0; i < data.length; i++) {
+                var case_data = "<tr>" +
+                        "<td name='id' class='id'>" + data[i].id + "</td>" +
+                        "<td Name='case_name' class='name'>" + data[i].case_name + "</td>" +
+                        "<td Name='ctime'>" + data[i].ctime + "</td>" +
+                        "<td Name='remark'>" + data[i].remark + "</td>" +
+                        "<td>" +
+                        "<button class='btn btn-default btn-xs' onclick='getCaseDetail(" + data[i].id + ")'>查看</button>" +
+                        "<button class='btn btn-default btn-xs' onclick='deleteCheckCase(" + data[i].id + ")'>删除</button>" +
+                        "</td>" +
+                        "</tr>";
+                caseList.push(data[i].id);
+                caseInfoMap.Set(data[i].id, case_data);
+            }
+            for (var time in caseList) {
+                index_data += caseInfoMap.Get(caseList[time]);
+            }
+            $("#case_list_table").html(index_data);
+        }
+    });
+</script>
+
+<!-- 预览用例任务的数据源和sql信息 -->
+<div id="getCasesModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="sqlTitle" class="modal-title">用例sql信息</h4>
+            </div>
+            <div class="m-search-group">
+                <label class="m-search-label">
+                    sql描述
+                </label>
+                <div class="m-search-detail">
+                    <textarea class="form-control" id="sqlPattern" rows="5" maxlength="500" name="describe"
+                              value=""></textarea>
+                </div>
+            </div>
+            <div class="m-search-group">
+                <label class="m-search-label">
+                    数据列名称
+                </label>
+                <div class="m-search-detail">
+                    <textarea class="form-control" id="dataColName" rows="3" maxlength="100" name="dataColName"
+                              value=""></textarea>
+                </div>
+            </div>
+            <div class="m-search-group">
+                <label class="m-search-label">
+                    数据源信息
+                </label>
+                <div class="m-search-detail">
+                    <input id="dataSrc" type="text" class="form-control" value="">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- 失败弹窗 -->
+<div id="failedModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">失败</h4>
+            </div>
+            <div class="modal-body">
+                <p id="checkfail">调用服务失败，请联系管理员。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

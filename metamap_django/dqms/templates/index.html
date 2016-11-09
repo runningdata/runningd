@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>数据质量监控系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    {% include 'component/css.html' %}
+
+  </head>
+
+  <body class="overflow-hidden">
+	<!-- Overlay Div -->
+	<div id="overlay" class="transparent"></div>
+
+
+	<div id="wrapper" class="preload">
+		<div id="top-nav" class="fixed skin-6">
+			<a href="#" class="brand">
+				<span>数据质量监控系统</span>
+			</a><!-- /brand -->
+			<button type="button" class="navbar-toggle pull-left" id="sidebarToggle">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<button type="button" class="navbar-toggle pull-left hide-menu" id="menuToggle">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+		</div><!-- /top-nav-->
+
+		<aside class="fixed skin-6">
+			<div class="sidebar-inner scrollable-sidebar">
+				<div class="size-toggle">
+					<a class="btn btn-sm" id="sizeToggle">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</a>
+					<a class="btn btn-sm pull-right logoutConfirm_open"  href="#logoutConfirm">
+						<i class="fa fa-power-off"></i>
+					</a>
+				</div><!-- /size-toggle -->
+				<div class="user-block clearfix">
+					<div class="detail">
+							<i class="fa fa-user fa-lg">
+							</i>
+							<strong style="margin-left: 16px" id="username"></strong>
+					</div>
+				</div>
+				<div class="main-menu">
+					<ul>
+						<li>
+							<a href="javascript:select_page('check')">
+								<span class="menu-icon">
+									<i class="fa fa-desktop fa-lg"></i>
+								</span>
+								<span class="text">
+									质检管理
+								</span>
+								<span class="menu-hover"></span>
+							</a>
+						</li>
+						<li>
+							<a href="javascript:select_page('case')">
+								<span class="menu-icon">
+									<i class="fa fa-tag fa-lg"></i>
+								</span>
+								<span class="text">
+									用例管理
+								</span>
+								<span class="menu-hover"></span>
+							</a>
+						</li>
+						<li class="openable">
+							<a href="#">
+								<span class="menu-icon">
+									<i class="fa fa-tasks fa-lg"></i>
+								</span>
+								<span class="text">
+									质量监控
+								</span>
+								<span class="menu-hover"></span>
+							</a>
+							<ul class="submenu">
+                                <li><a href="javascript:select_page('check/execution')"><span class="submenu-label">执行记录</span></a></li>
+				                <li><a href="javascript:select_page('alarm_info')"><span class="submenu-label">报警信息</span></a></li>
+				                <li><a href="javascript:select_page('alarm_stat')"><span class="submenu-label">报警统计</span></a></li>
+								<!--<li><a href="javascript:select_page('alarm_ack')"><span class="submenu-label">报警响应</span></a></li>-->
+				            </ul>
+						</li>
+						<li>
+							<a href="http://wiki.yinker.org">
+								<span class="menu-icon">
+									<i class="fa fa-tag fa-lg"></i>
+								</span>
+								<span class="text">
+									帮助文档
+								</span>
+								<span class="menu-hover"></span>
+							</a>
+						</li>
+					</ul>
+
+				</div><!-- /main-menu -->
+			</div><!-- /sidebar-inner -->
+		</aside>
+
+		<div id="main-container">
+			<iframe id="main_page" src="check" width="100%"  height="800"  scrolling="yes" frameborder="0" onload="get_username()"></iframe>
+		</div><!-- /main-container -->
+
+
+	</div><!-- /wrapper -->
+
+	<a href="" id="scroll-to-top" class="hidden-print"><i class="fa fa-chevron-up"></i></a>
+
+	<!-- Logout confirmation -->
+	<div class="custom-popup width-100" id="logoutConfirm">
+		<div class="padding-md">
+			<h4 class="m-top-none"> Do you want to logout?</h4>
+		</div>
+
+		<div class="text-center">
+			<a class="btn btn-success m-right-sm" href="logout">Logout</a>
+			<a class="btn btn-danger logoutConfirm_close">Cancel</a>
+		</div>
+	</div>
+
+    {% include 'component/js.html' %}
+
+	<script type="text/javascript">
+		function select_page(page) {
+			select_page(page, null);
+		}
+
+		function select_page(page, params) {
+			if(params != null)
+				$("#main_page").attr("src", page + "?" + params);
+			else
+				$("#main_page").attr("src", page);
+		}
+		function get_username(){
+{#			$.ajax({#}
+{#				url:"user/getUserName",#}
+{#				type:"get",#}
+{#				data:"",#}
+{#				success:function(resp){#}
+{#					data = resp.data;#}
+{#					if(resp.code == 1) { //调用服务失败#}
+{#						$("#failedModal").modal('show');#}
+{#						return;#}
+{#					}#}
+{#					$('#username').html(data.name);#}
+{#				}#}
+{#			})#}
+            $('#username').html('will');
+		}
+		$(function(){
+			get_username();
+		});
+
+	</script>
+  </body>
+</html>

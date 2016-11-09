@@ -4,10 +4,8 @@
 created by will 
 '''
 from django.db import models
-import datetime
-from django.utils import timezone
 
-from metamap.utils.fileds import Long2Date
+from will_common.utils.fileds import Long2Date
 
 
 class DB(models.Model):

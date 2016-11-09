@@ -1,0 +1,33 @@
+{% load staticfiles %}
+{% load etlutils %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/page/check_manager/index.css' %}"/>
+{% include 'component/css.html' %}
+{% block content %}
+    <div class="container">
+        <table class="table table-bordered ">
+            <caption></caption>
+            <thead>
+            <tr>
+                <th>质检名称</th>
+                <th>用例个数</th>
+                <th>用例完成个数</th>
+                <th>启动时间</th>
+                <th>结束时间</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if objs %}
+                {% for obj in objs %}
+                    <tr>
+                        <td>{{ obj.chk.chk_name }}</td>
+                        <td>{{  obj.case_num }}</td>
+                        <td>{{  obj.case_finish_num | default_if_none: '0' }}</td>
+                        <td>{{ obj.start_time | date:"Y-m-d H:i:s" }}</td>
+                        <td>{{ obj.end_time | date:"Y-m-d H:i:s" }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

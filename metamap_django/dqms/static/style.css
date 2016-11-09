@@ -1,0 +1,9 @@
+li a {
+    color: green;
+}
+.dropdown-menu>li>a:hover {
+    background-color: #c7ddef;
+}
+.glyphicon {
+  margin-right: 8px;
+}

@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+{% load ifdef %}
+
+{% has_def 'case' as has_etl %}
+
+{% block title %}调度列表{% endblock %}
+{% load etlutils %}
+{% block content %}
+    <div class="container">
+        {% has_def 'case' as has_etl %}
+        {% if has_etl %}
+            <h2>{{ etl.tblName }} の 调度列表</h2>
+            <a href="{% url 'metamap:sche_add' %}" class="btn btn-info">添加</a>
+        {% else %}
+            {% include 'components/search.html' %}
+        {% endif %}
+        <table class="table table-striped">
+            <caption></caption>
+            <thead>
+            <tr>
+                <th>名称</th>
+                <th>策略</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if objs %}
+                {% for obj in objs %}
+                    <tr>
+                        <td>{{ obj.name }}</td>
+                        <td>{% readable_schedule obj.schedule %}</td>
+                        <td>{{ obj.ctime | date:"Y年m月d日 H时i分" }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    操作 <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{% url 'metamap:sche_edit' pk=obj.id %}">编辑</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

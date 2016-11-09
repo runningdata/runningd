@@ -1,0 +1,18 @@
+{% load ifdef %}
+{% has_def 'search' as has_search %}
+<form role="search" class="navbar-form">
+    <div class="input-group add-on">
+        <input placeholder="按名称查询" name="search" type="text" class="form-control"
+                {% if has_search %}
+                    {% if search %}
+               value="{{ search }}"
+                    {% endif %}
+                {% endif %}
+        >
+        <div class="input-group-btn">
+            <button type="submit" class="btn btn-default">
+                <i class="glyphicon glyphicon-search"></i>
+            </button>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>报警统计</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/page/check_manager/index.css" />
+
+    <!-- Jquery -->
+    <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="js/jquery.jqGrid.min.js"></script>
+    <script type="text/javascript" src="js/grid.locale-cn.js"></script>
+    <script language="javascript" src="InValid.js"></script>
+    <!-- Bootstrap -->
+    <script src="bootstrap/js/bootstrap.js"></script>
+</head>
+
+<script>
+    var PAGE_NUM=1;
+    var PAGE_ROWS=200;
+
+    $(document).ready(function(){
+        queryCheckResult(PAGE_NUM,PAGE_ROWS);
+    });
+
+    /**
+     * 显示查询出来的质检结果
+     * @param data
+     */
+    function htmlCheckResultTable(data){
+        var check_inst_list_view="";
+        for(i=0;i<data.list.length;i++) {
+
+            check_inst_list_view += "<tr>" +
+                    "<td class='id'>" + data.list[i].chkId + "</td>" +
+                    "<td class='name'>" + data.list[i].chkName + "</td>" +
+                    "<td>" + data.list[i].totalNum + "</td>" +
+                    "<td>" + data.list[i].wrongNum + "</td>" +
+                    "<td>" + data.list[i].wrongRate + "</td>" +
+                    "<td>" + data.list[i].creator + "</td>" +
+                    "<td>" +
+                    "<button class='btn btn-default btn-xs' onclick=\"queryCaseResult(" + data.list[i].chkId + ")\">用例详情</button>" +
+                    "</td>" +
+                    "</tr>";
+        }
+
+        $("#checkinst_list_table").html(check_inst_list_view);
+
+    }
+
+    /**
+     * 显示查询出来的质检用例结果
+     * @param data
+     */
+    function htmlCaseResultTable(data){
+        var case_inst_list_view="";
+        for(i=0;i<data.list.length;i++) {
+
+            case_inst_list_view += "<tr>" +
+                    "<td class='id'>" + data.list[i].chkId + "</td>" +
+                    "<td class='name'>" + data.list[i].chkName + "</td>" +
+                    "<td>" + data.list[i].totalNum + "</td>" +
+                    "<td>" + data.list[i].wrongNum + "</td>" +
+                    "<td>" + data.list[i].wrongRate + "</td>" +
+                    "<td>" + data.list[i].creator + "</td>" +
+                    "</tr>";
+        }
+
+        $("#case_result_table").html(case_inst_list_view);
+        $("#caseResultModal").modal('show');
+    }
+
+    /**
+     *查询chkId下对应的质检用例的历史运行信息
+     */
+    function queryCaseResult(chkId){
+        $.ajax({
+            url:'alarm/queryCaseResult',
+            type:"get",
+            data:"chkId="+chkId+"&page=" + PAGE_NUM+ "&rows=" + PAGE_ROWS,
+            success:function(resp){
+                if(resp.code == 1) { //调用服务失败
+                    $("#checkresult").html(resp.msg);
+                    $("#failedModal").modal('show');
+                    return;
+                }
+                var data = resp.data;
+                htmlCaseResultTable(data);
+            }
+        })
+    }
+
+    /**
+     *查询chkId的历史运行信息
+     */
+    function queryCheckResult(page,row){
+        $.ajax({
+            url:'alarm/queryCheckResultByName',
+            type:"get",
+            data:"page=" + page+ "&rows=" + row,
+            success:function(resp){
+                if(resp.code == 1) { //调用服务失败
+                    $("#checkresult").html(resp.msg);
+                    $("#failedModal").modal('show');
+                    return;
+                }
+                var data = resp.data;
+                htmlCheckResultTable(data);
+            }
+        })
+    }
+
+
+    function queryCheckResultByName(page,row){
+        var chkName = $('#checkname').val();
+        $.ajax({
+            url:'alarm/queryCheckResultByName',
+            type:"get",
+            data:"chkName="+chkName+"&page=" + page+ "&rows=" + row,
+            success:function(resp){
+                if(resp.code == 1) { //调用服务失败
+                    $("#checkresult").html(resp.msg);
+                    $("#failedModal").modal('show');
+                    return;
+                }
+                var data = resp.data;
+                htmlCheckResultTable(data);
+            }
+        })
+
+    }
+
+</script>
+
+
+<body>
+<div class="panel-dash">
+    <!-- breadcrumb start -->
+    <div class="m-search-wrap label-w-100">
+        <div></div>
+        <div class="m-search-group">
+            <label class="m-search-label">质检监控统计</label>
+            <div class=" m-search-detail">
+                <input type="text" name="name" placeholder="质检名称" id="checkname">
+            </div>
+            <button type="button" class="btn btn-sm btn-success m-search-btn" id="j-submit"
+                    onclick="queryCheckResultByName(PAGE_NUM,PAGE_ROWS)">查询</button>
+        </div>
+        <div id="j-search-list">
+            <p id="totalCheckinst"></p>
+            <table class="table table-bordered " style="margin-top: 8px">
+                <thead>
+                <tr>
+                    <th>任务编号</th>
+                    <th>任务名称</th>
+                    <th>监控次数</th>
+                    <th>异常次数</th>
+                    <th>异常占比</th>
+                    <th>创建人</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="checkinst_list_table"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 质检用例下质检任务的弹窗 -->
+    <div id="caseResultModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 id="caseTitle" class="modal-title">用例监控信息</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered " style="margin-top: 8px">
+                        <thead>
+                        <tr>
+                            <th>用例编号</th>
+                            <th>用例名称</th>
+                            <th>监控次数</th>
+                            <th>异常次数</th>
+                            <th>异常占比</th>
+                            <th>创建人</th>
+                        </tr>
+                        </thead>
+                        <tbody id="case_result_table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 失败弹窗 -->
+    <div id="failedModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">失败</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="checkresult">调用服务失败，请联系管理员。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
+
+

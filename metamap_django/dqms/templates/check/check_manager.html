@@ -1,0 +1,598 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>质检管理</title>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/page/check_manager/index.css' %}"/>
+    {% include 'component/js.html' %}
+
+    <script>
+        var PAGE_ROWS = 15;
+        var PAGE_NUM = 1;
+        var STATUS_RECOVER = 1;
+        var STATUS_PAUSE = 2;
+        var VIEWER_YES = 1;
+        var VIEWER_NO = 2;
+        var TOTAL_RECORD_NUM = "";
+        var chkId;
+        var chkName;
+        var chkStatus;
+        var chkView;
+        var creator;
+
+        $(document).ready(function () {
+            var params = parseUrlParams(location.search);
+            chkName = params["chkName"];
+            creator = params["creator"];
+            if (isRightName(chkName)) {
+                $('#checkName').attr('value', chkName);
+            }
+            if (isRightName(creator)) {
+                $('#creator').attr('value', creator);
+            }
+        });
+
+        //根据query的数据将其显示在页面上
+        function htmlCheckListTable(data) {
+            TOTAL_RECORD_NUM = "总共：" + data.totalRecords + "条数据";
+            $('#totalCheck').html(TOTAL_RECORD_NUM);
+            var check_data = "";
+            for (i = 0; i < data.list.length; i++) {
+                var status_tmp = '';
+                var status_btn = '';
+                var viewer_btn = '';
+
+                //判断任务的调度状态
+                if (data.list[i].status == null) {
+                    status_tmp = '没有调度';
+                } else if (data.list[i].status == 'PAUSED') {
+                    status_tmp = '暂停中';
+                    status_btn = "<span id = 'status_" + data.list[i].chkId + "'><button class='btn btn-default btn-xs' onclick='changeStatus(" + data.list[i].chkId
+                            + ", " + STATUS_RECOVER + ")'>恢复调度</button></span>";
+                } else {
+                    status_tmp = '正常';
+                    status_btn = "<span id = 'status_" + data.list[i].chkId + "'><button class='btn btn-default btn-xs' onclick='changeStatus(" + data.list[i].chkId
+                            + ", " + STATUS_PAUSE + ")'>暂停调度</button></span>";
+                }
+                //判断当前任务是否已经被订阅
+                if (data.list[i].isView == "false") {
+                    viewer_btn = "<span id = 'status_" + data.list[i].chkId + "'><button class='btn btn-default btn-xs' onclick='observerCheck(" + data.list[i].chkId
+                            + ", " + VIEWER_NO + ")'>订阅</button></span>";
+                } else {
+                    viewer_btn = "<span id = 'status_" + data.list[i].chkId + "'><button class='btn btn-default btn-xs' onclick='observerCheck(" + data.list[i].chkId
+                            + ", " + VIEWER_YES + ")'>取消订阅</button></span>";
+                }
+                check_data += "<tr>" +
+                        "<td class='id'>" + data.list[i].chkId + "</td>" +
+                        "<td class='name'>" + data.list[i].chkName + "</td>" +
+                        "<td>" + data.list[i].lastTime + "</td>" +
+                        "<td>" + data.list[i].creator + "</td>" +
+                        "<td>" + status_tmp + "</td>" +
+                        "<td>" +
+//				"<button class='btn btn-default btn-xs' onclick=\"getCheckInstances(" + data.list[i].chkId + ",'" + data.list[i].chkName + "'," + PAGE_NUM + "," + PAGE_ROWS + ")\">查看实例</button>" +
+                        "<button class='btn btn-default btn-xs' onclick='editCheck(" + data.list[i].chkId + ")'>查看详情</button>" +
+                        status_btn +
+                        "<button class='btn btn-default btn-xs' onclick='deleteCheck(" + data.list[i].chkId + ")'>删除</button>" +
+                        "<button class='btn btn-default btn-xs' onclick='oncerun(" + data.list[i].chkId + ")'>测试执行</button>" +
+                        viewer_btn +
+                        "</td>" +
+                        "</tr>";
+            }
+            $("#check_list_table").html(check_data);
+        }
+
+        /**
+         * 订阅check
+         * */
+        function observerCheck(chk_id, viewStatus) {
+            chkId = chk_id;
+            chkView = viewStatus;
+            $("#viewStatusModal").modal('show');
+        }
+
+        function observer_check() {
+            if (chkView == VIEWER_NO) {
+                //订阅任务
+                $.ajax({
+                    url: "view/viewCheck",
+                    type: "post",
+                    data: "chkId=" + chkId,
+                    success: function (resp) {
+                        if (resp.code == 1) { //调用服务失败
+                            $("#checkmanager").html(resp.msg);
+                            $("#failedModal").modal('show');
+                            return;
+                        }
+                    }
+                });
+            }
+            if (chkView == VIEWER_YES) {
+                //取消订阅任务
+                $.ajax({
+                    url: "view/cancelViewCheck",
+                    type: "post",
+                    data: "chkId=" + chkId,
+                    success: function (resp) {
+                        if (resp.code == 1) { //调用服务失败
+                            $("#checkmanager").html(resp.msg);
+                            $("#failedModal").modal('show');
+                            return;
+                        }
+                    }
+                });
+            }
+        }
+
+
+        /**
+         * 单次执行质检任务，并不存储到调度系统
+         */
+        function oncerun(chk_id) {
+            chkId = chk_id;
+            $("#onceRunModal").modal('show');
+        }
+        function run_check() {
+            $("#onceRunModal").modal('hide');
+            $.ajax({
+                url: "schedule/onceSchedule",
+                type: "post",
+                data: "chkId=" + chkId,
+                success: function (resp) {
+                    if (resp.code == 1) { //调用服务失败
+                        $("#checkmanager").html(resp.msg);
+                        $("#failedModal").modal('show');
+                        return;
+                    }
+                }
+            })
+        }
+
+        /**
+         * 获取质检任务
+         */
+        function getChecks() {
+            alert('cha xun');
+            {#            var subUrl = "";#}
+            {#            chkName = $('#checkName').val();#}
+            {#            creator = $('#creator').val();#}
+            {#            if (isRightName(chkName)) {#}
+            {#                subUrl += "&chkName=" + chkName;#}
+            {#            }#}
+            {#            if (isRightName(creator)) {#}
+            {#                subUrl += "&creator=" + creator;#}
+            {#            }#}
+            {#            $.ajax({#}
+            {#                url: "check/queryCheck",#}
+            {#                type: "get",#}
+            {#                data: "page=" + page + "&rows=" + rows + subUrl,#}
+            {#                success: function (resp) {#}
+            {#                    if (resp.code == 1) { //调用服务失败#}
+            {#                        $("#checkmanager").html(resp.msg);#}
+            {#                        $("#failedModal").modal('show');#}
+            {#                        return;#}
+            {#                    }#}
+            {#                    var data = resp.data;#}
+            {#                    if (data.list.length == 0) {#}
+            {#                        $("#checkmanager").html("没有查询到符合条件的质检任务");#}
+            {#                        $("#failedModal").modal('show');#}
+            {#                        return;#}
+            {#                    }#}
+            {#                    var maxPage = data.maxPage;#}
+            {#                    //初始化分页插件#}
+            {#                    $('#checkpage').jqPaginator({#}
+            {#                        totalPages: maxPage,#}
+            {#                        visiblePages: 10,#}
+            {#                        currentPage: page,#}
+            {#                        onPageChange: function (num, type) {#}
+            {#                            if (type == "init") {#}
+            {#                                return;#}
+            {#                            }#}
+            {#                            getChecks(num, PAGE_ROWS);#}
+            {#                        }#}
+            {#                    });#}
+            {#                    htmlCheckListTable(data);#}
+            {#                }#}
+            {#            });#}
+        }
+
+        /**
+         * 新建一个质检任务
+         */
+        function createCheck() {
+            var params = "chk_name=" + chkName + "&creator=" + creator;
+            window.parent.select_page('check/edit', params);
+        }
+
+        /**
+         * 编辑质检任务
+         */
+        function editCheck(chk_id) {
+            var params = 'chk_id=' + chk_id + "&chk_name=" + chkName + "&creator=" + creator;
+            window.parent.select_page('check/edit', params);
+        }
+
+        /**
+         * 更新状态
+         */
+        function changeStatus(chk_id, status) {
+            chkId = chk_id;
+            chkStatus = status;
+            $("#changeStatusModal").modal('show');
+        }
+
+        function change_status() {
+            if (chkStatus == STATUS_RECOVER) {
+                //恢复任务
+                $.ajax({
+                    url: "schedule/resumeSchedule",
+                    type: "post",
+                    data: "chkId=" + chkId,
+                    success: function (resp) {
+                        if (resp.code == 1) { //调用服务失败
+                            $("#checkmanager").html(resp.msg);
+                            $("#failedModal").modal('show');
+                            return;
+                        }
+                    }
+                });
+            }
+            if (chkStatus == STATUS_PAUSE) {
+                //暂停任务
+                $.ajax({
+                    url: "schedule/pauseSchedule",
+                    type: "post",
+                    data: "chkId=" + chkId,
+                    success: function (resp) {
+                        if (resp.code == 1) { //调用服务失败
+                            $("#checkmanager").html(resp.msg);
+                            $("#failedModal").modal('show');
+                            return;
+                        }
+                    }
+                });
+            }
+
+        }
+
+        /**
+         * 查看历史调度
+         */
+        function getCheckInstances(chk_id, chk_name, page, rows) {
+            page = 1; //只显示最近的50个实例
+            $.ajax({
+                url: "check/queryCheckInstByChkId",
+                data: "page=" + page + "&rows=" + rows + "&chkId=" + chk_id,
+                type: "get",
+                success: function (resp) {
+                    if (resp.code == 1) { //调用服务失败
+                        $("#checkmanager").html(resp.msg);
+                        $("#failedModal").modal('show');
+                        return;
+                    }
+                    var data = resp.data;
+                    var check_inst_list_view = "";
+                    var result = '正确';
+
+                    for (i = 0; i < data.list.length; i++) {
+
+                        if (data.list[i].resultCode == -1) {
+                            result = '运行中';
+                        } else if (data.list[i].resultCode > 0) {
+                            result = '质检违反规则';
+                        } else if (data.list[i].resultCode == -99) {
+                            result = '运行异常';
+                        } else {
+                            result = "质检符合规则";
+                        }
+                        check_inst_list_view += "<tr>" +
+                                "<td class='id'>" + data.list[i].id + "</td>" +
+                                "<td class='name'>" + data.list[i].chkName + "</td>" +
+                                "<td>" + data.list[i].startTime + "</td>" +
+                                "<td>" + data.list[i].endTime + "</td>" +
+                                "<td>" + result + "</td>" +
+                                "<td>" +
+                                "<button class='btn btn-default btn-xs' onclick='getCheckInstanceDetail(" + data.list[i].id + ")'>查看</button>" +
+                                "</td>" +
+                                "</tr>";
+                    }
+
+                    $("#check_inst_list_table").html(check_inst_list_view);
+                    $("#checkTitle").html(chk_name);
+                    $("#getCheckInstModal").modal('show');
+                },
+
+            });
+        }
+
+        /**
+         * 删除质检任务
+         */
+        function deleteCheck(chk_id) {
+            chkId = chk_id;
+            $("#deleteModal").modal('show');
+        }
+
+        function delete_check() {
+            $("#deleteModal").modal('hide');
+            $.ajax({
+                url: "/dqms/check/del/",
+                data: "id=" + chkId,
+                type: "post",
+                success: function (resp) {
+                    if (resp.code == 1) { //调用服务失败
+                        $("#failedModal").modal('show');
+                        $("#casemanager").html(resp.msg);
+                        return;
+                    }
+                    window.parent.select_page('/dqms/check/');
+                },
+            });
+        }
+
+        /**
+         * 获取质检任务下质检用例实例详细内容
+         */
+        function getCheckInstanceDetail(chkinstId) {
+            $("#getCheckInstModal").modal('hide');
+            $.ajax({
+                url: "check/queryCaseInstByChkInst",
+                data: "chkinstId=" + chkinstId,
+                type: "get",
+                success: function (resp) {
+                    if (resp.code == 1) { //调用服务失败
+                        $("#checkmanager").html(resp.msg);
+                        $("#failedModal").modal('show');
+                        return;
+                    }
+                    var data = resp.data;
+                    var case_inst_list_view = "";
+                    var result = "";
+
+                    for (i = 0; i < data.list.length; i++) {
+
+                        if (data.list[i].resultCode == -1) {
+                            result = '运行中';
+                        } else if (data.list[i].resultCode > 0) {
+                            result = data.list[i].resultMsg;
+                        } else if (data.list[i].resultCode == -99) {
+                            result = data.list[i].resultMsg;
+                        } else if (data.list[i].resultCode == 0) {
+                            result = "质检符合规则";
+                        }
+                        case_inst_list_view += "<tr>" +
+                                "<td class='id'>" + data.list[i].id + "</td>" +
+                                "<td class='name'>" + data.list[i].caseName + "</td>" +
+                                "<td>" + data.list[i].startTime + "</td>" +
+                                "<td>" + data.list[i].endTime + "</td>" +
+                                "<td>" + result + "</td>" +
+                                "</tr>";
+                    }
+
+                    $("#case_inst_list_table").html(case_inst_list_view);
+                    $("#getCaseInstModal").modal('show');
+                },
+
+            });
+        }
+
+    </script>
+
+
+</head>
+<body>
+<div class="panel-dash">
+    <!-- breadcrumb start -->
+    <div id="breadcrumb">
+        <ul class="breadcrumb">
+            <li>质检管理</li>
+        </ul>
+    </div>
+    <!-- breadcrumb end -->
+    <div class="m-search-wrap label-w-100">
+        <div></div>
+        <div class="m-search-group">
+            <label class="m-search-label">质检名称</label>
+            <div class=" m-search-detail">
+                <input type="text" name="name" placeholder="质检名称" id="checkName">
+            </div>
+            <br>
+            <label class="m-search-label">创建人</label>
+            <div class=" m-search-detail">
+                <input type="text" name="name" placeholder="创建人" id="creator">
+            </div>
+            <button type="button" class="btn btn-sm btn-success m-search-btn" id="j-search"
+                    onclick="getChecks()">查询
+            </button>
+            <button type="button" class="btn btn-sm btn-success m-search-btn" id="j-create" onclick="createCheck()">
+                新建质检任务
+            </button>
+        </div>
+        <div id="j-search-list">
+            <p id="totalCheck">总共{{ objs.count }}条数据</p>
+            <table class="table table-bordered " style="margin-top: 8px">
+                <thead>
+                <tr>
+                    <th>编号</th>
+                    <th>任务名称</th>
+                    <th>上次运行时间</th>
+                    <th>创建人</th>
+                    <th>调度状态</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="check_list_table">
+                {% for obj in objs %}
+                    <tr>
+                        <td class='id'>  {{ obj.id }}  </td>
+                        <td class='name'>  {{ obj.chk_name }}  </td>
+                        <td>  {{ obj.ctime | date:"Y-m-d H:i:s" }}  </td>
+                        <td>  {{ obj.creator }}  </td>
+                        <td>  {{ obj.creator }}  </td>
+                        <td>
+                            <button class='btn btn-default btn-xs' onclick='editCheck(  {{ obj.id }}  )'>查看详情</button>
+                            <button class='btn btn-default btn-xs' onclick='deleteCheck(  {{ obj.id }}  )'>删除</button>
+                            <button class='btn btn-default btn-xs' onclick='oncerun(  {{ obj.id }}  )'>测试执行</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination" align="center" id="checkpage">
+        </div>
+    </div>
+</div>
+
+<!-- Modal HTML -->
+<!-- 获取质检实例任务 -->
+<div id="getCheckInstModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="checkTitle" class="modal-title">质检实例</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered " style="margin-top: 8px">
+                    <thead>
+                    <tr>
+                        <th>任务实例编号</th>
+                        <th>任务名称</th>
+                        <th>开始时间</th>
+                        <th>结束时间</th>
+                        <th>质检结果</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="check_inst_list_table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal HTML -->
+<!-- 获取质检实例下的用例实例 -->
+<div id="getCaseInstModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="caseTitle" class="modal-title">质检实例</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered " style="margin-top: 8px">
+                    <thead>
+                    <tr>
+                        <th>用例实例编号</th>
+                        <th>用例名称</th>
+                        <th>开始时间</th>
+                        <th>结束时间</th>
+                        <th>质检结果</th>
+                    </tr>
+                    </thead>
+                    <tbody id="case_inst_list_table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 更新质检状态 -->
+<div id="changeStatusModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">确认</h4>
+            </div>
+            <div class="modal-body">
+                <p>确定要更改任务的调度吗?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="change_status()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 订阅质检任务 -->
+<div id="viewStatusModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">确认</h4>
+            </div>
+            <div class="modal-body">
+                <p>确定要订阅质检任务吗?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="observer_check()">确认
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除质检任务 -->
+<div id="deleteModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">确认</h4>
+            </div>
+            <div class="modal-body">
+                <p>你确定要删除质检任务?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="delete_check()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 单次执行质检任务 -->
+<div id="onceRunModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">确认</h4>
+            </div>
+            <div class="modal-body">
+                <p>你确定要测试执行质检任务?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="run_check()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 失败弹窗 -->
+<div id="failedModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">失败</h4>
+            </div>
+            <div class="modal-body">
+                <p id="checkmanager">调用服务失败，请联系管理员。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,98 @@
+/**
+ * 斑马配送A端通用样式文件
+ *
+ * @date 2015-04-08 星期三
+ *
+ */
+
+/**
+ * less
+ *  - inline 是打包css
+ *  - less 是打包less
+ *  - css 生成 css @import url(xxx);
+ */
+
+// 引用 webfont, 打包之后路径不对
+// 故将 fonts 上移一级
+//
+// /stylesheets/page/poi_match/global.css 引用 fonts
+// 回退为不打包版本
+
+/* 前端基本样式组件库  */
+@import (inline) "basic/reset.css";
+@import (inline) "basic/css3.css";
+@import (inline) "basic/icon.css";
+@import (inline) "basic/common.css";
+
+/* 框架样式文件结构 */
+@import (inline) "lib/bootstrap.css"; // bs 不打包, reset 打包的话, bs样式被 reset覆盖
+@import (inline) "lib/font-awesome.css";
+
+@import (inline) "lib/dataTables.css";
+@import (inline) "lib/datepicker.css";
+@import (inline) "lib/chosen.css";
+@import (inline) "lib/jquery.tagsinput.css";
+@import (inline) "lib/endless.css";
+@import (inline) "lib/endless-skin.css";
+
+
+// 变量
+@import 'module/variable';
+
+*{
+  font-family: '冬青黑体','Helvetica Neue', 'Microsoft Yahei', sans-serif;
+}
+
+/**
+ * 先富平台入口
+ */
+#top-nav{
+
+  .links{
+    float: right;
+
+    @h: 45px;
+    height: @h;
+    line-height: @h;
+
+    a{
+      display: inline-block;
+      height: @h;
+      line-height: @h;
+
+      padding: 0 10px;
+      font-size: 14px;
+      color: #fff;
+
+      @bg: #2B333C;
+      background-color: @bg;
+
+      &:hover{
+        background-color: lighten(@bg, 20%); // 亮色,背景
+      }
+    }
+  }
+}
+aside.skin-6 {
+  background: #495B6C;
+  overflow-y: scroll;
+}
+
+/**
+ * banner相关
+ */
+@import "page/banner/show";
+
+/*
+  指标定义, 只显示有指标的项目
+  margin-left: 2px;
+  font-family: FontAwesome;
+  content: '\f059';
+  cursor: pointer;
+
+  // 不显示问号图标
+  i[data-desc-field="null"]:after{
+    margin-left: 0;
+    content: none;
+  }
+ */

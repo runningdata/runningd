@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block scripts %}
+    <script type="text/javascript">
+        var status = 0;
+        var urlB = "/metamap/etls/getexeclog/" +{{ execid }};
+        console.log(urlB);
+        function getData() {
+            console.log('beginning....');
+            $.ajax({
+                url: urlB,
+                success: function (data) {
+                    if ($("#log").html().length < data.length) {
+                        $("#log").html(data);
+                        $("html, body").animate({scrollTop: $(document).height() - $(window).height()});
+                    }
+                }
+            });
+            console.log('ending....');
+        }
+        getData();
+        setInterval(function () {
+            //- if (status == 0) {
+            console.log('beginning. setInterval...' + status);
+            getData();
+            console.log('eeeing....');
+            //- } else {
+            //-   console.log('ajax stops, cause status is ' + status);
+            //- }
+        }, 5000);
+    </script>
+{% endblock %}
+
+{% block title %}ETL执行{% endblock %}
+{% block content %}
+
+    <div id="log" class="container bg-info">
+    </div>
+{% endblock %}

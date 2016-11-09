@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+{% block title %}Rule列表{% endblock %}
+{% block content %}
+    <div class="container">
+
+        {% include 'components/search.html' %}
+
+        {% if objs %}
+            <table class="table table-striped table-hover">
+                <caption></caption>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>名称</th>
+                    <th>状态</th>
+                    <th>数据源</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for obj in objs %}
+                    <tr>
+                        <td>{{ obj.id }}</td>
+                        <td>{{ obj.case_name }}</td>
+                        <td>{{ obj.status }}</td>
+                        <td>{{ obj.data_src }}</td>
+                        <td>{{ obj.ctime|date:"Y年m月d日 H时i分" }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    操作 <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/dqms/rules/{{ obj.id }}/">编辑</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>没有找到相关obj</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,42 @@
+<div role="navigation" class="navbar navbar-inverse">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" data-toggle="collapse" data-target=".navbar-collapse" class="navbar-toggle collapsed">
+                <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span
+                    class="icon-bar"></span><span class="icon-bar"></span></button>
+            <a href="/dqms/" class="navbar-brand"><span class="glyphicon glyphicon-home"></span></a></div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                                        class="dropdown-toggle">用例 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/dqms"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
+                        <li><a href="/dqms/case/add" ><span class="glyphicon glyphicon-plus"></span>新增</a></li>
+                        <li><a href="/dqms/case/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a></li>
+                        <li><a href="/dqms/case/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a></li>
+                        <li><a href="/dqms/case/status/2/"><span class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                                        class="dropdown-toggle">规则 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/dqms"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
+                        <li><a href="/dqms/case/add" ><span class="glyphicon glyphicon-plus"></span>新增</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                                        class="dropdown-toggle">调度<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'dqms:sche_list' %}"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
+                        <li><a href="{% url 'dqms:sche_add' %}"><span  class="glyphicon glyphicon-plus"></span>新增</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="./"> </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

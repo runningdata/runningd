@@ -4,8 +4,8 @@ from django.db import models
 import datetime
 from django.utils import timezone
 
-from metamap.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
-
+from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
+from will_common.models import PeriodicTask
 
 
 class AnaETL(models.Model):
@@ -121,28 +121,6 @@ class WillDependencyTask(models.Model):
         else:
             return ''
 
-
-class PeriodicTask(models.Model):
-    name = models.CharField(unique=True, max_length=200)
-    task = models.CharField(max_length=200)
-    args = models.TextField(default='[]')
-    kwargs = models.TextField(default='{}')
-    queue = models.CharField(max_length=200, blank=True, null=True)
-    exchange = models.CharField(max_length=200, blank=True, null=True)
-    routing_key = models.CharField(max_length=200, blank=True, null=True)
-    expires = models.DateTimeField(blank=True, null=True)
-    enabled = models.IntegerField(default=1)
-    last_run_at = models.DateTimeField(blank=True, null=True)
-    total_run_count = models.IntegerField(default=0)
-    date_changed = models.DateTimeField(default=timezone.now)
-    description = models.TextField()
-    crontab = models.ForeignKey(DjceleryCrontabschedule, models.DO_NOTHING, blank=True, null=True)
-    interval = models.ForeignKey(DjceleryIntervalschedule, models.DO_NOTHING, blank=True, null=True)
-    willtask = models.ForeignKey(WillDependencyTask, models.DO_NOTHING, blank=True, null=True)
-
-    class Meta:
-        db_table = 'djcelery_periodictask'
-        managed = False
 
 class BIUser(models.Model):
     username = models.CharField(max_length=200, blank=True, null=True)

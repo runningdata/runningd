@@ -57,7 +57,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'metamap_django.urls'
+ROOT_URLCONF = 'metamap_django.dqms_urls'
 
 TEMPLATES = [
     {
@@ -207,7 +207,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True
         },
-        'metamap.utils': {
+        'will_common.utils': {
             'handlers': ['error_handler'],
             'level': 'ERROR',
             'propagate': True

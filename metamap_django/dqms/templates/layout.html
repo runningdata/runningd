@@ -1,0 +1,31 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}"/>
+    <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+    {% block scripts %}{% endblock %}
+    <title>{% block title %}这里是标题{% endblock %}</title>
+</head>
+
+<body>
+{% comment %}
+        <div id="sidebar">
+            {% block sidebar %}
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/blog/">Blog</a></li>
+            </ul>
+            {% endblock %}
+        </div>
+    {% endcomment %}
+{% include 'components/header.html' %}
+<div class="container">
+    {% block content %}{% endblock %}
+
+    {% include 'components/page.html' %}
+</div>
+</body>
+</html>

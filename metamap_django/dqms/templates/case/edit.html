@@ -1,0 +1,102 @@
+{% extends 'layout.html' %}
+{% load ifdef %}
+
+{% block title %}编辑case{% endblock %}
+{% load staticfiles %}
+
+{% block scripts %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-select.min.css' %}"/>
+    <script src="{% static 'js/bootstrap-select.min.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+    {% has_def 'case' as has_case %}
+    {% if has_case %}
+        <form action="." method="POST">
+            <div class="form-group">
+                <div class="form-group">
+                    <input name="id" value="{{ case.id }}" type="hidden" class="form-control">
+                    <label>case名称</label>
+                </div>
+                <div class="form-group">
+                    <input name="tblName" value="{{ case.case_name }}" type="text" class="form-control">
+                    <label>描述</label>
+                </div>
+                <div class="form-group">
+                    <textarea name="variables" rows="5" class="form-control">{{ case.remard }}</textarea>
+                    <label>查询SQL</label>
+                </div>
+                <textarea name="query" rows="13" class="form-control">{{ case.query }}</textarea>
+                <div class="form-group">
+
+                    <label>选择数据源</label>
+
+                    <select id="lunch" name="rel_id" class="selectpicker form-control" data-live-search="true">
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </div>
+            </div>
+        </form>
+        <script type="application/javascript">
+            var id = {{ case.datasrc_id }}
+        </script>
+    {% else %}
+        <form action="." method="POST">
+            <div class="form-group">
+                <div class="form-group">
+                    <input name="id" type="hidden" class="form-control">
+                    <label>case名称</label>
+                </div>
+                <div class="form-group">
+                    <input name="tblName" type="text" class="form-control">
+                    <label>描述</label>
+                </div>
+                <div class="form-group">
+                    <textarea name="variables" rows="5" class="form-control"></textarea>
+                    <label>查询SQL</label>
+                </div>
+                <textarea name="query" rows="13" class="form-control"></textarea>
+                <div class="form-group">
+                    <label>选择数据源</label>
+                    <select id="lunch" name="rel_id" class="selectpicker form-control" data-live-search="true">
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </div>
+            </div>
+        </form>
+
+        <script type="application/javascript">
+            var id = -1
+        </script>
+    {% endif %}
+
+    <script type="application/javascript">
+        $.ajax({
+                    type: "get",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    url: "/dqms/rest/datasrc/?format=json",
+                    success: function (result) {
+                        $.each(result, function (index, datasrc) {
+                            if (id == datasrc.id) {
+                                $("#lunch").append("<option selected='selected' value='" + datasrc.id + "'>" + datasrc.src_name + "</option>");
+                            } else {
+                                $("#lunch").append("<option value='" + datasrc.id + "'>" + datasrc.src_name + "</option>");
+                            }
+                        })
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(errorThrown);
+                    },
+                    async: false             //false表示同步
+                }
+        );
+    </script>
+{% endblock %}

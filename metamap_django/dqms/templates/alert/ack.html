@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>报警响应</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/page/check_manager/index.css" />
+    <link rel="stylesheet"  href="css/bootstrap-timepicker.css" />
+    <link rel="stylesheet"  href="css/bootstrap-wysihtml5.css" />
+    <link rel="stylesheet"  href="css/datepicker.css" />
+
+    <!-- Jquery -->
+    <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="js/jquery.jqGrid.min.js"></script>
+    <script type="text/javascript" src="js/grid.locale-cn.js"></script>
+    <script language="javascript" src="InValid.js"></script>
+    <!-- Bootstrap -->
+    <script src="bootstrap/js/bootstrap.js"></script>
+
+    <script>
+
+        var caseInstId;
+
+        $(document).ready(function(){
+            var params = parseUrlParams(location.search);
+            case_inst_id = params["caseInstId"];
+            caseInstId = case_inst_id;
+            queryCaseInstDetail(caseInstId);
+            queryAck(case_inst_id);
+        });
+
+        function queryAck(case_inst_id){
+            $.ajax({
+                url:'alarm/queryAckByCaseInstId',
+                type:"get",
+                data:"caseInstId="+case_inst_id,
+                success:function(resp){
+                    if(resp.code == 1) { //调用服务失败
+                        $("#checkinst").html(resp.msg);
+                        $("#failedModal").modal('show');
+                        return;
+                    }
+                    var data = resp.data;
+                    htmlAckTable(data);
+                }
+            })
+
+        }
+
+        function queryCaseInstDetail(case_inst_id){
+            $.ajax({
+                url:'case/queryCaseInstByCaseInstId',
+                type:"get",
+                data:"caseInstId="+case_inst_id,
+                success:function(resp){
+                    if(resp.code == 1) { //调用服务失败
+                        $("#checkinst").html(resp.msg);
+                        $("#failedModal").modal('show');
+                        return;
+                    }
+                    var data = resp.data;
+                    var ack_list_table_view = "";
+                    for(i=0;i<data.list.length;i++) {
+                        ack_list_table_view = data.list[i].resultMsg.replace(/\n/g,'<br/>');
+                    }
+                    $("#alarmMessage").html(ack_list_table_view)
+
+                }
+            })
+        }
+
+        /**
+         * 显示质检用例的列表
+         */
+        function htmlAckTable(data){
+            var ack_list_table_view = "";
+
+            for(i=0;i<data.list.length;i++) {
+                ack_list_table_view += "<tr>" +
+                        "<td class='id'>" + data.list[i].id + "</td>" +
+                        "<td class='name'>" + data.list[i].caseName + "</td>" +
+                        "<td>" + data.list[i].acker + "</td>" +
+                        "<td>" + data.list[i].ctime + "</td>" +
+                        "<td>" + data.list[i].ack_msg + "</td>" +
+                        "</tr>";
+            }
+
+            $("#ack_list_table").html(ack_list_table_view);
+        }
+
+        function cancelAck(){
+            window.parent.select_page('alarm_info');
+        }
+
+        function saveAck(){
+            var reason = $("#reason").val();
+            $.ajax({
+                url:'alarm/ackCaseInst',
+                type:"post",
+                data:"caseInstId="+caseInstId+"&reason="+reason,
+                success:function(resp){
+                    if(resp.code == 1) { //调用服务失败
+                        $("#checkinst").html(resp.msg);
+                        $("#failedModal").modal('show');
+                        return;
+                    }
+                    $("#reason").html("");
+                    queryAck(case_inst_id);
+                }
+            })
+        }
+
+    </script>
+</head>
+<body>
+<div class="panel-dash">
+    <!-- breadcrumb start -->
+    <div class="m-search-wrap label-w-100">
+        <div></div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4>
+                    <span class="badge">1</span>
+                    报警详情
+                </h4>
+            </div>
+            <div id="x-search-list">
+                <h5>
+                    <p id="alarmMessage" font color = "red"></p>
+                </h5>
+            </div>
+            <div class="loading-overlay">
+                <i class="loading-icon fa fa-refresh fa-spin fa-lg"></i>
+            </div>
+            <div class="panel-heading clearfix">
+                <h4>
+                    <span class="badge">2</span>
+                    报警响应历史
+                </h4>
+            </div>
+            <div id="j-search-list">
+                <p id="totalAck"></p>
+                <table class="table table-bordered " style="margin-top: 8px">
+                    <thead>
+                    <tr>
+                        <th>响应编号</th>
+                        <th>用例名称</th>
+                        <th>响应者</th>
+                        <th>响应时间</th>
+                        <th>报警反馈信息</th>
+                    </tr>
+                    </thead>
+                    <tbody id="ack_list_table"></tbody>
+                </table>
+            </div>
+            <div class="loading-overlay">
+                <i class="loading-icon fa fa-refresh fa-spin fa-lg"></i>
+            </div>
+            <div class="panel-heading clearfix">
+                <h4>
+                    <span class="badge">3</span>
+                    报警反馈编辑
+                </h4>
+            </div>
+            <div class="panel-body">
+                <div class="m-search-group">
+                    <label class="m-search-label">
+                        报警原因描述
+                    </label>
+                    <div class="m-search-detail">
+                        <textarea class="form-control" id="reason" cols="45" rows="5" placeholder="报警原因" maxlength="5000" name="remark" value=""></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <button class="btn btn-success j-save" type="submit" onclick="saveAck()">保存</button>
+                <button class="btn btn-success j-save" type="submit" onclick="cancelAck()">取消</button>
+            </div>
+            <div class="loading-overlay">
+                <i class="loading-icon fa fa-refresh fa-spin fa-lg"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 失败弹窗 -->
+    <div id="failedModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">失败</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="checkinst">调用服务失败，请联系管理员。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<!-- breadcrumb
+</body>
+</html>

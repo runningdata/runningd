@@ -12,12 +12,12 @@ from rest_framework import viewsets
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 
-from metamap.djcelery_models import DjceleryCrontabschedule, DjceleryPeriodictasks
-from metamap.helpers import cronhelper
+from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryPeriodictasks
+from will_common.helpers import cronhelper
 from metamap.models import WillDependencyTask, PeriodicTask, AnaETL, Exports, BIUser
 from metamap.serializers import ExportsSerializer, BIUserSerializer
-from metamap.utils import httputils
-from metamap.utils.constants import DEFAULT_PAGE_SIEZE
+from will_common.utils import httputils
+from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
 
 class ScheDepListView(generic.ListView):

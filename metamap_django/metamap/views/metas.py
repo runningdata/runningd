@@ -12,8 +12,8 @@ from django.utils import timezone
 import datetime
 from django.db import connections
 
-from metamap.utils import httputils
-from metamap.utils.constants import DEFAULT_PAGE_SIEZE
+from will_common.utils import httputils
+from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
 logger = logging.getLogger('info')
 
