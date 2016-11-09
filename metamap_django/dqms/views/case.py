@@ -24,6 +24,10 @@ def todo(request):
 
 def manager(request):
     datas = DqmsCase.objects.all()
+    if 'case_name' in request.GET:
+        datas = DqmsCase.objects.filter(case_name__contains=request.GET['case_name'])
+    else:
+        datas = DqmsCase.objects.all()
     return render(request, 'case/case_manager.html', {'objs': datas})
 
 

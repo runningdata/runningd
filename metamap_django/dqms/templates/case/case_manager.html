@@ -28,7 +28,6 @@
             if (isRightName(creator)) {
                 $('#creator').attr('value', creator);
             }
-            getCases(PAGE_NUM, PAGE_ROWS);
         });
 
         /**
@@ -61,17 +60,17 @@
         /**
          * 获取所有质检任务
          */
-        function getCases(page, rows) {
-
-            {#            var subUrl = "";#}
-            {#            caseName = $('#caseName').val();#}
-            {#            creator = $('#creator').val();#}
-            {#            if (isRightName(caseName)) {#}
-            {#                subUrl += "&caseName=" + caseName;#}
-            {#            }#}
-            {#            if (isRightName(creator)) {#}
-            {#                subUrl += "&creator=" + creator;#}
-            {#            }#}
+        function getCases() {
+            var subUrl = "";
+            caseName = $('#caseName').val();
+            creator = $('#creator').val();
+            if (isRightName(caseName)) {
+                subUrl += "&case_name=" + caseName;
+            }
+            if (isRightName(creator)) {
+                subUrl += "&creator=" + creator;
+            }
+            window.parent.select_page('case', subUrl);
             {#            $.ajax({#}
             {#                url: "case/all/",#}
             {#                type: "get",#}
@@ -210,7 +209,6 @@
                         $("#casemanager").html(resp.msg);
                         return;
                     }
-                    getCases(PAGE_NUM, PAGE_ROWS);
                 },
             });
         }
@@ -266,7 +264,7 @@
                 <input type="text" name="name" placeholder="创建人" id="creator">
             </div>
             <button type="button" class="btn btn-sm btn-success m-search-btn" id="j-submit"
-                    onclick="getCases(PAGE_NUM,PAGE_ROWS)">查询
+                    onclick="getCases()">查询
             </button>
             <button type="button" class="btn btn-sm btn-success m-search-btn" id="j-creator" onclick="createCase()">
                 新建用例

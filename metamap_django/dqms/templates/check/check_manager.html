@@ -153,48 +153,49 @@
          * 获取质检任务
          */
         function getChecks() {
-            alert('cha xun');
-            {#            var subUrl = "";#}
-            {#            chkName = $('#checkName').val();#}
-            {#            creator = $('#creator').val();#}
-            {#            if (isRightName(chkName)) {#}
-            {#                subUrl += "&chkName=" + chkName;#}
-            {#            }#}
-            {#            if (isRightName(creator)) {#}
-            {#                subUrl += "&creator=" + creator;#}
-            {#            }#}
-            {#            $.ajax({#}
-            {#                url: "check/queryCheck",#}
-            {#                type: "get",#}
-            {#                data: "page=" + page + "&rows=" + rows + subUrl,#}
-            {#                success: function (resp) {#}
-            {#                    if (resp.code == 1) { //调用服务失败#}
-            {#                        $("#checkmanager").html(resp.msg);#}
-            {#                        $("#failedModal").modal('show');#}
-            {#                        return;#}
-            {#                    }#}
-            {#                    var data = resp.data;#}
-            {#                    if (data.list.length == 0) {#}
-            {#                        $("#checkmanager").html("没有查询到符合条件的质检任务");#}
-            {#                        $("#failedModal").modal('show');#}
-            {#                        return;#}
-            {#                    }#}
-            {#                    var maxPage = data.maxPage;#}
-            {#                    //初始化分页插件#}
-            {#                    $('#checkpage').jqPaginator({#}
-            {#                        totalPages: maxPage,#}
-            {#                        visiblePages: 10,#}
-            {#                        currentPage: page,#}
-            {#                        onPageChange: function (num, type) {#}
-            {#                            if (type == "init") {#}
-            {#                                return;#}
-            {#                            }#}
-            {#                            getChecks(num, PAGE_ROWS);#}
-            {#                        }#}
-            {#                    });#}
-            {#                    htmlCheckListTable(data);#}
-            {#                }#}
-            {#            });#}
+            var subUrl = "";
+            chkName = $('#checkName').val();
+            creator = $('#creator').val();
+            if (isRightName(chkName)) {
+                subUrl += "&chk_name=" + chkName;
+            }
+            if (isRightName(creator)) {
+                subUrl += "&creator=" + creator;
+            }
+            alert(subUrl);
+            window.parent.select_page('check', subUrl);
+{#            $.ajax({#}
+{#                url: "check/queryCheck",#}
+{#                type: "get",#}
+{#                data: "page=" + page + "&rows=" + rows + subUrl,#}
+{#                success: function (resp) {#}
+{#                    if (resp.code == 1) { //调用服务失败#}
+{#                        $("#checkmanager").html(resp.msg);#}
+{#                        $("#failedModal").modal('show');#}
+{#                        return;#}
+{#                    }#}
+{#                    var data = resp.data;#}
+{#                    if (data.list.length == 0) {#}
+{#                        $("#checkmanager").html("没有查询到符合条件的质检任务");#}
+{#                        $("#failedModal").modal('show');#}
+{#                        return;#}
+{#                    }#}
+{#                    var maxPage = data.maxPage;#}
+{#                    //初始化分页插件#}
+{#                    $('#checkpage').jqPaginator({#}
+{#                        totalPages: maxPage,#}
+{#                        visiblePages: 10,#}
+{#                        currentPage: page,#}
+{#                        onPageChange: function (num, type) {#}
+{#                            if (type == "init") {#}
+{#                                return;#}
+{#                            }#}
+{#                            getChecks(num, PAGE_ROWS);#}
+{#                        }#}
+{#                    });#}
+{#                    htmlCheckListTable(data);#}
+{#                }#}
+{#            });#}
         }
 
         /**

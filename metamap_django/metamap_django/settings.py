@@ -57,8 +57,8 @@ INSTALLED_APPS = [
     'djcelery',
     'rest_framework',
     'will_common',
-    # 'dqms',
-    'metamap',
+    'dqms',
+    # 'metamap',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -89,8 +89,8 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# ROOT_URLCONF = 'metamap_django.dqms_urls'
-ROOT_URLCONF = 'metamap_django.metamap_urls'
+ROOT_URLCONF = 'metamap_django.dqms_urls'
+# ROOT_URLCONF = 'metamap_django.metamap_urls'
 
 TEMPLATES = [
     {
