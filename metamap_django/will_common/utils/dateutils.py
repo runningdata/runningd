@@ -20,3 +20,6 @@ def days_ago(days):
 
 def format_day(time):
     return time.strftime("%Y%m%d%H%M%S")
+
+def format_dbday(time):
+    return time.strftime("%Y-%m-%d %H:%M:%S")

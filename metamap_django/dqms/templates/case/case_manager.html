@@ -7,11 +7,9 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/page/check_manager/index.css' %}"/>
     {% include 'component/js.html' %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery.dataTables.css' %}"/>
+
     <script>
-        var PAGE_ROWS = 15;
-        var PAGE_NUM = 1;
-        var STATUS_RECOVER = 1;
-        var STATUS_PAUSE = 2;
         var TOTAL_RECORD_NUM = "";
         var caseId;
         var caseName;
@@ -31,33 +29,6 @@
         });
 
         /**
-         * 展示case列表
-         * */
-        function htmlCaseListTable(data) {
-            var case_data = "";
-            TOTAL_RECORD_NUM = "总共：" + data.totalRecords + "条数据";
-            $('#totalCase').html(TOTAL_RECORD_NUM)
-            for (i = 0; i < data.list.length; i++) {
-                case_data += "<tr>" +
-                        "<td class='id'>" + data.list[i].caseId + "</td>" +
-                        "<td class='name'>" + data.list[i].caseName + "</td>" +
-                        "<td>" + data.list[i].ctime + "</td>" +
-//				"<td>" + (data.list[i].remark == null ? "" : data.list[i].remark) + "</td>" +
-                        "<td>" + (data.list[i].editor ) + "</td>" +
-                        "<td>" + (data.list[i].status ) + "</td>" +
-                        "<td>" +
-//				"<button class='btn btn-default btn-xs' onclick=\"getCaseInstances(" + data.list[i].caseId + ",'" + data.list[i].caseName + "'," + PAGE_NUM + "," + PAGE_ROWS + ")\">查看实例</button>" +
-                        "<button class='btn btn-default btn-xs' onclick=\"editCase(" + data.list[i].caseId + ")\">查看详情</button>" +
-                        "<button class='btn btn-default btn-xs' onclick='deleteCase(" + data.list[i].caseId + ")'>删除</button>" +
-                        "<button class='btn btn-default btn-xs' onclick='onceRunCase(" + data.list[i].caseId + ")'>测试执行</button>" +
-                        "</td>" +
-                        "</tr>";
-            }
-
-            $("#all_case_list_table").html(case_data);
-        }
-
-        /**
          * 获取所有质检任务
          */
         function getCases() {
@@ -71,11 +42,6 @@
                 subUrl += "&creator=" + creator;
             }
             window.parent.select_page('case', subUrl);
-        }
-
-        function _pageChange(num, type) {
-            if (type != 'change')
-                return;
         }
 
         /**
@@ -101,55 +67,6 @@
 
         }
 
-        /**
-         * 查看历史调度
-         */
-        function getCaseInstances(case_id, case_name, page, rows) {
-            $.ajax({
-                url: "case/queryCaseInstByCaseId",
-                data: "page=" + page + "&rows=" + rows + "&caseId=" + case_id,
-                type: "get",
-                success: function (resp) {
-                    if (resp.code == 1) { //调用服务失败
-                        $("#failedModal").modal('show');
-                        $("#casemanager").html(resp.msg);
-                        return;
-                    }
-
-                    var data = resp.data;
-                    var case_inst_list = "";
-                    var result = '质检符合规则';
-
-                    for (i = 0; i < data.list.length; i++) {
-
-                        if (data.list[i].resultCode == -1) {
-                            result = '运行中';
-                        } else if (data.list[i].resultCode > 0) {
-                            result = data.list[i].resultMsg;
-                        } else if (data.list[i].resultCode == -99) {
-                            result = data.list[i].resultMsg;
-                        } else if (data.list[i].resultCode == 0) {
-                            result = "质检符合规则";
-                        }
-                        case_inst_list += "<tr>" +
-                                "<td class='id'>" + data.list[i].id + "</td>" +
-                                "<td class='name'>" + data.list[i].caseName + "</td>" +
-                                "<td>" + data.list[i].startTime + "</td>" +
-                                "<td>" + data.list[i].endTime + "</td>" +
-                                "<td>" + result + "</td>" +
-                                "<td>" +
-//												"<button class='btn btn-default btn-xs' onclick='getCaseInstanceDetail(" + data[i].id + ")'>查看</button>" +
-                                "</td>" +
-                                "</tr>";
-                    }
-
-                    $("#case_inst_list_table").html(case_inst_list);
-                    $("#caseTitle").html(case_name);
-                    $("#getCaseInstModal").modal('show');
-                },
-
-            });
-        }
 
         /**
          * 单次测试执行case
@@ -199,25 +116,33 @@
 
         //获取指定质检任务的执行记录
         function getexecutions(id) {
-            $.ajax({
-                type: "get",
-                measure_type: "json",
-                contentType: "application/json;charset=utf-8",
-                url: "/dqms/rest/execforcase?format=json&id=" + id,
-                success: function (result) {
-                    var src_data = "";
-                    $.each(result, function (index, obj) {
-                        src_data += "<tr>"
-                                + "<td>" + obj.start_time + "</td>"
-                                + "<td>" + obj.end_time + "</td>"
-                                + "<td>" + obj.status + "</td>"
-                                + "<td>" + obj.result_mes + "</td>"
-                                + "</tr>";
-                    });
-                    $("#execution_list_table").html(src_data);
-                    $("#executionModal").modal('show');
+            $('#example').DataTable({
+                "ajax": "/dqms/case/execs?id=" + id,
+                "columns": [
+                    {"data": "case_id"},
+                    {"data": "status"},
+                    {"data": "start_time"},
+                    {"data": "end_time"}
+                ],
+                "destroy": true,
+                "pageLength": 5,
+                "pagingType": "full",
+                language: {
+                    aria: {
+                        sortAscending: ": 以升序排列此列 ",
+                        sortDescending: ": 以降序排列此列"
+                    },
+                    emptyTable: "表中没有数据",
+                    info: "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    infoEmpty: "未找到数据",
+                    infoFiltered: "(由 _MAX_ 项结果过滤)",
+                    lengthMenu: "显示 _MENU_",
+                    search: "搜索:",
+                    zeroRecords: "没有匹配的结果",
+                    paginate: {previous: "上页", next: "下页", last: "末页", first: "首页"}
                 }
             });
+            $("#executionModal").modal('show');
         }
     </script>
 
@@ -269,7 +194,7 @@
                     <tr>
                         <td class='id'> {{ obj.id }}</td>
                         <td class='name'>{{ obj.case_name }}</td>
-                        <td> {{ obj.ctime | date:"Y-m-d H:i:s"}}</td>
+                        <td> {{ obj.ctime | date:"Y-m-d H:i:s" }}</td>
                         <td> {{ obj.editor | default_if_none:"-" }}</td>
                         <td> {{ obj.status  | default_if_none:"-" }}</td>
                         <td>
@@ -378,17 +303,16 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 id="srcTitle" class="modal-title">执行记录</h4>
             </div>
-            <div class="modal-body">
-                <table class="table table-bordered " style="margin-top: 8px">
+            <div class="modal-body" style="  margin-bottom: 25px;">
+                <table id="example" class="display" cellspacing="0" width="100%">
                     <thead>
                     <tr>
+                        <th>ID</th>
+                        <th>状态</th>
                         <th>启动时间</th>
                         <th>结束时间</th>
-                        <th>状态</th>
-                        <th>返回信息</th>
                     </tr>
                     </thead>
-                    <tbody id="execution_list_table"></tbody>
                 </table>
             </div>
         </div>

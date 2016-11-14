@@ -21,6 +21,7 @@ router.register(r'execforcase', CaseInstViewSet)
 urlpatterns = [
     url(r'^$', case.IndexView.as_view(), name='index'),
 
+    url(r'^check/execs$', check.execution, name='check_execution'),
     url(r'^check/$', check.manager, name='check_manager'),
     url(r'^check/del/$', check.delete, name='check_delete'),
     url(r'^check/edit/$', check.edit, name='check_edit'),
@@ -29,7 +30,7 @@ urlpatterns = [
 
     url(r'^alarm_info/$', alert.manager, name='alarm_info'),
 
-
+    url(r'^case/execs$', case.execution, name='case_execution'),
     url(r'^case/$', case.manager, name='case_manager'),
     url(r'^case/edit/$', case.edit, name='case_edit'),
     url(r'^case/save/$', case.save, name='case_save'),

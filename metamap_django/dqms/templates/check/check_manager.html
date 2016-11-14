@@ -7,10 +7,9 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/page/check_manager/index.css' %}"/>
     {% include 'component/js.html' %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery.dataTables.css' %}"/>
 
     <script>
-        var PAGE_ROWS = 15;
-        var PAGE_NUM = 1;
         var STATUS_RECOVER = 1;
         var STATUS_PAUSE = 2;
         var VIEWER_YES = 1;
@@ -34,54 +33,6 @@
             }
         });
 
-        //根据query的数据将其显示在页面上
-        function htmlCheckListTable(data) {
-            TOTAL_RECORD_NUM = "总共：" + data.totalRecords + "条数据";
-            $('#totalCheck').html(TOTAL_RECORD_NUM);
-            var check_data = "";
-            for (i = 0; i < data.list.length; i++) {
-                var status_tmp = '';
-                var status_btn = '';
-                var viewer_btn = '';
-
-                //判断任务的调度状态
-                if (data.list[i].status == null) {
-                    status_tmp = '没有调度';
-                } else if (data.list[i].status == 'PAUSED') {
-                    status_tmp = '暂停中';
-                    status_btn = "<span id = 'status_" + data.list[i].chkId + "'><button class='btn btn-default btn-xs' onclick='changeStatus(" + data.list[i].chkId
-                            + ", " + STATUS_RECOVER + ")'>恢复调度</button></span>";
-                } else {
-                    status_tmp = '正常';
-                    status_btn = "<span id = 'status_" + data.list[i].chkId + "'><button class='btn btn-default btn-xs' onclick='changeStatus(" + data.list[i].chkId
-                            + ", " + STATUS_PAUSE + ")'>暂停调度</button></span>";
-                }
-                //判断当前任务是否已经被订阅
-                if (data.list[i].isView == "false") {
-                    viewer_btn = "<span id = 'status_" + data.list[i].chkId + "'><button class='btn btn-default btn-xs' onclick='observerCheck(" + data.list[i].chkId
-                            + ", " + VIEWER_NO + ")'>订阅</button></span>";
-                } else {
-                    viewer_btn = "<span id = 'status_" + data.list[i].chkId + "'><button class='btn btn-default btn-xs' onclick='observerCheck(" + data.list[i].chkId
-                            + ", " + VIEWER_YES + ")'>取消订阅</button></span>";
-                }
-                check_data += "<tr>" +
-                        "<td class='id'>" + data.list[i].chkId + "</td>" +
-                        "<td class='name'>" + data.list[i].chkName + "</td>" +
-                        "<td>" + data.list[i].lastTime + "</td>" +
-                        "<td>" + data.list[i].creator + "</td>" +
-                        "<td>" + status_tmp + "</td>" +
-                        "<td>" +
-//				"<button class='btn btn-default btn-xs' onclick=\"getCheckInstances(" + data.list[i].chkId + ",'" + data.list[i].chkName + "'," + PAGE_NUM + "," + PAGE_ROWS + ")\">查看实例</button>" +
-                        "<button class='btn btn-default btn-xs' onclick='editCheck(" + data.list[i].chkId + ")'>查看详情</button>" +
-                        status_btn +
-                        "<button class='btn btn-default btn-xs' onclick='deleteCheck(" + data.list[i].chkId + ")'>删除</button>" +
-                        "<button class='btn btn-default btn-xs' onclick='oncerun(" + data.list[i].chkId + ")'>测试执行</button>" +
-                        viewer_btn +
-                        "</td>" +
-                        "</tr>";
-            }
-            $("#check_list_table").html(check_data);
-        }
 
         /**
          * 订阅check
@@ -125,30 +76,6 @@
             }
         }
 
-
-        /**
-         * 单次执行质检任务，并不存储到调度系统
-         */
-        function oncerun(chk_id) {
-            chkId = chk_id;
-            $("#onceRunModal").modal('show');
-        }
-        function run_check() {
-            $("#onceRunModal").modal('hide');
-            $.ajax({
-                url: "schedule/onceSchedule",
-                type: "post",
-                data: "chkId=" + chkId,
-                success: function (resp) {
-                    if (resp.code == 1) { //调用服务失败
-                        $("#checkmanager").html(resp.msg);
-                        $("#failedModal").modal('show');
-                        return;
-                    }
-                }
-            })
-        }
-
         /**
          * 获取质检任务
          */
@@ -164,38 +91,6 @@
             }
             alert(subUrl);
             window.parent.select_page('check', subUrl);
-            {#            $.ajax({#}
-            {#                url: "check/queryCheck",#}
-            {#                type: "get",#}
-            {#                data: "page=" + page + "&rows=" + rows + subUrl,#}
-            {#                success: function (resp) {#}
-            {#                    if (resp.code == 1) { //调用服务失败#}
-            {#                        $("#checkmanager").html(resp.msg);#}
-            {#                        $("#failedModal").modal('show');#}
-            {#                        return;#}
-            {#                    }#}
-            {#                    var data = resp.data;#}
-            {#                    if (data.list.length == 0) {#}
-            {#                        $("#checkmanager").html("没有查询到符合条件的质检任务");#}
-            {#                        $("#failedModal").modal('show');#}
-            {#                        return;#}
-            {#                    }#}
-            {#                    var maxPage = data.maxPage;#}
-            {#                    //初始化分页插件#}
-            {#                    $('#checkpage').jqPaginator({#}
-            {#                        totalPages: maxPage,#}
-            {#                        visiblePages: 10,#}
-            {#                        currentPage: page,#}
-            {#                        onPageChange: function (num, type) {#}
-            {#                            if (type == "init") {#}
-            {#                                return;#}
-            {#                            }#}
-            {#                            getChecks(num, PAGE_ROWS);#}
-            {#                        }#}
-            {#                    });#}
-            {#                    htmlCheckListTable(data);#}
-            {#                }#}
-            {#            });#}
         }
 
         /**
@@ -257,55 +152,6 @@
 
         }
 
-        /**
-         * 查看历史调度
-         */
-        function getCheckInstances(chk_id, chk_name, page, rows) {
-            page = 1; //只显示最近的50个实例
-            $.ajax({
-                url: "check/queryCheckInstByChkId",
-                data: "page=" + page + "&rows=" + rows + "&chkId=" + chk_id,
-                type: "get",
-                success: function (resp) {
-                    if (resp.code == 1) { //调用服务失败
-                        $("#checkmanager").html(resp.msg);
-                        $("#failedModal").modal('show');
-                        return;
-                    }
-                    var data = resp.data;
-                    var check_inst_list_view = "";
-                    var result = '正确';
-
-                    for (i = 0; i < data.list.length; i++) {
-
-                        if (data.list[i].resultCode == -1) {
-                            result = '运行中';
-                        } else if (data.list[i].resultCode > 0) {
-                            result = '质检违反规则';
-                        } else if (data.list[i].resultCode == -99) {
-                            result = '运行异常';
-                        } else {
-                            result = "质检符合规则";
-                        }
-                        check_inst_list_view += "<tr>" +
-                                "<td class='id'>" + data.list[i].id + "</td>" +
-                                "<td class='name'>" + data.list[i].chkName + "</td>" +
-                                "<td>" + data.list[i].startTime + "</td>" +
-                                "<td>" + data.list[i].endTime + "</td>" +
-                                "<td>" + result + "</td>" +
-                                "<td>" +
-                                "<button class='btn btn-default btn-xs' onclick='getCheckInstanceDetail(" + data.list[i].id + ")'>查看</button>" +
-                                "</td>" +
-                                "</tr>";
-                    }
-
-                    $("#check_inst_list_table").html(check_inst_list_view);
-                    $("#checkTitle").html(chk_name);
-                    $("#getCheckInstModal").modal('show');
-                },
-
-            });
-        }
 
         /**
          * 删除质检任务
@@ -380,26 +226,34 @@
 
         //获取指定质检任务的执行记录
         function getexecutions(id) {
-            $.ajax({
-                type: "get",
-                measure_type: "json",
-                contentType: "application/json;charset=utf-8",
-                url: "/dqms/rest/execforcheck?format=json&id=" + id,
-                success: function (result) {
-                    var src_data = "";
-                    $.each(result, function (index, obj) {
-                        src_data += "<tr>"
-                                + "<td>" + obj.case_num + "</td>"
-                                + "<td>" + obj.case_num + "</td>"
-                                + "<td>" + obj.case_finish_num + "</td>"
-                                + "<td>" + obj.start_time + "</td>"
-                                + "<td>" + obj.end_time + "</td>"
-                                + "</tr>";
-                    });
-                    $("#execution_list_table").html(src_data);
-                    $("#executionModal").modal('show');
-                }
+            $('#example').DataTable({
+                "ajax": "/dqms/check/execs?id=" + id,
+                "columns": [
+                    {"data": "case_num"},
+                    {"data": "case_finish_num"},
+                    {"data": "start_time"},
+                    {"data": "end_time"}
+                ],
+                "destroy": true,
+                "pageLength": 5,
+                "pagingType": "full",
+                "language": {
+                    aria: {
+                        sortAscending: ": 以升序排列此列 ",
+                        sortDescending: ": 以降序排列此列"
+                    },
+                    emptyTable: "表中没有数据",
+                    info: "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    infoEmpty: "未找到数据",
+                    infoFiltered: "(由 _MAX_ 项结果过滤)",
+                    lengthMenu: "显示 _MENU_",
+                    search: "搜索:",
+                    zeroRecords: "没有匹配的结果",
+                    paginate: {previous: "上页", next: "下页", last: "末页", first: "首页"}
+                },
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
             });
+            $("#executionModal").modal('show');
         }
     </script>
 
@@ -630,18 +484,16 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 id="srcTitle" class="modal-title">执行记录</h4>
             </div>
-            <div class="modal-body">
-                <table class="table table-bordered " style="margin-top: 8px">
+            <div class="modal-body" style="  margin-bottom: 25px;">
+                <table id="example" class="display" cellspacing="0" width="100%">
                     <thead>
                     <tr>
-                        <th>质检名称</th>
-                        <th>用例个数</th>
-                        <th>用例完成个数</th>
+                        <th>用例数</th>
+                        <th>完成数</th>
                         <th>启动时间</th>
                         <th>结束时间</th>
                     </tr>
                     </thead>
-                    <tbody id="execution_list_table"></tbody>
                 </table>
             </div>
         </div>

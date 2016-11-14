@@ -13,7 +13,7 @@ from will_common.djcelery_models import DjceleryIntervalschedule
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    phone = models.BigIntegerField(max_length=11, default=110)
+    phone = models.BigIntegerField(default=110)
 
 
 class WillDependencyTask(models.Model):

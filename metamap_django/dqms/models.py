@@ -5,6 +5,8 @@ from django.db import models
 from django.utils import timezone
 
 from will_common.models import UserProfile
+from will_common.templatetags import etlutils
+from will_common.utils import dateutils
 
 
 class DqmsDatasource(models.Model):
@@ -48,6 +50,14 @@ class DqmsCaseInst(models.Model):
     class Meta:
         db_table = 'willdqms_case_inst'
 
+    def as_dict(self):
+        return {'case_id': self.case.id,
+                'status': etlutils.readable_status(self.status),
+                'result_mes': self.result_mes,
+                'start_time': dateutils.format_dbday(self.start_time),
+                'end_time': dateutils.format_dbday(self.end_time)
+                }
+
 
 class DqmsCheck(models.Model):
     chk_name = models.CharField(max_length=300, blank=True, null=True)
@@ -89,6 +99,14 @@ class DqmsCheckInst(models.Model):
     class Meta:
         db_table = 'willdqms_check_inst'
 
+    def as_dict(self):
+        return {'chk_id': self.chk.id,
+                'case_num': self.case_num,
+                'case_finish_num': self.case_finish_num,
+                'start_time': dateutils.format_dbday(self.start_time),
+                'end_time': dateutils.format_dbday(self.end_time)
+                }
+
 
 class DqmsIndex(models.Model):
     case = models.ForeignKey(DqmsCase, on_delete=models.CASCADE, null=False)
@@ -118,7 +136,7 @@ class DqmsIndexInst(models.Model):
 
 class DqmsRule(models.Model):
     case = models.ForeignKey(DqmsCase, on_delete=models.CASCADE, null=False)
-    rule_type = models.IntegerField(blank=True, null=True,verbose_name=u'规则类型')
+    rule_type = models.IntegerField(blank=True, null=True, verbose_name=u'规则类型')
     max = models.IntegerField(default=-999)
     min = models.IntegerField(default=-999)
     measure_name = models.CharField(max_length=300, blank=True, null=True, verbose_name=u'指标名称')
@@ -146,6 +164,7 @@ class DqmsRuleInst(models.Model):
     class Meta:
         db_table = 'willdqms_rule_inst'
 
+
 class DqmsAck(models.Model):
     caseins = models.ForeignKey(DqmsCaseInst, on_delete=models.CASCADE, null=False)
     result_msg = models.CharField(max_length=5000, blank=True, null=True)
@@ -155,6 +174,7 @@ class DqmsAck(models.Model):
 
     class Meta:
         db_table = 'willdqms_ack'
+
 
 class DqmsAlert(models.Model):
     rule = models.ForeignKey(DqmsRule, on_delete=models.CASCADE, null=False)

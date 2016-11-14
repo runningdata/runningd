@@ -137,6 +137,7 @@ class CheckViewSet(viewsets.ModelViewSet):
         else:
             return Response('[]')
 
+
 class CheckInstViewSet(viewsets.ModelViewSet):
     serializer_class = DqmsCheckInstSerializer
     queryset = DqmsCheckInst.objects.all()
@@ -151,6 +152,21 @@ class CheckInstViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         else:
             return Response('[]')
+
+
+def execution(request):
+    chk_id = request.GET['id']
+    if 'NaN' != chk_id:
+        check_id = int(chk_id)
+        result = DqmsCheckInst.objects.filter(chk_id=check_id).order_by('-start_time')
+        s = [obj.as_dict() for obj in result]
+        rr = dict()
+        rr['data'] = s
+        rr['count'] = len(s)
+        return JsonResponse(rr)
+    else:
+        return JsonResponse('[]')
+
 
 class CaseInstViewSet(viewsets.ModelViewSet):
     serializer_class = DqmsCaseInstSerializer

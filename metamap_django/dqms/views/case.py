@@ -11,7 +11,7 @@ from django.views import generic
 from rest_framework import viewsets
 
 from dqms import tasks
-from dqms.models import DqmsCase, DqmsDatasource, DqmsRule
+from dqms.models import DqmsCase, DqmsDatasource, DqmsRule, DqmsCaseInst
 from dqms.serializers import DqmsDatasourceSerializer, DqmsCaseSerializer
 from will_common.utils import httputils
 import traceback
@@ -138,6 +138,19 @@ class DataSrcViewSet(viewsets.ModelViewSet):
     queryset = DqmsDatasource.objects.all()
     serializer_class = DqmsDatasourceSerializer
 
+
+def execution(request):
+    chk_id = request.GET['id']
+    if 'NaN' != chk_id:
+        check_id = int(chk_id)
+        result = DqmsCaseInst.objects.filter(case_id=check_id).order_by('-start_time')
+        s = [obj.as_dict() for obj in result]
+        rr = dict()
+        rr['data'] = s
+        rr['count'] = len(s)
+        return JsonResponse(rr)
+    else:
+        return JsonResponse('[]')
 
 class CaseViewSet(viewsets.ModelViewSet):
     queryset = DqmsCase.objects.all()
