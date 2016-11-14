@@ -164,38 +164,38 @@
             }
             alert(subUrl);
             window.parent.select_page('check', subUrl);
-{#            $.ajax({#}
-{#                url: "check/queryCheck",#}
-{#                type: "get",#}
-{#                data: "page=" + page + "&rows=" + rows + subUrl,#}
-{#                success: function (resp) {#}
-{#                    if (resp.code == 1) { //调用服务失败#}
-{#                        $("#checkmanager").html(resp.msg);#}
-{#                        $("#failedModal").modal('show');#}
-{#                        return;#}
-{#                    }#}
-{#                    var data = resp.data;#}
-{#                    if (data.list.length == 0) {#}
-{#                        $("#checkmanager").html("没有查询到符合条件的质检任务");#}
-{#                        $("#failedModal").modal('show');#}
-{#                        return;#}
-{#                    }#}
-{#                    var maxPage = data.maxPage;#}
-{#                    //初始化分页插件#}
-{#                    $('#checkpage').jqPaginator({#}
-{#                        totalPages: maxPage,#}
-{#                        visiblePages: 10,#}
-{#                        currentPage: page,#}
-{#                        onPageChange: function (num, type) {#}
-{#                            if (type == "init") {#}
-{#                                return;#}
-{#                            }#}
-{#                            getChecks(num, PAGE_ROWS);#}
-{#                        }#}
-{#                    });#}
-{#                    htmlCheckListTable(data);#}
-{#                }#}
-{#            });#}
+            {#            $.ajax({#}
+            {#                url: "check/queryCheck",#}
+            {#                type: "get",#}
+            {#                data: "page=" + page + "&rows=" + rows + subUrl,#}
+            {#                success: function (resp) {#}
+            {#                    if (resp.code == 1) { //调用服务失败#}
+            {#                        $("#checkmanager").html(resp.msg);#}
+            {#                        $("#failedModal").modal('show');#}
+            {#                        return;#}
+            {#                    }#}
+            {#                    var data = resp.data;#}
+            {#                    if (data.list.length == 0) {#}
+            {#                        $("#checkmanager").html("没有查询到符合条件的质检任务");#}
+            {#                        $("#failedModal").modal('show');#}
+            {#                        return;#}
+            {#                    }#}
+            {#                    var maxPage = data.maxPage;#}
+            {#                    //初始化分页插件#}
+            {#                    $('#checkpage').jqPaginator({#}
+            {#                        totalPages: maxPage,#}
+            {#                        visiblePages: 10,#}
+            {#                        currentPage: page,#}
+            {#                        onPageChange: function (num, type) {#}
+            {#                            if (type == "init") {#}
+            {#                                return;#}
+            {#                            }#}
+            {#                            getChecks(num, PAGE_ROWS);#}
+            {#                        }#}
+            {#                    });#}
+            {#                    htmlCheckListTable(data);#}
+            {#                }#}
+            {#            });#}
         }
 
         /**
@@ -378,6 +378,29 @@
             });
         }
 
+        //获取指定质检任务的执行记录
+        function getexecutions(id) {
+            $.ajax({
+                type: "get",
+                measure_type: "json",
+                contentType: "application/json;charset=utf-8",
+                url: "/dqms/rest/execforcheck?format=json&id=" + id,
+                success: function (result) {
+                    var src_data = "";
+                    $.each(result, function (index, obj) {
+                        src_data += "<tr>"
+                                + "<td>" + obj.case_num + "</td>"
+                                + "<td>" + obj.case_num + "</td>"
+                                + "<td>" + obj.case_finish_num + "</td>"
+                                + "<td>" + obj.start_time + "</td>"
+                                + "<td>" + obj.end_time + "</td>"
+                                + "</tr>";
+                    });
+                    $("#execution_list_table").html(src_data);
+                    $("#executionModal").modal('show');
+                }
+            });
+        }
     </script>
 
 
@@ -434,7 +457,9 @@
                         <td>
                             <button class='btn btn-default btn-xs' onclick='editCheck(  {{ obj.id }}  )'>查看详情</button>
                             <button class='btn btn-default btn-xs' onclick='deleteCheck(  {{ obj.id }}  )'>删除</button>
-                            <button class='btn btn-default btn-xs' onclick='oncerun(  {{ obj.id }}  )'>测试执行</button>
+                            <button class='btn btn-default btn-xs' onclick='getexecutions(  {{ obj.id }}  )'>执行记录
+                            </button>
+                            {#                            <button class='btn btn-default btn-xs' onclick='oncerun(  {{ obj.id }}  )'>测试执行</button>#}
                         </td>
                     </tr>
                 {% endfor %}
@@ -591,6 +616,33 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal HTML -->
+<!-- 获取执行记录 -->
+<div id="executionModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="srcTitle" class="modal-title">执行记录</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered " style="margin-top: 8px">
+                    <thead>
+                    <tr>
+                        <th>质检名称</th>
+                        <th>用例个数</th>
+                        <th>用例完成个数</th>
+                        <th>启动时间</th>
+                        <th>结束时间</th>
+                    </tr>
+                    </thead>
+                    <tbody id="execution_list_table"></tbody>
+                </table>
             </div>
         </div>
     </div>

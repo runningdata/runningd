@@ -21,7 +21,7 @@
                     <tr>
                         <td>{{ obj.chk.chk_name }}</td>
                         <td>{{  obj.case_num }}</td>
-                        <td>{{  obj.case_finish_num | default_if_none: '0' }}</td>
+                        <td>{{  obj.case_finish_num  }}</td>
                         <td>{{ obj.start_time | date:"Y-m-d H:i:s" }}</td>
                         <td>{{ obj.end_time | date:"Y-m-d H:i:s" }}</td>
                     </tr>

@@ -14,7 +14,5 @@ class RuleViewSet(viewsets.ModelViewSet):
     def get_all(self, request):
         case_id = int(request.GET['id'])
         result = DqmsRule.objects.filter(case_id=case_id)
-        for obj in result.values():
-            print obj
         serializer = self.get_serializer(result, many=True)
         return Response(serializer.data)

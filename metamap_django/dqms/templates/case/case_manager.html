@@ -71,43 +71,6 @@
                 subUrl += "&creator=" + creator;
             }
             window.parent.select_page('case', subUrl);
-            {#            $.ajax({#}
-            {#                url: "case/all/",#}
-            {#                type: "get",#}
-            {#                data: "page=" + page + "&rows=" + rows + subUrl,#}
-            {#                success: function (resp) {#}
-            {#                    data = resp.data;#}
-            {#                    if (resp.code == 1) { //调用服务失败#}
-            {#                        $("#failedModal").modal('show');#}
-            {#                        $("#casemanager").html(resp.msg);#}
-            {#                        return;#}
-            {#                    }#}
-            {#                    if (data.list.length == 0) {#}
-            {#                        $("#failedModal").modal('show');#}
-            {#                        $("#casemanager").html("没有符合条件的质检用例");#}
-            {#                        return;#}
-            {#                    }#}
-            {#                    var maxPage = data.maxPage;#}
-            {#                    $('#casepage').jqPaginator({#}
-            {#                        totalPages: maxPage,#}
-            {#                        visiblePages: 10,#}
-            {#                        currentPage: page,#}
-            {#                        onPageChange: function (num, type) {#}
-            {#                            if (type == "init") {#}
-            {#                                return;#}
-            {#                            }#}
-            {#                            getCases(num, rows);#}
-            {#                        }#}
-            {#                    });#}
-            {#                    htmlCaseListTable(data);#}
-            {##}
-            {#                },#}
-            {#                error: function (XMLHttpRequest, textStatus, errorThrown) {#}
-            {#                    $("#failedModal").modal('show');#}
-            {#                    $("#casefail").html(errorThrown);#}
-            {#                    return;#}
-            {#                }#}
-            {#            });#}
         }
 
         function _pageChange(num, type) {
@@ -200,15 +163,10 @@
         function run_case() {
             $("#onceRunModal").modal('hide');
             $.ajax({
-                url: "schedule/onceRunCase",
-                data: "caseId=" + caseId,
-                type: "post",
+                url: "/dqms/case/runtest/" + caseId,
+                type: "GET",
                 success: function (resp) {
-                    if (resp.code == 1) { //调用服务失败
-                        $("#failedModal").modal('show');
-                        $("#casemanager").html(resp.msg);
-                        return;
-                    }
+                    console.log(resp);
                 },
             });
         }
@@ -238,6 +196,29 @@
 
         }
 
+
+        //获取指定质检任务的执行记录
+        function getexecutions(id) {
+            $.ajax({
+                type: "get",
+                measure_type: "json",
+                contentType: "application/json;charset=utf-8",
+                url: "/dqms/rest/execforcase?format=json&id=" + id,
+                success: function (result) {
+                    var src_data = "";
+                    $.each(result, function (index, obj) {
+                        src_data += "<tr>"
+                                + "<td>" + obj.start_time + "</td>"
+                                + "<td>" + obj.end_time + "</td>"
+                                + "<td>" + obj.status + "</td>"
+                                + "<td>" + obj.result_mes + "</td>"
+                                + "</tr>";
+                    });
+                    $("#execution_list_table").html(src_data);
+                    $("#executionModal").modal('show');
+                }
+            });
+        }
     </script>
 
 
@@ -295,6 +276,7 @@
                             <button class='btn btn-default btn-xs' onclick="editCase({{ obj.id }})">查看详情</button>
                             <button class='btn btn-default btn-xs' onclick="deleteCase({{ obj.id }})">删除</button>
                             <button class='btn btn-default btn-xs' onclick="onceRunCase({{ obj.id }})">测试执行</button>
+                            <button class='btn btn-default btn-xs' onclick="getexecutions({{ obj.id }})">执行记录</button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -383,6 +365,31 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 获取执行记录 -->
+<div id="executionModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="srcTitle" class="modal-title">执行记录</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered " style="margin-top: 8px">
+                    <thead>
+                    <tr>
+                        <th>启动时间</th>
+                        <th>结束时间</th>
+                        <th>状态</th>
+                        <th>返回信息</th>
+                    </tr>
+                    </thead>
+                    <tbody id="execution_list_table"></tbody>
+                </table>
             </div>
         </div>
     </div>

@@ -137,6 +137,14 @@ DATABASES = {
         'USER': 'product',
         'HOST': '10.1.5.220',
         'PORT': '3306',
+    },
+    'dqms_check': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'YKX_DW',
+        'PASSWORD': 'Zjy@yinker20150309',
+        'USER': 'product',
+        'HOST': '10.1.5.220',
+        'PORT': '3306',
     }
 }
 

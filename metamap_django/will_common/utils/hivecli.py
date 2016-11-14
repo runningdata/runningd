@@ -3,15 +3,15 @@ import logging
 import pyhs2, json
 import re
 from django.conf import settings
-from django.template import Context
-from django.template.backends.django import Template
 from pyhs2.error import Pyhs2Exception
 
-from metamap.helpers import etlhelper
+from will_common.utils import djtemplates
+
 logger = logging.getLogger('django')
 
+
 def getTbls(etl):
-    sql = etlhelper.get_etl_sql(etl)
+    sql = djtemplates.get_etl_sql(etl)
     result = set()
     try:
         with pyhs2.connect(host=settings.HIVE_SERVER['host'],
@@ -42,6 +42,40 @@ def getTbls(etl):
     return result
 
 
+def execute(sql):
+    result = dict()
+    try:
+        with pyhs2.connect(host=settings.HIVE_SERVER['host'],
+                           port=settings.HIVE_SERVER['port'],
+                           authMechanism="PLAIN",
+                           user=settings.HIVE_SERVER['user'],
+                           password=settings.HIVE_SERVER['password'],
+                           database='default') as conn:
+            # with pyhs2.connect(host='10.1.5.63',
+            #                    port='10000',
+            #                    authMechanism="PLAIN",
+            #                    user='hdfs',
+            #                    password='',
+            #                    database='default') as conn:
+            with conn.cursor() as cur:
+                logger.info('clean sql is %s ' % sql)
+                # Execute query
+                cur.execute(sql)
+
+                # Fetch table results
+                schema = cur.getSchema()
+                row = cur.fetch()[0]
+                for col in schema:
+                    index = schema.index(col)
+                    result[col['columnName']] = row[index]
+                print result
+                return result
+    except Pyhs2Exception, e:
+        raise Exception('sql is %s,\n<br> error is %s' % (sql, e))
+    return result
+
+
 if __name__ == '__main__':
-    heh = getTbls("insert into xxsx select * from batting full join jlc.bank_card")
+    # heh = getTbls("insert into xxsx select * from batting full join jlc.bank_card")
+    heh = execute("select create_date as dat, userid from wind_test.topic_user limit 1")
     print heh

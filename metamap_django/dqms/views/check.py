@@ -13,8 +13,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 
-from dqms.models import DqmsCase, DqmsDatasource, DqmsRule, DqmsCheck, DqmsCheckInst
-from dqms.serializers import DqmsDatasourceSerializer, DqmsCaseSerializer
+from dqms.models import DqmsCase, DqmsDatasource, DqmsRule, DqmsCheck, DqmsCheckInst, DqmsCaseInst
+from dqms.serializers import DqmsDatasourceSerializer, DqmsCaseSerializer, DqmsCheckInstSerializer, \
+    DqmsCaseInstSerializer
 from will_common.helpers import cronhelper
 from will_common.models import PeriodicTask
 from will_common.utils import httputils
@@ -42,8 +43,6 @@ def edit(request):
     if 'chk_id' in request.GET:
         id = long(request.GET['chk_id'])
         obj = DqmsCheck.objects.get(pk=id)
-        for case in obj.cases.all():
-            print case.case_name
         return render(request, 'check/check_edit.html', {'obj': obj})
     else:
         return render(request, 'check/check_edit.html')
@@ -93,8 +92,8 @@ def save(request):
         return render(request, 'check/check_edit.html')
 
 
-def executions(request):
-    return render(request, 'check/executions.html', {'objs': DqmsCheckInst.objects.all()})
+def executions(request, pk):
+    return render(request, 'check/executions.html', {'objs': DqmsCheckInst.objects.filter(chk_id=pk)})
 
 
 def delete(request):
@@ -129,7 +128,41 @@ class CheckViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['GET'])
     def get_all(self, request):
-        check_id = int(request.GET['id'])
-        result = DqmsCheck.objects.get(pk=check_id).cases.all()
-        serializer = self.get_serializer(result, many=True)
-        return Response(serializer.data)
+        chk_id = request.GET['id']
+        if 'NaN' != chk_id:
+            check_id = int(chk_id)
+            result = DqmsCheck.objects.get(pk=check_id).cases.all()
+            serializer = self.get_serializer(result, many=True)
+            return Response(serializer.data)
+        else:
+            return Response('[]')
+
+class CheckInstViewSet(viewsets.ModelViewSet):
+    serializer_class = DqmsCheckInstSerializer
+    queryset = DqmsCheckInst.objects.all()
+
+    @list_route(methods=['GET'])
+    def get_all(self, request):
+        chk_id = request.GET['id']
+        if 'NaN' != chk_id:
+            check_id = int(chk_id)
+            result = DqmsCheckInst.objects.filter(chk_id=check_id).order_by('-start_time')
+            serializer = self.get_serializer(result, many=True)
+            return Response(serializer.data)
+        else:
+            return Response('[]')
+
+class CaseInstViewSet(viewsets.ModelViewSet):
+    serializer_class = DqmsCaseInstSerializer
+    queryset = DqmsCaseInst.objects.all()
+
+    @list_route(methods=['GET'])
+    def get_all(self, request):
+        case_id = request.GET['id']
+        if 'NaN' != case_id:
+            cid = int(case_id)
+            result = DqmsCaseInst.objects.filter(case_id=cid).order_by('-start_time')
+            serializer = self.get_serializer(result, many=True)
+            return Response(serializer.data)
+        else:
+            return Response('[]')

@@ -10,10 +10,13 @@ from django.urls import reverse
 from django.views import generic
 from rest_framework import viewsets
 
+from dqms import tasks
 from dqms.models import DqmsCase, DqmsDatasource, DqmsRule
 from dqms.serializers import DqmsDatasourceSerializer, DqmsCaseSerializer
 from will_common.utils import httputils
 import traceback
+
+from will_common.utils import mysqlcli
 
 logger = logging.getLogger('django')
 
@@ -21,6 +24,9 @@ logger = logging.getLogger('django')
 def todo(request):
     return HttpResponse('TODO!')
 
+def test(request):
+    result = mysqlcli.execute('dqms_check', 'select * from sys_channels')
+    return JsonResponse(result)
 
 def manager(request):
     datas = DqmsCase.objects.all()
@@ -51,7 +57,7 @@ def save(request):
                 case.save()
 
                 if request.POST['id'] != '-1':
-                    print 'this is not a new case, delete all rules before'
+                    logger.info('this is not a new case, delete all rules before')
                     case.dqmsrule_set.all().delete()
 
                 rules = ''.join(request.POST['ruleIndexs']).split(',')
@@ -63,7 +69,7 @@ def save(request):
                         index = kv.index('=')
                         key = kv[0: index]
                         value = kv[index + 1:]
-                        print('going to handle %s : %s' % (key, value))
+                        logger.info('going to handle %s : %s' % (key, value))
                         if hasattr(rule, key) and len(value) > 0:
                             value = ''.join(value)
                             setattr(rule, key, value)
@@ -78,6 +84,11 @@ def save(request):
     else:
         return render(request, 'case/case_edit.html')
 
+def runtest(request, pk):
+    tasks.run_case.delay(pk, request.user.id)
+    result = dict()
+    result['msg'] = 'success'
+    return JsonResponse(result)
 
 def delete(request):
     if 'id' in request.POST:

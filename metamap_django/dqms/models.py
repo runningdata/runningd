@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils import timezone
 
+from will_common.models import UserProfile
+
 
 class DqmsDatasource(models.Model):
     src_name = models.CharField(max_length=300, blank=True, null=True)
@@ -38,11 +40,8 @@ class DqmsCase(models.Model):
 
 class DqmsCaseInst(models.Model):
     case = models.ForeignKey(DqmsCase, on_delete=models.CASCADE, null=False)
-    result_code = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, default=-1)
     result_mes = models.CharField(max_length=1000, blank=True, null=True)
-    is_schedule = models.IntegerField(blank=True, null=True)
-    is_ack = models.IntegerField(blank=True, null=True)
-    ack_count = models.IntegerField(blank=True, null=True)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)
 
@@ -59,6 +58,7 @@ class DqmsCheck(models.Model):
     remark = models.CharField(max_length=300, blank=True, null=True)
     schedule = models.CharField(max_length=30, blank=True, null=True)
     cases = models.ManyToManyField(DqmsCase)
+    managers = models.ManyToManyField(UserProfile)
     valid = models.IntegerField(default=1)
 
     class Meta:
@@ -79,7 +79,7 @@ class DqmsCheckCase(models.Model):
 class DqmsCheckInst(models.Model):
     chk = models.ForeignKey(DqmsCheck, on_delete=models.CASCADE, null=False)
     case_num = models.IntegerField(blank=True, null=True)
-    case_finish_num = models.IntegerField(blank=True, null=True)
+    case_finish_num = models.IntegerField(blank=False, null=True, default=0)
     result_code = models.IntegerField(blank=True, null=True)
     result_mes = models.CharField(max_length=300, blank=True, null=True)
     is_schedule = models.IntegerField(blank=True, null=True)
@@ -146,17 +146,6 @@ class DqmsRuleInst(models.Model):
     class Meta:
         db_table = 'willdqms_rule_inst'
 
-
-class DqmsView(models.Model):
-    viewer = models.CharField(max_length=300, blank=True, null=True)
-    chk = models.ForeignKey(DqmsCheck, on_delete=models.CASCADE, null=False)
-    ctime = models.DateTimeField(default=timezone.now)
-    utime = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        db_table = 'willdqms_view'
-
-
 class DqmsAck(models.Model):
     caseins = models.ForeignKey(DqmsCaseInst, on_delete=models.CASCADE, null=False)
     result_msg = models.CharField(max_length=5000, blank=True, null=True)
@@ -166,3 +155,14 @@ class DqmsAck(models.Model):
 
     class Meta:
         db_table = 'willdqms_ack'
+
+class DqmsAlert(models.Model):
+    rule = models.ForeignKey(DqmsRule, on_delete=models.CASCADE, null=False)
+    target_phone = models.CharField(max_length=1000, verbose_name=u'目标手机号码')
+    push_msg = models.CharField(max_length=1000, null=False, default=-1)
+    push_resp = models.CharField(max_length=1000, null=False, default=-1)
+    ctime = models.DateTimeField(default=timezone.now)
+    owners = models.ManyToManyField(UserProfile)
+
+    class Meta:
+        db_table = 'willdqms_alert'

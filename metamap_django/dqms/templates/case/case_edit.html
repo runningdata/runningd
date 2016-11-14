@@ -109,12 +109,12 @@
                 url: "/dqms/rest/datasrc/?format=json",
                 success: function (result) {
                     var src_data = "";
-                    $.each(result, function (index, etl) {
+                    $.each(result, function (index, datasrc) {
                         src_data += "<tr>" +
-                                "<td Name='srcId'class='id'>" + etl.id + "</td>" +
-                                "<td class='name'>" + etl.src_name + "</td>" +
+                                "<td Name='srcId'class='id'>" + datasrc.id + "</td>" +
+                                "<td class='name'>" + datasrc.src_name + "</td>" +
                                 "<td>" +
-                                "<button class='btn btn-default btn-xs' onclick=\"addDataSrc(" + etl.id + ",'" + etl.src_name + "')\">添加</button>" +
+                                "<button class='btn btn-default btn-xs' onclick=\"addDataSrc(" + datasrc.id + ",'" + datasrc.src_name + "')\">添加</button>" +
                                 "</td>" +
                                 "</tr>";
                     });

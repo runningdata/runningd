@@ -10,3 +10,4 @@ def enum(*seq, **named):
 
 
 EXECUTION_STATUS = enum('RUNNING', 'DONE', 'FAILED')
+

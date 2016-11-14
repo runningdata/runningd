@@ -24,7 +24,7 @@ def get_etl_sql(etl):
     str.append(etl.variables)
     str.append(etl.query)
 
-    template = Template('\n'.join(str));
+    template = Template('\n'.join(str))
     return template.render(Context()).strip()
 
 def generate_sql(variables, query):

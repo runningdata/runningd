@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 from __future__ import unicode_literals
 
+from django.contrib.auth.models import User
 from django.db import models
 
 # Create your models here.
@@ -9,6 +10,10 @@ from django.utils import timezone
 
 from will_common.djcelery_models import DjceleryCrontabschedule
 from will_common.djcelery_models import DjceleryIntervalschedule
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User)
+    phone = models.BigIntegerField(max_length=11, default=110)
 
 
 class WillDependencyTask(models.Model):
@@ -24,6 +29,7 @@ class WillDependencyTask(models.Model):
 
     class Meta:
         unique_together = (('rel_id', 'schedule', 'type'),)
+        managed = False
 
     def get_schedule(self):
         task = PeriodicTask.objects.get(willtask_id=self.id)
