@@ -23,6 +23,7 @@ import traceback
 
 from will_common.djcelery_models import DjceleryCrontabschedule
 from will_common.djcelery_models import DjceleryPeriodictasks
+from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
 logger = logging.getLogger('django')
 

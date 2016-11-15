@@ -6,6 +6,12 @@
     <title>报警信息</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/page/check_manager/index.css' %}"/>
     {% include 'component/js.html' %}
+    <script>
+        function search() {
+            var name = $('#checkname').val();
+            window.parent.select_page('/dqms/alarm_info', 'name=' + name);
+        }
+    </script>
 </head>
 <body>
 <div class="panel-dash">
@@ -15,9 +21,9 @@
         <div class="m-search-group">
             <label class="m-search-label">质检监控信息</label>
             <div class=" m-search-detail">
-                <input type="text" name="name" placeholder="质检名称" id="checkname">
+                <input type="text" name="name" placeholder="质检名称" id="checkname" value="{{ request.session.name }}">
             </div>
-            <a type="button" class="btn btn-sm btn-success m-search-btn" href="#">查询</a>
+            <button type="button" class="btn btn-sm btn-success m-search-btn" onclick="search()">查询</button>
         </div>
         <div id="j-search-list">
             <p id="totalCheckinst"></p>
@@ -41,6 +47,7 @@
                 {% endfor %}
                 </tbody>
             </table>
+            {% include 'components/page.html' %}
         </div>
     </div>
 

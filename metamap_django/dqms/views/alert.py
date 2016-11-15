@@ -1,12 +1,34 @@
 from django.shortcuts import render
+from django.views import generic
 from rest_framework import viewsets
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 
 from dqms.models import DqmsRule, DqmsAlert
 from dqms.serializers import DqmsRuleSerializer
+from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
-def manager(request):
-    alerts = DqmsAlert.objects.all()
-    return render(request, 'alert/info.html', {'objs' : alerts})
 
+class AlertView(generic.ListView):
+    template_name = 'alert/info.html'
+    paginate_by = DEFAULT_PAGE_SIEZE
+    model = DqmsAlert
+    context_object_name = 'objs'
+    search_key = 'name'
+
+    def get_queryset(self):
+        key = self.get_key()
+        if len(key) > 0:
+            return DqmsAlert.objects.filter(rule__case__case_name__contains=key)
+        return DqmsAlert.objects.all().order_by('-ctime')
+
+    def get_key(self):
+        if self.search_key in self.request.session:
+            key = self.request.session[self.search_key]
+            if self.search_key in self.request.GET:
+                key = self.request.GET[self.search_key]
+                self.request.session[self.search_key] = key
+        elif self.search_key in self.request.GET:
+            key = self.request.GET[self.search_key]
+            self.request.session[self.search_key] = key
+        return key

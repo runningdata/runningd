@@ -17,6 +17,7 @@ from will_common.utils import httputils
 import traceback
 
 from will_common.utils import mysqlcli
+from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
 logger = logging.getLogger('django')
 
@@ -37,10 +38,37 @@ def manager(request):
     return render(request, 'case/case_manager.html', {'objs': datas})
 
 
+
+
+class CaseView(generic.ListView):
+    template_name = 'case/case_manager.html'
+    paginate_by = DEFAULT_PAGE_SIEZE
+    model = DqmsCase
+    context_object_name = 'objs'
+    search_key = 'case_name'
+
+    def get_queryset(self):
+        key = self.get_key()
+        if len(key) > 0:
+            return DqmsCase.objects.filter(case_name__contains=key)
+        return DqmsCase.objects.all().order_by('-ctime')
+
+    def get_key(self):
+        if self.search_key in self.request.session:
+            key = self.request.session[self.search_key]
+            if self.search_key in self.request.GET:
+                key = self.request.GET[self.search_key]
+                self.request.session[self.search_key] = key
+        elif self.search_key in self.request.GET:
+            key = self.request.GET[self.search_key]
+            self.request.session[self.search_key] = key
+        return key
+
+
 def edit(request):
     if 'case_id' in request.GET:
-        id = long(request.GET['case_id'])
-        obj = DqmsCase.objects.get(pk=id)
+        cid = long(request.GET['case_id'])
+        obj = DqmsCase.objects.get(pk=cid)
         return render(request, 'case/case_edit.html', {'obj': obj})
     else:
         return render(request, 'case/case_edit.html')
