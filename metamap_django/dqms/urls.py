@@ -1,4 +1,5 @@
 from django.conf.urls import url, include
+from django.contrib.auth.decorators import login_required
 from rest_framework import routers
 
 from dqms.views import alert
@@ -19,7 +20,7 @@ router.register(r'execforcheck', CheckInstViewSet)
 router.register(r'execforcase', CaseInstViewSet)
 
 urlpatterns = [
-    url(r'^$', case.IndexView.as_view(), name='index'),
+    url(r'^$', login_required(case.IndexView.as_view()), name='index'),
 
     url(r'^check/execs$', check.execution, name='check_execution'),
     url(r'^check/$', check.manager, name='check_manager'),

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*
 import logging
 
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -31,7 +32,7 @@ logger = logging.getLogger('django')
 def todo(request):
     return HttpResponse('TODO!')
 
-
+@login_required
 def manager(request):
     if 'chk_name' in request.GET:
         datas = DqmsCheck.objects.filter(chk_name__contains=request.GET['chk_name'])

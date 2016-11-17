@@ -49,7 +49,7 @@ class CaseView(generic.ListView):
 
     def get_queryset(self):
         key = self.get_key()
-        if len(key) > 0:
+        if key and len(key) > 0:
             return DqmsCase.objects.filter(case_name__contains=key)
         return DqmsCase.objects.all().order_by('-ctime')
 
@@ -62,6 +62,8 @@ class CaseView(generic.ListView):
         elif self.search_key in self.request.GET:
             key = self.request.GET[self.search_key]
             self.request.session[self.search_key] = key
+        else:
+            key = None
         return key
 
 
