@@ -20,4 +20,3 @@ def decrpt_msg(msg):
     decrypted = unpad(cc.decrypt(result2))
     return decrypted
 
-print decrpt_msg('PWy9rKUlzFLGO8Ry6v368w==')
