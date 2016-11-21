@@ -26,8 +26,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     # CAS
-    url(r'^accounts/login/$', views.login, name='login'),
-    url(r'^accounts/logout/$', views.logout, name='logout'),
+    # url(r'^accounts/login/$', views.login, name='login'),
+    # url(r'^accounts/logout/$', views.logout, name='logout'),
 ]
 
 
