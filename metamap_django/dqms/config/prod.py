@@ -45,9 +45,9 @@ BROKER_URL = 'redis://10.0.1.97:6379'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 # 设置cas服务器地址
-# CAS_SERVER_URL = "http://127.0.0.1:8081/casserver/"
+CAS_SERVER_URL = "http://127.0.0.1:8081/casserver/"
 # CAS_LOGOUT_COMPLETELY = True
-# CAS_PROVIDE_URL_TO_LOGOUT = True
+CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
 
 # push url
@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'will_common',
     'dqms',
     # 'metamap',
-    # 'cas',
+    'cas',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -90,8 +90,8 @@ MIDDLEWARE_CLASSES = [
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    # 'will_common.middleware.viewexception.LoginRequire',
-    # 'cas.middleware.CASMiddleware',
+    'will_common.middleware.viewexception.LoginRequire',
+    'cas.middleware.CASMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'will_common.middleware.accesstracer.AccessTracer',
@@ -102,10 +102,10 @@ ROOT_URLCONF = 'metamap_django.dqms_urls'
 
 ### Add authentication backends for cas
 
-# AUTHENTICATION_BACKENDS = (
-#     'django.contrib.auth.backends.ModelBackend',
-#     'cas.backends.CASBackend',
-# )
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'cas.backends.CASBackend',
+)
 
 TEMPLATES = [
     {
