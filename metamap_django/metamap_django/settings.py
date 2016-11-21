@@ -48,7 +48,14 @@ BROKER_URL = 'redis://localhost:6379'
 # CELERY_TIMEZONE = 'UTC'
 # CELERY_ENABLE_UTC = True
 # CELERY_IMPORTS = ("metamap.taske",)
-
+CELERY_ROUTES = {
+    'dqms.tasks.exec_dqms': {
+        'queue': 'dqms',
+    },
+    'dqms.tasks.run_case': {
+        'queue': 'dqms',
+    },
+}
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 

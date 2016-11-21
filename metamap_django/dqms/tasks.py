@@ -30,7 +30,6 @@ from will_common.utils import mysqlcli
 logger = get_task_logger(__name__)
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/dqms/'
 
-
 @shared_task
 def exec_dqms(task_id):
     check = DqmsCheck.objects.get(pk=task_id)
