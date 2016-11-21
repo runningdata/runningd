@@ -22,6 +22,7 @@ class ViewException():
 
 class LoginRequire():
     def process_view(self, request, view_func, view_args, view_kwargs):
+        logger.info('innnnnnnnnnnnnnnnnnnnnn   login required')
         print('innnnnnnnnnnnnnnnnnnnnn   login required')
         resolved_login_url = decorators.resolve_url('/accounts/login/')
         is_dqms = request.path.startswith('/dqms') and '/rest/' not in request.path
