@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 EEE = 'default_DEV'
 ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83']
 
@@ -102,10 +102,10 @@ ROOT_URLCONF = 'metamap_django.dqms_urls'
 
 ### Add authentication backends for cas
 
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'cas.backends.CASBackend',
-)
+# AUTHENTICATION_BACKENDS = (
+#     'django.contrib.auth.backends.ModelBackend',
+#     'cas.backends.CASBackend',
+# )
 
 TEMPLATES = [
     {
