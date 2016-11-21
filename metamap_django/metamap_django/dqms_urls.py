@@ -13,13 +13,9 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from cas import views
+# from cas import views
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.contrib.auth.decorators import login_required
-
-import dqms
-from dqms.views import case
 from will_common.views import common
 
 urlpatterns = [
@@ -30,8 +26,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     # CAS
-    url(r'^accounts/login/$', views.login, name='login'),
-    url(r'^accounts/logout/$', views.logout, name='logout'),
+    # url(r'^accounts/login/$', views.login, name='login'),
+    # url(r'^accounts/logout/$', views.logout, name='logout'),
 ]
 
 
