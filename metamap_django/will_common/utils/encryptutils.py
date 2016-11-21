@@ -11,10 +11,13 @@ cc = AES.new(settings.PUSH_KEY)
 
 
 def encrpt_msg(msg):
+    print cc.encrypt(pad(msg))
     return base64.b64encode(cc.encrypt(pad(msg)))
 
 
 def decrpt_msg(msg):
-    return base64.b64encode(cc.encrypt(pad(msg)))
+    result2 = base64.b64decode(msg)
+    decrypted = unpad(cc.decrypt(result2))
+    return decrypted
 
-    # print encrpt_msg('dsafr')
+print decrpt_msg('PWy9rKUlzFLGO8Ry6v368w==')

@@ -191,7 +191,7 @@
                         <td class='id'> {{ obj.id }}</td>
                         <td class='name'>{{ obj.case_name }}</td>
                         <td> {{ obj.ctime | date:"Y-m-d H:i:s" }}</td>
-                        <td> {{ obj.editor | default_if_none:"-" }}</td>
+                        <td> {{ obj.editor.user.username | default_if_none:"-" }}</td>
                         <td> {{ obj.status  | default_if_none:"-" }}</td>
                         <td>
                             <button class='btn btn-default btn-xs' onclick="editCase({{ obj.id }})">查看详情</button>

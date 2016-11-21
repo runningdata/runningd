@@ -18,7 +18,7 @@ from dqms.models import DqmsCase, DqmsDatasource, DqmsRule, DqmsCheck, DqmsCheck
 from dqms.serializers import DqmsDatasourceSerializer, DqmsCaseSerializer, DqmsCheckInstSerializer, \
     DqmsCaseInstSerializer
 from will_common.helpers import cronhelper
-from will_common.models import PeriodicTask
+from will_common.models import PeriodicTask, UserProfile
 from will_common.utils import httputils
 import traceback
 
@@ -54,10 +54,14 @@ def save(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                check = DqmsCheck()
-                httputils.post2obj(check, request.POST)
-                if check.id == -1 or check.id == '-1':
-                    check.id = None
+                if request.POST['id'] == '-1':
+                    check = DqmsCheck()
+                else:
+                    check = DqmsCheck.objects.get(pk=request.POST['id'])
+                httputils.post2obj(check, request.POST, 'id')
+                if not check.editor_id:
+                    check.creator = request.user.userprofile
+                check.editor = request.user.userprofile
 
                 case_ids = request.POST['case_ids']
 

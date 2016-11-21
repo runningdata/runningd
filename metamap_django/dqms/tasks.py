@@ -18,8 +18,10 @@ from dqms.models import DqmsCheckInst, DqmsCheck, DqmsCase, DqmsCaseInst, DqmsAl
 
 from celery.utils.log import get_task_logger
 
+from metamap_django import settings
 from will_common.models import UserProfile
 from will_common.utils import PushUtils
+from will_common.utils import encryptutils
 from will_common.utils import enums
 from will_common.utils import hivecli
 from will_common.utils import constants
@@ -32,6 +34,8 @@ ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/dqms/'
 @shared_task
 def exec_dqms(task_id):
     check = DqmsCheck.objects.get(pk=task_id)
+    check.last_run_time = timezone.now()
+    check.save()
     chk_inst = DqmsCheckInst.objects.create(chk=check, case_num=check.cases.count())
     chk_inst.save()
     try:
@@ -78,6 +82,7 @@ def runcase(case, check, user):
                     msg = constants.ALERT_MSG % (
                         chk_name, case.case_name, rule.measure_name, rule.min, rule.max, re)
                     if check:
+                        PushUtils.push_msg_tophone(case.editor.phone, msg)
                         resp = PushUtils.push_msg(check.managers.all(), msg)
                         phones = ''
                         for user in check.managers.all():
@@ -94,7 +99,7 @@ def runcase(case, check, user):
                     print('alerting for case %s -> rule : %s ' % (case.case_name, rule.measure_name))
     except Exception, e:
         logger.error(e)
-        PushUtils.push_msg_tophone(15210923443, traceback.format_exc())
+        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), traceback.format_exc())
         case_inst.status = enums.EXECUTION_STATUS.FAILED
         case_inst.result_mes = e.message
     case_inst.status = enums.EXECUTION_STATUS.DONE

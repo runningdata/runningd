@@ -16,9 +16,15 @@ Including another URLconf
 from cas import views
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.auth.decorators import login_required
+
+import dqms
+from dqms.views import case
+from will_common.views import common
 
 urlpatterns = [
     # url(r'^export/', include('metamap.xcurls')),
+    url(r'^$', common.redir_dqms),
     url(r'^dqms/', include('dqms.urls')),
     # url(r'^metamap/', include('metamap.urls', namespace='metamap')),
     url(r'^admin/', admin.site.urls),

@@ -23,8 +23,8 @@ class DqmsDatasource(models.Model):
 
 class DqmsCase(models.Model):
     case_name = models.CharField(max_length=300, blank=True, null=True)
-    creator = models.CharField(max_length=300, blank=True, null=True)
-    editor = models.CharField(max_length=300, blank=True, null=True)
+    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='case_creator')
+    editor = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='case_editor')
     datasrc = models.ForeignKey(DqmsDatasource, on_delete=models.CASCADE, null=False)
     query = models.CharField(max_length=3000, blank=True, null=True)
     sql_pattern = models.CharField(max_length=3000, blank=True, null=True, verbose_name=u'抽取数据的ETL')
@@ -61,10 +61,11 @@ class DqmsCaseInst(models.Model):
 
 class DqmsCheck(models.Model):
     chk_name = models.CharField(max_length=300, blank=True, null=True)
-    creator = models.CharField(max_length=300, blank=True, null=True)
-    editor = models.CharField(max_length=300, blank=True, null=True)
+    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='ehk_creator')
+    editor = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='chk_editor')
     ctime = models.DateTimeField(default=timezone.now)
     utime = models.DateTimeField(default=timezone.now)
+    last_run_time = models.DateTimeField()
     remark = models.CharField(max_length=300, blank=True, null=True)
     schedule = models.CharField(max_length=30, blank=True, null=True)
     cases = models.ManyToManyField(DqmsCase)

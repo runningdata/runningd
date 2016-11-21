@@ -80,10 +80,14 @@ def save(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                case = DqmsCase()
-                httputils.post2obj(case, request.POST)
-                if case.id == -1 or case.id == '-1':
-                    case.id = None
+                if request.POST['id'] == '-1':
+                    case = DqmsCase()
+                else:
+                    case = DqmsCase.objects.get(pk=request.POST['id'])
+                httputils.post2obj(case, request.POST, 'id')
+                if not case.editor_id:
+                    case.creator = request.user.userprofile
+                case.editor = request.user.userprofile
                 case.save()
 
                 if request.POST['id'] != '-1':

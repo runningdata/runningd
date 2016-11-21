@@ -26,12 +26,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
-EEE = 'PROD'
-
+DEBUG = True
+EEE = 'default_DEV'
 ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83']
-
 
 HIVE_SERVER = {
     'host': '10.0.1.84',
@@ -40,35 +37,37 @@ HIVE_SERVER = {
     'password': '',
 }
 
-import djcelery
-djcelery.setup_loader()
+ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
+
+BROKER_URL = 'redis://10.0.1.97:6379'
 
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
-BROKER_URL = 'redis://10.0.1.97:6379'
+# 设置cas服务器地址
+CAS_SERVER_URL = "http://127.0.0.1:8081/casserver/"
+# CAS_LOGOUT_COMPLETELY = True
+CAS_PROVIDE_URL_TO_LOGOUT = True
+# CAS_GATEWAY = True
 
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'Asia/Shanghai'
-# CELERY_TIMEZONE = 'UTC'
-# CELERY_ENABLE_UTC = True
-# CELERY_IMPORTS = ("metamap.taske",)
-
+# push url
+PUSH_URL = 'http://192.168.202.224:8080/sendMessage.shtml'
+PUSH_KEY = '&OKY%~!$^G*JRRF^'
 
 # Application definition
-
 INSTALLED_APPS = [
-    'metamap',
+    'djcelery',
+    'rest_framework',
+    'will_common',
+    'dqms',
+    # 'metamap',
+    'cas',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'djcelery',
-    'rest_framework',
 ]
 
 REST_FRAMEWORK = {
@@ -79,6 +78,10 @@ REST_FRAMEWORK = {
     ]
 }
 
+import djcelery
+
+djcelery.setup_loader()
+
 MIDDLEWARE_CLASSES = [
     'will_common.middleware.viewexception.ViewException',
     'django.middleware.security.SecurityMiddleware',
@@ -87,11 +90,22 @@ MIDDLEWARE_CLASSES = [
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'will_common.middleware.viewexception.LoginRequire',
+    'cas.middleware.CASMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'will_common.middleware.accesstracer.AccessTracer',
 ]
 
 ROOT_URLCONF = 'metamap_django.dqms_urls'
+# ROOT_URLCONF = 'metamap_django.metamap_urls'
+
+### Add authentication backends for cas
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'cas.backends.CASBackend',
+)
 
 TEMPLATES = [
     {
@@ -138,6 +152,14 @@ DATABASES = {
         'USER': 'zjy',
         'HOST': '10.0.1.74',
         'PORT': '3306',
+    },
+    'dqms_check': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'YKX_DW',
+        'PASSWORD': 'Zjy@yinker20150309',
+        'USER': 'zjy',
+        'HOST': '10.0.1.74',
+        'PORT': '3306',
     }
 }
 
@@ -177,6 +199,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = "/usr/local/metamap/static"
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -196,7 +220,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/metamap_all.log',  # 日志输出文件
+            'filename': 'dqms/log/dqms_all.log',  # 日志输出文件
             'maxBytes': 1024 * 1024 * 5,  # 文件大小
             'backupCount': 5,  # 备份份数
             'formatter': 'standard',  # 使用哪种formatters日志格式
@@ -204,7 +228,7 @@ LOGGING = {
         'error_handler': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/metamap_error.log',
+            'filename': 'dqms/log/dqms_error.log',
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
@@ -217,7 +241,7 @@ LOGGING = {
         'scprits_handler': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/metamap_script.log',
+            'filename': 'dqms/log/dqms_script.log',
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
@@ -244,7 +268,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True
         },
-        'will_common.utils': {
+        'dqms.utils': {
             'handlers': ['error_handler'],
             'level': 'ERROR',
             'propagate': True

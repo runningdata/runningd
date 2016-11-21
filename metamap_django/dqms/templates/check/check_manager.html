@@ -293,9 +293,10 @@
                 <tr>
                     <th>编号</th>
                     <th>任务名称</th>
-                    <th>上次运行时间</th>
                     <th>创建人</th>
-                    <th>调度状态</th>
+                    <th>上次运行时间</th>
+                    <th>最近修改时间</th>
+                    <th>最近修改人</th>
                     <th>操作</th>
                 </tr>
                 </thead>
@@ -304,9 +305,10 @@
                     <tr>
                         <td class='id'>  {{ obj.id }}  </td>
                         <td class='name'>  {{ obj.chk_name }}  </td>
-                        <td>  {{ obj.ctime | date:"Y-m-d H:i:s" }}  </td>
-                        <td>  {{ obj.creator }}  </td>
-                        <td>  {{ obj.creator }}  </td>
+                        <td>  {{ obj.creator.user.username }}  </td>
+                        <td>  {{ obj.last_run_time | date:"Y-m-d H:i:s" }}  </td>
+                        <td>  {{ obj.utime | date:"Y-m-d H:i:s" }}  </td>
+                        <td>  {{ obj.editor.user.username }} </td>
                         <td>
                             <button class='btn btn-default btn-xs' onclick='editCheck(  {{ obj.id }}  )'>查看详情</button>
                             <button class='btn btn-default btn-xs' onclick='deleteCheck(  {{ obj.id }}  )'>删除</button>

@@ -17,10 +17,10 @@ from cas import views
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from metamap.views import common
+from will_common.views import common
 
 urlpatterns = [
-    url(r'^$', common.not_login),
+    url(r'^$', common.redir_metamap),
     url(r'^export/', include('metamap.xcurls')),
     url(r'^metamap/', include('metamap.urls', namespace='metamap')),
     url(r'^admin/', admin.site.urls),

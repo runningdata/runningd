@@ -4,7 +4,7 @@
 created by will 
 '''
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 
 def h500(request):
@@ -12,3 +12,9 @@ def h500(request):
 
 def h404(request):
     return render(request, 'common/404.html')
+
+def redir_dqms(request):
+    return redirect('/dqms')
+
+def redir_metamap(request):
+    return redirect('/metamap')
