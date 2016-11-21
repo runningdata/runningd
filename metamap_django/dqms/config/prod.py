@@ -91,7 +91,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'will_common.middleware.viewexception.LoginRequire',
-    'cas.middleware.CASMiddleware',
+    # 'cas.middleware.CASMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'will_common.middleware.accesstracer.AccessTracer',
