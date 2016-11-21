@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'will_common',
     'dqms',
     # 'metamap',
-    'cas',
+    # 'cas',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
