@@ -44,6 +44,15 @@ BROKER_URL = 'redis://10.0.1.97:6379'
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
+CELERY_ROUTES = {
+    'dqms.tasks.exec_dqms': {
+        'queue': 'dqms',
+    },
+    'dqms.tasks.run_case': {
+        'queue': 'dqms',
+    },
+}
+
 # 设置cas服务器地址
 CAS_SERVER_URL = "http://10.1.5.83:7000/casserver/"
 # CAS_LOGOUT_COMPLETELY = True
