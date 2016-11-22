@@ -61,6 +61,7 @@ BROKER_URL = 'redis://10.0.1.97:6379'
 
 INSTALLED_APPS = [
     'will_common',
+    'cas',
     'metamap',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -85,7 +86,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
