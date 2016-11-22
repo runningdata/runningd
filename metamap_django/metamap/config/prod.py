@@ -92,7 +92,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'metamap_django.dqms_urls'
+ROOT_URLCONF = 'metamap_django.metamap_urls'
 
 TEMPLATES = [
     {
