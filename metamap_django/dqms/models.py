@@ -65,7 +65,7 @@ class DqmsCheck(models.Model):
     editor = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='chk_editor')
     ctime = models.DateTimeField(default=timezone.now)
     utime = models.DateTimeField(default=timezone.now)
-    last_run_time = models.DateTimeField()
+    last_run_time = models.DateTimeField(default=timezone.now)
     remark = models.CharField(max_length=300, blank=True, null=True)
     schedule = models.CharField(max_length=30, blank=True, null=True)
     cases = models.ManyToManyField(DqmsCase)
