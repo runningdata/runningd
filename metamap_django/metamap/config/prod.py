@@ -40,6 +40,12 @@ HIVE_SERVER = {
     'password': '',
 }
 
+# 设置cas服务器地址
+CAS_SERVER_URL = "http://10.1.5.83:7000/casserver/"
+# CAS_LOGOUT_COMPLETELY = True
+CAS_PROVIDE_URL_TO_LOGOUT = True
+# CAS_GATEWAY = True
+
 import djcelery
 djcelery.setup_loader()
 
