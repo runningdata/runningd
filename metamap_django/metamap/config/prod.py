@@ -32,7 +32,6 @@ EEE = 'PROD'
 
 ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83']
 
-
 HIVE_SERVER = {
     'host': '10.0.1.84',
     'port': 10000,
@@ -51,8 +50,8 @@ AUTHENTICATION_BACKENDS = (
     'cas.backends.CASBackend',
 )
 
-
 import djcelery
+
 djcelery.setup_loader()
 
 # Celery Beat 设置
@@ -105,6 +104,7 @@ MIDDLEWARE_CLASSES = [
     'cas.middleware.CASMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'will_common.middleware.accesstracer.AccessTracer',
 ]
 
 ROOT_URLCONF = 'metamap_django.metamap_urls'
