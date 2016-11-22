@@ -25,5 +25,6 @@ class LoginRequire():
         resolved_login_url = decorators.resolve_url('/accounts/login/')
         is_dqms = request.path.startswith('/dqms') and '/rest/' not in request.path
         is_gene = request.path.startswith('/metamap') and '/rest/' not in request.path and '/generate_job_dag/' not in request.path
-        if is_dqms and not request.user.is_authenticated() and not is_gene:
+        is_export = request.path.startswith('/export')
+        if is_dqms and not request.user.is_authenticated() and is_gene and is_export:
             return HttpResponseRedirect('/accounts/login/?next' + resolved_login_url)
