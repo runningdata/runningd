@@ -105,8 +105,8 @@ MIDDLEWARE_CLASSES = [
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'will_common.middleware.viewexception.LoginRequire',
-    'cas.middleware.CASMiddleware',
+    # 'will_common.middleware.viewexception.LoginRequire',
+    # 'cas.middleware.CASMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'will_common.middleware.accesstracer.AccessTracer',
@@ -117,10 +117,10 @@ ROOT_URLCONF = 'metamap_django.dqms_urls'
 
 ### Add authentication backends for cas
 
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'cas.backends.CASBackend',
-)
+# AUTHENTICATION_BACKENDS = (
+#     'django.contrib.auth.backends.ModelBackend',
+#     'cas.backends.CASBackend',
+# )
 
 TEMPLATES = [
     {
