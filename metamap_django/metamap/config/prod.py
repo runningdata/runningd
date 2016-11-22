@@ -46,6 +46,12 @@ CAS_SERVER_URL = "http://10.1.5.83:7000/casserver/"
 CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'cas.backends.CASBackend',
+)
+
+
 import djcelery
 djcelery.setup_loader()
 
