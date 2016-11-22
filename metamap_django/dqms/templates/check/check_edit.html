@@ -436,25 +436,27 @@
         data: "id=" + {{ obj.id }} +'&format=json',
         type: "get",
         success: function (data) {
-            var index_data = "";
-            for (i = 0; i < data.length; i++) {
-                var case_data = "<tr>" +
-                        "<td name='id' class='id'>" + data[i].id + "</td>" +
-                        "<td Name='case_name' class='name'>" + data[i].case_name + "</td>" +
-                        "<td Name='ctime'>" + data[i].ctime + "</td>" +
-                        "<td Name='remark'>" + data[i].remark + "</td>" +
-                        "<td>" +
-                        "<button class='btn btn-default btn-xs' onclick='getCaseDetail(" + data[i].id + ")'>查看</button>" +
-                        "<button class='btn btn-default btn-xs' onclick='deleteCheckCase(" + data[i].id + ")'>删除</button>" +
-                        "</td>" +
-                        "</tr>";
-                caseList.push(data[i].id);
-                caseInfoMap.Set(data[i].id, case_data);
+            if (data != '[]') {
+                var index_data = "";
+                for (i = 0; i < data.length; i++) {
+                    var case_data = "<tr>" +
+                            "<td name='id' class='id'>" + data[i].id + "</td>" +
+                            "<td Name='case_name' class='name'>" + data[i].case_name + "</td>" +
+                            "<td Name='ctime'>" + data[i].ctime + "</td>" +
+                            "<td Name='remark'>" + data[i].remark + "</td>" +
+                            "<td>" +
+                            "<button class='btn btn-default btn-xs' onclick='getCaseDetail(" + data[i].id + ")'>查看</button>" +
+                            "<button class='btn btn-default btn-xs' onclick='deleteCheckCase(" + data[i].id + ")'>删除</button>" +
+                            "</td>" +
+                            "</tr>";
+                    caseList.push(data[i].id);
+                    caseInfoMap.Set(data[i].id, case_data);
+                }
+                for (var time in caseList) {
+                    index_data += caseInfoMap.Get(caseList[time]);
+                }
+                $("#case_list_table").html(index_data);
             }
-            for (var time in caseList) {
-                index_data += caseInfoMap.Get(caseList[time]);
-            }
-            $("#case_list_table").html(index_data);
         }
     });
 </script>
