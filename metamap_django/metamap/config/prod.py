@@ -60,6 +60,7 @@ BROKER_URL = 'redis://10.0.1.97:6379'
 # Application definition
 
 INSTALLED_APPS = [
+    'will_common',
     'metamap',
     'django.contrib.admin',
     'django.contrib.auth',
