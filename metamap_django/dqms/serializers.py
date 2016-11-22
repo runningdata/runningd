@@ -16,7 +16,7 @@ class DqmsDatasourceSerializer(serializers.HyperlinkedModelSerializer):
 class DqmsCaseSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = DqmsCase
-        fields = ('case_name', 'creator', 'id', 'utime', 'ctime', 'remark')
+        fields = ('case_name', 'id', 'utime', 'ctime', 'remark')
 
 class DqmsCheckInstSerializer(serializers.HyperlinkedModelSerializer):
     start_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
