@@ -96,10 +96,14 @@ def runcase(case, check, user):
                     alert.push_resp = resp
                     alert.save()
                     print('alerting for case %s -> rule : %s ' % (case.case_name, rule.measure_name))
+        case_inst.status = enums.EXECUTION_STATUS.DONE
+        case_inst.result_mes = 'success'
     except Exception, e:
-        logger.error(e)
+        print(e.message)
+        logger.error(e.message)
+        print('phont : %s ' % encryptutils.decrpt_msg(settings.ADMIN_PHONE))
+        print('msg : %s ' % traceback.format_exc())
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), traceback.format_exc())
         case_inst.status = enums.EXECUTION_STATUS.FAILED
         case_inst.result_mes = e.message
-    case_inst.status = enums.EXECUTION_STATUS.DONE
     case_inst.save()
