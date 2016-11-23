@@ -11,7 +11,6 @@ cc = AES.new(settings.PUSH_KEY)
 
 
 def encrpt_msg(msg):
-    print cc.encrypt(pad(msg))
     return base64.b64encode(cc.encrypt(pad(msg)))
 
 
@@ -19,4 +18,3 @@ def decrpt_msg(msg):
     result2 = base64.b64decode(msg)
     decrypted = unpad(cc.decrypt(result2))
     return decrypted
-
