@@ -60,7 +60,7 @@ CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
 
 # push url
-PUSH_URL = 'http://192.168.202.224:8080/sendMessage.shtml'
+PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml'
 PUSH_KEY = '&OKY%~!$^G*JRRF^'
 
 # Application definition
