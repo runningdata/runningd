@@ -2,6 +2,7 @@
 import logging
 import urllib2
 
+from metamap_django import settings
 from will_common.utils.encryptutils import encrpt_msg
 
 
@@ -13,8 +14,9 @@ def push_msg(users, msg):
 
 def push_msg_tophone(phone, msg):
     logging.info('alert happening: %s : %s' % (phone, msg))
+
     req = urllib2.Request(
-        'http://192.168.202.224:8080/sendMessage.shtml?mobileNo=%s&content=%s' % (encrpt_msg(phone), encrpt_msg(msg)))
+        settings.PUSH_URL % (encrpt_msg(phone), encrpt_msg(msg)))
     try:
         resp = urllib2.urlopen(req)
         if resp.getcode() == 200:
