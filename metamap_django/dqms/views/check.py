@@ -7,8 +7,8 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.urls import reverse
 from django.utils import timezone
+from django.core.urlresolvers import reverse
 from django.views import generic
 from rest_framework import viewsets
 from rest_framework.decorators import list_route
