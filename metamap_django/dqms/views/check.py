@@ -71,7 +71,7 @@ def save(request):
                     for case_id in case_ids.split(','):
                         check.cases.add(DqmsCase.objects.get(pk=case_id))
 
-                cron_task, created = PeriodicTask.objects.get_or_create(name=check.chk_name)
+                cron_task, created = PeriodicTask.objects.get_or_create(name=check.chk_name, queue='dqms')
                 cron_task.enabled = check.valid
                 cron_task.task = 'dqms.tasks.exec_dqms'
                 cron_task.args = '[' + str(check.id) + ']'
