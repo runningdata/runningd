@@ -19,8 +19,8 @@ def push_msg_tophone(phone, msg):
 
     req = urllib2.Request(
         push_url % (encrpt_msg(phone), encrpt_msg(msg)))
-    req.add_header('User-Agent',
-                   'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36')
+    # req.add_header('User-Agent',
+    #                'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36')
     try:
         resp = urllib2.urlopen(req)
         if resp.getcode() == 200:
