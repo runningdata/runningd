@@ -23,11 +23,11 @@ def push_msg_tophone(phone, msg):
     # print r.headers
     # print r.content
 
-    data = {'mobileNo': encrpt_msg('18811395620'), 'content': encrpt_msg('hehe')}
+    data = {'mobileNo': 'PWy9rKUlzFLGO8Ry6v368w==', 'content': 'ZDvap/iSBk3oBD9Danq7LMphVSFwYhHE7CMnTkJxfagZXyEtfd87fYVuZR3lAuWs'}
     header = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36'}
 
-    rep = requests.get(url='http://advert.jianlc.com/sendMessage.shtml', data=data, headers=header, verify=False)
+    rep = requests.get(url='https://advert.jianlc.com/sendMessage.shtml', data=data, headers=header, verify=False)
     print rep.content
 
     # req = urllib2.Request(
