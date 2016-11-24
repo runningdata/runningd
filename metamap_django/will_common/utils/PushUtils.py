@@ -27,7 +27,7 @@ def push_msg_tophone(phone, msg):
     header = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36'}
 
-    rep = requests.get(url='https://advert.jianlc.com/sendMessage.shtml', data=data, headers=header, verify=False)
+    rep = requests.get(url='http://advert.jianlc.com/sendMessage.shtml', data=data, headers=header, verify=False)
     print rep.content
 
     # req = urllib2.Request(
