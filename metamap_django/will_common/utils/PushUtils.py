@@ -18,32 +18,31 @@ def push_msg(users, msg):
 
 def push_msg_tophone(phone, msg):
     # logging.info('alert happening: %s : %s' % (phone, msg))
-    # headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36"}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36"}
     # r = requests.get(push_url % (encrpt_msg(phone), encrpt_msg(msg)), headers=headers)
     # print r.headers
     # print r.content
 
-    data = {'mobileNo': 'PWy9rKUlzFLGO8Ry6v368w==', 'content': 'ZDvap/iSBk3oBD9Danq7LMphVSFwYhHE7CMnTkJxfagZXyEtfd87fYVuZR3lAuWs'}
-    header = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36'}
+    # data = {'mobileNo': 'PWy9rKUlzFLGO8Ry6v368w==', 'content': 'ZDvap/iSBk3oBD9Danq7LMphVSFwYhHE7CMnTkJxfagZXyEtfd87fYVuZR3lAuWs'}
+    # header = {
+    #     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36'}
+    #
+    # rep = requests.get(url='https://advert.jianlc.com/sendMessage.shtml', data=data, headers=header, verify=True)
+    # print rep.content
 
-    rep = requests.get(url='https://advert.jianlc.com/sendMessage.shtml', data=data, headers=header, verify=True)
-    print rep.content
-
-    # req = urllib2.Request(
-    #     push_url % (encrpt_msg(phone), encrpt_msg(msg)), headers=headers)
-    # req.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
-    # req.add_header('Accept-Encoding', 'gzip, deflate, sdch, br')
-    # req.add_header('Upgrade-Insecure-Requests', 1)
-    # # req.add_header('User-Agent',
-    # #                'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36')
-    # print('header : %s' % req.get_header('User-Agent'))
-    # try:
-    #     resp = urllib2.urlopen(req)
-    #     if resp.getcode() == 200:
-    #         print resp.read()
-    #         return 'push phone success'
-    #     else:
-    #         return 'error', resp.read()
-    # except urllib2.URLError, e:
-    #     return e.reason
+    req = urllib2.Request(
+        push_url % (encrpt_msg(phone), encrpt_msg(msg)), headers=headers)
+    print('header : %s' % req.get_header('User-Agent'))
+    try:
+        httpHandler = urllib2.HTTPHandler(debuglevel=1)
+        httpsHandler = urllib2.HTTPSHandler(debuglevel=1)
+        opener = urllib2.build_opener(httpHandler, httpsHandler)
+        urllib2.install_opener(opener)
+        resp = urllib2.urlopen(req)
+        if resp.getcode() == 200:
+            print resp.read()
+            return 'push phone success'
+        else:
+            return 'error', resp.read()
+    except urllib2.URLError, e:
+        return e.reason
