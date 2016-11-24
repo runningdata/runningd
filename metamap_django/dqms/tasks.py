@@ -104,6 +104,7 @@ def runcase(case, check, user):
         print('phont : %s ' % encryptutils.decrpt_msg(settings.ADMIN_PHONE))
         print('msg : %s ' % traceback.format_exc())
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), traceback.format_exc())
+        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), e.message)
         case_inst.status = enums.EXECUTION_STATUS.FAILED
         case_inst.result_mes = e.message
     case_inst.save()
