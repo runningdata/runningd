@@ -7,7 +7,7 @@ import requests
 from metamap_django import settings
 from will_common.utils.encryptutils import encrpt_msg
 
-push_url = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
+push_url = settings.PUSH_URL
 
 
 def push_msg(users, msg):
@@ -31,10 +31,8 @@ def push_msg_tophone(phone, msg):
     # print rep.content
 
     msg_ = push_url % (encrpt_msg(phone), encrpt_msg(msg))
-    print('msg : %s ' % msg_)
     req = urllib2.Request(msg_)
     req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36')
-    print('header : %s' % req.headers)
     try:
         httpHandler = urllib2.HTTPHandler(debuglevel=1)
         httpsHandler = urllib2.HTTPSHandler(debuglevel=1)
