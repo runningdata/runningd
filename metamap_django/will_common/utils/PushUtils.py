@@ -7,7 +7,7 @@ import requests
 from metamap_django import settings
 from will_common.utils.encryptutils import encrpt_msg
 
-push_url = settings.PUSH_URL
+push_url = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
 
 
 def push_msg(users, msg):
