@@ -18,7 +18,7 @@ def push_msg(users, msg):
 
 def push_msg_tophone(phone, msg):
     # logging.info('alert happening: %s : %s' % (phone, msg))
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36"}
+    # headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36"}
     # r = requests.get(push_url % (encrpt_msg(phone), encrpt_msg(msg)), headers=headers)
     # print r.headers
     # print r.content
@@ -31,18 +31,16 @@ def push_msg_tophone(phone, msg):
     # print rep.content
 
     msg_ = push_url % (encrpt_msg(phone), encrpt_msg(msg))
+    print('mmmmmmmmmmm : %s ' % msg_)
     req = urllib2.Request(msg_)
     req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36')
-    try:
-        httpHandler = urllib2.HTTPHandler(debuglevel=1)
-        httpsHandler = urllib2.HTTPSHandler(debuglevel=1)
-        opener = urllib2.build_opener(httpHandler, httpsHandler)
-        urllib2.install_opener(opener)
-        resp = urllib2.urlopen(req)
-        if resp.getcode() == 200:
-            print resp.read()
-            return 'push phone success'
-        else:
-            return 'error', resp.read()
-    except urllib2.URLError, e:
-        return e.reason
+    httpHandler = urllib2.HTTPHandler(debuglevel=1)
+    httpsHandler = urllib2.HTTPSHandler(debuglevel=1)
+    opener = urllib2.build_opener(httpHandler, httpsHandler)
+    urllib2.install_opener(opener)
+    resp = urllib2.urlopen(req)
+    if resp.getcode() == 200:
+        print resp.read()
+        return 'push phone success'
+    else:
+        return 'error', resp.read()
