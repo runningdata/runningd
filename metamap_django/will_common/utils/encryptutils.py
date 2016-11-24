@@ -13,7 +13,7 @@ cc = AES.new(settings.PUSH_KEY)
 def encrpt_msg(msg):
     if type(msg) == 'unicode':
         msg_ = msg.encode("utf8")
-    else:
+    elif type(msg) == 'long' or type(msg) == 'int':
         msg_ = str(msg)
     return base64.b64encode(cc.encrypt(pad(msg)))
 
