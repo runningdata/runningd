@@ -11,7 +11,7 @@ MSG_NO_DATA = 'NO_DATA'
 # For dqms
 DATASRC_TYPE_HIVE = 'hive'
 DATASRC_TYPE_MYSQL = 'mysql'
-ALERT_MSG = u'时间: %s . 质检任务 -> 质检用例 -> 规则：%s -> %s -> %s 失败， 期望值域： %d to %d, 实际值： %d '
+ALERT_MSG = u'【%s】质检任务 -> 质检用例 -> 规则：%s -> %s -> %s 规则验证失败， 期望值域： %d to %d, 实际值： %d '
 
 DATASRC_TYPE_MYSQL_DB = 'dqms_check'
 

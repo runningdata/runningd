@@ -11,9 +11,12 @@ push_url = settings.PUSH_URL
 
 
 def push_msg(users, msg):
-    for user in users:
-        push_msg_tophone(user.phone, msg)
-    return 'push success'
+    try:
+        for user in users:
+            push_msg_tophone(user.phone, msg)
+        return 'push success'
+    except Exception, e:
+        return 'push error : %s' % str(e)
 
 
 def push_msg_tophone(phone, msg):

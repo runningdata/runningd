@@ -23,6 +23,7 @@ class AlertView(generic.ListView):
         return DqmsAlert.objects.all().order_by('-ctime')
 
     def get_key(self):
+        key = ''
         if self.search_key in self.request.session:
             key = self.request.session[self.search_key]
             if self.search_key in self.request.GET:
