@@ -5,6 +5,9 @@ created by will
 DATE_FORMAT = "%Y-%m-%d"
 DATEKEY_FORMAT = "%Y%m%d"
 
+# For database usage
+MSG_NO_DATA = 'NO_DATA'
+
 # For dqms
 DATASRC_TYPE_HIVE = 'hive'
 DATASRC_TYPE_MYSQL = 'mysql'

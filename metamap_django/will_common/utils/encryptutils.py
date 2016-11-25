@@ -16,7 +16,7 @@ def encrpt_msg(msg):
     # elif isinstance(msg, int) or isinstance(msg, long):
     #     msg_ = str(msg)
     else:
-        msg_ = msg
+        msg_ = str(msg)
     return base64.b64encode(cc.encrypt(pad(msg_)))
 
 

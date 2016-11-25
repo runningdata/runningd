@@ -5,6 +5,7 @@ import re
 from django.conf import settings
 from pyhs2.error import Pyhs2Exception
 
+from will_common.utils import constants
 from will_common.utils import djtemplates
 
 logger = logging.getLogger('django')
@@ -64,7 +65,12 @@ def execute(sql):
 
                 # Fetch table results
                 schema = cur.getSchema()
-                row = cur.fetch()[0]
+                fetchall = cur.fetchall()
+                if len(fetchall) == 0:
+                    cur.close()
+                    return
+                row = fetchall[0]
+                cur.close()
                 for col in schema:
                     index = schema.index(col)
                     result[col['columnName']] = row[index]
@@ -72,7 +78,6 @@ def execute(sql):
                 return result
     except Pyhs2Exception, e:
         raise Exception('sql is %s,\n<br> error is %s' % (sql, e))
-    return result
 
 
 if __name__ == '__main__':

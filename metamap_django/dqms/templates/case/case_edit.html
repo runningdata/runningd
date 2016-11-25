@@ -48,13 +48,13 @@
         /**
          *编辑指标规则
          */
-        function editRule(seqId, measure_name, measure_column, measure_type, rule_type, min, max) {
+        function editRule(seqId, measure_name, measure_column, measure_type, rule_type, min, max, refer) {
             curr_rule = seqId;
             $("#index_name").attr('value', measure_name);
             $("#col_name").attr('value', measure_column);
             $("#alarm_min").attr('value', min);
             $("#alarm_max").attr('value', max);
-
+            $("#refer").attr('value', refer);
             $("#createRuleModal").modal('show');
 
             var count = $("#data_type option").length;
@@ -154,6 +154,7 @@
             var measure_column = $("#col_name").val();
             var min = $("#alarm_min").val();
             var max = $("#alarm_max").val();
+            var refer = $('#refer').val();
             var obj = document.getElementById('data_type');
             var measure_type = obj.options[obj.selectedIndex].text;
             obj = document.getElementById('rule_type');
@@ -176,9 +177,10 @@
                     "<td Name='rule_type'>" + rule_type + "</td>" +
                     "<td Name='min'>" + min + "</td>" +
                     "<td Name='max'>" + max + "</td>" +
+                    "<td Name='refer'>" + refer + "</td>" +
                     "<td>" +
                     "<button class='btn btn-default btn-xs' onclick=\"deleteRule(" + curr_rule + ")\">删除</button>" +
-                    "<button class='btn btn-default btn-xs' onclick=\"editRule(" + curr_rule + ",'" + measure_name + "','" + measure_column + "','" + measure_type + "','" + rule_type + "','" + min + "','" + max + "')\">编辑</button>" +
+                    "<button class='btn btn-default btn-xs' onclick=\"editRule(" + curr_rule + ",'" + measure_name + "','" + measure_column + "','" + measure_type + "','" + rule_type + "','" + min + "','" + max + "','" + refer + "')\">编辑</button>" +
                     "</td>" +
                     "</tr>";
             ruleInfoMap.Set(curr_rule, ruledata);
@@ -341,7 +343,7 @@
                               name="describe">{{ obj.sql_pattern }}</textarea>
                     </div>
                 </div>
-                <div class="m-search-group">
+                {% comment %} <div class="m-search-group">
                     <label class="m-search-label">
                         数据列<span style="color:#F00;margin-left: 8px;">*</span>
                     </label>
@@ -359,7 +361,7 @@
                               placeholder="sql中涉及的维度列,列之间用,隔开.如果质检用例不包含维度,为空" maxlength="500"
                               name="datameasure_column">{{ obj.data_dimension }}</textarea>
                     </div>
-                </div>
+                </div>{% endcomment %}
             </div>
         </div>
         <!-- second-step panel end -->
@@ -388,40 +390,41 @@
                             <th>规则类型</th>
                             <th>警报下界</th>
                             <th>警报上界</th>
+                            <th>参考值</th>
                             <th>操作</th>
                         </tr>
                         </thead>
                         <tbody id="rule_list_table">
-{#                        {% for rule in obj.dqmsrule_set.all %}#}
-{#                            <tr>#}
-{#                                <td class='id'>  {{ forloop.counter }} </td>#}
-{#                                <td Name='measure_name'#}
-{#                                    class='name'>  {{ rule.measure_name| default_if_none:"-" }}  </td>#}
-{#                                <td Name='measure_column'>  {{ rule.measure_column| default_if_none:"-" }}  </td>#}
-{#                                <td Name='measure_type'>  {{ rule.measure_type }}  </td>#}
-{#                                <td Name='rule_type'>  {{ rule.rule_type }}  </td>#}
-{#                                <td Name='min'>  {{ rule.min }} </td>#}
-{#                                <td Name='max'>  {{ rule.max }}  </td>#}
-{#                                <td>#}
-{#                                    <button class='btn btn-default btn-xs' onclick="deleteRule({{ rule.id }})">删除#}
-{#                                    </button>#}
-{#                                    <button class='btn btn-default btn-xs'#}
-{#                                            onclick="editRule({{ rule.id }},'{{ rule.measure_name }}','{{ rule.measure_column }}', '{{ rule.measure_type }}','{{ rule.rule_type }}', {{ rule.min }}, {{ rule.max }})">#}
-{#                                        编辑#}
-{#                                    </button>#}
-{#                                </td>#}
-{#                            </tr>#}
-{#                        {% endfor %}#}
+                        {#                        {% for rule in obj.dqmsrule_set.all %}#}
+                        {#                            <tr>#}
+                        {#                                <td class='id'>  {{ forloop.counter }} </td>#}
+                        {#                                <td Name='measure_name'#}
+                        {#                                    class='name'>  {{ rule.measure_name| default_if_none:"-" }}  </td>#}
+                        {#                                <td Name='measure_column'>  {{ rule.measure_column| default_if_none:"-" }}  </td>#}
+                        {#                                <td Name='measure_type'>  {{ rule.measure_type }}  </td>#}
+                        {#                                <td Name='rule_type'>  {{ rule.rule_type }}  </td>#}
+                        {#                                <td Name='min'>  {{ rule.min }} </td>#}
+                        {#                                <td Name='max'>  {{ rule.max }}  </td>#}
+                        {#                                <td>#}
+                        {#                                    <button class='btn btn-default btn-xs' onclick="deleteRule({{ rule.id }})">删除#}
+                        {#                                    </button>#}
+                        {#                                    <button class='btn btn-default btn-xs'#}
+                        {#                                            onclick="editRule({{ rule.id }},'{{ rule.measure_name }}','{{ rule.measure_column }}', '{{ rule.measure_type }}','{{ rule.rule_type }}', {{ rule.min }}, {{ rule.max }})">#}
+                        {#                                        编辑#}
+                        {#                                    </button>#}
+                        {#                                </td>#}
+                        {#                            </tr>#}
+                        {#                        {% endfor %}#}
 
                         </tbody>
 
                         <script>
                             $.ajax({
                                 url: "/dqms/rest/ruleforcase/get_all/",
-                                data: "id=" + {{ obj.id }} + '&format=json',
+                                data: "id=" + {{ obj.id }} +'&format=json',
                                 type: "get",
                                 success: function (data) {
-                                    var index_data="";
+                                    var index_data = "";
                                     for (i = 0; i < data.length; i++) {
                                         seqId = seqId + 1;
                                         var ruledata = "<tr>" +
@@ -432,9 +435,10 @@
                                                 "<td Name='rule_type'>" + data[i].rule_type + "</td>" +
                                                 "<td Name='min'>" + data[i].min + "</td>" +
                                                 "<td Name='max'>" + data[i].max + "</td>" +
+                                                "<td Name='refer'>" + data[i].refer + "</td>" +
                                                 "<td>" +
                                                 "<button class='btn btn-default btn-xs' onclick=\"deleteRule(" + seqId + ")\">删除</button>" +
-                                                "<button class='btn btn-default btn-xs' onclick=\"editRule(" + seqId + ",'" + data[i].measure_name + "','" + data[i].measure_column + "','" + data[i].measure_type + "','" + data[i].rule_type + "','" + data[i].min + "','" + data[i].max + "')\">编辑</button>" +
+                                                "<button class='btn btn-default btn-xs' onclick=\"editRule(" + seqId + ",'" + data[i].measure_name + "','" + data[i].measure_column + "','" + data[i].measure_type + "','" + data[i].rule_type + "','" + data[i].min + "','" + data[i].max + "','" + data[i].refer + "')\">编辑</button>" +
                                                 "</td>" +
                                                 "</tr>";
                                         seqIdList.push(seqId);
@@ -526,7 +530,7 @@
                               name="describe"></textarea>
                     </div>
                 </div>
-                <div class="m-search-group">
+                {% comment %}<div class="m-search-group">
                     <label class="m-search-label">
                         数据列<span style="color:#F00;margin-left: 8px;">*</span>
                     </label>
@@ -544,7 +548,7 @@
                               placeholder="sql中涉及的维度列,列之间用,隔开.如果质检用例不包含维度,为空" maxlength="500" name="datameasure_column"
                     ></textarea>
                     </div>
-                </div>
+                </div>{% endcomment %}
             </div>
         </div>
         <!-- second-step panel end -->
@@ -688,6 +692,16 @@
                         <div class="m-search-detail">
                             <input id="alarm_max" type="text" class="form-control" placeholder="必填项，必须为数值"
                                    maxlength="30" name="name" value="">
+                        </div>
+                    </div>
+
+                    <div class="m-search-group">
+                        <label class="m-search-label">
+                            参考值
+                        </label>
+                        <div class="m-search-detail">
+                            <input id="refer" type="text" class="form-control" placeholder="必填项，必须为数值"
+                                   maxlength="30" name="refer" value="">
                         </div>
                     </div>
 

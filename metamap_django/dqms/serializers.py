@@ -35,5 +35,5 @@ class DqmsCaseInstSerializer(serializers.HyperlinkedModelSerializer):
 class DqmsRuleSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = DqmsRule
-        fields = ('rule_type', 'remark',  'ctime',  'utime', 'min', 'max', 'measure_desc', 'measure_name', 'measure_type', 'rule_predicate', 'measure_column')
+        fields = ('refer','rule_type', 'remark',  'ctime',  'utime', 'min', 'max', 'measure_desc', 'measure_name', 'measure_type', 'rule_predicate', 'measure_column')
 

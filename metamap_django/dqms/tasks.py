@@ -31,6 +31,7 @@ from will_common.utils import mysqlcli
 logger = get_task_logger(__name__)
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/dqms/'
 
+
 @shared_task
 def exec_dqms(task_id):
     check = DqmsCheck.objects.get(pk=task_id)
@@ -80,7 +81,8 @@ def runcase(case, check, user):
                 if re > rule.max or re < rule.min:
                     alert = DqmsAlert.objects.create(rule=rule)
                     msg = constants.ALERT_MSG % (
-                        dateutils.format_dbday(timezone.now()), chk_name, case.case_name, rule.measure_name, rule.min, rule.max, re)
+                        dateutils.format_dbday(timezone.now()), chk_name, case.case_name, rule.measure_name, rule.min,
+                        rule.max, re)
                     if check:
                         PushUtils.push_msg_tophone(case.editor.phone, msg)
                         resp = PushUtils.push_msg(check.managers.all(), msg)
@@ -97,6 +99,10 @@ def runcase(case, check, user):
                     alert.push_resp = resp
                     alert.save()
                     print('alerting for case %s -> rule : %s ' % (case.case_name, rule.measure_name))
+        else:
+            logger.error('No data found for case %s' % (case.case_name))
+            print ('No data found for case %s ' % (case.case_name))
+            raise Exception('No data found for case %s ' % (case.case_name))
         case_inst.status = enums.EXECUTION_STATUS.DONE
         case_inst.result_mes = 'success'
     except Exception, e:
