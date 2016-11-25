@@ -21,6 +21,7 @@ from celery.utils.log import get_task_logger
 from metamap_django import settings
 from will_common.models import UserProfile
 from will_common.utils import PushUtils
+from will_common.utils import dateutils
 from will_common.utils import encryptutils
 from will_common.utils import enums
 from will_common.utils import hivecli
@@ -79,7 +80,7 @@ def runcase(case, check, user):
                 if re > rule.max or re < rule.min:
                     alert = DqmsAlert.objects.create(rule=rule)
                     msg = constants.ALERT_MSG % (
-                        chk_name, case.case_name, rule.measure_name, rule.min, rule.max, re)
+                        dateutils.format_dbday(timezone.now()), chk_name, case.case_name, rule.measure_name, rule.min, rule.max, re)
                     if check:
                         PushUtils.push_msg_tophone(case.editor.phone, msg)
                         resp = PushUtils.push_msg(check.managers.all(), msg)
