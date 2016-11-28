@@ -66,7 +66,8 @@ def exec_etl_cli(task_id):
         sql = etlhelper.generate_sql(will_task.variables, ana_etl.query)
         result = TMP_EXPORT_FILE_LOCATION + part
         result_dir = result +'_dir'
-        pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ',' " % result_dir
+        pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
+        sql = pre_insertr + sql
         command = 'hive -e \"' + sql.replace('"', '\\"') + '\"'
         print 'command is ', command
         with open(result, 'w') as wa:
