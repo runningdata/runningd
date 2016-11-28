@@ -53,7 +53,7 @@ def add(request):
         cron_task.name = task.name
         cron_task.willtask = task
         cron_task.enabled = task.valid
-        cron_task.task = 'metamap.tasks.exec_etl_cli'
+        cron_task.task = 'metamap.tasks.exec_etl_cli1'
         cron_task.args = '[' + str(task.id) + ']'
 
         cron = DjceleryCrontabschedule.objects.create()

@@ -57,7 +57,7 @@ def exec_etl(command, log):
 
 
 @shared_task
-def exec_etl_cli(task_id):
+def exec_etl_cli1(task_id):
     export = Exports.objects.create(task_id=task_id)
     try:
         will_task = WillDependencyTask.objects.get(pk=task_id)
