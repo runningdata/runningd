@@ -65,7 +65,8 @@ def exec_etl_cli(task_id):
         part = ana_etl.name + '-' + dateutils.now_datetime()
         sql = etlhelper.generate_sql(will_task.variables, ana_etl.query)
         result = TMP_EXPORT_FILE_LOCATION + part
-        pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ',' " % result
+        result_dir = result +'_dir'
+        pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ',' " % result_dir
         command = 'hive -e \"' + sql.replace('"', '\\"') + '\"'
         print 'command is ', command
         with open(result, 'w') as wa:
@@ -77,7 +78,7 @@ def exec_etl_cli(task_id):
         p.wait()
         returncode = p.returncode
         logger.info('%s return code is %d' % (command, returncode))
-        command = 'cat %s/* | iconv -f utf-8 -c -t gb18030 >> %s' % (result, result)
+        command = 'cat %s/* | iconv -f utf-8 -c -t gb18030 >> %s' % (result_dir, result)
         print 'command is ', command
         p = subprocess.Popen([''.join(command)], shell=True, stderr=open(error_file, 'a'), universal_newlines=True)
         p.wait()
