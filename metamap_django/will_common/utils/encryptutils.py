@@ -1,7 +1,7 @@
 import base64
 from Crypto.Cipher import AES
 
-from metamap_django import settings
+from django.conf import settings
 
 BS = AES.block_size
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)

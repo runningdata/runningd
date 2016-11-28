@@ -65,11 +65,8 @@ PUSH_KEY = '&OKY%~!$^G*JRRF^'
 
 # Application definition
 INSTALLED_APPS = [
-    'djcelery',
-    'rest_framework',
     'will_common',
     'dqms',
-    # 'metamap',
     'cas',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -77,6 +74,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djcelery',
+    'rest_framework',
 ]
 
 REST_FRAMEWORK = {

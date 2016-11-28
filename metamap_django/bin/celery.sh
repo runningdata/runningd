@@ -38,11 +38,11 @@ function stop() {
 ###  1. pull最新代码           ####
 #################################
 
-cd /server/metamap \
+cd /usr/local/will/metamap \
     && git pull
 
 
-cd /server/metamap/metamap_django
+cd /usr/local/will/metamap/metamap_django
 
 
 #################################
@@ -56,7 +56,7 @@ stop worker
 #################################
 export C_FORCE_ROOT=true
 
-/server/metamap_virenv/bin/python manage.py celery multi start will -A metamap \
+/server/xstorm/bin/python manage.py celery multi start will -A metamap \
  --pidfile="/var/run/celery/%n.pid" \
   --logfile="/var/log/celery/%n.log" \
   --settings=metamap.config.prod \

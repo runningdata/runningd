@@ -38,11 +38,11 @@ function stop() {
 ###  1. pull最新代码           ####
 #################################
 
-cd /server/metamap \
+cd /usr/local/will/metamap \
     && git pull
 
 
-cd /server/metamap/metamap_django
+cd /usr/local/will/metamap/metamap_django
 
 
 #################################
@@ -56,7 +56,7 @@ stop beat
 #################################
 export C_FORCE_ROOT=true
 
-/server/metamap_virenv/bin/python manage.py celery beat --loglevel=info --logfile="/var/log/celery/beat.log" \
+/usr/local/will/xstorm/bin/python manage.py celery beat --loglevel=info --logfile="/var/log/celery/beat.log" \
  --pidfile="/var/run/celery/beat.pid" \
  --settings=metamap.config.prod \
  --detach
