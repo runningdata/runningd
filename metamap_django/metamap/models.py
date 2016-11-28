@@ -99,28 +99,6 @@ class Meta(models.Model):
         return self.meta
 
 
-class WillDependencyTask(models.Model):
-    name = models.CharField(unique=True, max_length=200)
-    schedule = models.IntegerField(null=False, default=1)  # 0 天 1 周 2 月 3 季度 4 cron
-    valid = models.IntegerField(default=1)
-    ctime = models.DateTimeField(default=timezone.now)
-    utime = models.DateTimeField(null=True)
-    variables = models.TextField()
-    desc = models.TextField()
-    rel_id = models.IntegerField(null=True, blank=False, help_text="ETL or Email id")
-    type = models.IntegerField(default=1, blank=False, null=False, help_text="1 ETL; 2 EMAIL;")
-
-    class Meta:
-        unique_together = (('rel_id', 'schedule', 'type'),)
-
-    def get_schedule(self):
-        task = PeriodicTask.objects.get(willtask_id=self.id)
-        if self.schedule == 4:
-            cron = task.crontab
-            return cron.minute + ' ' + cron.hour + ' ' + cron.day_of_month + ' ' + cron.month_of_year + ' ' + cron.day_of_week
-        else:
-            return ''
-
 
 class BIUser(models.Model):
     username = models.CharField(max_length=200, blank=True, null=True)
