@@ -8,7 +8,7 @@ import os
 
 print('gunicorn config is running....')
 
-bind = "0.0.0.0:9099"
+bind = "0.0.0.0:8088"
 worker_class = "eventlet"
 workers = 4
 # workers = multiprocessing.cpu_count() * 2 + 1
