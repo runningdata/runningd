@@ -38,7 +38,7 @@ def generate_sql(variables, query):
     str.append(variables)
     str.append(query)
 
-    template = Template('\n'.join(str));
+    template = Template('\n'.join(str))
     return template.render(Context()).strip()
 
 def generate_etl_sql(etl, schedule = -1):
