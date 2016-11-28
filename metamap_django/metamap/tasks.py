@@ -71,7 +71,7 @@ def exec_etl_cli(task_id):
         command = 'hive -e \"' + sql.replace('"', '\\"') + '\"'
         print 'command is ', command
         with open(result, 'w') as wa:
-            header = ana_etl.headers.replace(',', '\t')
+            header = ana_etl.headers
             wa.write(header.encode('gb18030'))
             wa.write('\n')
         error_file = result + '.error'
