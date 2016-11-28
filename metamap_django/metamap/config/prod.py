@@ -66,14 +66,6 @@ BROKER_URL = 'redis://10.0.1.97:6379'
 # CELERY_TIMEZONE = 'UTC'
 # CELERY_ENABLE_UTC = True
 # CELERY_IMPORTS = ("metamap.taske",)
-CELERY_ROUTES = {
-    'metamap.tasks.exec_etl_cli': {
-        'queue': 'metamap',
-    },
-    'metamap.tasks.exec_etl': {
-        'queue': 'metamap',
-    },
-}
 
 # Application definition
 
