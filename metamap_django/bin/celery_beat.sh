@@ -56,7 +56,7 @@ stop beat
 #################################
 export C_FORCE_ROOT=true
 
-/usr/local/will/xstorm/bin/python manage.py celery beat --loglevel=info --logfile="/var/log/celery/beat.log" \
+/server/xstorm/bin/python manage.py celery beat --loglevel=info --logfile="/var/log/celery/beat.log" \
  --pidfile="/var/run/celery/beat.pid" \
  --settings=metamap.config.prod \
  --detach
