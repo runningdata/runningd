@@ -5,7 +5,7 @@ import datetime
 from django.utils import timezone
 
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
-from will_common.models import PeriodicTask
+from will_common.models import PeriodicTask, WillDependencyTask
 
 
 class AnaETL(models.Model):
