@@ -28,6 +28,7 @@ class WillDependencyTask(models.Model):
     type = models.IntegerField(default=1, blank=False, null=False, help_text="1 ETL; 2 EMAIL;")
 
     class Meta:
+        db_table = 'metamap_willdependencytask'
         unique_together = (('rel_id', 'schedule', 'type'),)
         managed = False
 
