@@ -28,7 +28,7 @@ class ScheDepListView(generic.ListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            return WillDependencyTask.objects.filter(type=2, etl__tblName__contains=tbl_name_).order_by('-valid', '-ctime')
+            return WillDependencyTask.objects.filter(type=2, name__contains=tbl_name_).order_by('-valid', '-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
         return WillDependencyTask.objects.filter(type=2).order_by('-valid', '-ctime')
 
