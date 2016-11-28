@@ -62,7 +62,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 BROKER_URL = 'redis://localhost:6379'
 
 CELERY_ROUTES = {
-    'metamap.tasks.exec_etl_cli1': {
+    'metamap.tasks.exec_etl_cli': {
         'queue': 'metamap',
     },
     'metamap.tasks.exec_etl': {
