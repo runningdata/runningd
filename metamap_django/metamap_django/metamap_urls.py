@@ -16,11 +16,11 @@ Including another URLconf
 from cas import views
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.auth.decorators import login_required
 
 from will_common.views import common
 
 urlpatterns = [
-    url(r'^$', common.redir_metamap),
     url(r'^export/', include('metamap.xcurls')),
     url(r'^metamap/', include('metamap.urls', namespace='metamap')),
     url(r'^admin/', admin.site.urls),
@@ -28,8 +28,12 @@ urlpatterns = [
     # CAS
     url(r'^accounts/login/$', views.login, name='login'),
     url(r'^accounts/logout/$', views.logout, name='logout'),
-]
 
+    # Navigate
+    url(r'^$', login_required(common.navigate), name='navigate'),
+    url(r'^user/$', login_required(common.modify_pwd), name='modify_pwd'),
+
+]
 
 handler500 = 'will_common.views.common.h500'
 

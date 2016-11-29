@@ -12,3 +12,8 @@ register = template.Library()
 def has_def(context, var):
     result = var in context and context[var] is not None
     return result
+
+
+@register.simple_tag
+def host_clean(status):
+    return status[0: len(status) - 5]

@@ -1,0 +1,24 @@
+<div role="navigation" class="navbar navbar-inverse">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" data-toggle="collapse" data-target=".navbar-collapse" class="navbar-toggle collapsed">
+                <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span
+                    class="icon-bar"></span><span class="icon-bar"></span></button>
+            <a href="/" class="navbar-brand"><span class="glyphicon glyphicon-home"></span> &nbsp;&nbsp;&nbsp; JLC数据平台</a></div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#">
+                    用户
+                        {% if  request.user.is_authenticated %}
+                            {{ request.user.username }}
+                        {% else %}
+                            未登录
+                        {% endif %}
+                    , 您好
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
