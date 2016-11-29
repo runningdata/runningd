@@ -40,7 +40,7 @@ HIVE_SERVER = {
 }
 
 # 设置cas服务器地址
-CAS_SERVER_URL = "http://10.1.5.83:7000/casserver/"
+CAS_SERVER_URL = "http://10.1.5.83:7000/sso/"
 # CAS_LOGOUT_COMPLETELY = True
 CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
