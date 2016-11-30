@@ -63,11 +63,10 @@ def exec_etl_cli(task_id):
         will_task = WillDependencyTask.objects.get(pk=task_id)
         ana_etl = AnaETL.objects.get(pk=will_task.rel_id)
         part = ana_etl.name + '-' + dateutils.now_datetime()
-        sql = etlhelper.generate_sql(will_task.variables, ana_etl.query)
         result = TMP_EXPORT_FILE_LOCATION + part
         result_dir = result +'_dir'
         pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
-        sql = pre_insertr + sql
+        sql = etlhelper.generate_sql(will_task.variables, pre_insertr + ana_etl.query)
         command = 'hive -e \"' + sql.replace('"', '\\"') + '\"'
         print 'command is ', command
         with open(result, 'w') as wa:
