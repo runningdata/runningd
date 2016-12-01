@@ -33,8 +33,6 @@
          *删除指标规则
          */
         function deleteRule(seqId) {
-            alert('rule is : ' + seqId);
-            alert('rule list : ' + seqIdList.join(','));
             seqIdList.splice(seqIdList.indexOf(seqId), 1);
             ruleInfoMap.Remove(seqId);
 

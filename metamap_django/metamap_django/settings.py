@@ -34,7 +34,7 @@ ALLOWED_HOSTS = []
 
 
 HIVE_SERVER = {
-    'host': '10.0.1.84',
+    'host': '10.1.5.63',
     'port': 10000,
     'user': 'hdfs',
     'password': '',

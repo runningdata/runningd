@@ -55,7 +55,7 @@ BROKER_URL = 'redis://localhost:6379'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 # 设置cas服务器地址
-CAS_SERVER_URL = "http://192.168.217.128:8081/casserver/"
+CAS_SERVER_URL = "http://192.168.217.128:8081/sso/"
 # CAS_LOGOUT_COMPLETELY = True
 CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
