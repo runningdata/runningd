@@ -61,7 +61,7 @@ i {
 /**
  * CSS3样式文件存放地点。
  *
- * @author XU Kai(xukai@will.com)
+ * @author heheda(www@will.com)
  * @date 2014.01.06
  */
 /**
@@ -71,7 +71,7 @@ i {
  *   <i class="icon show-me"></i>
  * 第一个参数标示基本属性，show-me用来改变background-position以及高宽来显示图片。
  *
- * @author XU Kai(xukai@will.com)
+ * @author heheda(www@will.com)
  * @date 2013.12.26
  */
 
@@ -1200,9 +1200,6 @@ i {
  * 页面通用样式库。
  * Ex:
  *   <div class="fr clearfix td"></div>
- *
- * @author XU Kai(xukai@will.com)
- * @date 2013.12.26
  *
  */
 
