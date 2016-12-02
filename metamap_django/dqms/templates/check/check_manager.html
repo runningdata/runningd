@@ -287,7 +287,7 @@
                 <tbody id="check_list_table">
                 {% for obj in objs %}
                     <tr>
-                        <td class='id'>  {{ obj.id }}  </td>
+                        <td class='id'>  {{ obj.id }} </td>
                         <td class='name'>  {{ obj.chk_name }}  </td>
                         <td>  {{ obj.creator.user.username }}  </td>
                         <td>  {{ obj.last_run_time | date:"Y-m-d H:i:s" }}  </td>
@@ -297,8 +297,7 @@
                             <button class='btn btn-default btn-xs' onclick='editCheck(  {{ obj.id }}  )'>查看详情</button>
                             <button id='orb{{ obj.id }}' class='btn btn-default btn-xs'
                                     onclick='observerCheck(  {{ obj.id }}  )'>
-                                {{ request.user.user_profile }}
-                                {% if request.user.user_profile in obj.managers.all %}
+                                {% if request.user.userprofile in obj.managers.all %}
                                     取消订阅
                                 {% else %}
                                     订阅
