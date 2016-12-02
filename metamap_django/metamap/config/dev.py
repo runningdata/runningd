@@ -19,7 +19,6 @@ import logging.handlers
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
@@ -29,14 +28,53 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-
 EEE = 'DEV'
 ALLOWED_HOSTS = []
 
 
+
+HIVE_SERVER = {
+    'host': '10.1.5.63',
+    'port': 10000,
+    'user': 'hdfs',
+    'password': '',
+}
+
+# 设置cas服务器地址
+CAS_SERVER_URL = "http://192.168.217.128:8081/sso/"
+# CAS_LOGOUT_COMPLETELY = True
+CAS_PROVIDE_URL_TO_LOGOUT = True
+# CAS_GATEWAY = True
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'cas.backends.CASBackend',
+)
+
+
+import djcelery
+
+djcelery.setup_loader()
+
+# Celery Beat 设置
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+BROKER_URL = 'redis://localhost:6379'
+
+CELERY_ROUTES = {
+    'metamap.tasks.exec_etl_cli': {
+        'queue': 'metamap',
+    },
+    'metamap.tasks.exec_etl': {
+        'queue': 'metamap',
+    },
+}
+
 # Application definition
 
 INSTALLED_APPS = [
+    'cas',
+    'will_common',
     'metamap.apps.MetamapConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,6 +82,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djcelery',
+    'rest_framework',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -53,11 +93,13 @@ MIDDLEWARE_CLASSES = [
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'will_common.middleware.viewexception.LoginRequire',
+    'cas.middleware.CASMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'metamap_django.dqms_urls'
+ROOT_URLCONF = 'metamap_django.metamap_urls'
 
 TEMPLATES = [
     {
@@ -77,20 +119,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'metamap_django.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'metamap1',                      
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'metamap1',
         'PASSWORD': '',
         'USER': 'root',
-        'HOST': '127.0.0.1', 
-        'PORT': '3306', 
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     },
-    'hivemeta' :{
+    'hivemeta': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'hivedb',
         'PASSWORD': 'Zjy@yinker20150309',
@@ -99,7 +140,6 @@ DATABASES = {
         'PORT': '3306',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -119,7 +159,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
@@ -133,12 +172,10 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
-
 
 LOGGING = {
     'version': 1,

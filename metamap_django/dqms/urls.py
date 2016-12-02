@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^check/del/$', check.delete, name='check_delete'),
     url(r'^check/edit/$', check.edit, name='check_edit'),
     url(r'^check/save/$', check.save, name='check_save'),
+    url(r'^check/subscribe/$', check.subscribe, name='subscribe'),
     url(r'^check/execution/(?P<pk>[0-9]+)/$', check.executions, name='check_execution'),
 
     url(r'^alarm_info/$', alert.AlertView.as_view(), name='alarm_info'),

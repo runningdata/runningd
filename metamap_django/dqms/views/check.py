@@ -43,12 +43,30 @@ def manager(request):
 
 def edit(request):
     if 'chk_id' in request.GET:
-        id = long(request.GET['chk_id'])
-        obj = DqmsCheck.objects.get(pk=id)
+        chk_id = long(request.GET['chk_id'])
+        obj = DqmsCheck.objects.get(pk=chk_id)
         return render(request, 'check/check_edit.html', {'obj': obj})
     else:
         return render(request, 'check/check_edit.html')
 
+
+def subscribe(request):
+    if 'chk_id' in request.POST:
+        chk_id = long(request.POST['chk_id'])
+        chk = DqmsCheck.objects.get(pk=chk_id)
+        user = UserProfile.objects.get(user=request.user)
+        managers = chk.managers.all()
+        if user in managers:
+            chk.managers.remove(user)
+            msg = '_dy'
+        else:
+            chk.managers.add(user)
+            msg = '_qxdy'
+        # chk.managers = managers
+        chk.save()
+        return HttpResponse('success' + msg)
+    else:
+        return HttpResponse('error')
 
 def save(request):
     if request.method == 'POST':

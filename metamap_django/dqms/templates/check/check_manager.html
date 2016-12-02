@@ -12,8 +12,6 @@
     <script>
         var STATUS_RECOVER = 1;
         var STATUS_PAUSE = 2;
-        var VIEWER_YES = 1;
-        var VIEWER_NO = 2;
         var TOTAL_RECORD_NUM = "";
         var chkId;
         var chkName;
@@ -37,43 +35,29 @@
         /**
          * 订阅check
          * */
-        function observerCheck(chk_id, viewStatus) {
+        function observerCheck(chk_id) {
             chkId = chk_id;
-            chkView = viewStatus;
             $("#viewStatusModal").modal('show');
         }
 
         function observer_check() {
-            if (chkView == VIEWER_NO) {
-                //订阅任务
-                $.ajax({
-                    url: "view/viewCheck",
-                    type: "post",
-                    data: "chkId=" + chkId,
-                    success: function (resp) {
-                        if (resp.code == 1) { //调用服务失败
-                            $("#checkmanager").html(resp.msg);
-                            $("#failedModal").modal('show');
-                            return;
-                        }
+            $.ajax({
+                url: "/dqms/check/subscribe/",
+                type: "post",
+                data: "chk_id=" + chkId,
+                success: function (resp) {
+                    var vv = '#orb' + chkId;
+                    if (resp == 'error') { //调用服务失败
+                        $("#checkmanager").html(resp.msg);
+                        $("#failedModal").modal('show');
+                        return;
+                    } else if (resp == 'success_dy') {
+                        $(vv).html('订阅');
+                    } else if (resp == 'success_qxdy') {
+                        $(vv).html('取消订阅');
                     }
-                });
-            }
-            if (chkView == VIEWER_YES) {
-                //取消订阅任务
-                $.ajax({
-                    url: "view/cancelViewCheck",
-                    type: "post",
-                    data: "chkId=" + chkId,
-                    success: function (resp) {
-                        if (resp.code == 1) { //调用服务失败
-                            $("#checkmanager").html(resp.msg);
-                            $("#failedModal").modal('show');
-                            return;
-                        }
-                    }
-                });
-            }
+                }
+            });
         }
 
         /**
@@ -311,6 +295,15 @@
                         <td>  {{ obj.editor.user.username }} </td>
                         <td>
                             <button class='btn btn-default btn-xs' onclick='editCheck(  {{ obj.id }}  )'>查看详情</button>
+                            <button id='orb{{ obj.id }}' class='btn btn-default btn-xs'
+                                    onclick='observerCheck(  {{ obj.id }}  )'>
+                                {{ request.user.user_profile }}
+                                {% if request.user.user_profile in obj.managers.all %}
+                                    取消订阅
+                                {% else %}
+                                    订阅
+                                {% endif %}
+                            </button>
                             <button class='btn btn-default btn-xs' onclick='deleteCheck(  {{ obj.id }}  )'>删除</button>
                             <button class='btn btn-default btn-xs' onclick='getexecutions(  {{ obj.id }}  )'>执行记录
                             </button>
@@ -407,7 +400,7 @@
                 <h4 class="modal-title">确认</h4>
             </div>
             <div class="modal-body">
-                <p>确定要订阅质检任务吗?</p>
+                <p>确定要修改质检任务的订阅状态吗?</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
