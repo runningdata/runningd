@@ -41,7 +41,7 @@ HIVE_SERVER = {
 }
 
 # 设置cas服务器地址
-CAS_SERVER_URL = "http://192.168.217.128:8081/sso/"
+CAS_SERVER_URL = "http://dev.will.com:8081/sso/"
 # CAS_LOGOUT_COMPLETELY = True
 CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
@@ -133,10 +133,10 @@ DATABASES = {
     },
     'hivemeta': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hivedb',
+        'NAME': 'hive',
         'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'root',
-        'HOST': '10.1.5.113',
+        'USER': 'ambari',
+        'HOST': '10.1.5.225',
         'PORT': '3306',
     }
 }

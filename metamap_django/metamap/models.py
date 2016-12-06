@@ -108,6 +108,14 @@ class BIUser(models.Model):
         managed = False
 
 
+
+class Sqoop(models.Model):
+    meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False)
+    columns = models.TextField(null=False)
+    update_key = models.CharField(max_length=100, null=True)
+    target_tbl = models.CharField(max_length=300, null=False)
+    src_tbl = models.CharField(max_length=300, null=False)
+
 class Exports(models.Model):
     '''
     定时任务执行记录
