@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+{% block title %}hive字段列表{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% include 'components/search.html' %}
+        <table class="table table-striped">
+            <caption></caption>
+            <thead>
+            <tr>
+                <th>字段名称</th>
+                <th>字段类型</th>
+                <th>数据库名称</th>
+                <th>表名称</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if metas %}
+                {% for meta in metas %}
+                    <tr>
+                        <td>{{ meta.col_name }}</td>
+                        <td>{{ meta.col_type_name }}</td>
+                        <td>{{ meta.db.name }}</td>
+                        <td>{{ meta.tbl.tbl_name }}</td>
+                        <td>
+                            <a href="../tbl_search/{{ meta.tbl.tbl_id }}" class="btn btn-primary btn-sm">表信息</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

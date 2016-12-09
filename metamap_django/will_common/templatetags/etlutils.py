@@ -123,11 +123,19 @@ schedule_dic[2] = u'每月'
 schedule_dic[3] = u'每季度'
 schedule_dic[4] = u'Cron调度'
 
+sche_type_dic = dict()
+sche_type_dic[1] = u'ETL'
+sche_type_dic[2] = u'EXPORT'
+sche_type_dic[3] = u'Hive2Mysql'
+sche_type_dic[4] = u'Mysql2Hive'
 
 @register.simple_tag
 def readable_schedule(schedule):
     return schedule_dic[schedule]
 
+@register.simple_tag
+def readable_sche_type(schedule):
+    return sche_type_dic[schedule]
 
 @register.filter
 def is_valid(value):

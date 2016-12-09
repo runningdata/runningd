@@ -2,18 +2,23 @@ from django.conf.urls import url, include
 from rest_framework import routers
 
 from metamap.views import sche_etl, export
+from metamap.views import sqoop
 from metamap.views.export import AnaETLViewSet
-from metamap.views.etls import ETLViewSet
+from metamap.views.etls import ETLViewSet, SqoopHive2MysqlViewSet
 from metamap.views.sche_ana import ExportsViewSet, BIUserViewSet
+from metamap.views.sqoop import SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
 from views import etls, metas
 
 app_name = 'metamap'
 
 router = routers.DefaultRouter()
 router.register(r'etls', ETLViewSet)
+router.register(r'hive2mysql', SqoopHive2MysqlViewSet)
 router.register(r'users', BIUserViewSet)
 router.register(r'emails', AnaETLViewSet)
 router.register(r'exports', ExportsViewSet)
+router.register(r'sqoop_hive_meta', SqoopHiveMetaViewSet)
+router.register(r'sqoop_mysql_meta', SqoopMysqlMetaViewSet)
 
 urlpatterns = [
 
@@ -43,6 +48,16 @@ urlpatterns = [
     url(r'^meta/col_search/$', metas.ColView.as_view(), name='col_list'),
     url(r'^meta/tbl_search/$', metas.TBLView.as_view(), name='tbl_list'),
     url(r'^meta/tbl_search/(?P<tblid>[0-9]+)/$', metas.get_table, name='tbl_info'),
+
+    url(r'^sqoop/$', sqoop.Hive2MysqlListView.as_view(), name='h2m_sqoop_list'),
+    url(r'^sqoop/(?P<pk>[0-9]+)/$', sqoop.edit, name='h2m_sqoop_edit'),
+    url(r'^sqoop/add/$', sqoop.add, name='h2m_sqoop_add'),
+    url(r'^sqoop/review/(?P<sqoop_id>[0-9]+)/$', sqoop.review, name='h2m_ssqoop_review'),
+
+    url(r'^sqoop/exec/(?P<sqoopid>[0-9]+)/$', sqoop.exec_job, name='sqoop_exec'),
+    url(r'^sqoop/execlog/(?P<execid>[0-9]+)/$', sqoop.exec_log, name='sqoop_execlog'),
+    url(r'^sqoop/getexeclog/(?P<execid>[0-9]+)/$', sqoop.get_exec_log, name='sqoop_getexeclog'),
+    url(r'^sqoop/status/(?P<status>[0-9]+)/$', sqoop.StatusJobView.as_view(), name='status'),
 
     url(r'^tasks/tasks/$', sche_etl.get_all_tasks, name='tasks'),
     url(r'^tasks/update/$', sche_etl.update_tasks_interval, name='update_tasks_interval'),

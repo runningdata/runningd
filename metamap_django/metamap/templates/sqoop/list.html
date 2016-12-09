@@ -1,0 +1,82 @@
+{% extends 'layout.html' %}
+{% block title %}obj列表{% endblock %}
+{% block scripts %}
+    <script type="text/javascript">
+        function preview(sqoopid) {
+            var urlB = '/metamap/sqoop/review/' + sqoopid + '/';
+            $.ajax({
+                url: urlB,
+                success: function (data) {
+                    $("#modal-data").html(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    $("#modal-data").html(errorThrown);
+                }
+            });
+        }
+    </script>
+    <style>
+        .modal-body {
+            word-wrap: break-word;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <!-- Modal -->
+    <div class="modal fade" id="previewsql" tabindex="-1" role="dialog" aria-labelledby="sqllabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">x</span></button>
+                    <h4 class="modal-title" id="sqllabel">预览SQL</h4>
+                </div>
+                <div id="modal-data" class="modal-body">
+                    ...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% include 'components/search.html' %}
+        <table class="table table-striped">
+            <caption></caption>
+            <thead>
+            <tr>
+                <th>数据库名称</th>
+                <th>mysql</th>
+                <th>hive</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if objs %}
+                {% for obj in objs %}
+                    <tr>
+                        <td>{{ obj.name }}</td>
+                        <td>{{ obj.mysql_meta.meta }}</td>
+                        <td>{{ obj.hive_meta.meta }}
+                        </td>
+                        <td>
+                            {#                            <a class="btn btn-primary btn-sm" href="/metamap/sqoop/{{ obj.id }}/">编辑</a>#}
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    操作 <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/metamap/sqoop/{{ obj.id }}/">编辑</a></li>
+                                    <li><a href="#" data-toggle="modal" data-target="#previewsql"
+                                           onclick="preview({{ obj.id }})">预览SQL</a></li>
+                                    <li><a target="view_window" href="/metamap/sqoop/exec/{{ obj.id }}/">测试执行</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -6,6 +6,8 @@ from django.utils import timezone
 
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
 from will_common.models import PeriodicTask, WillDependencyTask
+import will_common
+from will_common.templatetags.etlutils import sche_type_dic
 
 
 class AnaETL(models.Model):
@@ -71,20 +73,6 @@ class TblBlood(models.Model):
         return self.parentTbl + '-->' + self.tblName
 
 
-class Executions(models.Model):
-    '''
-    单次任务执行记录
-    '''
-    logLocation = models.CharField(max_length=120, db_column='log_location')
-    job = models.ForeignKey(ETL, on_delete=models.CASCADE, null=False)
-    start_time = models.DateTimeField(default=timezone.now)
-    end_time = models.DateTimeField(null=True)
-    status = models.IntegerField(default=-1)
-
-    def __str__(self):
-        return self.logLocation
-
-
 class Meta(models.Model):
     '''
        数据库对应meta
@@ -108,23 +96,92 @@ class BIUser(models.Model):
         managed = False
 
 
+class SqoopMysql2Hive(models.Model):
+    mysql_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_m')
+    hive_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_h')
+    columns = models.TextField(null=True)
+    query = models.TextField(null=True)
+    mysql_tbl = models.CharField(max_length=300, null=False)
+    option = models.TextField(null=True, )
 
-class Sqoop(models.Model):
-    meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False)
-    columns = models.TextField(null=False)
-    update_key = models.CharField(max_length=100, null=True)
-    target_tbl = models.CharField(max_length=300, null=False)
-    src_tbl = models.CharField(max_length=300, null=False)
+
+#
+# class WillDependencyTask(models.Model):
+#     name = models.CharField(unique=True, max_length=200)
+#     schedule = models.IntegerField(null=False, default=1)  # 0 天 1 周 2 月 3 季度 4 cron
+#     valid = models.IntegerField(default=1)
+#     ctime = models.DateTimeField(default=timezone.now)
+#     utime = models.DateTimeField(null=True)
+#     variables = models.TextField()
+#     desc = models.TextField()
+#     rel_id = models.IntegerField(null=True, blank=False, help_text="ETL or Email id")
+#     type = models.IntegerField(default=1, blank=False, null=False, help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive")
+#
+#     class Meta:
+#         db_table = 'metamap_willdependencytask'
+#         unique_together = (('rel_id', 'schedule', 'type'),)
+#         managed = False
+
+class SqoopHive2Mysql(models.Model):
+    name = models.CharField(max_length=40, null=False, default='none')
+    mysql_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_m')
+    hive_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_h')
+    columns = models.TextField(null=True)
+    update_key = models.TextField(null=True)
+    update_mode = models.CharField(max_length=30, default='allowinsert')
+    hive_tbl = models.CharField(max_length=300, null=False, default='none')
+    mysql_tbl = models.CharField(max_length=300, null=False)
+    option = models.TextField(null=True, )
+    settings = models.TextField(null=True)
+    partion_expr = models.TextField(null=True)
+    parallel = models.IntegerField(default=1, verbose_name='并发执行')
+    ctime = models.DateTimeField(default=timezone.now)
+
 
 class Exports(models.Model):
     '''
     定时任务执行记录
     '''
     file_loc = models.CharField(max_length=120, db_column='file_loc')
-    task = models.ForeignKey(WillDependencyTask, on_delete=models.CASCADE, null=False)
+    task = models.ForeignKey(WillDependencyTask, on_delete=models.DO_NOTHING, null=False)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)
     command = models.TextField()
 
+    # class Meta:
+    #     managed = False
+
     def __str__(self):
         return self.file_loc
+
+
+class Executions(models.Model):
+    '''
+    单次任务执行记录
+    '''
+    logLocation = models.CharField(max_length=120, db_column='log_location')
+    job = models.ForeignKey(ETL, on_delete=models.CASCADE, null=False)
+    # job = models.IntegerField(default=-1, null=False)
+    # job_name = models.CharField(max_length=120, null=False, default='noname')
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(null=True)
+    status = models.IntegerField(default=-1)
+    # type = models.IntegerField(default=-1, null=False, verbose_name="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive",
+    #                            choices=sche_type_dic.items())
+
+    def __str__(self):
+        return self.logLocation
+
+
+class SqoopHive2MysqlExecutions(models.Model):
+    '''
+    单次任务执行记录
+    '''
+    logLocation = models.CharField(max_length=120, db_column='log_location')
+    job = models.ForeignKey(SqoopHive2Mysql, on_delete=models.CASCADE, null=False)
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(null=True)
+    status = models.IntegerField(default=-1)
+
+    def __str__(self):
+        return self.logLocation

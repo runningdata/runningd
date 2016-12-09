@@ -6,12 +6,14 @@ created by will
 
 from django.template import Context, Template
 
-from metamap.models import TblBlood, ETL, WillDependencyTask
+from metamap.db_views import ColMeta
+from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql
 from will_common.utils import dateutils
 from will_common.utils.constants import *
 import logging
 
 logger = logging.getLogger('info')
+
 
 def get_etl_sql(etl):
     '''
@@ -27,6 +29,7 @@ def get_etl_sql(etl):
     template = Template('\n'.join(str))
     return template.render(Context()).strip()
 
+
 def generate_sql(variables, query):
     '''
     预览HSQL内容
@@ -41,7 +44,98 @@ def generate_sql(variables, query):
     template = Template('\n'.join(str))
     return template.render(Context()).strip()
 
-def generate_etl_sql(etl, schedule = -1):
+
+def generate_sqoop_mysql2hive(task):
+    task = SqoopMysql2Hive()
+    str = list(' sqoop import ')
+
+    # sqoop --options-file/server/app/sqoop/jlc_import_hive.txt --delete-target-dir-m    23 --table    cash_record
+
+
+    # --connect
+    # jdbc:mysql: // 120.55 .176.18:5306/product?useCursorFetch = true & dontTrackOpenResources = true & defaultFetchSize = 2000
+    # --driver
+    # com.mysql.jdbc.Driver
+    # --username
+    # xmanread
+    # --password
+    # LtLUGkNbr84UWXglBFYe4GuMX8EJXeIG
+    # --outdir
+    # /server/app/sqoop/vo
+    # --bindir
+    # /server/app/sqoop/vo
+    # --hive -
+    # import
+    # --hive-overwrite
+    str.append(task.mysql_meta.settings)
+    str.append(' --hive-database ')
+    str.append(task.hive_meta.db)
+    str.append(' --delete-target-dir ')
+    str.append(task.option)
+    str.append(' --verbose --table')
+    str.append(task.mysql_tbl)
+    return ' '.join(str)
+
+
+def generate_sqoop_hive2mysql(task):
+    str = list()
+
+    # sqoop --options-file/server/app/sqoop/export_hive_ykw_dw.txt --table
+    # JLC_ORDER_DETAIL_APP \
+    # --export-dir/apps/hive/warehouse/dim_payment.db/order_detail/log_type =${type}/log_period =${period}/log_create_date =${create_time} \
+    #  --input-fields-terminated-by '\t' \
+    # --update-key
+    # create_date, period, type, channel_id, bank_name, platform, status_id, return_status \
+    # --update-mode
+    # allowinsert \
+    # --columns
+    # create_date, end_date, period, type, \
+    # channel_id, bank_name, platform, status_id, return_status, \
+    # number_order, amount_order
+
+    # export
+    # --connect
+    # jdbc:mysql: // 10.0.1.73:3306/YKX_DW?useCursorFetch = true & dontTrackOpenResources = true & defaultFetchSize = 2000
+    # --username
+    # root
+    # --password
+    # data @ yinker.com
+    # --connection-manager
+    # org.apache.sqoop.manager.MySQLManager
+    # --outdir
+    # /server/app/sqoop/vo
+    # --m
+    # 1
+    str.append('{% load etlutils %}')
+    str.append(task.settings)
+    str.append(' sqoop export ')
+    str.append(task.mysql_meta.settings)
+    str.append(' --input-fields-terminated-by "\\t" ')
+    str.append('  --update-key ')
+    str.append(task.update_key)
+    str.append(' --update-mode ')
+    str.append(task.update_mode)
+    str.append(' --columns ')
+    str.append(task.columns)
+    export_dir = ColMeta.objects.using('hivemeta').filter(db__name=task.hive_meta.db, tbl__tbl_name=task.hive_tbl).first().location
+    export_dir += '/'
+    export_dir += task.hive_tbl
+    export_dir += '/'
+    if len(task.partion_expr) != 0:
+        export_dir += task.partion_expr
+    str.append(' --export-dir ')
+    str.append(export_dir)
+    str.append(' --table ')
+    str.append(task.mysql_tbl)
+    str.append(' --verbose ')
+    str.append(task.option)
+
+    template = Template(' '.join(str).replace('\n', ' ').replace('&', '\&'))
+    strip = template.render(Context()).strip()
+    return strip
+
+
+def generate_etl_sql(etl, schedule=-1):
     '''
     预览HSQL内容
     :param etl:
@@ -73,7 +167,7 @@ def generate_etl_sql(etl, schedule = -1):
     return template.render(Context()).strip()
 
 
-def generate_etl_file(etl, location, schedule = -1):
+def generate_etl_file(etl, location, schedule=-1):
     '''
     生成hql文件
     :param etl:
@@ -86,7 +180,7 @@ def generate_etl_file(etl, location, schedule = -1):
         f.write(final_result.encode('utf-8'))
 
 
-def generate_job_file(blood, parent_node, folder, schedule = -1):
+def generate_job_file(blood, parent_node, folder, schedule=-1):
     '''
     生成azkaban job文件
     :param blood:
@@ -114,8 +208,9 @@ def generate_job_file(blood, parent_node, folder, schedule = -1):
         job_depencied = ','.join(dependencies)
         content += "dependencies=" + job_depencied + "\n"
     job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
-    with open(job_file,'w') as f:
+    with open(job_file, 'w') as f:
         f.write(content)
+
 
 def load_nodes(leafs, folder, done_blood, schedule):
     '''

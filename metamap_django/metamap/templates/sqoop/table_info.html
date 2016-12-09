@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+{% block title %}表信息{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>{{ result.db.name }}@{{ result.tbl_name }} 表信息</h2>
+        <h4>创建时间：{{ result.create_time }} </h4>
+        {% if has_blood %}
+            <a href="/metamap/etls/blood/?tblName={{ result.db.name }}@{{ result.tbl_name }}"
+               class="btn btn-primary btn-sm">血统</a>
+        {% endif %}
+
+        <table class="table table-striped">
+            <caption></caption>
+            <thead>
+            <tr>
+                <th>字段名称</th>
+                <th>字段类型</th>
+                <th>注释</th>
+                <th>数据库名称</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if result.colmeta_set %}
+                {% for meta in result.colmeta_set.all %}
+                    <tr>
+                        <td>{{ meta.col_name }}</td>
+                        <td>{{ meta.col_type_name }}</td>
+                        <td>
+                            {% if meta.col_comment %}
+                                {{ meta.col_comment }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ meta.db.name }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -9,11 +9,14 @@ from django.core.files import File
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from django.views import generic
 from djcelery.models import IntervalSchedule
 
 from metamap import tasks
-from metamap.models import ETL, PeriodicTask, WillDependencyTask
+from metamap.models import ETL, PeriodicTask, WillDependencyTask, SqoopHive2Mysql
+from will_common.djcelery_models import DjceleryPeriodictasks, DjceleryCrontabschedule
+from will_common.helpers import cronhelper
 from will_common.utils import dateutils
 from will_common.utils import httputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE, TMP_EXPORT_FILE_LOCATION
@@ -53,10 +56,38 @@ class ScheDepListView(generic.ListView):
     context_object_name = 'objs'
     model = WillDependencyTask
 
+    def handle_etl(self, objss, obj):
+        '''
+        过滤掉无效的ETL
+        :param obj:
+        :return:
+        '''
+        etl = ETL.objects.get(id=obj.rel_id)
+        if etl.valid != 1:
+            objss = objss.exclude(id=obj.id)
+        return objss
+
+    def handle_hive2mysql(self, objss, obj):
+        return objss
+        # etl = SqoopHive2Mysql.objects.get(id=obj.rel_id)
+        # if etl.valid != 1:
+        #     objs = objs.exclude(id=obj.id)
+
+    # TODO 考虑一下是否合适
+    def handle_email_export(self, objss, obj):
+        '''
+        暂时不显示export的调度
+        :param objss:
+        :param obj:
+        :return:
+        '''
+        objss = objss.exclude(id=obj.id)
+        return objss
+
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            objs = WillDependencyTask.objects.filter(type=1, name__contains=tbl_name_).order_by('-valid', '-ctime')
+            objs = WillDependencyTask.objects.filter(name__contains=tbl_name_).order_by('-valid', '-ctime')
             for obj in objs:
                 pk = obj.rel_id
                 etl = ETL.objects.get(id=pk)
@@ -64,12 +95,11 @@ class ScheDepListView(generic.ListView):
                     objs = objs.exclude(id=obj.id)
             return objs
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        objs = WillDependencyTask.objects.filter(type=1).order_by('-valid', '-ctime')
+        objs = WillDependencyTask.objects.order_by('-valid', '-ctime')
+
+        handlers = {1: self.handle_etl, 2: self.handle_email_export, 3: self.handle_hive2mysql}
         for obj in objs:
-            pk = obj.rel_id
-            etl = ETL.objects.get(id=pk)
-            if etl.valid != 1:
-                objs = objs.exclude(id=obj.id)
+            objs = handlers.get(obj.type)(objs, obj)
         return objs
 
     def get_context_data(self, **kwargs):
@@ -133,6 +163,25 @@ def add(request):
         task = WillDependencyTask()
         httputils.post2obj(task, request.POST, 'id')
         task.save()
+
+        if int(task.schedule) == 4:
+            cron_task = PeriodicTask.objects.create()
+            cron_task.name = task.name
+            cron_task.willtask = task
+            cron_task.enabled = task.valid
+            cron_task.task = 'metamap.tasks.exec_etl_cli'
+            cron_task.args = '[' + str(task.id) + ']'
+
+            cron = DjceleryCrontabschedule.objects.create()
+            cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(
+                request.POST['cronexp'])
+            cron_task.crontab = cron
+            cron.save()
+            cron_task.save()
+
+            tasks = DjceleryPeriodictasks.objects.get(ident=1)
+            tasks.last_update = timezone.now()
+            tasks.save()
         return redirect('metamap:sche_list')
     else:
         return render(request, 'sche/edit.html')
@@ -140,10 +189,58 @@ def add(request):
 
 @transaction.atomic
 def edit(request, pk):
+    '''
+    如果是定时任务，新建或更新定时任务与定时器
+    如果不是定时任务，删掉既有的定时任务与定时器
+    只要跟定时任务有关，就更新出发定时器的机关
+    :param request:
+    :param pk:
+    :return:
+    '''
     if request.POST:
         task = WillDependencyTask.objects.get(pk=pk)
+        orig_sche_type = task.schedule
         httputils.post2obj(task, request.POST, 'id')
         task.save()
+        if int(task.schedule) == 4:
+            if PeriodicTask.objects.filter(willtask_id=pk).exists():
+                cron_task = PeriodicTask.objects.get(willtask_id=pk)
+                cron_task.name = task.name
+                cron_task.enabled = task.valid
+                cron_task.save()
+
+                cron = DjceleryCrontabschedule.objects.get(pk=cron_task.crontab_id)
+                cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(
+                    request.POST['cronexp'])
+                cron.save()
+            else:
+                cron_task = PeriodicTask.objects.create()
+                cron_task.name = task.name
+                cron_task.willtask = task
+                cron_task.enabled = task.valid
+                cron_task.task = 'metamap.tasks.exec_etl_cli'
+                cron_task.args = '[' + str(task.id) + ']'
+
+                cron = DjceleryCrontabschedule.objects.create()
+                cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(
+                    request.POST['cronexp'])
+                cron_task.crontab = cron
+                cron.save()
+                cron_task.save()
+
+        else:
+            if PeriodicTask.objects.filter(willtask_id=pk).exists():
+                cron_task = PeriodicTask.objects.get(willtask_id=pk)
+                if DjceleryCrontabschedule.objects.filter(pk=cron_task.crontab_id).exists():
+                    cron = DjceleryCrontabschedule.objects.get(pk=cron_task.crontab_id)
+                    cron.delete()
+                cron_task.delete()
+
+        if int(orig_sche_type) == 4 or int(task.schedule) == 4:
+            tasks = DjceleryPeriodictasks.objects.get(ident=1)
+            tasks.last_update = timezone.now()
+            tasks.save()
+
         return redirect('metamap:sche_list')
     else:
         obj = WillDependencyTask.objects.get(pk=pk)

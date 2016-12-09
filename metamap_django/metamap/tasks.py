@@ -15,12 +15,13 @@ from celery import shared_task, task
 from django.utils import timezone
 
 from metamap.helpers import etlhelper
-from metamap.models import ETL, Executions, WillDependencyTask, AnaETL, Exports
+from metamap.models import ETL, Executions, WillDependencyTask, AnaETL, Exports, SqoopHive2MysqlExecutions, \
+    SqoopHive2Mysql
 from will_common.utils import enums, dateutils
 
 from celery.utils.log import get_task_logger
 
-from will_common.utils.constants import TMP_EXPORT_FILE_LOCATION
+from will_common.utils.constants import TMP_EXPORT_FILE_LOCATION, AZKABAN_SCRIPT_LOCATION
 
 logger = get_task_logger(__name__)
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/metamap/'
@@ -34,6 +35,28 @@ def getroot():
 @shared_task
 def add(x, y):
     return x + y
+
+
+@shared_task
+def exec_sqoop(command, location):
+    print('command is %s , location is %s' % (command, location))
+    execution = SqoopHive2MysqlExecutions.objects.get(logLocation=location)
+    execution.end_time = timezone.now()
+    try:
+        p = subprocess.Popen([''.join(command)], stdout=open(execution.logLocation, 'a'), stderr=subprocess.STDOUT,
+                             shell=True,
+                             universal_newlines=True)
+        p.wait()
+        returncode = p.returncode
+        logger.info('%s return code is %d' % (command, returncode))
+        if returncode == 0:
+            execution.status = enums.EXECUTION_STATUS.DONE
+        else:
+            execution.status = enums.EXECUTION_STATUS.FAILED
+    except Exception, e:
+        logger.error(e)
+        execution.status = enums.EXECUTION_STATUS.FAILED
+    execution.save()
 
 
 @shared_task
@@ -56,15 +79,13 @@ def exec_etl(command, log):
     execution.save()
 
 
-@shared_task
-def exec_etl_cli(task_id):
-    export = Exports.objects.create(task_id=task_id)
+def exec_email_export(will_task):
+    export = Exports.objects.create(task=will_task)
     try:
-        will_task = WillDependencyTask.objects.get(pk=task_id)
         ana_etl = AnaETL.objects.get(pk=will_task.rel_id)
         part = ana_etl.name + '-' + dateutils.now_datetime()
         result = TMP_EXPORT_FILE_LOCATION + part
-        result_dir = result +'_dir'
+        result_dir = result + '_dir'
         pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
         sql = etlhelper.generate_sql(will_task.variables, pre_insertr + ana_etl.query)
         command = 'hive -e \"' + sql.replace('"', '\\"') + '\"'
@@ -94,6 +115,47 @@ def exec_etl_cli(task_id):
         export.file_loc = part
         export.command = traceback.format_exc()
         export.save()
+
+
+# TODO 处理其他类型的定时任务
+def exec_hive2mysql(will_task):
+    print 'TODO exec_hive2mysql'
+    sqoop = SqoopHive2Mysql.objects.get(id=will_task.rel_id)
+    location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-sqoop-sche-' + sqoop.name + '.log'
+    command = etlhelper.generate_sqoop_hive2mysql(sqoop)
+    execution = SqoopHive2MysqlExecutions(logLocation=location, job_id=sqoop.id, status=0)
+    execution.save()
+    exec_sqoop(command, location)
+    pass
+
+
+def exec_etl_sche(will_task):
+    etl = ETL.objects.get(id=will_task.rel_id)
+    location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-sche-' + etl.tblName.replace('@', '__') + '.hql'
+    etlhelper.generate_etl_file(etl, location)
+    log_location = location.replace('hql', 'log')
+    with open(log_location, 'a') as log:
+        with open(location, 'r') as hql:
+            log.write(hql.read())
+    execution = Executions(logLocation=log_location, job_id=will_task.rel_id, status=0)
+    execution.save()
+    exec_etl('hive -f ' + location, log_location)
+
+
+def exec_mysql2hive(will_task):
+    print 'TODO exec_mysql2hive'
+    logger.error('TODO exec_mysql2hive')
+    pass
+
+
+executors = {1: exec_etl_sche, 2: exec_email_export, 3: exec_hive2mysql, 4: exec_mysql2hive}
+
+
+@shared_task
+def exec_etl_cli(task_id):
+    will_task = WillDependencyTask.objects.get(pk=task_id)
+    type = will_task.type
+    executors.get(type)(will_task)
 
 
 @shared_task

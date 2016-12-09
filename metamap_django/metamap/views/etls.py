@@ -16,8 +16,8 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 
 from metamap.helpers import bloodhelper, etlhelper
-from metamap.models import TblBlood, ETL, Executions, WillDependencyTask
-from metamap.serializers import ETLSerializer
+from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, SqoopHive2Mysql
+from metamap.serializers import ETLSerializer, SqoopHive2MysqlSerializer
 from will_common.utils import hivecli, httputils, dateutils, ziputils
 from will_common.utils.constants import *
 
@@ -53,7 +53,9 @@ class ETLViewSet(viewsets.ModelViewSet):
     queryset = ETL.objects.filter(valid=1).order_by('-ctime')
     serializer_class = ETLSerializer
 
-
+class SqoopHive2MysqlViewSet(viewsets.ModelViewSet):
+    queryset = SqoopHive2Mysql.objects.order_by('-ctime')
+    serializer_class = SqoopHive2MysqlSerializer
 
 def get_json(request):
     queryset = ETL.objects.filter(valid=1).order_by('-ctime')

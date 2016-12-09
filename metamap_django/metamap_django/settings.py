@@ -27,8 +27,11 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-EEE = 'default_DEV'
+
+EEE = 'DEV'
 ALLOWED_HOSTS = []
+
+
 
 HIVE_SERVER = {
     'host': '10.1.5.63',
@@ -37,64 +40,53 @@ HIVE_SERVER = {
     'password': '',
 }
 
-ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
-
-BROKER_URL = 'redis://localhost:6379'
-
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'Asia/Shanghai'
-# CELERY_TIMEZONE = 'UTC'
-# CELERY_ENABLE_UTC = True
-# CELERY_IMPORTS = ("metamap.taske",)
-
-
-
-# Celery Beat 设置
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-
 # 设置cas服务器地址
-CAS_SERVER_URL = "http://192.168.217.128:8081/sso/"
+CAS_SERVER_URL = "http://dev.will.com:8081/sso/"
 # CAS_LOGOUT_COMPLETELY = True
 CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
 
-# push url
-PUSH_URL = 'http://192.168.202.224:8080/sendMessage.shtml?mobileNo=%s&content=%s'
-# PUSH_URL = 'http://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
-PUSH_KEY = '&OKY%~!$^G*JRRF^'
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'cas.backends.CASBackend',
+)
+
+
+import djcelery
+
+djcelery.setup_loader()
+
+# Celery Beat 设置
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+BROKER_URL = 'redis://localhost:6379'
+
+CELERY_ROUTES = {
+    'metamap.tasks.exec_etl_cli': {
+        'queue': 'metamap',
+    },
+    'metamap.tasks.exec_etl': {
+        'queue': 'metamap',
+    },
+}
 
 # Application definition
+
 INSTALLED_APPS = [
-    'djcelery',
-    'rest_framework',
-    'will_common',
-    'dqms',
-    # 'metamap',
     'cas',
+    'will_common',
+    'metamap.apps.MetamapConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djcelery',
+    'rest_framework',
 ]
 
-REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
-}
-
-import djcelery
-
-djcelery.setup_loader()
-
 MIDDLEWARE_CLASSES = [
-    'will_common.middleware.viewexception.ViewException',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -105,18 +97,9 @@ MIDDLEWARE_CLASSES = [
     'cas.middleware.CASMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'will_common.middleware.accesstracer.AccessTracer',
 ]
 
-ROOT_URLCONF = 'metamap_django.dqms_urls'
-# ROOT_URLCONF = 'metamap_django.metamap_urls'
-
-### Add authentication backends for cas
-
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'cas.backends.CASBackend',
-)
+ROOT_URLCONF = 'metamap_django.metamap_urls'
 
 TEMPLATES = [
     {
@@ -145,31 +128,15 @@ DATABASES = {
         'NAME': 'metamap1',
         'PASSWORD': '',
         'USER': 'root',
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     },
     'hivemeta': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'hive',
-        'PASSWORD': 'ambari',
+        'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'ambari',
-        'HOST': '10.1.5.82',
-        'PORT': '3306',
-    },
-    'ykx_wd': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'YKX_DW',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'product',
-        'HOST': '10.1.5.220',
-        'PORT': '3306',
-    },
-    'dqms_check': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'YKX_DW',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'product',
-        'HOST': '10.1.5.220',
+        'HOST': '10.1.5.225',
         'PORT': '3306',
     }
 }
@@ -197,7 +164,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Shanghai'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -209,8 +176,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
-
-STATIC_ROOT = "/usr/local/metamap/static"
 
 LOGGING = {
     'version': 1,
@@ -231,7 +196,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'metamap/log/metamap_all.log',  # 日志输出文件
+            'filename': '/var/log/metamap_all.log',  # 日志输出文件
             'maxBytes': 1024 * 1024 * 5,  # 文件大小
             'backupCount': 5,  # 备份份数
             'formatter': 'standard',  # 使用哪种formatters日志格式
@@ -239,7 +204,7 @@ LOGGING = {
         'error_handler': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'metamap/log/metamap_error.log',
+            'filename': '/var/log/metamap_error.log',
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
@@ -252,7 +217,7 @@ LOGGING = {
         'scprits_handler': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'metamap/log/metamap_script.log',
+            'filename': '/var/log/metamap_script.log',
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
@@ -279,7 +244,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True
         },
-        'metamap.utils': {
+        'will_common.utils': {
             'handlers': ['error_handler'],
             'level': 'ERROR',
             'propagate': True

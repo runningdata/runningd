@@ -35,6 +35,7 @@ class ColMeta(models.Model):
     '''
     id = models.IntegerField(primary_key=True)
     db = models.ForeignKey(DB, on_delete=models.DO_NOTHING)
+    location = models.CharField(max_length=300, null=True)
     tbl = models.ForeignKey(TBL, on_delete=models.DO_NOTHING)
     tbl_type = models.CharField(max_length=30, null=True)
     col_type_name = models.CharField(max_length=300, null=True)

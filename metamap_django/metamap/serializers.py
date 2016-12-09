@@ -5,13 +5,19 @@ created by will
 '''
 from rest_framework import serializers
 
-from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser
+from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser, Meta, SqoopHive2Mysql
 
 
 class ETLSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ETL
         fields = ('tblName', 'valid', 'id')
+
+
+class SqoopHive2MysqlSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = SqoopHive2Mysql
+        fields = ('name', 'id')
 
 class BIUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -36,3 +42,9 @@ class ExportsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Exports
         fields = ('file_loc', 'start_time', 'end_time', 'command', 'task')
+
+class MetaSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Meta
+        fields = ('meta', 'db', 'id', 'ctime')
