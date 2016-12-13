@@ -97,30 +97,16 @@ class BIUser(models.Model):
 
 
 class SqoopMysql2Hive(models.Model):
+    name = models.CharField(max_length=40, null=False, default='none')
     mysql_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_m')
     hive_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_h')
     columns = models.TextField(null=True)
-    query = models.TextField(null=True)
     mysql_tbl = models.CharField(max_length=300, null=False)
     option = models.TextField(null=True, )
-
-
-#
-# class WillDependencyTask(models.Model):
-#     name = models.CharField(unique=True, max_length=200)
-#     schedule = models.IntegerField(null=False, default=1)  # 0 天 1 周 2 月 3 季度 4 cron
-#     valid = models.IntegerField(default=1)
-#     ctime = models.DateTimeField(default=timezone.now)
-#     utime = models.DateTimeField(null=True)
-#     variables = models.TextField()
-#     desc = models.TextField()
-#     rel_id = models.IntegerField(null=True, blank=False, help_text="ETL or Email id")
-#     type = models.IntegerField(default=1, blank=False, null=False, help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive")
-#
-#     class Meta:
-#         db_table = 'metamap_willdependencytask'
-#         unique_together = (('rel_id', 'schedule', 'type'),)
-#         managed = False
+    parallel = models.IntegerField(default=1, verbose_name='并发执行')
+    where_clause = models.TextField(null=True)
+    ctime = models.DateTimeField(default=timezone.now)
+    settings = models.TextField(null=True)
 
 class SqoopHive2Mysql(models.Model):
     name = models.CharField(max_length=40, null=False, default='none')
@@ -128,7 +114,6 @@ class SqoopHive2Mysql(models.Model):
     hive_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_h')
     columns = models.TextField(null=True)
     update_key = models.TextField(null=True)
-    update_mode = models.CharField(max_length=30, default='allowinsert')
     hive_tbl = models.CharField(max_length=300, null=False, default='none')
     mysql_tbl = models.CharField(max_length=300, null=False)
     option = models.TextField(null=True, )
@@ -179,6 +164,19 @@ class SqoopHive2MysqlExecutions(models.Model):
     '''
     logLocation = models.CharField(max_length=120, db_column='log_location')
     job = models.ForeignKey(SqoopHive2Mysql, on_delete=models.CASCADE, null=False)
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(null=True)
+    status = models.IntegerField(default=-1)
+
+    def __str__(self):
+        return self.logLocation
+
+class SqoopMysql2HiveExecutions(models.Model):
+    '''
+    单次任务执行记录
+    '''
+    logLocation = models.CharField(max_length=120, db_column='log_location')
+    job = models.ForeignKey(SqoopMysql2Hive, on_delete=models.CASCADE, null=False)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)
     status = models.IntegerField(default=-1)

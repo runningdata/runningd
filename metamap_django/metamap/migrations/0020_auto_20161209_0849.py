@@ -13,21 +13,21 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.DeleteModel(
-            name='WillDependencyTask',
-        ),
-        migrations.RemoveField(
-            model_name='sqoophive2mysql',
-            name='query',
-        ),
-        migrations.AddField(
-            model_name='sqoophive2mysql',
-            name='hive_tbl',
-            field=models.CharField(default=b'none', max_length=300),
-        ),
-        migrations.AlterField(
-            model_name='exports',
-            name='task',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='will_common.WillDependencyTask'),
-        ),
+        # migrations.DeleteModel(
+        #     name='WillDependencyTask',
+        # ),
+        # migrations.RemoveField(
+        #     model_name='sqoophive2mysql',
+        #     name='query',
+        # ),
+        # migrations.AddField(
+        #     model_name='sqoophive2mysql',
+        #     name='hive_tbl',
+        #     field=models.CharField(default=b'none', max_length=300),
+        # ),
+        # migrations.AlterField(
+        #     model_name='exports',
+        #     name='task',
+        #     field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='will_common.WillDependencyTask'),
+        # ),
     ]

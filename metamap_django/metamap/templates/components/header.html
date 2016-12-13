@@ -7,8 +7,29 @@
             <a href="/" class="navbar-brand"><span class="glyphicon glyphicon-home"></span></a></div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
+                {% if user.username == 'admin' %}
+                    <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                                            class="dropdown-toggle">Hive<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/metamap/meta/col_search">字段查询</a></li>
+                            <li><a href="/metamap/meta/tbl_search">表查询</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
-                                        class="dropdown-toggle">ETL <span class="caret"></span></a>
+                                        class="dropdown-toggle">M2H<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/metamap/sqoop2"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
+                        <li><a href="/metamap/sqoop2/add" ><span class="glyphicon glyphicon-plus"></span>新增</a></li>
+                        <li><a href="/metamap/sqoop2/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a></li>
+                        <li><a href="/metamap/sqoop2/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a></li>
+                        <li><a href="/metamap/sqoop2/status/2/"><span class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                                        class="dropdown-toggle">H2H <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/metamap"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
                         <li><a href="/metamap/etls/add" ><span class="glyphicon glyphicon-plus"></span>新增</a></li>
@@ -18,14 +39,7 @@
                     </ul>
                 </li>
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
-                                        class="dropdown-toggle">Hive<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/metamap/meta/col_search">字段查询</a></li>
-                        <li><a href="/metamap/meta/tbl_search">表查询</a></li>
-                    </ul>
-                </li>
-                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
-                                        class="dropdown-toggle">Mysql2Hive<span class="caret"></span></a>
+                                        class="dropdown-toggle">H2M<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/metamap/sqoop"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
                         <li><a href="/metamap/sqoop/add" ><span class="glyphicon glyphicon-plus"></span>新增</a></li>
@@ -34,13 +48,15 @@
                         <li><a href="/metamap/sqoop/status/2/"><span class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
                     </ul>
                 </li>
-                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
-                                        class="dropdown-toggle">Meta<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/metamap/meta/list">查询meta</a></li>
-                        <li><a href="/metamap/meta/add">新增meta</a></li>
-                    </ul>
-                </li>
+                {% if user.username == 'admin' %}
+                    <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                                            class="dropdown-toggle">Meta<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/metamap/meta/list">查询meta</a></li>
+                            <li><a href="/metamap/meta/add">新增meta</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
                                         class="dropdown-toggle">调度<span class="caret"></span></a>
                     <ul class="dropdown-menu">

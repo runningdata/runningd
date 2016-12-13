@@ -7,65 +7,120 @@
 {% endblock %}
 {% block content %}
     {% csrf_token %}
-    <form action="." method="POST">
-        <div class="form-group">
-            <input name="id" value="{{ obj.id }}" type="hidden" class="form-control">
+    {% if obj %}
+        <form action="." method="POST">
             <div class="form-group">
-                <label>任务名称</label>
-                <input name="name" value="{{ obj.name }}" type="text" class="form-control">
+                <input name="id" value="{{ obj.id }}" type="hidden" class="form-control">
+                <div class="form-group">
+                    <label>任务名称</label>
+                    <input name="name" value="{{ obj.name }}" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>mysql</label>
+                    <select id="mysql_select" name="mysql_meta_id" class="selectpicker form-control"
+                            data-live-search="true">
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>hive</label>
+                    <select id="hive_select" name="hive_meta_id" class="selectpicker form-control"
+                            data-live-search="true">
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>主键[默认 - ID]</label>
+                    <input name="update_key" value="{{ obj.update_key }}" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Hive表</label>
+                    <input name="hive_tbl" value="{{ obj.hive_tbl }}" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>mysql表</label>
+                    <input name="mysql_tbl" value="{{ obj.mysql_tbl }}" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>字段</label>
+                    <textarea name="columns" rows="5" class="form-control">{{ obj.columns }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>分区表达式</label>
+                    <textarea name="partion_expr" rows="5" class="form-control">{{ obj.partion_expr }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>其他参数配置</label>
+                    <textarea name="option" rows="5" class="form-control">{{ obj.option }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>变量配置</label>
+                    <textarea name="settings" rows="5" class="form-control">{{ obj.settings }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>并发度</label>
+                    <input name="parallel" value="{{ obj.parallel }}" type="text" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">提交</button>
             </div>
+        </form>
+    {% else %}
+        <form action="." method="POST">
             <div class="form-group">
-                <label>mysql</label>
-                <select id="mysql_select" name="mysql_meta_id" class="selectpicker form-control" data-live-search="true">
-                    <option class="bs-title-option" value="">选择....</option>
-                </select>
+                <div class="form-group">
+                    <label>任务名称</label>
+                    <input name="name" value="" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>mysql</label>
+                    <select id="mysql_select" name="mysql_meta_id" class="selectpicker form-control"
+                            data-live-search="true">
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>hive</label>
+                    <select id="hive_select" name="hive_meta_id" class="selectpicker form-control"
+                            data-live-search="true">
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>主键[默认 - ID]</label>
+                    <input name="update_key" value="" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Hive表</label>
+                    <input name="hive_tbl" value="" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>mysql表</label>
+                    <input name="mysql_tbl" value="" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>字段</label>
+                    <textarea name="columns" rows="5" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>分区表达式</label>
+                    <textarea name="partion_expr" rows="5" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>其他参数配置</label>
+                    <textarea name="option" rows="5" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>变量配置</label>
+                    <textarea name="settings" rows="5" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>并发度</label>
+                    <input name="parallel" value="1" type="text" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">提交</button>
             </div>
-            <div class="form-group">
-                <label>hive</label>
-                <select id="hive_select" name="hive_meta_id" class="selectpicker form-control"
-                        data-live-search="true">
-                    <option class="bs-title-option" value="">选择....</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>主键[默认 - ID]</label>
-                <input name="update_key" value="{{ obj.update_key }}" type="text" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>更新模式</label>
-                <input name="update_mode" value="{{ obj.update_mode }}" type="text" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>Hive表</label>
-                <input name="hive_tbl" value="{{ obj.hive_tbl }}" type="text" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>mysql表</label>
-                <input name="mysql_tbl" value="{{ obj.mysql_tbl }}" type="text" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>字段</label>
-                <textarea name="columns" rows="5" class="form-control">{{ obj.columns }}</textarea>
-            </div>
-            <div class="form-group">
-                <label>分区表达式</label>
-                <textarea name="partion_expr" rows="5" class="form-control">{{ obj.partion_expr }}</textarea>
-            </div>
-            <div class="form-group">
-                <label>配置</label>
-                <textarea name="option" rows="5" class="form-control">{{ obj.option }}</textarea>
-            </div>
-            <div class="form-group">
-                <label>变量配置</label>
-                <textarea name="settings" rows="5" class="form-control">{{ obj.settings }}</textarea>
-            </div>
-            <div class="form-group">
-                <label>并发度</label>
-                <input name="parallel" value="{{ obj.parallel }}" type="text" class="form-control">
-            </div>
-            <button type="submit" class="btn btn-primary">提交</button>
-        </div>
-    </form>
+        </form>
+    {% endif %}
 
     <script>
         {% if obj %}

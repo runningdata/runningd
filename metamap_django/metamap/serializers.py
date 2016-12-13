@@ -5,7 +5,7 @@ created by will
 '''
 from rest_framework import serializers
 
-from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser, Meta, SqoopHive2Mysql
+from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser, Meta, SqoopHive2Mysql, SqoopMysql2Hive
 
 
 class ETLSerializer(serializers.HyperlinkedModelSerializer):
@@ -17,6 +17,11 @@ class ETLSerializer(serializers.HyperlinkedModelSerializer):
 class SqoopHive2MysqlSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = SqoopHive2Mysql
+        fields = ('name', 'id')
+
+class SqoopMysql2HiveSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = SqoopMysql2Hive
         fields = ('name', 'id')
 
 class BIUserSerializer(serializers.HyperlinkedModelSerializer):

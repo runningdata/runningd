@@ -16,7 +16,7 @@ from django.utils import timezone
 
 from metamap.helpers import etlhelper
 from metamap.models import ETL, Executions, WillDependencyTask, AnaETL, Exports, SqoopHive2MysqlExecutions, \
-    SqoopHive2Mysql
+    SqoopHive2Mysql, SqoopMysql2Hive, SqoopMysql2HiveExecutions
 from will_common.utils import enums, dateutils
 
 from celery.utils.log import get_task_logger
@@ -58,6 +58,26 @@ def exec_sqoop(command, location):
         execution.status = enums.EXECUTION_STATUS.FAILED
     execution.save()
 
+@shared_task
+def exec_sqoop2(command, location):
+    print('command is %s , location is %s' % (command, location))
+    execution = SqoopMysql2HiveExecutions.objects.get(logLocation=location)
+    execution.end_time = timezone.now()
+    try:
+        p = subprocess.Popen([''.join(command)], stdout=open(execution.logLocation, 'a'), stderr=subprocess.STDOUT,
+                             shell=True,
+                             universal_newlines=True)
+        p.wait()
+        returncode = p.returncode
+        logger.info('%s return code is %d' % (command, returncode))
+        if returncode == 0:
+            execution.status = enums.EXECUTION_STATUS.DONE
+        else:
+            execution.status = enums.EXECUTION_STATUS.FAILED
+    except Exception, e:
+        logger.error(e)
+        execution.status = enums.EXECUTION_STATUS.FAILED
+    execution.save()
 
 @shared_task
 def exec_etl(command, log):
@@ -119,14 +139,12 @@ def exec_email_export(will_task):
 
 # TODO 处理其他类型的定时任务
 def exec_hive2mysql(will_task):
-    print 'TODO exec_hive2mysql'
     sqoop = SqoopHive2Mysql.objects.get(id=will_task.rel_id)
     location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-sqoop-sche-' + sqoop.name + '.log'
     command = etlhelper.generate_sqoop_hive2mysql(sqoop)
     execution = SqoopHive2MysqlExecutions(logLocation=location, job_id=sqoop.id, status=0)
     execution.save()
     exec_sqoop(command, location)
-    pass
 
 
 def exec_etl_sche(will_task):
@@ -143,9 +161,12 @@ def exec_etl_sche(will_task):
 
 
 def exec_mysql2hive(will_task):
-    print 'TODO exec_mysql2hive'
-    logger.error('TODO exec_mysql2hive')
-    pass
+    sqoop = SqoopMysql2Hive.objects.get(id=will_task.rel_id)
+    location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-sqoop2-sche-' + sqoop.name + '.log'
+    command = etlhelper.generate_sqoop_mysql2hive(sqoop)
+    execution = SqoopMysql2HiveExecutions(logLocation=location, job_id=sqoop.id, status=0)
+    execution.save()
+    exec_sqoop2(command, location)
 
 
 executors = {1: exec_etl_sche, 2: exec_email_export, 3: exec_hive2mysql, 4: exec_mysql2hive}

@@ -3,8 +3,9 @@ from rest_framework import routers
 
 from metamap.views import sche_etl, export
 from metamap.views import sqoop
+from metamap.views import sqoop2
 from metamap.views.export import AnaETLViewSet
-from metamap.views.etls import ETLViewSet, SqoopHive2MysqlViewSet
+from metamap.views.etls import ETLViewSet, SqoopHive2MysqlViewSet, SqoopMysql2HiveViewSet
 from metamap.views.sche_ana import ExportsViewSet, BIUserViewSet
 from metamap.views.sqoop import SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
 from views import etls, metas
@@ -14,6 +15,7 @@ app_name = 'metamap'
 router = routers.DefaultRouter()
 router.register(r'etls', ETLViewSet)
 router.register(r'hive2mysql', SqoopHive2MysqlViewSet)
+router.register(r'mysql2hive', SqoopMysql2HiveViewSet)
 router.register(r'users', BIUserViewSet)
 router.register(r'emails', AnaETLViewSet)
 router.register(r'exports', ExportsViewSet)
@@ -40,6 +42,8 @@ urlpatterns = [
     url(r'^etls/exec_list/(?P<jobid>[0-9]+)/$', etls.ExecLogView.as_view(), name='exec_list'),
 
     url(r'^etls/generate_job_dag/(?P<schedule>[0-9])/$', etls.generate_job_dag, name='generate_job_dag'),
+    url(r'^sqoop/generate_job_dag/(?P<schedule>[0-9])/$', sqoop.generate_job_dag, name='generate_job_dag'),
+    url(r'^sqoop2/generate_job_dag/(?P<schedule>[0-9])/$', sqoop2.generate_job_dag, name='generate_job_dag'),
 
 
     url(r'^meta/list/$', metas.MetaListView.as_view(), name='meta_list'),
@@ -57,7 +61,17 @@ urlpatterns = [
     url(r'^sqoop/exec/(?P<sqoopid>[0-9]+)/$', sqoop.exec_job, name='sqoop_exec'),
     url(r'^sqoop/execlog/(?P<execid>[0-9]+)/$', sqoop.exec_log, name='sqoop_execlog'),
     url(r'^sqoop/getexeclog/(?P<execid>[0-9]+)/$', sqoop.get_exec_log, name='sqoop_getexeclog'),
-    url(r'^sqoop/status/(?P<status>[0-9]+)/$', sqoop.StatusJobView.as_view(), name='status'),
+    url(r'^sqoop/status/(?P<status>[0-9]+)/$', sqoop.StatusJobView.as_view(), name='sqoop_status'),
+
+    url(r'^sqoop2/$', sqoop2.Mysql2HiveListView.as_view(), name='h2m_sqoop2_list'),
+    url(r'^sqoop2/(?P<pk>[0-9]+)/$', sqoop2.edit, name='h2m_sqoop2_edit'),
+    url(r'^sqoop2/add/$', sqoop2.add, name='h2m_sqoop2_add'),
+    url(r'^sqoop2/review/(?P<sqoop_id>[0-9]+)/$', sqoop2.review, name='h2m_sqoop2_review'),
+
+    url(r'^sqoop2/exec/(?P<sqoopid>[0-9]+)/$', sqoop2.exec_job, name='sqoop2_exec'),
+    url(r'^sqoop2/execlog/(?P<execid>[0-9]+)/$', sqoop2.exec_log, name='sqoop2_execlog'),
+    url(r'^sqoop2/getexeclog/(?P<execid>[0-9]+)/$', sqoop2.get_exec_log, name='sqoop2_getexeclog'),
+    url(r'^sqoop2/status/(?P<status>[0-9]+)/$', sqoop2.StatusJobView.as_view(), name='sqoop2_status'),
 
     url(r'^tasks/tasks/$', sche_etl.get_all_tasks, name='tasks'),
     url(r'^tasks/update/$', sche_etl.update_tasks_interval, name='update_tasks_interval'),

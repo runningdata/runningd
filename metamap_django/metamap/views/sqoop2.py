@@ -13,7 +13,7 @@ from django.views import generic
 from rest_framework import viewsets
 
 from metamap.helpers import etlhelper
-from metamap.models import SqoopHive2Mysql, Meta, SqoopHive2MysqlExecutions
+from metamap.models import SqoopMysql2Hive, Meta, SqoopMysql2HiveExecutions
 from metamap.serializers import MetaSerializer
 from will_common.models import WillDependencyTask
 from will_common.utils import dateutils
@@ -28,57 +28,63 @@ class SqoopHiveMetaViewSet(viewsets.ModelViewSet):
     queryset = Meta.objects.filter(type=2).order_by('-ctime')
     serializer_class = MetaSerializer
 
+
 class SqoopMysqlMetaViewSet(viewsets.ModelViewSet):
     queryset = Meta.objects.filter(type=1).order_by('-ctime')
     serializer_class = MetaSerializer
 
-class Hive2MysqlListView(generic.ListView):
-    template_name = 'sqoop/list.html'
+
+class Mysql2HiveListView(generic.ListView):
+    template_name = 'sqoop/list2.html'
     context_object_name = 'objs'
 
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             search = self.request.GET['search']
-            return SqoopHive2Mysql.objects.filter(sqoop__contains=search).order_by('ctime')
+            return SqoopMysql2Hive.objects.filter(sqoop__contains=search).order_by('ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return SqoopHive2Mysql.objects.all()
+        return SqoopMysql2Hive.objects.all()
 
     def get_context_data(self, **kwargs):
-        context = super(Hive2MysqlListView, self).get_context_data(**kwargs)
+        context = super(Mysql2HiveListView, self).get_context_data(**kwargs)
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             context['search'] = self.request.GET['search']
         return context
 
+
 def add(request):
     if request.method == 'POST':
-        sqoop = SqoopHive2Mysql()
+        sqoop = SqoopMysql2Hive()
         httputils.post2obj(sqoop, request.POST, 'id')
         sqoop.save()
         logger.info('sqoop has been created successfully : %s ' % sqoop)
-        return HttpResponseRedirect('/metamap/sqoop/')
+        return HttpResponseRedirect('/metamap/sqoop2/')
     else:
-        return render(request, 'sqoop/edit.html')
+        return render(request, 'sqoop/edit2.html')
+
 
 def edit(request, pk):
     if request.method == 'POST':
-        sqoop = SqoopHive2Mysql.objects.get(pk=int(pk))
+        sqoop = SqoopMysql2Hive.objects.get(pk=int(pk))
         httputils.post2obj(sqoop, request.POST, 'id')
         sqoop.save()
         logger.info('sqoop has been created successfully : %s ' % sqoop)
-        return HttpResponseRedirect('/metamap/sqoop/')
+        return HttpResponseRedirect('/metamap/sqoop2/')
     else:
-        obj = SqoopHive2Mysql.objects.get(pk=pk)
-        return render(request, 'sqoop/edit.html', {'obj': obj})
+        obj = SqoopMysql2Hive.objects.get(pk=pk)
+        return render(request, 'sqoop/edit2.html', {'obj': obj})
+
 
 def exec_job(request, sqoopid):
-    sqoop = SqoopHive2Mysql.objects.get(id=sqoopid)
+    sqoop = SqoopMysql2Hive.objects.get(id=sqoopid)
     location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-sqoop-' + sqoop.name + '.log'
-    command = etlhelper.generate_sqoop_hive2mysql(sqoop)
-    execution = SqoopHive2MysqlExecutions(logLocation=location, job_id=sqoopid, status=0)
+    command = etlhelper.generate_sqoop_mysql2hive(sqoop)
+    execution = SqoopMysql2HiveExecutions(logLocation=location, job_id=sqoopid, status=0)
     execution.save()
     from metamap import tasks
-    tasks.exec_sqoop.delay(command, location)
+    tasks.exec_sqoop2.delay(command, location)
     return redirect('metamap:sqoop_execlog', execid=execution.id)
+
 
 def exec_log(request, execid):
     '''
@@ -89,6 +95,7 @@ def exec_log(request, execid):
     '''
     return render(request, 'sqoop/exec_log.html', {'execid': execid})
 
+
 def get_exec_log(request, execid):
     '''
     获取指定execution的log内容
@@ -96,7 +103,7 @@ def get_exec_log(request, execid):
     :param execid:
     :return:
     '''
-    execution = SqoopHive2MysqlExecutions.objects.get(pk=execid)
+    execution = SqoopMysql2HiveExecutions.objects.get(pk=execid)
 
     try:
         with open(execution.logLocation, 'r') as log:
@@ -105,24 +112,26 @@ def get_exec_log(request, execid):
         return HttpResponse('')
     return HttpResponse(content)
 
+
 def review(request, sqoop_id):
     try:
-        sqoop = SqoopHive2Mysql.objects.get(id=sqoop_id)
-        hql = etlhelper.generate_sqoop_hive2mysql(sqoop)
+        sqoop = SqoopMysql2Hive.objects.get(id=sqoop_id)
+        hql = etlhelper.generate_sqoop_mysql2hive(sqoop)
         # return render(request, 'etl/review_sql.html', {'obj': etl, 'hql': hql})
         return HttpResponse(hql.replace('--', '<br>--'))
     except Exception, e:
         logger.error(e)
         return HttpResponse(e)
 
+
 class StatusJobView(generic.ListView):
     template_name = 'sqoop/executions_status.html'
     context_object_name = 'executions'
-    model = SqoopHive2MysqlExecutions
+    model = SqoopMysql2HiveExecutions
 
     def get(self, request, status):
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        self.object_list = SqoopHive2MysqlExecutions.objects.filter(status=status).order_by('-start_time')
+        self.object_list = SqoopMysql2HiveExecutions.objects.filter(status=status).order_by('-start_time')
         allow_empty = self.get_allow_empty()
 
         if not allow_empty:
@@ -147,14 +156,14 @@ def generate_job_dag(request, schedule):
     :return:
     '''
     try:
-        folder = 'h2m-' + dateutils.now_datetime()
-        leafs = WillDependencyTask.objects.filter(schedule=schedule, type=3, valid=1)
+        folder = 'm2h-' + dateutils.now_datetime()
+        leafs = WillDependencyTask.objects.filter(schedule=schedule, type=4, valid=1)
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-        etlhelper.generate_job_file_sqoop(leafs, folder)
+        etlhelper.generate_job_file_sqoop2(leafs, folder)
 
-        job_name = 'sqoop_done_' + dateutils.now_datetime()
+        job_name = 'sqoop2_done_' + dateutils.now_datetime()
         command = 'echo done for sqoop'
         deps = [leaf.name for leaf in leafs]
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))

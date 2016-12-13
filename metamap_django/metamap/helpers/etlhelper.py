@@ -6,7 +6,7 @@ created by will
 
 from django.template import Context, Template
 
-from metamap.db_views import ColMeta
+from metamap.db_views import ColMeta, DB
 from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql
 from will_common.utils import dateutils
 from will_common.utils.constants import *
@@ -45,9 +45,15 @@ def generate_sql(variables, query):
     return template.render(Context()).strip()
 
 
-def generate_sqoop_mysql2hive(task):
-    task = SqoopMysql2Hive()
-    str = list(' sqoop import ')
+def generate_sqoop_mysql2hive(task, schedule=-1):
+    str = list()
+    str.append('{% load etlutils %}')
+    if schedule == -1:
+        if task.settings and task.settings != 'None':
+            str.append(task.settings)
+    else:
+        tt = WillDependencyTask.objects.get(rel_id=task.id, schedule=schedule, type=4)
+        str.append(tt.variables)
 
     # sqoop --options-file/server/app/sqoop/jlc_import_hive.txt --delete-target-dir-m    23 --table    cash_record
 
@@ -67,17 +73,36 @@ def generate_sqoop_mysql2hive(task):
     # --hive -
     # import
     # --hive-overwrite
+    str.append(' sqoop import ')
     str.append(task.mysql_meta.settings)
     str.append(' --hive-database ')
     str.append(task.hive_meta.db)
     str.append(' --delete-target-dir ')
-    str.append(task.option)
-    str.append(' --verbose --table')
+    if task.columns:
+        str.append(' --columns')
+        str.append(task.columns)
+    if task.where_clause:
+        str.append(' --where')
+        str.append(task.where_clause)
+    str.append(' --table')
     str.append(task.mysql_tbl)
-    return ' '.join(str)
+    str.append(' --hive-import --hive-overwrite')
+    str.append('--outdir /server/app/sqoop/vo --bindir /server/app/sqoop/vo --verbose ')
+    if 'target_table' in task.option:
+        export_dir = DB.objects.using('hivemeta').filter(name=task.hive_meta.db).first().db_location_uri
+        export_dir += '/'
+        export_dir += task.mysql_tbl
+        export_dir += '/'
+        str.append(task.option.replace('target_table', 'target-dir ' + export_dir))
+    else:
+        str.append(task.option)
+
+    template = Template(' '.join(str).replace('\n', ' ').replace('&', '\&'))
+    strip = template.render(Context()).strip()
+    return strip
 
 
-def generate_sqoop_hive2mysql(task):
+def generate_sqoop_hive2mysql(task, schedule=-1):
     str = list()
 
     # sqoop --options-file/server/app/sqoop/export_hive_ykw_dw.txt --table
@@ -107,17 +132,22 @@ def generate_sqoop_hive2mysql(task):
     # --m
     # 1
     str.append('{% load etlutils %}')
-    str.append(task.settings)
+    if schedule == -1:
+        if task.settings and task.settings != 'None':
+            str.append(task.settings)
+    else:
+        tt = WillDependencyTask.objects.get(rel_id=task.id, schedule=schedule, type=3)
+        str.append(tt.variables)
     str.append(' sqoop export ')
     str.append(task.mysql_meta.settings)
     str.append(' --input-fields-terminated-by "\\t" ')
     str.append('  --update-key ')
     str.append(task.update_key)
-    str.append(' --update-mode ')
-    str.append(task.update_mode)
+    str.append(' --update-mode allowinsert ')
     str.append(' --columns ')
     str.append(task.columns)
-    export_dir = ColMeta.objects.using('hivemeta').filter(db__name=task.hive_meta.db, tbl__tbl_name=task.hive_tbl).first().location
+    export_dir = ColMeta.objects.using('hivemeta').filter(db__name=task.hive_meta.db,
+                                                          tbl__tbl_name=task.hive_tbl).first().location
     export_dir += '/'
     export_dir += task.hive_tbl
     export_dir += '/'
@@ -146,7 +176,7 @@ def generate_etl_sql(etl, schedule=-1):
     if schedule == -1:
         str.append(etl.variables)
     else:
-        task = WillDependencyTask.objects.get(rel_id=etl.id, schedule=schedule)
+        task = WillDependencyTask.objects.get(rel_id=etl.id, schedule=schedule, type=1)
         str.append(task.variables)
     str.append("-- job for " + etl.tblName)
     if etl.author:
@@ -210,6 +240,57 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
     job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
     with open(job_file, 'w') as f:
         f.write(content)
+
+
+def generate_end_job_file(job_name, command, folder, deps):
+    # 生成结束的job文件
+    job_type = 'command'
+    content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
+    if deps:
+        content += "dependencies=" + deps + "\n"
+    job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+    with open(job_file, 'w') as f:
+        f.write(content)
+
+
+def generate_job_file_sqoop(objs, folder):
+    '''
+    生成azkaban job文件
+    :param blood:
+    :param parent_node:
+    :param folder:
+    :return:
+    '''
+    for obj in objs:
+        job_name = obj.name
+        task = SqoopHive2Mysql.objects.get(obj.rel_id)
+        command = generate_sqoop_hive2mysql(task, schedule=obj.schedule)
+        # 生成job文件
+        job_type = 'command'
+        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
+        job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+        with open(job_file, 'w') as f:
+            f.write(content)
+
+
+def generate_job_file_sqoop2(objs, folder):
+    '''
+    生成azkaban job文件
+    :param blood:
+    :param parent_node:
+    :param folder:
+    :return:
+    '''
+    for obj in objs:
+        job_name = obj.name
+        task = SqoopMysql2Hive.objects.get(pk=obj.rel_id)
+        command = generate_sqoop_mysql2hive(task, schedule=obj.schedule)
+        # 生成job文件
+        job_type = 'command'
+        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
+        job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+        with open(job_file, 'w') as f:
+            f.write(content)
 
 
 def load_nodes(leafs, folder, done_blood, schedule):

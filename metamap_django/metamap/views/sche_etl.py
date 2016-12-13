@@ -97,7 +97,7 @@ class ScheDepListView(generic.ListView):
         self.paginate_by = DEFAULT_PAGE_SIEZE
         objs = WillDependencyTask.objects.order_by('-valid', '-ctime')
 
-        handlers = {1: self.handle_etl, 2: self.handle_email_export, 3: self.handle_hive2mysql}
+        handlers = {1: self.handle_etl, 2: self.handle_email_export, 3: self.handle_hive2mysql, 4: self.handle_hive2mysql}
         for obj in objs:
             objs = handlers.get(obj.type)(objs, obj)
         return objs
@@ -231,10 +231,11 @@ def edit(request, pk):
         else:
             if PeriodicTask.objects.filter(willtask_id=pk).exists():
                 cron_task = PeriodicTask.objects.get(willtask_id=pk)
-                if DjceleryCrontabschedule.objects.filter(pk=cron_task.crontab_id).exists():
-                    cron = DjceleryCrontabschedule.objects.get(pk=cron_task.crontab_id)
-                    cron.delete()
+                cronid = cron_task.crontab_id
                 cron_task.delete()
+                if DjceleryCrontabschedule.objects.filter(pk=cronid).exists():
+                    cron = DjceleryCrontabschedule.objects.get(pk=cronid)
+                    cron.delete()
 
         if int(orig_sche_type) == 4 or int(task.schedule) == 4:
             tasks = DjceleryPeriodictasks.objects.get(ident=1)
