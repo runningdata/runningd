@@ -12,6 +12,7 @@ import subprocess
 import traceback
 
 from celery import shared_task, task
+from django.conf import settings
 from django.utils import timezone
 
 from metamap.helpers import etlhelper
@@ -108,7 +109,7 @@ def exec_email_export(will_task):
         result_dir = result + '_dir'
         pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
         sql = etlhelper.generate_sql(will_task.variables, pre_insertr + ana_etl.query)
-        command = 'hive -e \"' + sql.replace('"', '\\"') + '\"'
+        command = 'hive -Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE +' -e \"' + sql.replace('"', '\\"') + '\"'
         print 'command is ', command
         with open(result, 'w') as wa:
             header = ana_etl.headers

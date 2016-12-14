@@ -31,6 +31,7 @@ DEBUG = True
 EEE = 'DEV'
 ALLOWED_HOSTS = []
 
+CLUTER_QUEUE = 'default'
 
 
 HIVE_SERVER = {
