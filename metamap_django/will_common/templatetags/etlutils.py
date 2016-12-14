@@ -128,6 +128,18 @@ schedule_dic[4] = u'Cron调度'
 def readable_schedule(schedule):
     return schedule_dic[schedule]
 
+@register.simple_tag
+def clean_blood(blood):
+    '''
+    为了方便mermaid显示，把blood里的@替换为__
+    :param blood:
+    :return:
+    '''
+    parentTbl = blood.parentTbl.replace('@', '__').replace('class', 'calss')
+    tblName = blood.tblName.replace('@', '__').replace('class', 'calss')
+    if blood.current > 0:
+        tblName += ';style ' + blood.tblName.replace('@', '__').replace('class', 'calss') + ' fill:#f9f,stroke:#333,stroke-width:4px'
+    return parentTbl + '-->' + tblName
 
 @register.filter
 def is_valid(value):
@@ -136,6 +148,6 @@ def is_valid(value):
     return '否'
 
 
-@register.filter
-def clean_blood(value):
-    return value.replace('@', '__');
+# @register.filter
+# def clean_blood(value):
+#     return value.replace('@', '__');

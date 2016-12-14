@@ -66,6 +66,7 @@ class TblBlood(models.Model):
     relatedEtlId = models.IntegerField(db_column='related_etl_id')
     ctime = models.DateTimeField(default=timezone.now)
     valid = models.IntegerField(default=1)
+    current = 0
 
     def __str__(self):
         return self.parentTbl + '-->' + self.tblName

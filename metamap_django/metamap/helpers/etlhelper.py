@@ -82,7 +82,6 @@ def generate_etl_file(etl, location, schedule = -1):
     '''
     final_result = generate_etl_sql(etl, schedule)
     with open(location, 'w') as f:
-        print('hql content : %s ' % final_result)
         f.write(final_result.encode('utf-8'))
 
 
@@ -132,7 +131,11 @@ def load_nodes(leafs, folder, done_blood, schedule):
                                            + " JOIN metamap_willdependencytask s "
                                            + " on s.type = 1 and s.schedule = " + schedule + " and s.rel_id = b.related_etl_id"
                                            + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
-        if parent_node not in done_blood:
+        # if parent_node not in done_blood:
+
+        if leaf.tblName not in done_blood:
+            logger.error('not in blood : %s , doneis : %s' % (parent_node, done_blood))
             generate_job_file(leaf, parent_node, folder, schedule)
             done_blood.add(leaf.tblName)
+        print('parent_node : %s ,floadr : %s , done_boloo: %s, sche: %s' %(parent_node, folder, done_blood, schedule))
         load_nodes(parent_node, folder, done_blood, schedule)
