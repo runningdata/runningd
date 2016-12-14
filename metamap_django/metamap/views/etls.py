@@ -135,7 +135,9 @@ def blood_dag(request, etlid):
     bloods = TblBlood.objects.filter(relatedEtlId=int(etlid), valid=1)
     final_bloods = set()
     for blood in bloods:
-        final_bloods.add(bloodhelper.clean_blood(blood, etlid))
+        # final_bloods.add(bloodhelper.clean_blood(blood, etlid))
+        blood.current = blood.id
+        final_bloods.add(blood)
         bloodhelper.find_parent_mermaid(blood, final_bloods, etlid)
         bloodhelper.find_child_mermaid(blood, final_bloods, etlid)
     return render(request, 'etl/blood.html', {'bloods': final_bloods})

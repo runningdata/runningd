@@ -7,18 +7,40 @@
 
 
 {% block content %}
-<div class="container text-center">
-    <script src="{% static 'js/mermaid.min.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/mermaid.css' %}" />
-    <script type="text/jaascript">
+    <div class="container text-center">
+        <script src="{% static 'js/mermaid.min.js' %}"></script>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/mermaid.css' %}"/>
+        <script type="text/jaascript">
         mermaid.initialize({startOnLoad:true});
-    </script>
-    <h2>血统详情</h2>
-    <div class="mermaid">
-        graph TD;
-        {% for blood in bloods %}
-            {{ blood.parentTbl| clean_blood }} --> {{ blood.tblName | clean_blood }}
-        {% endfor %}
-    </div>
-</div>
+
+
+        </script>
+        <h2>血统详情</h2>
+        <div class="mermaid">
+            graph TD;
+            {% for blood in bloods %}
+                {% clean_blood blood %}
+            {% endfor %}
+        </div>
+        <div>
+            <table class="table table-condensed table-hover">
+                <caption>依赖关系表</caption>
+                <thead>
+                <tr>
+                    <th>父节点</th>
+                    <th>子节点</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for blood in bloods %}
+                    <tr>
+                        <td>{{ blood.parentTbl }}</td>
+                        <td>{{ blood.tblName }}</td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
 {% endblock %}

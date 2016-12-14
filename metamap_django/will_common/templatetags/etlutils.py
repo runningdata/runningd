@@ -82,11 +82,13 @@ def last_month_end(date):
     days_ = datetime.date(y, m, 1) - datetime.timedelta(days=1)
     return days_.strftime('%Y-%m-%d')
 
+
 @register.simple_tag
 def current_month_start(date):
     y, m = get_year_and_month(date)
     month_start_dt = datetime.date(y, m, 1)
     return month_start_dt.strftime('%Y-%m-%d')
+
 
 @register.simple_tag
 def current_month_end(date):
@@ -129,13 +131,31 @@ sche_type_dic[2] = u'EXPORT'
 sche_type_dic[3] = u'Hive2Mysql'
 sche_type_dic[4] = u'Mysql2Hive'
 
+
 @register.simple_tag
 def readable_schedule(schedule):
     return schedule_dic[schedule]
 
+
 @register.simple_tag
 def readable_sche_type(schedule):
     return sche_type_dic[schedule]
+
+
+@register.simple_tag
+def clean_blood(blood):
+    '''
+    为了方便mermaid显示，把blood里的@替换为__
+    :param blood:
+    :return:
+    '''
+    parentTbl = blood.parentTbl.replace('@', '__').replace('class', 'calss')
+    tblName = blood.tblName.replace('@', '__').replace('class', 'calss')
+    if blood.current > 0:
+        tblName += ';style ' + blood.tblName.replace('@', '__').replace('class',
+                                                                        'calss') + ' fill:#f9f,stroke:#333,stroke-width:4px'
+    return parentTbl + '-->' + tblName
+
 
 @register.filter
 def is_valid(value):
@@ -143,7 +163,6 @@ def is_valid(value):
         return '是'
     return '否'
 
-
-@register.filter
-def clean_blood(value):
-    return value.replace('@', '__');
+# @register.filter
+# def clean_blood(value):
+#     return value.replace('@', '__');

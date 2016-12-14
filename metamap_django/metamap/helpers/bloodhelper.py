@@ -28,7 +28,8 @@ def find_parent_mermaid(blood, final_bloods, current=0):
     bloods = TblBlood.objects.filter(tblName=blood.parentTbl)
     if bloods.count() > 0:
         for bld in bloods:
-            final_bloods.add(clean_blood(bld, current))
+            # final_bloods.add(clean_blood(bld, current))
+            final_bloods.add(bld)
             find_parent_mermaid(bld, final_bloods)
 
 
@@ -42,5 +43,6 @@ def find_child_mermaid(blood, final_bloods, current=0):
     bloods = TblBlood.objects.filter(parentTbl=blood.tblName)
     if bloods.count() > 0:
         for bld in bloods:
-            final_bloods.add(clean_blood(bld, current))
-            find_parent_mermaid(bld, final_bloods)
+            # final_bloods.add(clean_blood(bld, current))
+            final_bloods.add(bld)
+            find_child_mermaid(bld, final_bloods)
