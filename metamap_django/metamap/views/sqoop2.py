@@ -125,7 +125,7 @@ def review(request, sqoop_id):
 
 
 class StatusJobView(generic.ListView):
-    template_name = 'sqoop/executions_status.html'
+    template_name = 'sqoop/executions_status2.html'
     context_object_name = 'executions'
     model = SqoopMysql2HiveExecutions
 
