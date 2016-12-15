@@ -15,7 +15,7 @@ function get_jobs() {
         echo "length is ${#filename}"
         failed_num=`expr $failed_num + 1`
         echo "failed for ${failed_num} times"
-        if [ $failed_num -eq 3 ]; then
+        if [ $failed_num -eq 30 ]; then
                 exit 1
         fi
         sleep 10m
