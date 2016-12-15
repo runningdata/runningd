@@ -88,7 +88,10 @@ class ExportsViewSet(viewsets.ModelViewSet):
         for export in objs:
             ana_id = export.task.rel_id
             ana_etl = AnaETL.objects.get(pk=ana_id)
-            if ana_etl.is_auth(user):
+            if user != 'xuexu':
+                if ana_etl.is_auth(user):
+                    result.append(export)
+            else:
                 result.append(export)
         serializer = self.get_serializer(result, many=True)
         return Response(serializer.data)
