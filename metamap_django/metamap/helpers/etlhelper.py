@@ -78,7 +78,6 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
     str.append(task.mysql_meta.settings)
     str.append(' --hive-database ')
     str.append(task.hive_meta.db)
-    str.append(' --delete-target-dir ')
     if task.columns:
         str.append(' --columns')
         str.append(task.columns)
@@ -96,6 +95,7 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
         export_dir += '/'
         str.append(task.option.replace('target-dir', 'target-dir ' + export_dir))
     else:
+        str.append(' --delete-target-dir ')
         str.append(task.option)
 
     template = Template(' '.join(str).replace('\n', ' ').replace('&', '\&'))
