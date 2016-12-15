@@ -17,6 +17,7 @@ pidfile = '/tmp/metamap_gunicorn.pid'
 errorlog = '/tmp/metamap_gunicorn_error.log'
 loglevel = 'info'
 capture_output = True
+timeout=600
 proc_name = 'will\'s metamap'
 daemon = True
 

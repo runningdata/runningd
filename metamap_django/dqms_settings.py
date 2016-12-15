@@ -17,6 +17,7 @@ pidfile = '/tmp/dqms_gunicorn.pid'
 errorlog = '/tmp/dqms_gunicorn_error.log'
 loglevel = 'info'
 capture_output = True
+timeout=600
 proc_name = 'will\'s dqms'
 daemon = True
 
