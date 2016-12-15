@@ -93,7 +93,7 @@ def exec_log(request, execid):
     :param execid:
     :return:
     '''
-    return render(request, 'sqoop/exec_log.html', {'execid': execid})
+    return render(request, 'sqoop/exec_log2.html', {'execid': execid})
 
 
 def get_exec_log(request, execid):
