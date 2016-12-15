@@ -94,7 +94,7 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
         export_dir += '/'
         export_dir += task.mysql_tbl
         export_dir += '/'
-        str.append(task.option.replace('target_table', 'target-dir ' + export_dir))
+        str.append(task.option.replace('target-dir', 'target-dir ' + export_dir))
     else:
         str.append(task.option)
 
