@@ -59,6 +59,7 @@ def exec_sqoop(command, location):
         execution.status = enums.EXECUTION_STATUS.FAILED
     execution.save()
 
+
 @shared_task
 def exec_sqoop2(command, location):
     print('command is %s , location is %s' % (command, location))
@@ -79,6 +80,7 @@ def exec_sqoop2(command, location):
         logger.error(e)
         execution.status = enums.EXECUTION_STATUS.FAILED
     execution.save()
+
 
 @shared_task
 def exec_etl(command, log):
@@ -109,7 +111,7 @@ def exec_email_export(will_task):
         result_dir = result + '_dir'
         pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
         sql = etlhelper.generate_sql(will_task.variables, pre_insertr + ana_etl.query)
-        command = 'hive -Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE +' -e \"' + sql.replace('"', '\\"') + '\"'
+        command = 'hive -Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + sql.replace('"', '\\"') + '\"'
         print 'command is ', command
         with open(result, 'w') as wa:
             header = ana_etl.headers
@@ -177,7 +179,7 @@ executors = {1: exec_etl_sche, 2: exec_email_export, 3: exec_hive2mysql, 4: exec
 def exec_etl_cli(task_id):
     will_task = WillDependencyTask.objects.get(pk=task_id)
     type = will_task.type
-    executors.get(type)(will_task)
+    executors.get(type)(will_task, will_task.schedule)
 
 
 @shared_task

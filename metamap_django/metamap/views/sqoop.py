@@ -15,6 +15,7 @@ from rest_framework import viewsets
 from metamap.helpers import etlhelper
 from metamap.models import SqoopHive2Mysql, Meta, SqoopHive2MysqlExecutions
 from metamap.serializers import MetaSerializer
+from will_common.decorators import my_decorator
 from will_common.models import WillDependencyTask
 from will_common.utils import dateutils
 from will_common.utils import httputils
@@ -59,7 +60,9 @@ def add(request):
     else:
         return render(request, 'sqoop/edit.html')
 
+@my_decorator('pk')
 def edit(request, pk):
+    print('inner')
     if request.method == 'POST':
         sqoop = SqoopHive2Mysql.objects.get(pk=int(pk))
         httputils.post2obj(sqoop, request.POST, 'id')

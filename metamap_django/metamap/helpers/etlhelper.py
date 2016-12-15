@@ -3,7 +3,7 @@
 '''
 created by will 
 '''
-
+from django.conf import settings
 from django.template import Context, Template
 
 from metamap.db_views import ColMeta, DB
@@ -74,6 +74,7 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
     # import
     # --hive-overwrite
     str.append(' sqoop import ')
+    str.append('-Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE)
     str.append(task.mysql_meta.settings)
     str.append(' --hive-database ')
     str.append(task.hive_meta.db)
@@ -139,6 +140,7 @@ def generate_sqoop_hive2mysql(task, schedule=-1):
         tt = WillDependencyTask.objects.get(rel_id=task.id, schedule=schedule, type=3)
         str.append(tt.variables)
     str.append(' sqoop export ')
+    str.append('-Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE)
     str.append(task.mysql_meta.settings)
     str.append(' --input-fields-terminated-by "\\t" ')
     str.append('  --update-key ')
@@ -178,6 +180,7 @@ def generate_etl_sql(etl, schedule=-1):
     else:
         task = WillDependencyTask.objects.get(rel_id=etl.id, schedule=schedule, type=1)
         str.append(task.variables)
+    str.append('set mapreduce.job.queuename=' + settings.CLUTER_QUEUE +';')
     str.append("-- job for " + etl.tblName)
     if etl.author:
         str.append("-- author : " + etl.author)

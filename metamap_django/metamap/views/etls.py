@@ -18,6 +18,7 @@ from django.views import generic
 from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, SqoopHive2Mysql, SqoopMysql2Hive
 from metamap.serializers import ETLSerializer, SqoopHive2MysqlSerializer, SqoopMysql2HiveSerializer
+from will_common.decorators import my_decorator
 from will_common.utils import hivecli, httputils, dateutils, ziputils
 from will_common.utils.constants import *
 
@@ -179,7 +180,6 @@ def add(request):
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
         return render(request, 'etl/edit.html')
-
 
 def edit(request, pk):
     if request.method == 'POST':

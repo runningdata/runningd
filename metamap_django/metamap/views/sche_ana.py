@@ -57,7 +57,8 @@ def add(request):
         cron_task.args = '[' + str(task.id) + ']'
 
         cron = DjceleryCrontabschedule.objects.create()
-        cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(request.POST['cronexp'])
+        cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(
+            request.POST['cronexp'])
         cron_task.crontab = cron
         cron.save()
 
@@ -69,6 +70,7 @@ def add(request):
         return redirect('export:sche_list')
     else:
         return render(request, 'sche/ana/edit.html')
+
 
 class ExportsViewSet(viewsets.ModelViewSet):
     now = timezone.now()
@@ -91,9 +93,11 @@ class ExportsViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(result, many=True)
         return Response(serializer.data)
 
+
 class BIUserViewSet(viewsets.ModelViewSet):
     queryset = BIUser.objects.using('ykx_wd').all()
     serializer_class = BIUserSerializer
+
 
 @transaction.atomic
 def edit(request, pk):
