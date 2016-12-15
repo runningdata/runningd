@@ -70,7 +70,11 @@
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li>
-                    <a href="#"> 群组：{{ user.groups.first }} &nbsp;&nbsp; 用户： {{ user.username }}</a>
+                    <a href="#">
+                        {% if user.username == 'admin' %}
+                            群组：{{ user.groups.first }} &nbsp;&nbsp; 用户： {{ user.username }}
+                        {% endif %}
+                    </a>
                 </li>
             </ul>
         </div>
