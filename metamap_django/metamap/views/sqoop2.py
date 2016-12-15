@@ -83,7 +83,7 @@ def exec_job(request, sqoopid):
     execution.save()
     from metamap import tasks
     tasks.exec_sqoop2.delay(command, location)
-    return redirect('metamap:sqoop_execlog', execid=execution.id)
+    return redirect('metamap:sqoop2_execlog', execid=execution.id)
 
 
 def exec_log(request, execid):
