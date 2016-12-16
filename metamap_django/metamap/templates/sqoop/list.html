@@ -3,7 +3,7 @@
 {% block scripts %}
     <script type="text/javascript">
         function preview(sqoopid) {
-            var urlB = '/metamap/sqoop/review/' + sqoopid + '/';
+            var urlB = '/metamap/h2m/review/' + sqoopid + '/';
             $.ajax({
                 url: urlB,
                 success: function (data) {
@@ -66,12 +66,12 @@
                                     操作 <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a href="/metamap/sqoop/{{ obj.id }}/">编辑</a></li>
+                                    <li><a href="/metamap/h2m/{{ obj.id }}/">编辑</a></li>
                                     {% if user.username == 'admin' %}
                                     <li><a href="#" data-toggle="modal" data-target="#previewsql"
                                            onclick="preview({{ obj.id }})">预览SQL</a></li>
                                     {% endif %}
-                                    <li><a target="view_window" href="/metamap/sqoop/exec/{{ obj.id }}/">测试执行</a></li>
+                                    <li><a target="view_window" href="/metamap/h2m/exec/{{ obj.id }}/">测试执行</a></li>
                                 </ul>
                             </div>
                         </td>

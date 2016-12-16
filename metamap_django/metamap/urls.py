@@ -42,8 +42,8 @@ urlpatterns = [
     url(r'^etls/exec_list/(?P<jobid>[0-9]+)/$', etls.ExecLogView.as_view(), name='exec_list'),
 
     url(r'^etls/generate_job_dag/(?P<schedule>[0-9])/$', etls.generate_job_dag, name='generate_job_dag'),
-    url(r'^sqoop/generate_job_dag/(?P<schedule>[0-9])/$', sqoop.generate_job_dag, name='generate_sqoop_job_dag'),
-    url(r'^sqoop2/generate_job_dag/(?P<schedule>[0-9])/$', sqoop2.generate_job_dag, name='generate_sqoop2_job_dag'),
+    url(r'^h2m/generate_job_dag/(?P<schedule>[0-9])/$', sqoop.generate_job_dag, name='generate_sqoop_job_dag'),
+    url(r'^m2h/generate_job_dag/(?P<schedule>[0-9])/$', sqoop2.generate_job_dag, name='generate_sqoop2_job_dag'),
 
 
     url(r'^meta/list/$', metas.MetaListView.as_view(), name='meta_list'),
@@ -53,25 +53,25 @@ urlpatterns = [
     url(r'^meta/tbl_search/$', metas.TBLView.as_view(), name='tbl_list'),
     url(r'^meta/tbl_search/(?P<tblid>[0-9]+)/$', metas.get_table, name='tbl_info'),
 
-    url(r'^sqoop/$', sqoop.Hive2MysqlListView.as_view(), name='h2m_sqoop_list'),
-    url(r'^sqoop/(?P<pk>[0-9]+)/$', sqoop.edit, name='h2m_sqoop_edit'),
-    url(r'^sqoop/add/$', sqoop.add, name='h2m_sqoop_add'),
-    url(r'^sqoop/review/(?P<sqoop_id>[0-9]+)/$', sqoop.review, name='h2m_ssqoop_review'),
+    url(r'^h2m/$', sqoop.Hive2MysqlListView.as_view(), name='h2m_sqoop_list'),
+    url(r'^h2m/(?P<pk>[0-9]+)/$', sqoop.edit, name='h2m_sqoop_edit'),
+    url(r'^h2m/add/$', sqoop.add, name='h2m_sqoop_add'),
+    url(r'^h2m/review/(?P<sqoop_id>[0-9]+)/$', sqoop.review, name='h2m_ssqoop_review'),
 
-    url(r'^sqoop/exec/(?P<sqoopid>[0-9]+)/$', sqoop.exec_job, name='sqoop_exec'),
-    url(r'^sqoop/execlog/(?P<execid>[0-9]+)/$', sqoop.exec_log, name='sqoop_execlog'),
-    url(r'^sqoop/getexeclog/(?P<execid>[0-9]+)/$', sqoop.get_exec_log, name='sqoop_getexeclog'),
-    url(r'^sqoop/status/(?P<status>[0-9]+)/$', sqoop.StatusJobView.as_view(), name='sqoop_status'),
+    url(r'^h2m/exec/(?P<sqoopid>[0-9]+)/$', sqoop.exec_job, name='sqoop_exec'),
+    url(r'^h2m/execlog/(?P<execid>[0-9]+)/$', sqoop.exec_log, name='sqoop_execlog'),
+    url(r'^h2m/getexeclog/(?P<execid>[0-9]+)/$', sqoop.get_exec_log, name='sqoop_getexeclog'),
+    url(r'^h2m/status/(?P<status>[0-9]+)/$', sqoop.StatusJobView.as_view(), name='sqoop_status'),
 
-    url(r'^sqoop2/$', sqoop2.Mysql2HiveListView.as_view(), name='h2m_sqoop2_list'),
-    url(r'^sqoop2/(?P<pk>[0-9]+)/$', sqoop2.edit, name='h2m_sqoop2_edit'),
-    url(r'^sqoop2/add/$', sqoop2.add, name='h2m_sqoop2_add'),
-    url(r'^sqoop2/review/(?P<sqoop_id>[0-9]+)/$', sqoop2.review, name='h2m_sqoop2_review'),
+    url(r'^m2h/$', sqoop2.Mysql2HiveListView.as_view(), name='h2m_sqoop2_list'),
+    url(r'^m2h/(?P<pk>[0-9]+)/$', sqoop2.edit, name='h2m_sqoop2_edit'),
+    url(r'^m2h/add/$', sqoop2.add, name='h2m_sqoop2_add'),
+    url(r'^m2h/review/(?P<sqoop_id>[0-9]+)/$', sqoop2.review, name='h2m_sqoop2_review'),
 
-    url(r'^sqoop2/exec/(?P<sqoopid>[0-9]+)/$', sqoop2.exec_job, name='sqoop2_exec'),
-    url(r'^sqoop2/execlog/(?P<execid>[0-9]+)/$', sqoop2.exec_log, name='sqoop2_execlog'),
-    url(r'^sqoop2/getexeclog/(?P<execid>[0-9]+)/$', sqoop2.get_exec_log, name='sqoop2_getexeclog'),
-    url(r'^sqoop2/status/(?P<status>[0-9]+)/$', sqoop2.StatusJobView.as_view(), name='sqoop2_status'),
+    url(r'^m2h/exec/(?P<sqoopid>[0-9]+)/$', sqoop2.exec_job, name='sqoop2_exec'),
+    url(r'^m2h/execlog/(?P<execid>[0-9]+)/$', sqoop2.exec_log, name='sqoop2_execlog'),
+    url(r'^m2h/getexeclog/(?P<execid>[0-9]+)/$', sqoop2.get_exec_log, name='sqoop2_getexeclog'),
+    url(r'^m2h/status/(?P<status>[0-9]+)/$', sqoop2.StatusJobView.as_view(), name='sqoop2_status'),
 
     url(r'^tasks/tasks/$', sche_etl.get_all_tasks, name='tasks'),
     url(r'^tasks/update/$', sche_etl.update_tasks_interval, name='update_tasks_interval'),

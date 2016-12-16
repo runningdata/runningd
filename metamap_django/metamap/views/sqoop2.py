@@ -58,7 +58,7 @@ def add(request):
         httputils.post2obj(sqoop, request.POST, 'id')
         sqoop.save()
         logger.info('sqoop has been created successfully : %s ' % sqoop)
-        return HttpResponseRedirect('/metamap/sqoop2/')
+        return HttpResponseRedirect('/metamap/m2h/')
     else:
         return render(request, 'sqoop/edit2.html')
 
@@ -69,7 +69,7 @@ def edit(request, pk):
         httputils.post2obj(sqoop, request.POST, 'id')
         sqoop.save()
         logger.info('sqoop has been created successfully : %s ' % sqoop)
-        return HttpResponseRedirect('/metamap/sqoop2/')
+        return HttpResponseRedirect('/metamap/m2h/')
     else:
         obj = SqoopMysql2Hive.objects.get(pk=pk)
         return render(request, 'sqoop/edit2.html', {'obj': obj})
@@ -161,9 +161,9 @@ def generate_job_dag(request, schedule):
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-        etlhelper.generate_job_file_sqoop2(leafs, folder)
+        etlhelper.generate_job_file_m2h(leafs, folder)
 
-        job_name = 'sqoop2_done_' + dateutils.now_datetime()
+        job_name = 'm2h_done_' + dateutils.now_datetime()
         command = 'echo done for sqoop'
         deps = [leaf.name for leaf in leafs]
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))

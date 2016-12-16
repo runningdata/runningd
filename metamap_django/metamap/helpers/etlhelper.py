@@ -255,7 +255,7 @@ def generate_end_job_file(job_name, command, folder, deps):
         f.write(content)
 
 
-def generate_job_file_sqoop(objs, folder):
+def generate_job_file_h2m(objs, folder):
     '''
     生成azkaban job文件
     :param blood:
@@ -275,7 +275,7 @@ def generate_job_file_sqoop(objs, folder):
             f.write(content)
 
 
-def generate_job_file_sqoop2(objs, folder):
+def generate_job_file_m2h(objs, folder):
     '''
     生成azkaban job文件
     :param blood:
