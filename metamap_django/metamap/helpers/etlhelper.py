@@ -103,6 +103,9 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
     return strip
 
 
+def get_hive_inmi_tbl(tbl):
+    return tbl + '_inmi'
+
 def generate_sqoop_hive2mysql(task, schedule=-1):
     str = list()
 

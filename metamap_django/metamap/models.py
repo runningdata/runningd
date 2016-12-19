@@ -107,6 +107,7 @@ class SqoopMysql2Hive(models.Model):
     parallel = models.IntegerField(default=1, verbose_name='并发执行')
     where_clause = models.TextField(null=True)
     ctime = models.DateTimeField(default=timezone.now)
+    partition_key = models.CharField(max_length=300, null=True, default='')
     settings = models.TextField(null=True)
 
 class SqoopHive2Mysql(models.Model):
@@ -124,7 +125,7 @@ class SqoopHive2Mysql(models.Model):
     ctime = models.DateTimeField(default=timezone.now)
 
 
-class Exports(models.Model):
+class Exporskts(models.Model):
     '''
     定时任务执行记录
     '''

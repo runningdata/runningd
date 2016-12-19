@@ -72,6 +72,17 @@ def exec_sqoop2(command, location):
         p.wait()
         returncode = p.returncode
         logger.info('%s return code is %d' % (command, returncode))
+        sqoop = execution.job
+        if len(sqoop.partition_key) > 0 in sqoop.option:
+            inmi_tbl = etlhelper.get_hive_inmi_tbl(sqoop.mysql_tbl)
+            hive_cmd = 'hive -e "set hive.exec.dynamic.partition.mode=nonstrict;insert overwrite table %s partition(%s) select * from %s; drop %s;"' % \
+                       (inmi_tbl, sqoop.partition_key, sqoop.mysql_tbl, inmi_tbl)
+            p = subprocess.Popen([''.join(command)], stdout=open(execution.logLocation, 'a'), stderr=subprocess.STDOUT,
+                                 shell=True,
+                                 universal_newlines=True)
+            p.wait()
+            returncode += p.returncode
+            logger.info('%s return code is %d' % (command, returncode))
         if returncode == 0:
             execution.status = enums.EXECUTION_STATUS.DONE
         else:
@@ -111,7 +122,8 @@ def exec_email_export(will_task):
         result_dir = result + '_dir'
         pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
         sql = etlhelper.generate_sql(will_task.variables, pre_insertr + ana_etl.query)
-        command = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + sql.replace('"', '\\"') + '\"'
+        command = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + sql.replace('"',
+                                                                                                              '\\"') + '\"'
         print 'command is ', command
         with open(result, 'w') as wa:
             header = ana_etl.headers
