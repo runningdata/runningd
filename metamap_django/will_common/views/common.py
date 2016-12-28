@@ -106,8 +106,11 @@ from django.utils.translation import ugettext as _
 
 class GroupListView(generic.ListView):
     def get(self, request, *args, **kwargs):
-        current_group = self.request.user.groups.all()
-        self.object_list = self.get_queryset().filter(cgroup__in=current_group)
+        if request.user.username != 'admin':
+            current_group = self.request.user.groups.all()
+            self.object_list = self.get_queryset().filter(cgroup__in=current_group)
+        else:
+            self.object_list = self.get_queryset()
         allow_empty = self.get_allow_empty()
 
         if not allow_empty:
