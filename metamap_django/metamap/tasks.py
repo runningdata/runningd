@@ -57,6 +57,7 @@ def exec_h2m(command, location):
     except Exception, e:
         logger.error(e)
         execution.status = enums.EXECUTION_STATUS.FAILED
+    execution.end_time = timezone.now()
     execution.save()
 
 
@@ -90,6 +91,7 @@ def exec_m2h(command, location):
     except Exception, e:
         logger.error(e)
         execution.status = enums.EXECUTION_STATUS.FAILED
+    execution.end_time = timezone.now()
     execution.save()
 
 
@@ -110,6 +112,7 @@ def exec_etl(command, log):
     except Exception, e:
         logger.error(e)
         execution.status = enums.EXECUTION_STATUS.FAILED
+    execution.end_time = timezone.now()
     execution.save()
 
 
