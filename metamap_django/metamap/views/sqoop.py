@@ -19,8 +19,10 @@ from will_common.decorators import my_decorator
 from will_common.models import WillDependencyTask
 from will_common.utils import dateutils
 from will_common.utils import httputils
+from will_common.utils import userutils
 from will_common.utils import ziputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE, AZKABAN_SCRIPT_LOCATION, AZKABAN_BASE_LOCATION
+from will_common.views.common import GroupListView
 
 logger = logging.getLogger('info')
 
@@ -33,14 +35,14 @@ class SqoopMysqlMetaViewSet(viewsets.ModelViewSet):
     queryset = Meta.objects.filter(type=1).order_by('-ctime')
     serializer_class = MetaSerializer
 
-class Hive2MysqlListView(generic.ListView):
+class Hive2MysqlListView(GroupListView):
     template_name = 'sqoop/list.html'
     context_object_name = 'objs'
 
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             search = self.request.GET['search']
-            return SqoopHive2Mysql.objects.filter(sqoop__contains=search).order_by('ctime')
+            return SqoopHive2Mysql.objects.filter(name__contains=search).order_by('ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
         return SqoopHive2Mysql.objects.all()
 
@@ -54,6 +56,7 @@ def add(request):
     if request.method == 'POST':
         sqoop = SqoopHive2Mysql()
         httputils.post2obj(sqoop, request.POST, 'id')
+        userutils.add_current_creator(sqoop, request)
         sqoop.save()
         logger.info('sqoop has been created successfully : %s ' % sqoop)
         return HttpResponseRedirect('/metamap/h2m/')
@@ -66,6 +69,7 @@ def edit(request, pk):
     if request.method == 'POST':
         sqoop = SqoopHive2Mysql.objects.get(pk=int(pk))
         httputils.post2obj(sqoop, request.POST, 'id')
+        userutils.add_current_creator(sqoop, request)
         sqoop.save()
         logger.info('sqoop has been created successfully : %s ' % sqoop)
         return HttpResponseRedirect('/metamap/h2m/')
@@ -80,7 +84,7 @@ def exec_job(request, sqoopid):
     execution = SqoopHive2MysqlExecutions(logLocation=location, job_id=sqoopid, status=0)
     execution.save()
     from metamap import tasks
-    tasks.exec_sqoop.delay(command, location)
+    tasks.exec_h2m.delay(command, location)
     return redirect('metamap:sqoop_execlog', execid=execution.id)
 
 def exec_log(request, execid):

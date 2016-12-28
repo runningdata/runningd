@@ -33,7 +33,6 @@ ALLOWED_HOSTS = []
 
 CLUTER_QUEUE = 'default'
 
-
 HIVE_SERVER = {
     'host': '10.1.5.63',
     'port': 10000,
@@ -126,7 +125,7 @@ WSGI_APPLICATION = 'metamap_django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'metamap',
+        'NAME': 'metamap1',
         'PASSWORD': '',
         'USER': 'root',
         'HOST': '127.0.0.1',

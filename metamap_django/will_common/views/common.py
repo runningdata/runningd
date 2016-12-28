@@ -5,9 +5,15 @@ created by will
 '''
 from django import forms
 from django.contrib import auth
+from django.contrib.auth.models import Group
 from django.db import transaction
+from django.http import Http404
 from django.shortcuts import render, redirect, render_to_response
 from django.template import RequestContext
+from django.views import generic
+from rest_framework import viewsets
+
+from will_common.serializers import GroupsSerializer
 
 
 def navigate(request):
@@ -93,3 +99,34 @@ def redir_dqms(request):
 
 def redir_metamap(request):
     return redirect('/metamap')
+
+
+from django.utils.translation import ugettext as _
+
+
+class GroupListView(generic.ListView):
+    def get(self, request, *args, **kwargs):
+        current_group = self.request.user.groups.all()
+        self.object_list = self.get_queryset().filter(cgroup__in=current_group)
+        allow_empty = self.get_allow_empty()
+
+        if not allow_empty:
+            # When pagination is enabled and object_list is a queryset,
+            # it's better to do a cheap query than to load the unpaginated
+            # queryset in memory.
+            if (self.get_paginate_by(self.object_list) is not None
+                and hasattr(self.object_list, 'exists')):
+                is_empty = not self.object_list.exists()
+            else:
+                is_empty = len(self.object_list) == 0
+            if is_empty:
+                raise Http404(_("Empty list and '%(class_name)s.allow_empty' is False.")
+                              % {'class_name': self.__class__.__name__})
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+
+
+class GroupsViewSet(viewsets.ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupsSerializer

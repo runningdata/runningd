@@ -9,6 +9,13 @@
     {% csrf_token %}
     <form action="." method="POST">
         <div class="form-group">
+            <div class="form-group">
+                <label>cgroup</label>
+                <select id="cgroup_id" name="cgroup_id" class="selectpicker form-control"
+                        data-live-search="true">
+                    <option class="bs-title-option" value="">选择....</option>
+                </select>
+            </div>
             <input name="id" value="{{ obj.id }}" type="hidden" class="form-control">
             <div class="form-group">
                 <label>任务名称</label>
@@ -65,9 +72,11 @@
         {% if obj %}
             var hive_meta_id = {{ obj.hive_meta.id }};
             var mysql_meta_id = {{ obj.mysql_meta.id }};
+            var cgroupid = {{ obj.cgroup_id }};
         {% else %}
             var hive_meta_id = -1;
             var mysql_meta_id = -1;
+            var cgroupid = -1;
         {% endif %}
     </script>
     <script type="application/javascript">
@@ -112,4 +121,5 @@
                 }
         );
     </script>
+    {% include 'components/common_group_js.html' %}
 {% endblock %}

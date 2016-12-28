@@ -85,21 +85,19 @@ class ScheDepListView(generic.ListView):
         return objss
 
     def get_queryset(self):
+        filters = {1: self.handle_etl, 2: self.handle_email_export, 3: self.handle_hive2mysql, 4: self.handle_hive2mysql}
+
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
             objs = WillDependencyTask.objects.filter(name__contains=tbl_name_).order_by('-valid', '-ctime')
             for obj in objs:
-                pk = obj.rel_id
-                etl = ETL.objects.get(id=pk)
-                if etl.valid != 1:
-                    objs = objs.exclude(id=obj.id)
+                objs = filters.get(obj.type)(objs, obj)
             return objs
         self.paginate_by = DEFAULT_PAGE_SIEZE
         objs = WillDependencyTask.objects.order_by('-valid', '-ctime')
 
-        handlers = {1: self.handle_etl, 2: self.handle_email_export, 3: self.handle_hive2mysql, 4: self.handle_hive2mysql}
         for obj in objs:
-            objs = handlers.get(obj.type)(objs, obj)
+            objs = filters.get(obj.type)(objs, obj)
         return objs
 
     def get_context_data(self, **kwargs):

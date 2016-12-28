@@ -18,7 +18,9 @@ from metamap.helpers import etlhelper
 from metamap.models import AnaETL
 from metamap.serializers import AnaETLSerializer
 from will_common.utils import httputils
+from will_common.utils import userutils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
+from will_common.views.common import GroupListView
 
 logger = logging.getLogger('django')
 
@@ -26,7 +28,7 @@ class AnaETLViewSet(viewsets.ModelViewSet):
     queryset = AnaETL.objects.filter(valid=1).order_by('-ctime')
     serializer_class = AnaETLSerializer
 
-class IndexView(generic.ListView):
+class IndexView(GroupListView):
     template_name = 'export/list.html'
     context_object_name = 'objs'
     model = AnaETL
@@ -49,6 +51,7 @@ def add(request):
     if request.method == 'POST':
         obj = AnaETL()
         httputils.post2obj(obj, request.POST, 'id')
+        userutils.add_current_creator(obj, request)
         obj.save()
         logger.info('ETL has been created successfully : %s ' % obj)
         return HttpResponseRedirect(reverse('export:index'))
@@ -70,6 +73,7 @@ def edit(request, pk):
             with transaction.atomic():
                 obj = AnaETL.objects.get(pk=int(pk))
                 httputils.post2obj(obj, request.POST, 'id')
+                userutils.add_current_creator(obj, request)
                 obj.save()
                 return HttpResponseRedirect(reverse('export:index'))
         except Exception, e:

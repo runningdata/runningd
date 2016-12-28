@@ -10,9 +10,13 @@
         <form action="." method="POST">
             <div class="form-group">
                 <input name="id" value="{{ etl.id }}" type="hidden" class="form-control">
+                <label>cgroup</label>
+                <select id="cgroup_id" name="cgroup_id" class="selectpicker form-control"
+                        data-live-search="true">
+                    <option class="bs-title-option" value="">选择....</option>
+                </select>
                 <label>ETL名称</label>
                 <input name="tblName" value="{{ etl.tblName }}" type="text" class="form-control">
-
                 <label>查询SQL</label>
                 <textarea name="query" rows="13" class="form-control">{{ etl.query }}</textarea>
                 <label>预设变量</label>
@@ -44,6 +48,11 @@
         <form action="." method="POST">
             <div class="form-group">
                 <input name="id" value="" type="hidden" class="form-control">
+                <label>cgroup</label>
+                <select id="cgroup_id" name="cgroup_id" class="selectpicker form-control"
+                        data-live-search="true">
+                    <option class="bs-title-option" value="">选择....</option>
+                </select>
                 <label>ETL名称</label>
                 <input name="tblName" value="" type="text" class="form-control">
 
@@ -69,4 +78,13 @@
             </div>
         </form>
     {% endif %}
+<script>
+        {% if has_etl %}
+            var cgroupid = {{ etl.cgroup_id }};
+        {% else %}
+            var cgroupid = -1;
+        {% endif %}
+    </script>
+
+    {% include 'components/common_group_js.html' %}
 {% endblock %}

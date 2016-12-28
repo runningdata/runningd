@@ -12,6 +12,11 @@
         {% if has_etl %}
             <form action="." method="POST">
                 <div class="form-group">
+                    <label>cgroup</label>
+                    <select id="cgroup_id" name="cgroup_id" class="selectpicker form-control"
+                            data-live-search="true">
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
                     <label>名字</label>
                     <input name="name" value="{{ obj.name }}" type="text" class="form-control">
                     <label>表头[英文逗号隔开]</label>
@@ -46,6 +51,11 @@
         {% else %}
             <form action="." method="POST">
                 <div class="form-group">
+                    <label>cgroup</label>
+                    <select id="cgroup_id" name="cgroup_id" class="selectpicker form-control"
+                            data-live-search="true">
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
                     <label>名字</label>
                     <input name="name" value="" type="text" class="form-control">
                     <label>表头[英文逗号隔开]</label>
@@ -75,5 +85,13 @@
             </form>
         {% endif %}
     </div>
+     <script>
+        {% if obj %}
+            var cgroupid = {{ obj.cgroup_id }};
+        {% else %}
+            var cgroupid = -1;
+        {% endif %}
+    </script>
+    {% include 'components/common_group_js.html' %}
 
 {% endblock %}

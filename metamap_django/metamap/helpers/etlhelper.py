@@ -46,6 +46,8 @@ def generate_sql(variables, query):
 
 
 def generate_sqoop_mysql2hive(task, schedule=-1):
+    is_partition = True if len(task.partition_key) > 0 else False
+
     str = list()
     str.append('{% load etlutils %}')
     if schedule == -1:
@@ -85,7 +87,10 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
         str.append(' --where')
         str.append(task.where_clause)
     str.append(' --table')
-    str.append(task.mysql_tbl)
+    if is_partition:
+        str.append(get_hive_inmi_tbl(task.mysql_tbl))
+    else:
+        str.append(task.mysql_tbl)
     str.append(' --hive-import --hive-overwrite')
     str.append('--outdir /server/app/sqoop/vo --bindir /server/app/sqoop/vo --verbose ')
     if 'target-dir' in task.option:

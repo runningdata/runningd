@@ -13,11 +13,13 @@ import datetime
 from django.db import connections
 
 from will_common.utils import httputils
+from will_common.utils import userutils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
+from will_common.views.common import GroupListView
 
 logger = logging.getLogger('info')
 
-class MetaListView(generic.ListView):
+class MetaListView(GroupListView):
     template_name = 'meta/meta_list.html'
     context_object_name = 'metas'
 
@@ -38,6 +40,7 @@ def add(request):
     if request.method == 'POST':
         meta = Meta()
         httputils.post2obj(meta, request.POST, 'id')
+        userutils.add_current_creator(meta, request)
         meta.save()
         logger.info('Meta has been created successfully : %s ' % meta)
         return HttpResponseRedirect(reverse('metamap:meta_list'))
@@ -48,12 +51,13 @@ def edit(request, pk):
     if request.method == 'POST':
         meta = Meta.objects.filter(valid=1).get(pk=int(pk))
         httputils.post2obj(meta, request.POST, 'id')
+        userutils.add_current_creator(meta, request)
         meta.save()
         logger.info('Meta has been created successfully : %s ' % meta)
         return HttpResponseRedirect(reverse('metamap:meta_list'))
     else:
-        etl = Meta.objects.get(pk=pk)
-        return render(request, 'meta/edit.html', {'etl': etl})
+        obj = Meta.objects.get(pk=pk)
+        return render(request, 'meta/edit.html', {'obj': obj})
 
 class ColView(generic.ListView):
     template_name = 'meta/col_list.html'

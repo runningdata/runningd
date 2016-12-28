@@ -1,11 +1,12 @@
 # !/usr/bin/env python
 # -*- coding:utf-8 -*-
+from django.contrib.auth.models import Group
 from django.db import models
 import datetime
 from django.utils import timezone
 
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
-from will_common.models import PeriodicTask, WillDependencyTask
+from will_common.models import PeriodicTask, WillDependencyTask, UserProfile
 import will_common
 from will_common.templatetags.etlutils import sche_type_dic
 
@@ -21,6 +22,8 @@ class AnaETL(models.Model):
     variables = models.CharField(max_length=2000, default='')
     valid = models.IntegerField(default=1)
     auth_users = models.TextField(default='', null=False, blank=False)
+    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='ana_creator', null=True)
+    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='ana_cgroup', null=True)
 
     __str__ = query
 
@@ -49,6 +52,8 @@ class ETL(models.Model):
     valid = models.IntegerField(default=1, verbose_name=u"是否生效")
     setting = models.CharField(max_length=200, default='')
     variables = models.CharField(max_length=2000, default='')
+    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='etl_creator', null=True)
+    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='etl_cgroup', null=True)
 
     __str__ = query
 
@@ -84,6 +89,8 @@ class Meta(models.Model):
     type = valid = models.IntegerField(default=1)
     ctime = models.DateTimeField(default=timezone.now)
     valid = models.IntegerField(default=1)
+    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='meta_creator', null=True)
+    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='meta_cgroup', null=True)
 
     def __str__(self):
         return self.meta
@@ -109,6 +116,9 @@ class SqoopMysql2Hive(models.Model):
     ctime = models.DateTimeField(default=timezone.now)
     partition_key = models.CharField(max_length=300, null=True, default='')
     settings = models.TextField(null=True)
+    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='m2h_creator', null=True)
+    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='m2h_cgroup', null=True)
+
 
 class SqoopHive2Mysql(models.Model):
     name = models.CharField(max_length=40, null=False, default='none')
@@ -123,9 +133,11 @@ class SqoopHive2Mysql(models.Model):
     partion_expr = models.TextField(null=True)
     parallel = models.IntegerField(default=1, verbose_name='并发执行')
     ctime = models.DateTimeField(default=timezone.now)
+    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='h2m_creator', null=True)
+    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='h2m_cgroup', null=True)
 
 
-class Exporskts(models.Model):
+class Exports(models.Model):
     '''
     定时任务执行记录
     '''
@@ -153,6 +165,7 @@ class Executions(models.Model):
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)
     status = models.IntegerField(default=-1)
+
     # type = models.IntegerField(default=-1, null=False, verbose_name="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive",
     #                            choices=sche_type_dic.items())
 
@@ -172,6 +185,7 @@ class SqoopHive2MysqlExecutions(models.Model):
 
     def __str__(self):
         return self.logLocation
+
 
 class SqoopMysql2HiveExecutions(models.Model):
     '''

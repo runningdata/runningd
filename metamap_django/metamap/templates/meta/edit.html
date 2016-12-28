@@ -6,24 +6,29 @@
     {% csrf_token %}
     <form action="." method="POST">
         <div class="form-group">
-            <input name="id" value="{{ etl.id }}" type="hidden" class="form-control">
+            <input name="id" value="{{ obj.id }}" type="hidden" class="form-control">
             <label>数据库名称</label>
-            <input name="db" value="{{ etl.db }}" type="text" class="form-control">
+            <input name="db" value="{{ obj.db }}" type="text" class="form-control">
 
+            <label>cgroup</label>
+            <select id="cgroup_id" name="cgroup_id" class="selectpicker form-control"
+                    data-live-search="true">
+                <option class="bs-title-option" value="">选择....</option>
+            </select>
             <label>meta</label>
-            <textarea name="meta" rows="13" class="form-control">{{ etl.meta }}</textarea>
+            <textarea name="meta" rows="13" class="form-control">{{ obj.meta }}</textarea>
             <label>配置</label>
-            <textarea name="settings" rows="5" class="form-control">{{ etl.settings }}</textarea>
+            <textarea name="settings" rows="5" class="form-control">{{ obj.settings }}</textarea>
             <label>类型</label>
             <select name="type" class="form-control">
                 <option value="1"
-                        {% if etl.type == 1 %}
+                        {% if obj.type == 1 %}
                         selected="selected"
                         {% endif %}
                 >mysql
                 </option>
                 <option value="2"
-                        {% if etl.type == 2 %}
+                        {% if obj.type == 2 %}
                         selected="selected"
                         {% endif %}
                 >hive
@@ -33,4 +38,12 @@
             <button type="submit" class="btn btn-primary">提交</button>
         </div>
     </form>
+    <script>
+        {% if obj %}
+            var cgroupid = {{ obj.cgroup_id }};
+        {% else %}
+            var cgroupid = -1;
+        {% endif %}
+    </script>
+    {% include 'components/common_group_js.html' %}
 {% endblock %}

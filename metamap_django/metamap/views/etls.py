@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import transaction
+from django.http import Http404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -20,7 +21,9 @@ from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, SqoopH
 from metamap.serializers import ETLSerializer, SqoopHive2MysqlSerializer, SqoopMysql2HiveSerializer
 from will_common.decorators import my_decorator
 from will_common.utils import hivecli, httputils, dateutils, ziputils
+from will_common.utils import userutils
 from will_common.utils.constants import *
+from will_common.views.common import GroupListView
 
 logger = logging.getLogger('django')
 
@@ -28,7 +31,7 @@ logger = logging.getLogger('django')
 # work_manager = threadpool.WorkManager(10, 3)
 
 @method_decorator(login_required, name='dispatch')
-class IndexView(generic.ListView):
+class IndexView(GroupListView):
     template_name = 'index.html'
     context_object_name = 'etls'
     model = ETL
@@ -38,6 +41,7 @@ class IndexView(generic.ListView):
             tbl_name_ = self.request.GET['search']
             return ETL.objects.filter(valid=1, tblName__contains=tbl_name_).order_by('-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
+        current_group = self.request.user.groups.all()
         return ETL.objects.filter(valid=1).order_by('-ctime')
 
     def get_context_data(self, **kwargs):
@@ -165,6 +169,7 @@ def add(request):
             with transaction.atomic():
                 etl = ETL()
                 httputils.post2obj(etl, request.POST, 'id')
+                userutils.add_current_creator(etl, request)
                 find_ = etl.tblName.find('@')
                 etl.meta = etl.tblName[0: find_]
                 etl.save()
@@ -197,6 +202,7 @@ def edit(request, pk):
                     privious_etl.id = None
                     privious_etl.ctime = timezone.now()
                     httputils.post2obj(etl, request.POST, 'id')
+                    userutils.add_current_creator(etl, request)
                     find_ = etl.tblName.find('@')
                     etl.meta = etl.tblName[0: find_]
 

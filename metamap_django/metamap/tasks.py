@@ -39,7 +39,7 @@ def add(x, y):
 
 
 @shared_task
-def exec_sqoop(command, location):
+def exec_h2m(command, location):
     print('command is %s , location is %s' % (command, location))
     execution = SqoopHive2MysqlExecutions.objects.get(logLocation=location)
     execution.end_time = timezone.now()
@@ -61,7 +61,7 @@ def exec_sqoop(command, location):
 
 
 @shared_task
-def exec_sqoop2(command, location):
+def exec_m2h(command, location):
     print('command is %s , location is %s' % (command, location))
     execution = SqoopMysql2HiveExecutions.objects.get(logLocation=location)
     execution.end_time = timezone.now()
@@ -159,7 +159,7 @@ def exec_hive2mysql(will_task):
     command = etlhelper.generate_sqoop_hive2mysql(sqoop)
     execution = SqoopHive2MysqlExecutions(logLocation=location, job_id=sqoop.id, status=0)
     execution.save()
-    exec_sqoop(command, location)
+    exec_h2m(command, location)
 
 
 def exec_etl_sche(will_task):
@@ -181,7 +181,7 @@ def exec_mysql2hive(will_task):
     command = etlhelper.generate_sqoop_mysql2hive(sqoop)
     execution = SqoopMysql2HiveExecutions(logLocation=location, job_id=sqoop.id, status=0)
     execution.save()
-    exec_sqoop2(command, location)
+    exec_m2h(command, location)
 
 
 executors = {1: exec_etl_sche, 2: exec_email_export, 3: exec_hive2mysql, 4: exec_mysql2hive}

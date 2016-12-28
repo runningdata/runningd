@@ -24,6 +24,8 @@ urlpatterns = [
     url(r'^dqms/', include('dqms.urls')),
     url(r'^admin/', admin.site.urls),
 
+    url(r'^common/', include('will_common.urls')),
+
     # CAS
     url(r'^accounts/login/$', views.login, name='login'),
     url(r'^accounts/logout/$', views.logout, name='logout'),

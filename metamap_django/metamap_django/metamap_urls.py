@@ -21,6 +21,7 @@ from django.contrib.auth.decorators import login_required
 from will_common.views import common
 
 urlpatterns = [
+    url(r'^common/', include('will_common.urls')),
     url(r'^export/', include('metamap.xcurls')),
     url(r'^metamap/', include('metamap.urls', namespace='metamap')),
     url(r'^admin/', admin.site.urls),

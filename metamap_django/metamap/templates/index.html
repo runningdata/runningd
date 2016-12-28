@@ -44,8 +44,10 @@
                 <tr>
                     <th>ID</th>
                     <th>META</th>
+                    <th>所属组</th>
                     <th>表名</th>
                     <th>创建时间</th>
+                    <th>创建人</th>
                     <th>操作</th>
                 </tr>
                 </thead>
@@ -54,8 +56,10 @@
                     <tr>
                         <td>{{ etl.id }}</td>
                         <td>{{ etl.meta }}</td>
+                        <td>{{ etl.cgroup }}</td>
                         <td>{{ etl.tblName }}</td>
                         <td>{{ etl.ctime|date:"Y年m月d日 H时i分" }}</td>
+                        <td>{{ etl.creator.user.username }}</td>
                         <td>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"
