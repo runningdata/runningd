@@ -232,7 +232,6 @@ def edit(request, pk):
         return render(request, 'etl/edit.html', {'etl': etl})
 
 
-@transaction.atomic
 def exec_job(request, etlid):
     etl = ETL.objects.get(id=etlid)
     location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-' + etl.tblName.replace('@', '__') + '.hql'
