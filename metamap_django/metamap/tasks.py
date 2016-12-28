@@ -89,6 +89,7 @@ def exec_m2h(command, location):
         else:
             execution.status = enums.EXECUTION_STATUS.FAILED
     except Exception, e:
+        logger.error('ERROR: %s' % traceback.format_exc())
         logger.error(e)
         execution.status = enums.EXECUTION_STATUS.FAILED
     execution.end_time = timezone.now()
