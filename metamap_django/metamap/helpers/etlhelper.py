@@ -88,7 +88,8 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
         str.append(task.where_clause)
     str.append(' --table')
     if is_partition:
-        str.append(get_hive_inmi_tbl(task.mysql_tbl))
+        str.append(task.mysql_tbl)
+        str.append(' --hive-table ' + get_hive_inmi_tbl(task.mysql_tbl))
     else:
         str.append(task.mysql_tbl)
     str.append(' --hive-import --hive-overwrite')
