@@ -76,7 +76,7 @@ def exec_m2h(command, location):
         sqoop = execution.job
         if len(sqoop.partition_key) > 0 in sqoop.option:
             inmi_tbl = etlhelper.get_hive_inmi_tbl(sqoop.mysql_tbl)
-            hive_cmd = 'hive -e "set hive.exec.dynamic.partition.mode=nonstrict;insert overwrite table %s partition(%s) select * from %s; drop %s;"' % \
+            hive_cmd = 'hive -e "set hive.exec.dynamic.partition.mode=nonstrict;insert overwrite table %s partition(%s) select * from %s; drop table %s;"' % \
                        (inmi_tbl, sqoop.partition_key, sqoop.mysql_tbl, inmi_tbl)
             p = subprocess.Popen([''.join(command)], stdout=open(execution.logLocation, 'a'), stderr=subprocess.STDOUT,
                                  shell=True,
