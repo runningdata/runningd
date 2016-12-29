@@ -32,7 +32,7 @@ project_desc=${prefix}_schedule
 # 调用生成job的任务，返回任务名称或者失败信息
 curl -X GET http://${metamap_host}/metamap/${job_type}/generate_job_dag/${num}/ > ${tmp_output}
 filename=`cat ${tmp_output}`
-if [ $filename == "error" -o ${#filename} -ne 14 ]; then
+if [ $filename == "error" -o ${#filename} -ne 18 ]; then
         echo "error happends when generate Job Scripts. ori_filename is ${filename}"
 	echo "length is ${#filename}"
         exit 1

@@ -318,7 +318,7 @@ def generate_job_dag(request, schedule):
     '''
     try:
         done_blood = set()
-        folder = dateutils.now_datetime()
+        folder = 'h2h-' + dateutils.now_datetime()
         leafs = TblBlood.objects.raw("select a.* from "
                                      + "(select * from metamap_tblblood where valid = 1) a"
                                      + " join "
