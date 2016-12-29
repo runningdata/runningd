@@ -75,7 +75,7 @@ echo "uploading project ${project_name} successfully"
 #
 function check_exec_status(){
 	execid=$1
-	sleep 20m
+	sleep 10m
 	#查看前execution的执行状态，完成后退出
 	status=RUNNING
 	until [ $status == '"SUCCEEDED"' ]
