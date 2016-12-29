@@ -88,6 +88,9 @@ function check_exec_status(){
 		elif [ $status == '"FAILED"' ]; then
                         echo "${execid} has been failed."
                         break
+		elif [ $status == '"SUCCEEDED"' ]; then
+                        echo "${execid} has been SUCCEEDED."
+                        break
 		fi
     		echo "${execid} not yet..." `cat ${tmp_output}`
 		sleep 10m	
