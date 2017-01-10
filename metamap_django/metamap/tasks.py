@@ -124,7 +124,10 @@ def exec_email_export(will_task):
         part = ana_etl.name + '-' + dateutils.now_datetime()
         result = TMP_EXPORT_FILE_LOCATION + part
         result_dir = result + '_dir'
-        pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
+        if ana_etl.creator:
+            pre_insertr = "-- %s;\ninsert overwrite local directory '%s' row format delimited fields terminated by ','  " % (ana_etl.creator.user.username + '-' + ana_etl.name, result_dir)
+        else:
+            pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
         sql = etlhelper.generate_sql(will_task.variables, pre_insertr + ana_etl.query)
         command = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + sql.replace('"',
                                                                                                               '\\"') + '\"'

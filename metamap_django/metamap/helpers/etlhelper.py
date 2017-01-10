@@ -191,6 +191,8 @@ def generate_etl_sql(etl, schedule=-1):
         str.append(task.variables)
     str.append('set mapreduce.job.queuename=' + settings.CLUTER_QUEUE +';')
     str.append("-- job for " + etl.tblName)
+    if etl.creator:
+        str.append("-- " + etl.creator.user.username + '-' + etl.tblName)
     if etl.author:
         str.append("-- author : " + etl.author)
     ctime = etl.ctime
@@ -274,8 +276,8 @@ def generate_job_file_h2m(objs, folder):
     '''
     for obj in objs:
         job_name = obj.name
-        task = SqoopHive2Mysql.objects.get(obj.rel_id)
-        command = generate_sqoop_hive2mysql(task, schedule=obj.schedule)
+        task = SqoopHive2Mysql.objects.get(pk=obj.rel_id)
+        command = generate_sqoop_hive2mysql(task, schedule=obj.schedule).replace('&', '\&')
         # 生成job文件
         job_type = 'command'
         content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
@@ -295,10 +297,10 @@ def generate_job_file_m2h(objs, folder):
     for obj in objs:
         job_name = obj.name
         task = SqoopMysql2Hive.objects.get(pk=obj.rel_id)
-        command = generate_sqoop_mysql2hive(task, schedule=obj.schedule)
+        command = generate_sqoop_mysql2hive(task, schedule=obj.schedule).replace('&', '\&')
         # 生成job文件
-        job_type = 'command'
-        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
+        job_type = ' command \n retries=12\n retry.backoff=300000\n'
+        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command
         job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
         with open(job_file, 'w') as f:
             f.write(content)
