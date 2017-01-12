@@ -94,6 +94,7 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
         str.append(task.mysql_tbl)
     str.append(' --hive-import --hive-overwrite')
     str.append('--outdir /server/app/sqoop/vo --bindir /server/app/sqoop/vo --verbose ')
+    str.append(' -m %d ' % task.parallel)
     if 'target-dir' in task.option:
         export_dir = DB.objects.using('hivemeta').filter(name=task.hive_meta.db).first().db_location_uri
         export_dir += '/'
@@ -169,6 +170,7 @@ def generate_sqoop_hive2mysql(task, schedule=-1):
     str.append(' --table ')
     str.append(task.mysql_tbl)
     str.append(' --verbose ')
+    str.append(' -m %d ' % task.parallel)
     str.append(task.option)
 
     template = Template(' '.join(str).replace('\n', ' ').replace('&', '\&'))
