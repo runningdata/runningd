@@ -279,13 +279,13 @@ def generate_job_file_h2m(objs, folder):
     for obj in objs:
         job_name = obj.name
         task = SqoopHive2Mysql.objects.get(pk=obj.rel_id)
-        command = generate_sqoop_hive2mysql(task, schedule=obj.schedule).replace('&', '\&')
+        command = generate_sqoop_hive2mysql(task, schedule=obj.schedule)
         sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".h2m"
         with open(sqoop_file, 'w') as f:
             f.write(command)
         # 生成job文件
-        job_type = 'command\n retries=12\n retry.backoff=300000\n'
-        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = bash -X ' + sqoop_file + '\n'
+        job_type = 'command\nretries=12\nretry.backoff=300000\n'
+        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = sh ' + sqoop_file + '\n'
         job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
         with open(job_file, 'w') as f:
             f.write(content)
@@ -302,13 +302,13 @@ def generate_job_file_m2h(objs, folder):
     for obj in objs:
         job_name = obj.name
         task = SqoopMysql2Hive.objects.get(pk=obj.rel_id)
-        command = generate_sqoop_mysql2hive(task, schedule=obj.schedule).replace('&', '\&')
+        command = generate_sqoop_mysql2hive(task, schedule=obj.schedule)
         sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".m2h"
         with open(sqoop_file, 'w') as f:
             f.write(command)
         # 生成job文件
-        job_type = ' command \n retries=12\n retry.backoff=300000\n'
-        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = bash -X ' + sqoop_file + '\n'
+        job_type = ' command \nretries=12\nretry.backoff=300000\n'
+        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = sh ' + sqoop_file + '\n'
         job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
         with open(job_file, 'w') as f:
             f.write(content)
