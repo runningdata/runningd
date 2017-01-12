@@ -42,9 +42,9 @@ class Hive2MysqlListView(GroupListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             search = self.request.GET['search']
-            return SqoopHive2Mysql.objects.filter(name__contains=search).order_by('ctime')
+            return SqoopHive2Mysql.objects.filter(name__contains=search).order_by('-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return SqoopHive2Mysql.objects.all()
+        return SqoopHive2Mysql.objects.all().order_by('-ctime')
 
     def get_context_data(self, **kwargs):
         context = super(Hive2MysqlListView, self).get_context_data(**kwargs)
