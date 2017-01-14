@@ -122,7 +122,7 @@ def review(request, sqoop_id):
         logger.error(e)
         return HttpResponse(e)
 
-class StatusJobView(generic.ListView):
+class StatusJobView(GroupListView):
     template_name = 'sqoop/executions_status.html'
     context_object_name = 'executions'
     model = SqoopHive2MysqlExecutions
