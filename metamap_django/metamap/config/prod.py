@@ -28,7 +28,8 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-EEE = 'PROD'
+
+ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 
 ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83']
 CLUTER_QUEUE = 'default'

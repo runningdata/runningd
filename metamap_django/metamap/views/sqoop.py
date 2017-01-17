@@ -4,6 +4,7 @@ import logging
 import os
 import traceback
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponse
@@ -17,7 +18,9 @@ from metamap.models import SqoopHive2Mysql, Meta, SqoopHive2MysqlExecutions
 from metamap.serializers import MetaSerializer
 from will_common.decorators import my_decorator
 from will_common.models import WillDependencyTask
+from will_common.utils import PushUtils
 from will_common.utils import dateutils
+from will_common.utils import encryptutils
 from will_common.utils import httputils
 from will_common.utils import userutils
 from will_common.utils import ziputils
@@ -165,7 +168,7 @@ def generate_job_dag(request, schedule):
         command = 'echo done for h2m'
         deps = [leaf.name for leaf in leafs]
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
-
+        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d h2m generated ' % len(leafs))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:

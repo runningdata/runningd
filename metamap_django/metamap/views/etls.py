@@ -5,6 +5,7 @@ import os
 import traceback
 from StringIO import StringIO
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
@@ -20,6 +21,8 @@ from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, SqoopHive2Mysql, SqoopMysql2Hive
 from metamap.serializers import ETLSerializer, SqoopHive2MysqlSerializer, SqoopMysql2HiveSerializer
 from will_common.decorators import my_decorator
+from will_common.utils import PushUtils
+from will_common.utils import encryptutils
 from will_common.utils import hivecli, httputils, dateutils, ziputils
 from will_common.utils import userutils
 from will_common.utils.constants import *
@@ -334,6 +337,7 @@ def generate_job_dag(request, schedule):
         etlhelper.load_nodes(leafs, folder, done_blood, schedule)
         tbl = TblBlood(tblName='etl_done_' + folder)
         etlhelper.generate_job_file(tbl, leafs, folder)
+        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d etls generated ' % len(done_blood))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:

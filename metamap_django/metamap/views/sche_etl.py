@@ -199,6 +199,8 @@ def edit(request, pk):
         task = WillDependencyTask.objects.get(pk=pk)
         orig_sche_type = task.schedule
         httputils.post2obj(task, request.POST, 'id')
+        if ETL.objects.get(pk=task.rel_id).valid != 1 :
+            raise Exception('the etl you choose is invalid now, please rechoose another one')
         task.save()
         if int(task.schedule) == 4:
             if PeriodicTask.objects.filter(willtask_id=pk).exists():
