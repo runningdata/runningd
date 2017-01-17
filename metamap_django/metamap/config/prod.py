@@ -29,6 +29,9 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 DEBUG = False
 
 
+# push url
+PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
+PUSH_KEY = '&OKY%~!$^G*JRRF^'
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 
 ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83']

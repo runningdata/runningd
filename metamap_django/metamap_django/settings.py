@@ -29,6 +29,8 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 DEBUG = True
 
 ADMIN_PHONE = ''
+PUSH_URL = 'https://advert.willcup.com/sendMessage.shtml?mobileNo=%s&content=%s'
+PUSH_KEY = '&OKY%~!$^G*JRRF^'
 
 EEE = 'DEV'
 ALLOWED_HOSTS = []
