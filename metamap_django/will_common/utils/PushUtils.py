@@ -2,7 +2,6 @@
 import logging
 import urllib2
 
-import requests
 from django.conf import settings
 
 from will_common.utils.encryptutils import encrpt_msg
