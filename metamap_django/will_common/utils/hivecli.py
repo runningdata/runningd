@@ -34,6 +34,7 @@ def getTbls(etl):
 
                 # Fetch table results
                 deps = json.loads(cur.fetchone()[0])
+                print(' got deps : %s ' % deps)
                 tables_ = deps['input_tables']
                 for tbl in tables_:
                     result.add(tbl['tablename'])
