@@ -335,5 +335,4 @@ def load_nodes(leafs, folder, done_blood, schedule):
             logger.error('not in blood : %s , doneis : %s' % (parent_node, done_blood))
             generate_job_file(leaf, parent_node, folder, schedule)
             done_blood.add(leaf.tblName)
-        print('parent_node : %s ,floadr : %s , done_boloo: %s, sche: %s' %(parent_node, folder, done_blood, schedule))
         load_nodes(parent_node, folder, done_blood, schedule)
