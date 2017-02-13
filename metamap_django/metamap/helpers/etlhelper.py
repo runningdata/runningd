@@ -316,7 +316,7 @@ def generate_job_file_m2h(objs, folder):
             f.write(content)
 
 
-def load_nodes(leafs, folder, done_blood, schedule):
+def load_nodes(leafs, folder, done_blood, done_leaf, schedule):
     '''
     遍历加载节点
     :param leafs:
@@ -325,14 +325,18 @@ def load_nodes(leafs, folder, done_blood, schedule):
     :return:
     '''
     for leaf in leafs:
-        parent_node = TblBlood.objects.raw("select b.* from"
-                                           + " metamap_tblblood a join metamap_tblblood b"
-                                           + " on a.parent_tbl = b.tbl_name and b.valid = 1"
-                                           + " JOIN metamap_willdependencytask s "
-                                           + " on s.type = 1 and s.schedule = " + schedule + " and s.rel_id = b.related_etl_id"
-                                           + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
-        if leaf.tblName not in done_blood:
-            logger.error('not in blood : %s , doneis : %s' % (parent_node, done_blood))
-            generate_job_file(leaf, parent_node, folder, schedule)
-            done_blood.add(leaf.tblName)
-        load_nodes(parent_node, folder, done_blood, schedule)
+        tbl_name = leaf.tblName
+        if tbl_name not in done_leaf:
+            print('handling... %s ' % leaf.tblName)
+            parent_node = TblBlood.objects.raw("select b.* from"
+                                               + " metamap_tblblood a join metamap_tblblood b"
+                                               + " on a.parent_tbl = b.tbl_name and b.valid = 1"
+                                               + " JOIN metamap_willdependencytask s "
+                                               + " on s.type = 1 and s.schedule = " + schedule + " and s.rel_id = b.related_etl_id"
+                                               + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
+            if leaf.tblName not in done_blood:
+                print('not in blood : %s ' % parent_node.tblName)
+                generate_job_file(leaf, parent_node, folder, schedule)
+                done_blood.add(leaf.tblName)
+            print('parent_node : %s ,floadr : %s ,sche: %s' % (parent_node.tblName, folder, schedule))
+            load_nodes(parent_node, folder, done_blood, done_leaf, schedule)

@@ -321,6 +321,7 @@ def generate_job_dag(request, schedule):
     '''
     try:
         done_blood = set()
+        done_leaf = set()
         folder = 'h2h-' + dateutils.now_datetime()
         leafs = TblBlood.objects.raw("select a.* from "
                                      + "(select * from metamap_tblblood where valid = 1) a"
@@ -334,7 +335,7 @@ def generate_job_dag(request, schedule):
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-        etlhelper.load_nodes(leafs, folder, done_blood, schedule)
+        etlhelper.load_nodes(leafs, folder, done_blood, done_leaf, schedule)
         tbl = TblBlood(tblName='etl_done_' + folder)
         etlhelper.generate_job_file(tbl, leafs, folder)
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d etls generated ' % len(done_blood))
