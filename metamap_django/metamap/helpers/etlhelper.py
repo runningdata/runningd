@@ -337,6 +337,7 @@ def load_nodes(leafs, folder, done_blood, done_leaf, schedule):
             if tbl_name not in done_blood:
                 print('not in blood : %s ' % tbl_name)
                 generate_job_file(leaf, parent_node, folder, schedule)
-                done_blood.add(leaf.tblName)
+                done_blood.add(tbl_name)
             print('parent_node for : %s ,floadr : %s ,sche: %s' % (tbl_name, folder, schedule))
+            done_leaf.add(tbl_name)
             load_nodes(parent_node, folder, done_blood, done_leaf, schedule)
