@@ -92,7 +92,7 @@ function check_exec_status(){
                         echo "${execid} has been SUCCEEDED."
                         break
 		fi
-    		echo "${execid} not yet..." `cat ${tmp_output}`
+    		echo "${execid} not yet..."
 		sleep 10m	
 	done
 }
