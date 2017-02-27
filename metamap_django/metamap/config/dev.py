@@ -28,7 +28,15 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-EEE = 'DEV'
+# email settings
+EMAIL_HOST = 'smtp.exmail.qq.com'
+EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
+EMAIL_HOST_PASSWORD = 'YYxx24680'
+EMAIL_USE_TLS = True
+
+PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
+PUSH_KEY = '&OKY%~!$^G*JRRF^'
+ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 ALLOWED_HOSTS = []
 
 CLUTER_QUEUE = 'default'

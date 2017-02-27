@@ -5,6 +5,7 @@ created by will
 '''
 import datetime
 from django.db import transaction
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.views import generic
@@ -17,6 +18,7 @@ from will_common.helpers import cronhelper
 from metamap.models import AnaETL, Exports, BIUser
 from metamap.serializers import ExportsSerializer, BIUserSerializer
 from will_common.models import WillDependencyTask, PeriodicTask
+from will_common.utils import constants
 from will_common.utils import httputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
@@ -72,6 +74,7 @@ def add(request):
         return render(request, 'sche/ana/edit.html')
 
 
+
 class ExportsViewSet(viewsets.ModelViewSet):
     now = timezone.now()
     days = now - datetime.timedelta(days=7)
@@ -79,22 +82,43 @@ class ExportsViewSet(viewsets.ModelViewSet):
     serializer_class = ExportsSerializer
 
     @list_route(methods=['GET'])
+    def get_file(self, request):
+        from django.http import FileResponse
+        user = request.query_params['user']
+        sid = request.query_params['sid']
+        filename = request.query_params['filename']
+        result = httputils.jlc_auth(user, sid)
+        full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
+        if result == 'success':
+            response = FileResponse(open(full_file, 'rb'))
+            response['Content-Disposition'] = 'attachment; filename=te.sh'
+            return response
+        else:
+            return HttpResponse("session is not valid")
+
+    @list_route(methods=['GET'])
     def get_all(self, request):
         now = timezone.now()
         days = now - datetime.timedelta(days=7)
         user = request.query_params['user']
-        objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
-        result = list()
-        for export in objs:
-            ana_id = export.task.rel_id
-            ana_etl = AnaETL.objects.get(pk=ana_id)
-            if user != 'xuexu':
-                if ana_etl.is_auth(user):
+        sid = request.query_params['sid']
+        result = httputils.jlc_auth(user, sid)
+        if result == 'success':
+            print 'auth done'
+            objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
+            result = list()
+            for export in objs:
+                ana_id = export.task.rel_id
+                ana_etl = AnaETL.objects.get(pk=ana_id)
+                if user != 'xuexu':
+                    if ana_etl.is_auth(user):
+                        result.append(export)
+                else:
                     result.append(export)
-            else:
-                result.append(export)
-        serializer = self.get_serializer(result, many=True)
-        return Response(serializer.data)
+            serializer = self.get_serializer(result, many=True)
+            return Response(serializer.data)
+        else:
+            return Response("no result")
 
 
 class BIUserViewSet(viewsets.ModelViewSet):

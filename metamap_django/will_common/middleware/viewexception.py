@@ -26,5 +26,7 @@ class LoginRequire():
         is_dqms = request.path.startswith('/dqms') and '/rest/' not in request.path
         is_gene = request.path.startswith('/metamap') and '/rest/' not in request.path and '/generate_job_dag/' not in request.path
         is_export = request.path.startswith('/export')
-        if (is_dqms or is_gene or is_export) and not request.user.is_authenticated() :
-            return HttpResponseRedirect('/accounts/login/?next' + resolved_login_url)
+        is_test = request.path.endswith('test/')
+        if not is_test:
+            if (is_dqms or is_gene or is_export ) and not request.user.is_authenticated():
+                return HttpResponseRedirect('/accounts/login/?next' + resolved_login_url)

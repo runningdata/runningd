@@ -141,13 +141,13 @@ def exec_email_export(will_task):
         p.wait()
         returncode = p.returncode
         logger.info('%s return code is %d' % (command, returncode))
+        export.command = command
         command = 'cat %s/* | iconv -f utf-8 -c -t gb18030 >> %s' % (result_dir, result)
         print 'command is ', command
         p = subprocess.Popen([''.join(command)], shell=True, stderr=open(error_file, 'a'), universal_newlines=True)
         p.wait()
         returncode = p.returncode
         export.end_time = timezone.now()
-        export.command = command
         export.file_loc = part
         export.save()
         logger.info('%s return code is %d' % (command, returncode))

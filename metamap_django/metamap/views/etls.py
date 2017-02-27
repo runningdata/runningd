@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*
+import base64
 import json
 import logging
 import os
@@ -8,8 +9,12 @@ from StringIO import StringIO
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import BadHeaderError
+from django.core.mail import EmailMessage
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import transaction
+from django.http import FileResponse
 from django.http import Http404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
@@ -22,6 +27,7 @@ from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, SqoopH
 from metamap.serializers import ETLSerializer, SqoopHive2MysqlSerializer, SqoopMysql2HiveSerializer
 from will_common.decorators import my_decorator
 from will_common.utils import PushUtils
+from will_common.utils import constants
 from will_common.utils import encryptutils
 from will_common.utils import hivecli, httputils, dateutils, ziputils
 from will_common.utils import userutils
@@ -312,6 +318,59 @@ def preview_job_dag(request):
         logger.error('error : %s ' % e)
         return HttpResponse('error')
 
+
+def send_email(request):
+    subject = request.POST.get('subject', 'willtest')
+    message = request.POST.get('message', 'willtest')
+    from_email = request.POST.get('from_email', 'yinkerconfluence@yinker.com')
+    if subject and message and from_email:
+        try:
+            send_mail(subject, message, from_email, ['chenxin@yinker.com'])
+        except BadHeaderError:
+            return HttpResponse('Invalid header found.')
+        return HttpResponse('Ok header found.')
+    else:
+        # In reality we'd use a form class
+        # to get proper validation errors.
+        return HttpResponse('Make sure all fields are entered and valid.')
+
+def send_email2(request):
+    subject = request.POST.get('subject', 'willtest')
+    message = request.POST.get('message', 'willtest')
+    from_email = request.POST.get('from_email', 'yinkerconfluence@yinker.com')
+    if subject and message and from_email:
+        try:
+            email = EmailMessage(
+                u'中文题目',
+                u'中文内容',
+                'yinkerconfluence@yinker.com',
+                ['chenxin@yinker.com'],
+                ['xuexu@yinker.com'],
+            )
+            email.attach_file(u'/root/月度目标数据-20170210095000')
+
+            email.send()
+        except BadHeaderError:
+            return HttpResponse('Invalid header found.')
+        return HttpResponse('Ok header found.')
+    else:
+        # In reality we'd use a form class
+        # to get proper validation errors.
+        return HttpResponse('Make sure all fields are entered and valid.')
+
+def filedownload(request):
+    user = request.GET['user']
+    sid = request.GET['sid']
+    filename = request.GET['filename']
+    result = httputils.jlc_auth(user, sid)
+    if result == 'success':
+        full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
+        if result == 'success':
+            response = FileResponse(open(full_file, 'rb'))
+        response['Content-Disposition'] = 'attachment; filename=te.sh'
+        return response
+    else:
+        return HttpResponse("session is not valid")
 
 def generate_job_dag(request, schedule):
     '''

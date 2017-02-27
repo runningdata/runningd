@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*
 import logging
+import urllib2
 
 '''
 http的一些常用的工具方法
@@ -36,3 +37,22 @@ def get2obj(obj, get, *excludes):
                 v = ''.join(v)
                 setattr(obj, k, v)
     logging.info("get params has been copied to  obj -> %s" % obj)
+
+def get_url(url):
+    req = urllib2.Request(url)
+    req.add_header('User-Agent',
+                   'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36')
+    httpHandler = urllib2.HTTPHandler(debuglevel=1)
+    httpsHandler = urllib2.HTTPSHandler(debuglevel=1)
+    opener = urllib2.build_opener(httpHandler, httpsHandler)
+    urllib2.install_opener(opener)
+    resp = urllib2.urlopen(req)
+    if resp.getcode() == 200:
+        return resp.read()
+    else:
+        return 'error'
+
+
+def jlc_auth(user, sid):
+    url = 'http://10.1.5.222:8091/valsession?username=%s&sessionid=%s' % (user, sid)
+    return get_url(url)
