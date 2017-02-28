@@ -74,7 +74,6 @@ def add(request):
         return render(request, 'sche/ana/edit.html')
 
 
-
 class ExportsViewSet(viewsets.ModelViewSet):
     now = timezone.now()
     days = now - datetime.timedelta(days=7)
@@ -90,12 +89,11 @@ class ExportsViewSet(viewsets.ModelViewSet):
         group = request.query_params['group']
         if group == 'jlc':
             result = httputils.jlc_auth(user, sid)
-        final_filename =  filename + '.csv'
-        final_filename =  unicode(final_filename, 'utf8')
+        final_filename = filename + '.csv'
         full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
         if result == 'success':
             response = FileResponse(open(full_file, 'rb'))
-            response['Content-Disposition'] = 'attachment; filename=%s' % final_filename
+            response['Content-Disposition'] = 'attachment; filename=%s' % final_filename.encode('utf-8')
             return response
         else:
             return HttpResponse("session is not valid")
