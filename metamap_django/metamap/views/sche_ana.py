@@ -90,10 +90,12 @@ class ExportsViewSet(viewsets.ModelViewSet):
         group = request.query_params['group']
         if group == 'jlc':
             result = httputils.jlc_auth(user, sid)
+        final_filename =  filename + '.csv'
+        final_filename =  unicode(final_filename, 'utf8')
         full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
         if result == 'success':
             response = FileResponse(open(full_file, 'rb'))
-            response['Content-Disposition'] = 'attachment; filename=%s' % (filename + '.csv')
+            response['Content-Disposition'] = 'attachment; filename=%s' % final_filename
             return response
         else:
             return HttpResponse("session is not valid")
