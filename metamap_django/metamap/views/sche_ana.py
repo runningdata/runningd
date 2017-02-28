@@ -87,11 +87,13 @@ class ExportsViewSet(viewsets.ModelViewSet):
         user = request.query_params['user']
         sid = request.query_params['sid']
         filename = request.query_params['filename']
-        result = httputils.jlc_auth(user, sid)
+        group = request.query_params['group']
+        if group == 'jlc':
+            result = httputils.jlc_auth(user, sid)
         full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
         if result == 'success':
             response = FileResponse(open(full_file, 'rb'))
-            response['Content-Disposition'] = 'attachment; filename=te.sh'
+            response['Content-Disposition'] = 'attachment; filename=%s' % (filename + '.csv')
             return response
         else:
             return HttpResponse("session is not valid")
@@ -102,8 +104,10 @@ class ExportsViewSet(viewsets.ModelViewSet):
         days = now - datetime.timedelta(days=7)
         user = request.query_params['user']
         sid = request.query_params['sid']
-        result = httputils.jlc_auth(user, sid)
-        if result == 'success':
+        group = request.query_params['group']
+        if group == 'jlc':
+            response = httputils.jlc_auth(user, sid)
+        if response == 'success':
             print 'auth done'
             objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
             result = list()
@@ -118,7 +122,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(result, many=True)
             return Response(serializer.data)
         else:
-            return Response("no result")
+            return Response("no result for %s -> %s -> %s " % (group, user, sid))
 
 
 class BIUserViewSet(viewsets.ModelViewSet):
