@@ -38,6 +38,7 @@ def get2obj(obj, get, *excludes):
                 setattr(obj, k, v)
     logging.info("get params has been copied to  obj -> %s" % obj)
 
+
 def get_url(url):
     req = urllib2.Request(url)
     req.add_header('User-Agent',
@@ -54,5 +55,5 @@ def get_url(url):
 
 
 def jlc_auth(user, sid):
-    url = 'http://10.1.5.222:8091/valsession?username=%s&sessionid=%s' % (user, sid)
+    url = 'http://xlightning.jianlc.com/valsession?username=%s&sessionid=%s' % (user, sid)
     return get_url(url)
