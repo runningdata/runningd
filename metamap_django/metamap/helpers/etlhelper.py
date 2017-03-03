@@ -122,8 +122,12 @@ def generate_jarapp_script(wd, task, schedule=-1):
     context = Context()
     context['task'] = task
     context['wd'] = wd
-    with open('metamap/config/jar_template.sh') as tem:
-        str.append(tem.read())
+    if task.engine_type.id == 1:
+        with open('metamap/config/spark_template.sh') as tem:
+            str.append(tem.read())
+    else:
+        with open('metamap/config/jar_template.sh') as tem:
+            str.append(tem.read())
     template = Template('\n'.join(str))
     strip = template.render(context).strip()
     return strip
