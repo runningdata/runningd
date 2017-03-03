@@ -43,8 +43,8 @@ def get_url(url):
     req = urllib2.Request(url)
     req.add_header('User-Agent',
                    'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36')
-    httpHandler = urllib2.HTTPHandler(debuglevel=1)
-    httpsHandler = urllib2.HTTPSHandler(debuglevel=1)
+    httpHandler = urllib2.HTTPHandler(debuglevel=0)
+    httpsHandler = urllib2.HTTPSHandler(debuglevel=0)
     opener = urllib2.build_opener(httpHandler, httpsHandler)
     urllib2.install_opener(opener)
     resp = urllib2.urlopen(req)

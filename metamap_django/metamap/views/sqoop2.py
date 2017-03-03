@@ -10,12 +10,10 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.views import generic
 from rest_framework import viewsets
 
 from metamap.helpers import etlhelper
 from metamap.models import SqoopMysql2Hive, Meta, SqoopMysql2HiveExecutions
-from metamap.serializers import MetaSerializer
 from will_common.models import WillDependencyTask
 from will_common.utils import PushUtils
 from will_common.utils import dateutils
@@ -27,16 +25,6 @@ from will_common.utils.constants import DEFAULT_PAGE_SIEZE, AZKABAN_SCRIPT_LOCAT
 from will_common.views.common import GroupListView
 
 logger = logging.getLogger('info')
-
-
-class SqoopHiveMetaViewSet(viewsets.ModelViewSet):
-    queryset = Meta.objects.filter(type=2).order_by('-ctime')
-    serializer_class = MetaSerializer
-
-
-class SqoopMysqlMetaViewSet(viewsets.ModelViewSet):
-    queryset = Meta.objects.filter(type=1).order_by('-ctime')
-    serializer_class = MetaSerializer
 
 
 class Mysql2HiveListView(GroupListView):
@@ -129,31 +117,6 @@ def review(request, sqoop_id):
     except Exception, e:
         logger.error(e)
         return HttpResponse(e)
-
-
-class StatusJobView(GroupListView):
-    template_name = 'sqoop/executions_status2.html'
-    context_object_name = 'executions'
-    model = SqoopMysql2HiveExecutions
-
-    def get(self, request, status):
-        self.paginate_by = DEFAULT_PAGE_SIEZE
-        self.object_list = SqoopMysql2HiveExecutions.objects.filter(status=status).order_by('-start_time')
-        allow_empty = self.get_allow_empty()
-
-        if not allow_empty:
-            # When pagination is enabled and object_list is a queryset,
-            # it's better to do a cheap query than to load the unpaginated
-            # queryset in memory.
-            if (self.get_paginate_by(self.object_list) is not None
-                and hasattr(self.object_list, 'exists')):
-                is_empty = not self.object_list.exists()
-            else:
-                is_empty = len(self.object_list) == 0
-            if is_empty:
-                raise Exception("Empty list and '%(class_name)s.allow_empty' is False.")
-        context = self.get_context_data()
-        return self.render_to_response(context)
 
 
 def generate_job_dag(request, schedule):

@@ -103,7 +103,6 @@ def redir_metamap(request):
 
 from django.utils.translation import ugettext as _
 
-
 class GroupListView(generic.ListView):
     def get(self, request, *args, **kwargs):
         if request.user.username != 'admin':

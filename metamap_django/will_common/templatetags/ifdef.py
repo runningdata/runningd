@@ -17,3 +17,7 @@ def has_def(context, var):
 @register.simple_tag
 def host_clean(status):
     return status[0: len(status) - 5]
+
+@register.simple_tag(takes_context=True)
+def get_verbose(context, field):
+    return context['obj']._meta.get_field_by_name(field)[0].verbose_name

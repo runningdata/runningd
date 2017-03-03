@@ -14,3 +14,8 @@ class Long2Date(models.Field):
             return value
         return datetime.utcfromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S")
 
+class WillFileField(models.FileField):
+    def from_db_value(self, value, expression, connection, context):
+        if value is None:
+            return value
+        return datetime.utcfromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S")

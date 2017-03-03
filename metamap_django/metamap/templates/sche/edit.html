@@ -15,6 +15,10 @@
                 get_hive2mysql();
             } else if (task_type == 4) {
                 get_mysql2hive();
+            } else if (task_type == 5) {
+                get_sourceapp();
+            } else if (task_type == 6) {
+                get_jarapp();
             }
         }
     </script>
@@ -33,6 +37,12 @@
             <div class="form-group">
                 <label>任务类型</label>
                 <select id="task_type" name="type" onchange='change_type()' class="selectpicker form-control">
+                    <option
+                            {% if task.type == 6 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="6">JarApp
+                    </option>
                     <option
                             {% if task.type == 4 %}#}
                                 selected="selected"
@@ -63,7 +73,7 @@
             </div>
             <div class="form-group">
                 <label>预设变量</label>
-                <textarea name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
+                <textarea  id="variables" name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
             </div>
             <div class="form-group">
                 <label>是否生效</label>
@@ -147,6 +157,12 @@
                 <label>任务类型</label>
                 <select id="task_type" name="type" onchange='change_type()' class="selectpicker form-control">
                     <option
+                            {% if task.type == 6 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="6">JarApp
+                    </option>
+                    <option
                                 value="4">Mysql2Hive
                     </option>
                     <option
@@ -168,7 +184,7 @@
             </div>
             <div class="form-group">
                 <label>预设变量</label>
-                <textarea name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
+                <textarea id="variables" name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
             </div>
             <div class="form-group">
                 <label>是否生效</label>
@@ -279,6 +295,54 @@
                         dataType: "json",
                         contentType: "application/json;charset=utf-8",
                         url: "/metamap/rest/mysql2hive/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, sqoop) {
+                                if (id == sqoop.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        function get_sourceapp() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/sourceapp/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, sqoop) {
+                                if (id == sqoop.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        function get_jarapp() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/jarapp/?format=json",
                         success: function (result) {
                             $("#lunch").html('').selectpicker('refresh');
                             $.each(result, function (index, sqoop) {

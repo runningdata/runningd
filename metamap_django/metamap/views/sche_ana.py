@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryPeriodictasks
 from will_common.helpers import cronhelper
 from metamap.models import AnaETL, Exports, BIUser
-from metamap.serializers import ExportsSerializer, BIUserSerializer
+from metamap.rest.serializers import ExportsSerializer, BIUserSerializer
 from will_common.models import WillDependencyTask, PeriodicTask
 from will_common.utils import constants
 from will_common.utils import httputils
@@ -123,11 +123,6 @@ class ExportsViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         else:
             return Response("no result for %s -> %s -> %s " % (group, user, sid))
-
-
-class BIUserViewSet(viewsets.ModelViewSet):
-    queryset = BIUser.objects.using('ykx_wd').all()
-    serializer_class = BIUserSerializer
 
 
 @transaction.atomic

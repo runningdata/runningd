@@ -110,8 +110,63 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
     return strip
 
 
+def generate_jarapp_script(wd, task, schedule=-1):
+    '''
+    1. mvn build
+    2. app run
+    :param task:
+    :param schedule:
+    :return:
+    '''
+    str = list()
+    context = Context()
+    context['task'] = task
+    context['wd'] = wd
+    with open('metamap/config/jar_template.sh') as tem:
+        str.append(tem.read())
+    template = Template('\n'.join(str))
+    strip = template.render(context).strip()
+    return strip
+
+
+def generate_sourceapp_script(wd, task, schedule=-1):
+    '''
+    1. mvn build
+    2. app run
+    :param task:
+    :param schedule:
+    :return:
+    '''
+    str = list()
+    context = Context()
+    context['wd'] = wd
+    context['sourceapp'] = task
+    with open('metamap/config/template.sh') as tem:
+        str.append(tem.read())
+    template = Template('\n'.join(str))
+    strip = template.render(context).strip()
+    return strip
+
+
+def generate_sourceapp_script_file(wd, task, schedule=-1):
+    '''
+    1. mvn build
+    2. app run
+    :param wd:
+    :param task:
+    :param schedule:
+    :return:
+    '''
+    content = generate_sourceapp_script(wd, task, schedule)
+    filename = wd + '/exec.sh'
+    with open(filename, 'w') as fi:
+        fi.write(content.encode('utf-8'))
+    return filename
+
+
 def get_hive_inmi_tbl(tbl):
     return tbl + '_inmi'
+
 
 def generate_sqoop_hive2mysql(task, schedule=-1):
     str = list()
@@ -191,10 +246,10 @@ def generate_etl_sql(etl, schedule=-1):
     else:
         task = WillDependencyTask.objects.get(rel_id=etl.id, schedule=schedule, type=1)
         str.append(task.variables)
-    str.append('set mapreduce.job.queuename=' + settings.CLUTER_QUEUE +';')
-    str.append("-- job for " + etl.tblName)
+    str.append('set mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ';')
+    str.append("-- job for " + etl.name)
     if etl.creator:
-        str.append("-- " + etl.creator.user.username + '-' + etl.tblName)
+        str.append("-- " + etl.creator.user.username + '-' + etl.name)
     if etl.author:
         str.append("-- author : " + etl.author)
     ctime = etl.ctime
@@ -236,7 +291,7 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
     job_name = blood.tblName
     if not job_name.startswith('etl_done_'):
         # 生成hql文件
-        etl = ETL.objects.get(tblName=job_name, valid=1)
+        etl = ETL.objects.get(name=job_name, valid=1)
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         generate_etl_file(etl, location, schedule)
         command = "hive -f " + location

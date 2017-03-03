@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% load etlutils %}
 {% load ifdef %}
-{% block title %}ETL执行记录{% endblock %}
+{% block title %}执行记录{% endblock %}
 
 {% block content %}
     {% has_def 'executions'  as has %}
@@ -29,7 +29,7 @@
                         <td>{{ execution.end_time|date:"Y年m月d日 H时i分" }}</td>
                         <td>{% readable_status execution.status %}</td>
                         <td>
-                            <a class="btn btn-primary btn-sm" href="/metamap/m2h/execlog/{{ execution.id }}/">详情</a>
+                            <a class="btn btn-primary btn-sm" href="/metamap/{{ url_base }}/execlog/{{ execution.id }}/">详情</a>
                         </td>
                     </tr>
                 {% endfor %}

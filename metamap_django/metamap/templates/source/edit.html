@@ -1,0 +1,131 @@
+{% extends 'layout.html' %}
+{% load staticfiles %}
+{% block scripts %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-select.min.css' %}"/>
+    <script src="{% static 'js/bootstrap-select.min.js' %}"></script>
+{% endblock %}
+{% load ifdef %}
+{% block content %}
+    <div class="container">
+        {% csrf_token %}
+        {% has_def 'obj' as has_etl %}
+        {% if has_etl %}
+            <form action="." method="POST">
+                <div class="form-group">
+                    <label>cgroup</label>
+                    <select id="cgroup_id" name="cgroup_id" class="selectpicker form-control"
+                            data-live-search="true" required>
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
+                    <label>任务类型</label>
+                    <select id="engine_type" name="engine_type" class="selectpicker form-control"
+                            data-live-search="true" required>
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
+                    <label>名字</label>
+                    <input name="name" value="{{ obj.name }}" type="text" class="form-control">
+                    <label>{% get_verbose 'git_url' %}</label>
+                    <input name="git_url" value="{{ obj.git_url }}" type="text" class="form-control">
+                    <label>{% get_verbose 'branch' %}</label>
+                    <input name="branch" rows="13" class="form-control">{{ obj.branch }}</input>
+                    <label>{% get_verbose 'compile_tool' %}</label>
+                    <input name="compile_tool" rows="5" class="form-control">{{ obj.compile_tool }}</input>
+                    <label>是否生效</label>
+                    <div class="radio-inline">
+                        <input id="optionsRadios1" type="radio" name="valid"
+                                {% if valid != 0 %}
+                               checked="checked"
+                                {% endif %}
+                               value="1">是
+                    </div>
+                    <div class="radio-inline">
+                        <input id="optionsRadios3" type="radio" name="valid"
+                                {% if valid == 0 %}
+                               checked="checked"
+                                {% endif %}
+                               value="0">否
+                    </div>
+                    <br/>
+                    <div class="form-group">
+                        <label>权限用户</label>
+                        <input name="auth_users" value="{{ obj.auth_users }}" type="text" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </div>
+            </form>
+        {% else %}
+            <form action="." method="POST">
+                <div class="form-group">
+                    <label>cgroup</label>
+                    <select id="cgroup_id" name="cgroup_id" class="selectpicker form-control"
+                            data-live-search="true" required>
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
+                    <label>任务类型</label>
+                    <select id="engine_type" name="engine_type" class="selectpicker form-control"
+                            data-live-search="true" required>
+                        <option class="bs-title-option" value="">选择....</option>
+                    </select>
+                    <label>名字</label>
+                    <input name="name" value="" type="text" class="form-control">
+                    <label>{% get_verbose 'git_url' %}</label>
+                    <input name="git_url" value="" type="text" class="form-control">
+                    <label>{% get_verbose 'branch' %}</label>
+                    <input name="branch" rows="13" class="form-control"></input>
+                    <label>{% get_verbose 'compile_tool' %}</label>
+                    <input name="compile_tool" rows="5" class="form-control"></input>
+                    <label>是否生效</label>
+                    <div class="radio-inline">
+                        <input id="optionsRadios1" type="radio" name="valid"
+                               checked="checked"
+                               value="1">是
+                    </div>
+                    <div class="radio-inline">
+                        <input id="optionsRadios3" type="radio" name="valid"
+                               checked="checked"
+                               value="0">否
+                    </div>
+                    <br/>
+                    <div class="form-group">
+                        <label>权限用户</label>
+                        <input name="auth_users" type="text" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+     <script>
+        {% if obj %}
+            var cgroupid = {{ obj.cgroup_id }};
+            var entype= {{ obj.engine_type }};
+        {% else %}
+            var cgroupid = -1;
+            var entype= -1;
+        {% endif %}
+    </script>
+    <script type="application/javascript">
+        $.ajax({
+                    type: "get",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    url: "/metamap/source/get_engine_type/",
+                    success: function (result) {
+                        $.each(result, function (index, obj) {
+                            if (entype ==index) {
+                                $("#engine_type").append("<option selected='selected' value='" + index + "'>" + obj + "</option>");
+                            } else {
+                                $("#engine_type").append("<option value='" + index + "'>" + obj + "</option>");
+                            }
+                        })
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(errorThrown);
+                    },
+                    async: false             //false表示同步
+                }
+        );
+    </script>
+    {% include 'components/common_group_js.html' %}
+
+{% endblock %}

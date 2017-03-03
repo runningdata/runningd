@@ -121,7 +121,7 @@ def get_table(request, tblid):
     tbl = TBL.objects.using('hivemeta').get(pk=tblid)
     has_blood = True
     try:
-        ETL.objects.get(valid=1, tblName=tbl.db.name + '@' + tbl.tbl_name)
+        ETL.objects.get(valid=1, name=tbl.db.name + '@' + tbl.tbl_name)
     except ObjectDoesNotExist, e:
         has_blood = False
     return render(request, 'meta/table_info.html', {'result': tbl, 'has_blood': has_blood})

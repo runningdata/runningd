@@ -15,7 +15,6 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import FileResponse
-from django.http import Http404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -23,9 +22,8 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 
 from metamap.helpers import bloodhelper, etlhelper
-from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, SqoopHive2Mysql, SqoopMysql2Hive
-from metamap.serializers import ETLSerializer, SqoopHive2MysqlSerializer, SqoopMysql2HiveSerializer
-from will_common.decorators import my_decorator
+from metamap.models import TblBlood, ETL, Executions, WillDependencyTask
+
 from will_common.utils import PushUtils
 from will_common.utils import constants
 from will_common.utils import encryptutils
@@ -48,7 +46,7 @@ class IndexView(GroupListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            return ETL.objects.filter(valid=1, tblName__contains=tbl_name_).order_by('-ctime')
+            return ETL.objects.filter(valid=1, jar__contains=tbl_name_).order_by('-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
         current_group = self.request.user.groups.all()
         return ETL.objects.filter(valid=1).order_by('-ctime')
@@ -59,23 +57,6 @@ class IndexView(GroupListView):
             context['search'] = self.request.GET['search']
         return context
 
-
-from rest_framework import viewsets
-
-
-class ETLViewSet(viewsets.ModelViewSet):
-    queryset = ETL.objects.filter(valid=1).order_by('-ctime')
-    serializer_class = ETLSerializer
-
-class SqoopHive2MysqlViewSet(viewsets.ModelViewSet):
-    queryset = SqoopHive2Mysql.objects.order_by('-ctime')
-    serializer_class = SqoopHive2MysqlSerializer
-
-
-
-class SqoopMysql2HiveViewSet(viewsets.ModelViewSet):
-    queryset = SqoopMysql2Hive.objects.order_by('-ctime')
-    serializer_class = SqoopMysql2HiveSerializer
 
 def get_json(request):
     queryset = ETL.objects.filter(valid=1).order_by('-ctime')
@@ -94,7 +75,7 @@ class InvalidView(generic.ListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            return ETL.objects.filter(valid=0, tblName__contains=tbl_name_).order_by('-ctime')
+            return ETL.objects.filter(valid=0, jar__contains=tbl_name_).order_by('-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
         return ETL.objects.filter(valid=0).order_by('-ctime')
 
@@ -105,44 +86,10 @@ class InvalidView(generic.ListView):
         return context
 
 
-class StatusJobView(generic.ListView):
-    template_name = 'etl/executions_status.html'
-    context_object_name = 'executions'
-    model = Executions
-
-    def get(self, request, status):
-        self.paginate_by = DEFAULT_PAGE_SIEZE
-        self.object_list = Executions.objects.filter(status=status).order_by('-start_time')
-        allow_empty = self.get_allow_empty()
-
-        if not allow_empty:
-            # When pagination is enabled and object_list is a queryset,
-            # it's better to do a cheap query than to load the unpaginated
-            # queryset in memory.
-            if (self.get_paginate_by(self.object_list) is not None
-                and hasattr(self.object_list, 'exists')):
-                is_empty = not self.object_list.exists()
-            else:
-                is_empty = len(self.object_list) == 0
-            if is_empty:
-                raise Exception("Empty list and '%(class_name)s.allow_empty' is False.")
-        context = self.get_context_data()
-        return self.render_to_response(context)
-
-
 class EditView(generic.DetailView):
     template_name = 'etl/edit.html'
     context_object_name = 'form'
     queryset = ETL.objects.all()
-
-
-# class ETLForm(forms.ModelForm):
-#     preSql = forms.CharField(widget=forms.Textarea(attrs={'class': "form-control", "size": 10}))
-#
-#     class Meta:
-#         model = ETL
-#         exclude = ['id', 'ctime']
-
 
 
 def blood_dag(request, etlid):
@@ -160,7 +107,7 @@ def blood_dag(request, etlid):
 def blood_by_name(request):
     etl_name = request.GET['tblName']
     try:
-        etl = ETL.objects.filter(valid=1).get(tblName=etl_name)
+        etl = ETL.objects.filter(valid=1).get(jar=etl_name)
         return blood_dag(request, etl.id)
     except ObjectDoesNotExist:
         message = u'%s 不存在' % etl_name
@@ -168,7 +115,7 @@ def blood_by_name(request):
 
 
 def his(request, tblName):
-    etls = ETL.objects.filter(tblName=tblName).order_by('-ctime')
+    etls = ETL.objects.filter(name=tblName).order_by('-ctime')
     return render(request, 'etl/his.html', {'etls': etls, 'tblName': tblName})
 
 
@@ -179,14 +126,14 @@ def add(request):
                 etl = ETL()
                 httputils.post2obj(etl, request.POST, 'id')
                 userutils.add_current_creator(etl, request)
-                find_ = etl.tblName.find('@')
-                etl.meta = etl.tblName[0: find_]
+                find_ = etl.name.find('@')
+                etl.meta = etl.name[0: find_]
                 etl.save()
                 logger.info('ETL has been created successfully : %s ' % etl)
                 deps = hivecli.getTbls(etl)
                 for dep in deps:
-                    if etl.tblName != dep:
-                        tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+                    if etl.name != dep:
+                        tblBlood = TblBlood(jar=etl.name, parentTbl=dep, relatedEtlId=etl.id)
                         tblBlood.save()
                         logger.info('Tblblood has been created successfully : %s' % tblBlood)
                 return HttpResponseRedirect(reverse('metamap:index'))
@@ -194,6 +141,7 @@ def add(request):
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
         return render(request, 'etl/edit.html')
+
 
 def edit(request, pk):
     if request.method == 'POST':
@@ -212,8 +160,8 @@ def edit(request, pk):
                     privious_etl.ctime = timezone.now()
                     httputils.post2obj(etl, request.POST, 'id')
                     userutils.add_current_creator(etl, request)
-                    find_ = etl.tblName.find('@')
-                    etl.meta = etl.tblName[0: find_]
+                    find_ = etl.name.find('@')
+                    etl.meta = etl.name[0: find_]
 
                     etl.save()
                     logger.info('ETL has been created successfully : %s ' % etl)
@@ -227,9 +175,9 @@ def edit(request, pk):
 
                     deps = hivecli.getTbls(etl)
                     for dep in deps:
-                        logger.info("dep is %s, tblName is %s " % (dep, etl.tblName))
-                        if etl.tblName != dep:
-                            tblBlood = TblBlood(tblName=etl.tblName, parentTbl=dep, relatedEtlId=etl.id)
+                        logger.info("dep is %s, tblName is %s " % (dep, etl.name))
+                        if etl.name != dep:
+                            tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
                             tblBlood.save()
                             logger.info('Tblblood has been created successfully : %s' % tblBlood)
                     logger.info('Tblblood for %s has been created successfully' % (pk))
@@ -243,7 +191,7 @@ def edit(request, pk):
 
 def exec_job(request, etlid):
     etl = ETL.objects.get(id=etlid)
-    location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-' + etl.tblName.replace('@', '__') + '.hql'
+    location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-' + etl.name.replace('@', '__') + '.hql'
     etlhelper.generate_etl_file(etl, location)
     log_location = location.replace('hql', 'log')
     with open(log_location, 'a') as log:
@@ -251,7 +199,7 @@ def exec_job(request, etlid):
             log.write(hql.read())
     # work_manager.add_job(threadpool.do_job, 'hive -f ' + location, log_location)
     # logger.info(
-    #     'job for %s has been executed, current pool size is %d' % (etl.tblName, work_manager.work_queue.qsize()))
+    #     'job for %s has been executed, current pool size is %d' % (etl.name, work_manager.work_queue.qsize()))
     execution = Executions(logLocation=log_location, job_id=etlid, status=0)
     execution.save()
     from metamap import tasks
@@ -334,6 +282,7 @@ def send_email(request):
         # to get proper validation errors.
         return HttpResponse('Make sure all fields are entered and valid.')
 
+
 def send_email2(request):
     subject = request.POST.get('subject', 'willtest')
     message = request.POST.get('message', 'willtest')
@@ -358,6 +307,7 @@ def send_email2(request):
         # to get proper validation errors.
         return HttpResponse('Make sure all fields are entered and valid.')
 
+
 def filedownload(request):
     user = request.GET['user']
     sid = request.GET['sid']
@@ -371,6 +321,7 @@ def filedownload(request):
         return response
     else:
         return HttpResponse("session is not valid")
+
 
 def generate_job_dag(request, schedule):
     '''
@@ -397,7 +348,8 @@ def generate_job_dag(request, schedule):
         etlhelper.load_nodes(leafs, folder, done_blood, done_leaf, schedule)
         tbl = TblBlood(tblName='etl_done_' + folder)
         etlhelper.generate_job_file(tbl, leafs, folder)
-        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d etls generated ' % len(done_blood))
+        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
+                                   '%d etls generated ' % len(done_blood))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:

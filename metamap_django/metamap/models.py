@@ -7,8 +7,6 @@ from django.utils import timezone
 
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
 from will_common.models import PeriodicTask, WillDependencyTask, UserProfile
-import will_common
-from will_common.templatetags.etlutils import sche_type_dic
 
 
 class AnaETL(models.Model):
@@ -40,10 +38,64 @@ class AnaETL(models.Model):
         return self.name
 
 
+class SourceEngine(models.Model):
+    name = models.CharField(max_length=20, verbose_name=u"引擎名称")
+    bin_name = models.CharField(max_length=20, verbose_name=u"引擎启动脚本")
+    enpath_path = models.CharField(max_length=300, verbose_name=u"引擎路径")
+
+    def __str__(self):
+        return self.name
+
+
+class CompileTool(models.Model):
+    name = models.CharField(max_length=20, verbose_name=u"引擎名称")
+    bin_name = models.CharField(max_length=20, verbose_name=u"引擎启动脚本")
+    opts = models.CharField(max_length=100, verbose_name=u"默认编译参数")
+    target_path = models.CharField(max_length=100, verbose_name=u"默认目标文件路径")
+    enpath_path = models.CharField(max_length=300, verbose_name=u"引擎路径")
+
+    def __str__(self):
+        return self.name
+
+
+class SourceApp(models.Model):
+    name = models.CharField(max_length=200, verbose_name=u"任务名称")
+    engine_type = models.ForeignKey(SourceEngine, on_delete=models.DO_NOTHING,
+                                    verbose_name=u"运行工具")
+    git_url = models.CharField(max_length=200, verbose_name=u"git地址")
+    branch = models.CharField(max_length=20, verbose_name=u"git分支")
+    sub_dir = models.CharField(max_length=100, verbose_name=u"工作目录")
+    main_func = models.CharField(max_length=100, verbose_name=u"入口类")
+    compile_tool = models.ForeignKey(CompileTool, on_delete=models.DO_NOTHING,
+                                     verbose_name=u"运行工具")
+    priority = models.IntegerField(default=5, blank=True)
+    valid = models.IntegerField(default=1, verbose_name=u"是否生效")
+    engine_opts = models.TextField(max_length=400, default='', verbose_name=u"引擎运行参数", blank=True, null=True)
+    main_func_opts = models.TextField(max_length=400, default='', verbose_name=u"入口类运行参数", blank=True, null=True)
+    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='source_creator', null=True)
+    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='source_cgroup', null=True)
+    ctime = models.DateTimeField(default=timezone.now)
+
+
+class JarApp(models.Model):
+    name = models.CharField(max_length=200, verbose_name=u"任务名称")
+    engine_type = models.ForeignKey(SourceEngine, on_delete=models.DO_NOTHING,
+                                    verbose_name=u"运行工具")
+    main_func = models.CharField(max_length=100, verbose_name=u"入口类")
+    priority = models.IntegerField(default=5, blank=True)
+    jar_file = models.FileField(upload_to='jars', blank=True)
+    valid = models.IntegerField(default=1, verbose_name=u"是否生效")
+    engine_opts = models.TextField(max_length=400, default='', verbose_name=u"引擎运行参数", blank=True, null=True)
+    main_func_opts = models.TextField(max_length=400, default='', verbose_name=u"入口类运行参数", blank=True, null=True)
+    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='jar_creator', null=True)
+    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='jar_cgroup', null=True)
+    ctime = models.DateTimeField(default=timezone.now)
+
+
 class ETL(models.Model):
     query = models.TextField()
     meta = models.CharField(max_length=20)
-    tblName = models.CharField(max_length=100, db_column='tbl_name', verbose_name=u"ETL名称")
+    name = models.CharField(max_length=100, db_column='tbl_name', verbose_name=u"ETL名称")
     author = models.CharField(max_length=20, blank=True, null=True)
     preSql = models.TextField(db_column='pre_sql', blank=True, null=True)
     ctime = models.DateTimeField(default=timezone.now)
@@ -186,6 +238,32 @@ class SqoopHive2MysqlExecutions(models.Model):
     def __str__(self):
         return self.logLocation
 
+
+class SourceAppExecutions(models.Model):
+    '''
+    单次任务执行记录
+    '''
+    logLocation = models.CharField(max_length=120, db_column='log_location')
+    job = models.ForeignKey(SourceApp, on_delete=models.CASCADE, null=False)
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(null=True)
+    status = models.IntegerField(default=-1)
+
+    def __str__(self):
+        return self.logLocation
+
+class JarAppExecutions(models.Model):
+    '''
+    单次任务执行记录
+    '''
+    logLocation = models.CharField(max_length=120, db_column='log_location')
+    job = models.ForeignKey(JarApp, on_delete=models.CASCADE, null=False)
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(null=True)
+    status = models.IntegerField(default=-1)
+
+    def __str__(self):
+        return self.logLocation
 
 class SqoopMysql2HiveExecutions(models.Model):
     '''

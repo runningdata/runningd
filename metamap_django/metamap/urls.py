@@ -1,14 +1,17 @@
 from django.conf.urls import url, include
 from rest_framework import routers
 
+from metamap.models import JarAppExecutions, SqoopMysql2HiveExecutions, Executions, SqoopHive2MysqlExecutions
+from metamap.views import jar
 from metamap.views import sche_etl, export
+from metamap.views import source
 from metamap.views import sqoop
 from metamap.views import sqoop2
-from metamap.views.export import AnaETLViewSet
-from metamap.views.etls import ETLViewSet, SqoopHive2MysqlViewSet, SqoopMysql2HiveViewSet
-from metamap.views.sche_ana import ExportsViewSet, BIUserViewSet
-from metamap.views.sqoop import SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
+from metamap.rest.rest_views import ETLViewSet, SqoopHive2MysqlViewSet, SqoopMysql2HiveViewSet, SourceAppViewSet, \
+    JarAppViewSet, BIUserViewSet, AnaETLViewSet, SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
+from metamap.views.sche_ana import ExportsViewSet
 from views import etls, metas
+from metamap.views import common
 
 app_name = 'metamap'
 
@@ -16,6 +19,8 @@ router = routers.DefaultRouter()
 router.register(r'etls', ETLViewSet)
 router.register(r'hive2mysql', SqoopHive2MysqlViewSet)
 router.register(r'mysql2hive', SqoopMysql2HiveViewSet)
+router.register(r'sourceapp', SourceAppViewSet)
+router.register(r'jarapp', JarAppViewSet)
 router.register(r'users', BIUserViewSet)
 router.register(r'emails', AnaETLViewSet)
 router.register(r'exports', ExportsViewSet)
@@ -29,7 +34,8 @@ urlpatterns = [
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
     url(r'^etls/invalid/$', etls.InvalidView.as_view(), name='invalid'),
     url(r'^etls/add/$', etls.add, name='add'),
-    url(r'^etls/status/(?P<status>[0-9]+)/$', etls.StatusJobView.as_view(), name='status'),
+    url(r'^etls/status/(?P<status>[0-9]+)/$',
+        common.StatusListView.as_view(url_base='etls', model=Executions),  name='status'),
     url(r'^etls/his/(?P<tblName>.*)/$', etls.his, name='his'),
     url(r'^etls/blood/$', etls.blood_by_name, name='blood_by_name'),
     url(r'^etls/preview_dag/$', etls.preview_job_dag, name='preview_job_dag'),
@@ -48,7 +54,6 @@ urlpatterns = [
     url(r'^h2m/generate_job_dag/(?P<schedule>[0-9])/$', sqoop.generate_job_dag, name='generate_sqoop_job_dag'),
     url(r'^m2h/generate_job_dag/(?P<schedule>[0-9])/$', sqoop2.generate_job_dag, name='generate_sqoop2_job_dag'),
 
-
     url(r'^meta/list/$', metas.MetaListView.as_view(), name='meta_list'),
     url(r'^meta/add/$', metas.add, name='add_meta'),
     url(r'^meta/(?P<pk>[0-9]+)/$', metas.edit, name='edit_meta'),
@@ -64,17 +69,18 @@ urlpatterns = [
     url(r'^h2m/exec/(?P<sqoopid>[0-9]+)/$', sqoop.exec_job, name='sqoop_exec'),
     url(r'^h2m/execlog/(?P<execid>[0-9]+)/$', sqoop.exec_log, name='sqoop_execlog'),
     url(r'^h2m/getexeclog/(?P<execid>[0-9]+)/$', sqoop.get_exec_log, name='sqoop_getexeclog'),
-    url(r'^h2m/status/(?P<status>[0-9]+)/$', sqoop.StatusJobView.as_view(), name='sqoop_status'),
+    url(r'^h2m/status/(?P<status>[0-9]+)/$',
+        common.StatusListView.as_view(url_base='h2m', model=SqoopHive2MysqlExecutions),  name='sqoop_status'),
 
     url(r'^m2h/$', sqoop2.Mysql2HiveListView.as_view(), name='h2m_sqoop2_list'),
     url(r'^m2h/(?P<pk>[0-9]+)/$', sqoop2.edit, name='h2m_sqoop2_edit'),
     url(r'^m2h/add/$', sqoop2.add, name='h2m_sqoop2_add'),
     url(r'^m2h/review/(?P<sqoop_id>[0-9]+)/$', sqoop2.review, name='h2m_sqoop2_review'),
-
     url(r'^m2h/exec/(?P<sqoopid>[0-9]+)/$', sqoop2.exec_job, name='sqoop2_exec'),
     url(r'^m2h/execlog/(?P<execid>[0-9]+)/$', sqoop2.exec_log, name='sqoop2_execlog'),
     url(r'^m2h/getexeclog/(?P<execid>[0-9]+)/$', sqoop2.get_exec_log, name='sqoop2_getexeclog'),
-    url(r'^m2h/status/(?P<status>[0-9]+)/$', sqoop2.StatusJobView.as_view(), name='sqoop2_status'),
+    url(r'^m2h/status/(?P<status>[0-9]+)/$',
+        common.StatusListView.as_view(url_base='m2h', model=SqoopMysql2HiveExecutions), name='sqoop2_status'),
 
     url(r'^tasks/tasks/$', sche_etl.get_all_tasks, name='tasks'),
     url(r'^tasks/update/$', sche_etl.update_tasks_interval, name='update_tasks_interval'),
@@ -86,8 +92,24 @@ urlpatterns = [
     url(r'^sche/add/$', sche_etl.add, name='sche_add'),
     url(r'^sche/migrate/$', sche_etl.migrate_jobs, name='migrate'),
 
+    url(r'^source/$', source.IndexView.as_view(), name='source_index'),
+    url(r'^source/add/$', source.add, name='source_add'),
+    url(r'^source/(?P<pk>[0-9]+)/$', source.edit, name='source_edit'),
+    url(r'^source/review/(?P<pk>[0-9]+)/$', source.review, name='source_review'),
+    url(r'^source/exec/(?P<pk>[0-9]+)/$', source.exec_job, name='source_exec'),
 
+    url(r'^jar/$', jar.IndexView.as_view(), name='jar_index'),
+    url(r'^jar/add/$', jar.add, name='jar_add'),
+    url(r'^jar/del/(?P<pk>[0-9]+)/$', jar.delete, name='jar_delete'),
+    url(r'^jar/(?P<pk>[0-9]+)/$', jar.edit, name='jar_edit'),
+    url(r'^jar/review/(?P<pk>[0-9]+)/$', jar.review, name='jar_review'),
+    url(r'^jar/exec/(?P<pk>[0-9]+)/$', jar.exec_job, name='jar_exec'),
+    url(r'^jar/execlog/(?P<execid>[0-9]+)/$', jar.exec_log, name='jar_execlog'),
+    url(r'^jar/getexeclog/(?P<execid>[0-9]+)/$', jar.get_exec_log, name='jar_getexeclog'),
+    url(r'^jar/status/(?P<status>[0-9]+)/$', common.StatusListView.as_view(url_base='jar', model=JarAppExecutions),
+        name='jar_status'),
 
+    url(r'^source/get_engine_type/$', source.get_engine_type, name='get_engine_type'),
     url(r'^rest/', include(router.urls)),
     url(r'^json/', etls.get_json),
 ]

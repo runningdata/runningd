@@ -67,11 +67,8 @@ class ScheDepListView(generic.ListView):
             objss = objss.exclude(id=obj.id)
         return objss
 
-    def handle_hive2mysql(self, objss, obj):
+    def handle_pass(self, objss, obj):
         return objss
-        # etl = SqoopHive2Mysql.objects.get(id=obj.rel_id)
-        # if etl.valid != 1:
-        #     objs = objs.exclude(id=obj.id)
 
     # TODO 考虑一下是否合适
     def handle_email_export(self, objss, obj):
@@ -85,7 +82,8 @@ class ScheDepListView(generic.ListView):
         return objss
 
     def get_queryset(self):
-        filters = {1: self.handle_etl, 2: self.handle_email_export, 3: self.handle_hive2mysql, 4: self.handle_hive2mysql}
+        filters = {1: self.handle_etl, 2: self.handle_email_export, 3: self.handle_pass,
+                   4: self.handle_pass, 5: self.handle_pass, 6: self.handle_pass}
 
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
@@ -252,5 +250,5 @@ def edit(request, pk):
 def migrate_jobs(request):
     etls = ETL.objects.filter(valid=1, onSchedule=1)
     for etl in etls:
-        WillDependencyTask.objects.get_or_create(schedule=0, etl_id=etl.id, name=etl.tblName, variables=etl.variables)
+        WillDependencyTask.objects.get_or_create(schedule=0, etl_id=etl.id, name=etl.name, variables=etl.variables)
     return HttpResponse('success')

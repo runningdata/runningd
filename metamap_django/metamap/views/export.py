@@ -16,7 +16,6 @@ from rest_framework import viewsets
 
 from metamap.helpers import etlhelper
 from metamap.models import AnaETL
-from metamap.serializers import AnaETLSerializer
 from will_common.utils import httputils
 from will_common.utils import userutils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
@@ -24,9 +23,6 @@ from will_common.views.common import GroupListView
 
 logger = logging.getLogger('django')
 
-class AnaETLViewSet(viewsets.ModelViewSet):
-    queryset = AnaETL.objects.filter(valid=1).order_by('-ctime')
-    serializer_class = AnaETLSerializer
 
 class IndexView(GroupListView):
     template_name = 'export/list.html'

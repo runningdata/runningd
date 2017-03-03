@@ -19,8 +19,8 @@ class ETLAdmin(admin.ModelAdmin):
     get_app_url.short_description = '持续集成状态'
 
     readonly_fields = ('onSchedule',)
-    list_display = ('query', 'tblName', 'preSql')
-    search_fields = ('tblName',)
+    list_display = ('query', 'name', 'preSql')
+    search_fields = ('name',)
     list_filter = ('valid',)
 
 admin.site.register(TblBlood)

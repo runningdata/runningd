@@ -11,9 +11,13 @@ from django.utils import timezone
 from will_common.djcelery_models import DjceleryCrontabschedule
 from will_common.djcelery_models import DjceleryIntervalschedule
 
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     phone = models.BigIntegerField(default=110)
+
+    def __str__(self):
+        return self.user.username
 
 
 class WillDependencyTask(models.Model):
@@ -25,7 +29,8 @@ class WillDependencyTask(models.Model):
     variables = models.TextField()
     desc = models.TextField()
     rel_id = models.IntegerField(null=True, blank=False, help_text="ETL or Email id")
-    type = models.IntegerField(default=1, blank=False, null=False, help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive")
+    type = models.IntegerField(default=1, blank=False, null=False,
+                               help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 jarfile")
 
     class Meta:
         db_table = 'metamap_willdependencytask'
