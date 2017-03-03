@@ -251,9 +251,9 @@
                             $("#lunch").html('').selectpicker('refresh');
                             $.each(result, function (index, etl) {
                                 if (id == etl.id) {
-                                    $("#lunch").append("<option selected='selected' value='" + etl.id + "'>" + etl.tblName + "</option>");
+                                    $("#lunch").append("<option selected='selected' value='" + etl.id + "'>" + etl.name + "</option>");
                                 } else {
-                                    $("#lunch").append("<option value='" + etl.id + "'>" + etl.tblName + "</option>");
+                                    $("#lunch").append("<option value='" + etl.id + "'>" + etl.name + "</option>");
                                 }
                             });
                             $("#lunch").selectpicker('refresh');
