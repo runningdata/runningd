@@ -12,7 +12,7 @@ from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser, Met
 class ETLSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ETL
-        fields = ('jar', 'valid', 'id')
+        fields = ('name', 'valid', 'id')
 
 
 class SourceAppSerializer(serializers.HyperlinkedModelSerializer):

@@ -33,6 +33,7 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li><a href="{% url 'metamap:jar_edit' obj.id %}">编辑</a></li>
+                                    <li><a href="{% url 'metamap:jar_exec' obj.id %}">测试执行</a></li>
                                     <li><a href="{% url 'metamap:jar_review' obj.id %}">review脚本</a></li>
                                     <li><a href="{% url 'metamap:jar_delete' obj.id %}">删除</a></li>
                                 </ul>

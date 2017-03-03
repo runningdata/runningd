@@ -46,7 +46,7 @@ class IndexView(GroupListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            return ETL.objects.filter(valid=1, jar__contains=tbl_name_).order_by('-ctime')
+            return ETL.objects.filter(valid=1, name__contains=tbl_name_).order_by('-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
         current_group = self.request.user.groups.all()
         return ETL.objects.filter(valid=1).order_by('-ctime')
@@ -75,7 +75,7 @@ class InvalidView(generic.ListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            return ETL.objects.filter(valid=0, jar__contains=tbl_name_).order_by('-ctime')
+            return ETL.objects.filter(valid=0, name__contains=tbl_name_).order_by('-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
         return ETL.objects.filter(valid=0).order_by('-ctime')
 
@@ -107,7 +107,7 @@ def blood_dag(request, etlid):
 def blood_by_name(request):
     etl_name = request.GET['tblName']
     try:
-        etl = ETL.objects.filter(valid=1).get(jar=etl_name)
+        etl = ETL.objects.filter(valid=1).get(name=etl_name)
         return blood_dag(request, etl.id)
     except ObjectDoesNotExist:
         message = u'%s 不存在' % etl_name
@@ -133,7 +133,7 @@ def add(request):
                 deps = hivecli.getTbls(etl)
                 for dep in deps:
                     if etl.name != dep:
-                        tblBlood = TblBlood(jar=etl.name, parentTbl=dep, relatedEtlId=etl.id)
+                        tblBlood = TblBlood(name=etl.name, parentTbl=dep, relatedEtlId=etl.id)
                         tblBlood.save()
                         logger.info('Tblblood has been created successfully : %s' % tblBlood)
                 return HttpResponseRedirect(reverse('metamap:index'))
