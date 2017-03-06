@@ -116,6 +116,22 @@ class ETL(models.Model):
         return self.ctime >= timezone.now - datetime.timedelta(days=1)
 
 
+class ETLObj(models.Model):
+    name = models.CharField(max_length=100, db_column='name')
+    type = models.IntegerField(default=1, blank=False, null=False,
+                                help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 jarfile")
+    rel_id = models.IntegerField(db_column='related_etl_id')
+
+
+class EtlBlood(models.Model):
+    child = models.ForeignKey(ETLObj, on_delete=models.DO_NOTHING)
+    parent = models.ForeignKey(ETLObj, on_delete=models.DO_NOTHING)
+    ctime = models.DateTimeField(default=timezone.now)
+    current = 0
+
+    def __str__(self):
+        return self.parent.name + '-->' + self.child.name
+
 class TblBlood(models.Model):
     class Meta:
         unique_together = (('tblName', 'parentTbl', 'valid'),)
@@ -126,12 +142,9 @@ class TblBlood(models.Model):
     ctime = models.DateTimeField(default=timezone.now)
     valid = models.IntegerField(default=1)
     current = 0
-    parent_type = models.IntegerField(default=1, blank=False, null=False,
-                               help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 jarfile")
 
     def __str__(self):
         return self.parentTbl + '-->' + self.tblName
-
 
 class Meta(models.Model):
     '''

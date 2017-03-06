@@ -133,7 +133,7 @@ def add(request):
                 deps = hivecli.getTbls(etl)
                 for dep in deps:
                     if etl.name != dep:
-                        tblBlood = TblBlood(name=etl.name, parentTbl=dep, relatedEtlId=etl.id)
+                        tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
                         tblBlood.save()
                         logger.info('Tblblood has been created successfully : %s' % tblBlood)
                 return HttpResponseRedirect(reverse('metamap:index'))
