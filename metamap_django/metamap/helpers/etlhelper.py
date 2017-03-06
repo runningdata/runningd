@@ -219,11 +219,14 @@ def generate_sqoop_hive2mysql(task, schedule=-1):
     str.append(task.columns)
     export_dir = ColMeta.objects.using('hivemeta').filter(db__name=task.hive_meta.db,
                                                           tbl__tbl_name=task.hive_tbl).first().location
+    print('got export_dir_db is %s ' % export_dir)
     export_dir += '/'
     export_dir += task.hive_tbl
     export_dir += '/'
+    print('got export_dir_tbl is %s ' % export_dir)
     if len(task.partion_expr) != 0:
         export_dir += task.partion_expr
+    print('got export_dir is %s ' % export_dir)
     str.append(' --export-dir ')
     str.append(export_dir)
     str.append(' --table ')

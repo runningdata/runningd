@@ -126,6 +126,8 @@ class TblBlood(models.Model):
     ctime = models.DateTimeField(default=timezone.now)
     valid = models.IntegerField(default=1)
     current = 0
+    parent_type = models.IntegerField(default=1, blank=False, null=False,
+                               help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 jarfile")
 
     def __str__(self):
         return self.parentTbl + '-->' + self.tblName
