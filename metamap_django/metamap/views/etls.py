@@ -445,7 +445,7 @@ def generate_job_dag_v2(request, schedule):
         done_blood = set()
         done_leaf = set()
         folder = 'h2h-' + dateutils.now_datetime()
-        leafs = TblBlood.objects.raw("SELECT a.* FROM "
+        leafs = ETLBlood.objects.raw("SELECT a.* FROM "
                                       "metamap_etlblood a "
                                      "join ("
                                         "select rel_id from metamap_willdependencytask where `schedule` = " + schedule +" and valid=1 and type!=100 "

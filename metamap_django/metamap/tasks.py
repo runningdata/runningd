@@ -230,6 +230,7 @@ def exec_jarapp(taskid):
     command = etlhelper.generate_jarapp_script(work_dir, jar_task)
     print command
     execution = JarAppExecutions(logLocation=log, job_id=jar_task.id, status=0)
+    command = 'runuser -l tinyv -c "' + command + '"'
     normal_execution(command, execution)
 
 
@@ -237,6 +238,7 @@ def exec_jarapp(taskid):
 def exec_jar(command, pk):
     try:
         execution = JarAppExecutions.objects.get(pk=pk)
+        command = 'runuser -l tinyv -c "' + command + '"'
         p = subprocess.Popen([''.join(command)], stdout=open(execution.logLocation, 'a'), stderr=subprocess.STDOUT,
                              shell=True,
                              universal_newlines=True)

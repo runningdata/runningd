@@ -7,7 +7,7 @@ from django.conf import settings
 from django.template import Context, Template
 
 from metamap.db_views import ColMeta, DB
-from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql
+from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql, ETLBlood
 from will_common.utils import dateutils
 from will_common.utils.constants import *
 import logging
@@ -318,6 +318,36 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
     with open(job_file, 'w') as f:
         f.write(content)
 
+def generate_job_file_v2(blood, parent_node, folder, schedule=-1):
+    '''
+    生成azkaban job文件
+    :param blood:
+    :param parent_node:
+    :param folder:
+    :return:
+    '''
+    job_name = blood.tblName
+    if not job_name.startswith('etl_done_'):
+        # 生成hql文件
+        etl = ETL.objects.get(name=job_name, valid=1)
+        location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
+        generate_etl_file(etl, location, schedule)
+        command = "hive -f " + location
+    else:
+        command = "echo " + job_name
+
+    # 生成job文件
+    job_type = ' command\nretries=12\nretry.backoff=300000\n'
+    dependencies = set()
+    for p in parent_node:
+        dependencies.add(p.tblName)
+    content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
+    if len(dependencies) > 0:
+        job_depencied = ','.join(dependencies)
+        content += "dependencies=" + job_depencied + "\n"
+    job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+    with open(job_file, 'w') as f:
+        f.write(content)
 
 def generate_end_job_file(job_name, command, folder, deps):
     # 生成结束的job文件
@@ -417,12 +447,17 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
         tbl_name = leaf.tblName
         if tbl_name not in done_leaf:
             print('handling... %s ' % tbl_name)
-            parent_node = TblBlood.objects.raw("select b.* from"
-                                               + " metamap_tblblood a join metamap_tblblood b"
-                                               + " on a.parent_tbl = b.tbl_name and b.valid = 1"
-                                               + " JOIN metamap_willdependencytask s "
-                                               + " on s.type = 1 and s.schedule = " + schedule + " and s.rel_id = b.related_etl_id"
-                                               + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
+            parent_node = ETLBlood.objects.raw("SELECT  b.* "
+                                               "FROM 	"
+                                               "  ("
+                                               "select  		id 	"
+                                               "from metamap_etlobj"
+                                               " WHERE 	NAME = 'dim_temporary@dim_user_invite_chain' "
+                                               ") a "
+                                               "JOIN metamap_etlblood b "
+                                               "ON a.id = b.child_id "
+                                               "JOIN metamap_willdependencytask s "
+                                               "ON s.`schedule` = " + schedule + " AND s.rel_id = a.id")
             if tbl_name not in done_blood:
                 print('not in blood : %s ' % tbl_name)
                 generate_job_file(leaf, parent_node, folder, schedule)
