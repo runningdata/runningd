@@ -119,13 +119,13 @@ class ETL(models.Model):
 class ETLObj(models.Model):
     name = models.CharField(max_length=100, db_column='name')
     type = models.IntegerField(default=1, blank=False, null=False,
-                                help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 jarfile")
-    rel_id = models.IntegerField(db_column='related_etl_id')
+                                help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 sourcefile;6 jarfile")
+    rel_id = models.IntegerField()
 
 
-class EtlBlood(models.Model):
-    child = models.ForeignKey(ETLObj, on_delete=models.DO_NOTHING)
-    parent = models.ForeignKey(ETLObj, on_delete=models.DO_NOTHING)
+class ETLBlood(models.Model):
+    child = models.ForeignKey(ETLObj, on_delete=models.DO_NOTHING, related_name='child')
+    parent = models.ForeignKey(ETLObj, on_delete=models.DO_NOTHING, related_name='parent')
     ctime = models.DateTimeField(default=timezone.now)
     current = 0
 

@@ -43,6 +43,31 @@ def getTbls(etl):
         raise Exception('sql is %s,\n<br> error is %s' % (sql, e))
     return result
 
+def get_tbls(sql):
+    result = set()
+    try:
+        with pyhs2.connect(host=settings.HIVE_SERVER['host'],
+                           port=settings.HIVE_SERVER['port'],
+                           authMechanism="PLAIN",
+                           user=settings.HIVE_SERVER['user'],
+                           password=settings.HIVE_SERVER['password'],
+                           database='default') as conn:
+            with conn.cursor() as cur:
+                logger.info('clean sql is %s ' % sql)
+                # Execute query
+                cur.execute("explain dependency " + sql)
+
+                # Fetch table results
+                deps = json.loads(cur.fetchone()[0])
+                print(' got deps : %s ' % deps)
+                tables_ = deps['input_tables']
+                for tbl in tables_:
+                    result.add(tbl['tablename'])
+                logger.info('analyse sql done ')
+    except Pyhs2Exception, e:
+        raise Exception('sql is %s,\n<br> error is %s' % (sql, e))
+    return result
+
 
 def execute(sql):
     result = dict()

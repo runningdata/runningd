@@ -125,6 +125,9 @@ def generate_jarapp_script(wd, task, schedule=-1):
     if task.engine_type.id == 1:
         with open('metamap/config/spark_template.sh') as tem:
             str.append(tem.read())
+    elif task.engine_type.id == 2:
+        with open('metamap/config/hadoop_template.sh') as tem:
+            str.append(tem.read())
     else:
         with open('metamap/config/jar_template.sh') as tem:
             str.append(tem.read())
@@ -376,6 +379,33 @@ def generate_job_file_m2h(objs, folder):
 
 
 def load_nodes(leafs, folder, done_blood, done_leaf, schedule):
+    '''
+    遍历加载节点
+    :param leafs:
+    :param folder:
+    :param done_blood:
+    :return:
+    '''
+    for leaf in leafs:
+        tbl_name = leaf.tblName
+        if tbl_name not in done_leaf:
+            print('handling... %s ' % tbl_name)
+            parent_node = TblBlood.objects.raw("select b.* from"
+                                               + " metamap_tblblood a join metamap_tblblood b"
+                                               + " on a.parent_tbl = b.tbl_name and b.valid = 1"
+                                               + " JOIN metamap_willdependencytask s "
+                                               + " on s.type = 1 and s.schedule = " + schedule + " and s.rel_id = b.related_etl_id"
+                                               + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
+            if tbl_name not in done_blood:
+                print('not in blood : %s ' % tbl_name)
+                generate_job_file(leaf, parent_node, folder, schedule)
+                done_blood.add(tbl_name)
+            print('parent_node for : %s ,floadr : %s ,sche: %s' % (tbl_name, folder, schedule))
+            done_leaf.add(tbl_name)
+            load_nodes(parent_node, folder, done_blood, done_leaf, schedule)
+
+
+def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
     '''
     遍历加载节点
     :param leafs:

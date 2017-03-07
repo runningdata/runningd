@@ -22,7 +22,8 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 
 from metamap.helpers import bloodhelper, etlhelper
-from metamap.models import TblBlood, ETL, Executions, WillDependencyTask
+from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, ETLObj, ETLBlood, SqoopHive2Mysql, \
+    SqoopMysql2Hive, AnaETL
 
 from will_common.utils import PushUtils
 from will_common.utils import constants
@@ -56,6 +57,82 @@ class IndexView(GroupListView):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             context['search'] = self.request.GET['search']
         return context
+
+
+def clean_etl_data(request):
+    # TODO 有些sqoop import的ods表相关的，还没有生成对应的ETLBlood对象，所以当前ETL的H2H也是不完整的血统DAG
+    # for etl in ETL.objects.filter(valid=1):
+    #     try:
+    #         etl_obj, result = ETLObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=1)
+    #     except Exception, e:
+    #         print('%d --> %s' % (etl.id, e))
+    #
+    # for blood in TblBlood.objects.all():
+    #     if blood.valid == 1:
+    #         try:
+    #             child = ETL.objects.get(pk=blood.relatedEtlId)
+    #             parent = ETL.objects.get(name=blood.parentTbl, valid=1)
+    #             etl_blood, result = ETLBlood.objects.update_or_create(child=ETLObj.objects.get(rel_id=child.id), parent=ETLObj.objects.get(rel_id=parent.id))
+    #         except Exception, e:
+    #             print('%d --> %s' % (blood.id, e))
+
+    # 把hive数据表作为自己的依赖
+    # for etl in SqoopHive2Mysql.objects.all():
+    #     try:
+    #         etl_obj, result = ETLObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=3)
+    #         tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
+    #         rel_id = ETL.objects.get(name=tbl_name, valid=1).id
+    #         parent = ETLObj.objects.get(rel_id=rel_id, type=1)
+    #         ETLBlood.objects.update_or_create(child=etl_obj, parent=parent)
+    #     except Exception, e:
+    #         print('%d --> %s' % (etl.id, e))
+
+
+    # for etl in SqoopMysql2Hive.objects.all():
+    #     try:
+    #         etl_obj, result = ETLObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=4)
+    #         tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
+    #         # 导入M2H，把前面缺失的import添加到ETLBlood中去
+    #         for blood in TblBlood.objects.filter(parentTbl=tbl_name):
+    #             try:
+    #                 parent = ETL.objects.get(name=blood.parentTbl, valid=1)
+    #             except Exception, e:
+    #                 print('%s <<<< %s' % (blood.parentTbl, blood.tblName))
+    #                 print('%d --> %s' % (blood.id, e))
+    #                 child = ETLObj.objects.get(type=1, name=blood.tblName)
+    #                 ETLBlood.objects.update_or_create(parent=etl_obj, child=child)
+    #                 print('%s >>>> %s' % (tbl_name, child.name))
+    #     except Exception, e:
+    #         print('%d --> %s' % (etl.id, e))
+
+    # AnaETL清洗，顺便添加依赖(一般除了m2h就是h2h)
+    # for etl in AnaETL.objects.all():
+    #     try:
+    #         etl_obj, result = ETLObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=2)
+            # TODO 测试环境hiveserver的HDFS元数据不全面
+            # deps = hivecli.get_tbls(etl.query)
+            # for dep in deps:
+            #     try:
+            #         parent = ETLObj.objects.get(name=dep)
+            #     except Exception, e:
+            #         # 如果h2h里面没有，那就在m2h里
+            #         names = dep.split('@')
+            #         m2h = SqoopMysql2Hive.objects.get(hive_meta__meta=names[0], mysql_tbl=names[1])
+            #         parent = ETLObj.objects.get(rel_id=m2h.id, type=4)
+            #     ETLBlood.objects.update_or_create(parent=parent, child=etl_obj)
+        # except Exception, e:
+        #     print('%d --> %s' % (etl.id, e))
+
+    # 将既有的willdependency_task生成一遍
+    # for task in WillDependencyTask.objects.all():
+    #     try:
+    #         if task.type == 100:
+    #             continue
+    #         etl_obj = ETLObj.objects.get(type=task.type, rel_id=task.rel_id)
+    #         WillDependencyTask.objects.update_or_create(rel_id=etl_obj.id, type=100)
+    #     except Exception, e:
+    #         print('%d --> %s' % (task.id, e))
+    return HttpResponse('done')
 
 
 def get_json(request):
@@ -348,6 +425,40 @@ def generate_job_dag(request, schedule):
         etlhelper.load_nodes(leafs, folder, done_blood, done_leaf, schedule)
         tbl = TblBlood(tblName='etl_done_' + folder)
         etlhelper.generate_job_file(tbl, leafs, folder)
+        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
+                                   '%d etls generated ' % len(done_blood))
+        ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
+        return HttpResponse(folder)
+    except Exception, e:
+        logger.error('error : %s ' % e)
+        logger.error('traceback is : %s ' % traceback.format_exc())
+        return HttpResponse('error')
+
+
+def generate_job_dag_v2(request, schedule):
+    '''
+    抽取所有有效的ETL,生成azkaban调度文件
+    :param request:
+    :return:
+    '''
+    try:
+        done_blood = set()
+        done_leaf = set()
+        folder = 'h2h-' + dateutils.now_datetime()
+        leafs = TblBlood.objects.raw("SELECT a.* FROM "
+                                      "metamap_etlblood a "
+                                     "join ("
+                                        "select rel_id from metamap_willdependencytask where `schedule` = " + schedule +" and valid=1 and type!=100 "
+                                        ") b "
+                                            "on a.id = b.rel_id "
+                                     "left outer join ("
+                                     "SELECT DISTINCT parent_id from metamap_etlblood ) c "
+                                        "on a.id = c.parent_id "
+                                    "where c.parent_id is NULL")
+        os.mkdir(AZKABAN_BASE_LOCATION + folder)
+        os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
+
+        etlhelper.load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule)
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%d etls generated ' % len(done_blood))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)

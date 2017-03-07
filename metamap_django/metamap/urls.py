@@ -31,6 +31,7 @@ urlpatterns = [
 
     url(r'^$', etls.IndexView.as_view(), name='index'),
 
+    url(r'^etls/clean_data/$', etls.clean_etl_data, name='clean_etl_data'),
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
     url(r'^etls/invalid/$', etls.InvalidView.as_view(), name='invalid'),
     url(r'^etls/add/$', etls.add, name='add'),

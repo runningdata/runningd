@@ -1,0 +1,1 @@
+{{ task.engine_type.bin_name }} jar {{ wd }}{{ task.jar_file }} {{ task.engine_opts }} {{ task.main_func }} {{ task.main_func_opts }}
