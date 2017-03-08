@@ -131,7 +131,7 @@ sche_type_dic[2] = u'EXPORT'
 sche_type_dic[3] = u'Hive2Mysql'
 sche_type_dic[4] = u'Mysql2Hive'
 sche_type_dic[5] = u'SourceApp'
-sche_type_dic[6] = u'Mysql2Hive'
+sche_type_dic[6] = u'JarApp'
 
 
 @register.simple_tag
