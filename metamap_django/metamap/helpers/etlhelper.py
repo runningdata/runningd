@@ -133,7 +133,10 @@ def generate_jarapp_script(wd, task, schedule=-1):
             str.append(tem.read())
     template = Template('\n'.join(str))
     strip = template.render(context).strip()
-    return strip
+    strip = '{% load etlutils %} \n' + strip
+    template = Template(strip)
+    strip2 = template.render(Context()).strip()
+    return strip2
 
 
 def generate_sourceapp_script(wd, task, schedule=-1):
