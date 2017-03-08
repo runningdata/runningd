@@ -12,8 +12,10 @@ logger = logging.getLogger('django')
 
 
 def getTbls(etl):
-    sql = djtemplates.get_etl_sql(etl)
     result = set()
+    if len(etl.query) == 0:
+        return result
+    sql = djtemplates.get_etl_sql(etl)
     try:
         with pyhs2.connect(host=settings.HIVE_SERVER['host'],
                            port=settings.HIVE_SERVER['port'],
