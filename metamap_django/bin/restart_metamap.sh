@@ -1,6 +1,7 @@
 #! /bin/bash
 if [ -z $METAMAP_HOME ];then
     echo "Please set env $METAMAP_HOME first."
+    exit 1
 else
     echo "METAMAP_HOME is : $METAMAP_HOME"
 fi
