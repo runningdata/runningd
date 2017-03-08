@@ -81,7 +81,7 @@ class JarApp(models.Model):
     name = models.CharField(max_length=200, verbose_name=u"任务名称")
     engine_type = models.ForeignKey(SourceEngine, on_delete=models.DO_NOTHING,
                                     verbose_name=u"运行工具")
-    main_func = models.CharField(max_length=100, verbose_name=u"入口类")
+    main_func = models.CharField(max_length=100, verbose_name=u"入口类", blank=True, default='')
     priority = models.IntegerField(default=5, blank=True)
     jar_file = models.FileField(upload_to='jars', blank=True)
     valid = models.IntegerField(default=1, verbose_name=u"是否生效")
