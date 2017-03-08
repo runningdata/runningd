@@ -1,6 +1,12 @@
 #! /bin/bash
 
 
+if [ -z $METAMAP_HOME ];then
+    echo "Please set env $METAMAP_HOME first."
+else
+    echo "METAMAP_HOME is : $METAMAP_HOME"
+fi
+
 ## 检查当前进程中是否还有celery进程活着
 function check() {
     lines=`ps -ef |grep celery | grep -v dqms | grep ${1} | wc -l`
@@ -39,11 +45,11 @@ function stop() {
 ###  1. pull最新代码           ####
 #################################
 
-cd /usr/local/will/metamap \
+cd $METAMAP_HOME \
     && git pull
 
 
-cd /usr/local/will/metamap/metamap_django
+cd $METAMAP_HOME/metamap_django
 
 
 #################################
