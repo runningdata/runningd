@@ -321,6 +321,36 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
     with open(job_file, 'w') as f:
         f.write(content)
 
+def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1):
+    '''
+    生成azkaban job文件
+    :param blood:
+    :param parent_names:
+    :param folder:
+    :return:
+    '''
+    if not job_name.startswith('etl_done_'):
+        # 生成hql文件
+        etl = ETL.objects.get(name=job_name, valid=1)
+        location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
+        generate_etl_file(etl, location, schedule)
+        command = "hive -f " + location
+    else:
+        command = "echo " + job_name
+
+    # 生成job文件
+    job_type = ' command\nretries=12\nretry.backoff=300000\n'
+    dependencies = set()
+    for p in parent_names:
+        dependencies.add(p)
+    content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
+    if len(dependencies) > 0:
+        job_depencied = ','.join(dependencies)
+        content += "dependencies=" + job_depencied + "\n"
+    job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+    with open(job_file, 'w') as f:
+        f.write(content)
+
 def generate_job_file_v2(blood, parent_node, folder, schedule=-1):
     '''
     生成azkaban job文件

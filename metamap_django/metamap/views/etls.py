@@ -185,6 +185,7 @@ def blood_dag(request, etlid):
     return render(request, 'etl/blood.html', {'bloods': final_bloods})
 
 
+
 def blood_by_name(request):
     etl_name = request.GET['tblName']
     try:
@@ -403,6 +404,30 @@ def filedownload(request):
     else:
         return HttpResponse("session is not valid")
 
+
+def generate_job_dag_by_etls(request, schedule):
+    '''
+    抽取所有指定etlid子节点的有效的ETL
+    :param request:
+    :return:
+    '''
+    try:
+        final_bloods = set()
+        dependencies = {}
+        for name in request.GET.get('names').split(','):
+            for blood in TblBlood.objects.filter(tblName=name):
+                bloodhelper.find_child_mermaid(blood, final_bloods)
+        for blood in final_bloods:
+            dependencies.setdefault(blood.tblName, set())
+            dependencies.get(blood.tblName).add(blood.parentTbl)
+        # folder = 'h2h-' + dateutils.now_datetime()
+        # ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
+        # return HttpResponse(folder)
+        return HttpResponse('xxx')
+    except Exception, e:
+        logger.error('error : %s ' % e)
+        logger.error('traceback is : %s ' % traceback.format_exc())
+        return HttpResponse('error')
 
 def generate_job_dag(request, schedule):
     '''

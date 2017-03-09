@@ -44,6 +44,7 @@ urlpatterns = [
     url(r'^etls/emailtest/$', etls.send_email, name='send_email'),
     url(r'^etls/email2test/$', etls.send_email2, name='send_email2'),
     url(r'^etls/downloadtest/$', etls.filedownload, name='filedownload'),
+    url(r'^etls/gjdbe/(?P<schedule>[0-9]+)/$', etls.generate_job_dag_by_etls, name='generate_job_dag_by_etls'),
 
     url(r'^etls/review_sql/(?P<etlid>[0-9]+)/$', etls.review_sql, name='review_sql'),
     url(r'^etls/exec/(?P<etlid>[0-9]+)/$', etls.exec_job, name='exec'),
