@@ -405,29 +405,51 @@ def filedownload(request):
         return HttpResponse("session is not valid")
 
 
-def generate_job_dag_by_etls(request, schedule):
+def restart_job(request):
     '''
     抽取所有指定etlid子节点的有效的ETL
     :param request:
     :return:
     '''
-    try:
-        final_bloods = set()
-        dependencies = {}
-        for name in request.GET.get('names').split(','):
-            for blood in TblBlood.objects.filter(tblName=name):
-                bloodhelper.find_child_mermaid(blood, final_bloods)
-        for blood in final_bloods:
-            dependencies.setdefault(blood.tblName, set())
-            dependencies.get(blood.tblName).add(blood.parentTbl)
-        # folder = 'h2h-' + dateutils.now_datetime()
-        # ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
-        # return HttpResponse(folder)
-        return HttpResponse('xxx')
-    except Exception, e:
-        logger.error('error : %s ' % e)
-        logger.error('traceback is : %s ' % traceback.format_exc())
-        return HttpResponse('error')
+    if request.user.username == 'admin':
+        if request.method == 'POST':
+            try:
+                final_bloods = set()
+                dependencies = {}
+                schedule = int(request.POST.get('schedule'))
+
+                for name in request.POST.get('names').split(','):
+                    for blood in TblBlood.objects.filter(tblName=name):
+                        bloodhelper.find_child_mermaid(blood, final_bloods)
+
+                for blood in final_bloods:
+                    child_name = blood.tblName
+                    c_etl = ETL.objects.get(name=child_name, valid=1)
+                    if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=1).exists():
+                        dependencies.setdefault(blood.tblName, set())
+                        p_etl = ETL.objects.get(name=blood.parentTbl, valid=1)
+                        if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=1).exists():
+                            dependencies.get(blood.tblName).add(blood.parentTbl)
+
+                folder = 'h2h-' + dateutils.now_datetime() + '-restart'
+                os.mkdir(AZKABAN_BASE_LOCATION + folder)
+                os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
+
+                for k, v in dependencies.items():
+                    etlhelper.generate_job_file_for_partition(k, v, folder, schedule)
+                etlhelper.generate_job_file_for_partition('etl_done_' + folder, dependencies.keys(), folder)
+                ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
+                return HttpResponse(folder)
+            except Exception, e:
+                logger.error('error : %s ' % e)
+                logger.error('traceback is : %s ' % traceback.format_exc())
+                return HttpResponse('error')
+        else:
+            return render(request, 'etl/restart.html')
+    else:
+        return HttpResponse('no auth')
+
+
 
 def generate_job_dag(request, schedule):
     '''

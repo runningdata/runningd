@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% load ifdef %}
+
+{% block title %}任务重导{% endblock %}
+
+{% block content %}
+    <form action="." method="POST">
+    <div class="form-group">
+            <label>调度方式</label>
+            <div class="radio-inline">
+                <input id="optionsRadios1" type="radio" name="schedule"
+                       checked="checked"
+                       value="0">每天
+            </div>
+            <div class="radio-inline">
+                <input id="optionsRadios1" type="radio" name="schedule"
+                       value="1">周【每周第一天】
+            </div>
+            <div class="radio-inline">
+                <input id="optionsRadios3" type="radio" name="schedule"
+                       value="2">月【每月第一天】
+            </div>
+            <div class="radio-inline">
+                <input id="optionsRadios3" type="radio" name="schedule"
+                       value="3">季度【每季第一天】
+            </div>
+            <div class="radio-inline">
+                <div class="input-group">
+                    <input type="radio" aria-label="自定义" name="schedule"
+                           value="4">自定义【cron】
+                    <input type="text" class="inline" name="cronexp" value="">
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>ETL名称</label>
+            <input name="names" value="" type="text" class="form-control">
+            <button type="submit" class="btn btn-primary">提交</button>
+        </div>
+    </form>
+{% endblock %}

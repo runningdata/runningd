@@ -62,7 +62,12 @@ class ScheDepListView(generic.ListView):
         :param obj:
         :return:
         '''
-        etl = ETL.objects.get(id=obj.rel_id)
+        try:
+            etl = ETL.objects.get(id=obj.rel_id)
+        except Exception, e:
+            print('etl %d not found' % obj.rel_id)
+            objss = objss.exclude(id=obj.id)
+            return objss
         if etl.valid != 1:
             objss = objss.exclude(id=obj.id)
         return objss
@@ -83,7 +88,7 @@ class ScheDepListView(generic.ListView):
 
     def get_queryset(self):
         filters = {1: self.handle_etl, 2: self.handle_email_export, 3: self.handle_pass,
-                   4: self.handle_pass, 5: self.handle_pass, 6: self.handle_pass}
+                   4: self.handle_pass, 5: self.handle_pass, 6: self.handle_pass, 100: self.handle_pass}
 
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']

@@ -132,6 +132,7 @@ sche_type_dic[3] = u'Hive2Mysql'
 sche_type_dic[4] = u'Mysql2Hive'
 sche_type_dic[5] = u'SourceApp'
 sche_type_dic[6] = u'JarApp'
+sche_type_dic[100] = u'调整中'
 
 
 @register.simple_tag

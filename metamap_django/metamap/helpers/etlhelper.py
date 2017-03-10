@@ -286,8 +286,9 @@ def generate_etl_file(etl, location, schedule=-1):
     :return:
     '''
     final_result = generate_etl_sql(etl, schedule)
-    with open(location, 'w') as f:
-        f.write(final_result.encode('utf-8'))
+    if final_result != MSG_NO_DATA:
+        with open(location, 'w') as f:
+            f.write(final_result.encode('utf-8'))
 
 
 def generate_job_file(blood, parent_node, folder, schedule=-1):
