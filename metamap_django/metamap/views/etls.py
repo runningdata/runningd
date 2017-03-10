@@ -407,7 +407,8 @@ def filedownload(request):
 
 def restart_job(request):
     '''
-    抽取所有指定etlid子节点的有效的ETL
+    指定调度周期与etl名字
+    抽取所有指定etlid子节点的有效的ETL, 生成azkaban调度文件
     :param request:
     :return:
     '''
@@ -419,6 +420,7 @@ def restart_job(request):
                 schedule = int(request.POST.get('schedule'))
 
                 for name in request.POST.get('names').split(','):
+                    dependencies[name] = set()
                     for blood in TblBlood.objects.filter(tblName=name):
                         bloodhelper.find_child_mermaid(blood, final_bloods)
 
@@ -426,17 +428,18 @@ def restart_job(request):
                     child_name = blood.tblName
                     c_etl = ETL.objects.get(name=child_name, valid=1)
                     if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=1).exists():
-                        dependencies.setdefault(blood.tblName, set())
-                        p_etl = ETL.objects.get(name=blood.parentTbl, valid=1)
+                        dependencies.setdefault(child_name, set())
+                        parent_name = blood.parentTbl
+                        p_etl = ETL.objects.get(name=parent_name, valid=1)
                         if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=1).exists():
-                            dependencies.get(blood.tblName).add(blood.parentTbl)
+                            dependencies.get(child_name).add(parent_name)
 
                 folder = 'h2h-' + dateutils.now_datetime() + '-restart'
                 os.mkdir(AZKABAN_BASE_LOCATION + folder)
                 os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-                for k, v in dependencies.items():
-                    etlhelper.generate_job_file_for_partition(k, v, folder, schedule)
+                for job_name, parent_names in dependencies.items():
+                    etlhelper.generate_job_file_for_partition(job_name, parent_names, folder, schedule)
                 etlhelper.generate_job_file_for_partition('etl_done_' + folder, dependencies.keys(), folder)
                 ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
                 return HttpResponse(folder)
