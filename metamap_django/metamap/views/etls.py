@@ -111,7 +111,9 @@ def clean_etl_data(request):
     # AnaETL清洗，顺便添加依赖(一般除了m2h就是h2h)
     for etl in AnaETL.objects.all():
         try:
-            if etl.id == 15: continue
+            if etl.name.__contains__(u'转化率'):
+                print(' %s passed ' % etl.name)
+                continue
             etl_obj, result = ETLObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=2)
             print('ETLObj for AnaETL done : %s ' % etl.name)
             # TODO 测试环境hiveserver的HDFS元数据不全面
@@ -121,7 +123,7 @@ def clean_etl_data(request):
                     parent = ETLObj.objects.get(name=dep)
                 except Exception, e:
                     # 如果h2h里面没有，那就在m2h里
-                    print(' AnaETL \'s dep dep : %S ' % dep)
+                    print(' >>>>>>>>>>>>>>>>>>>>>>>>> AnaETL \'s dep dep : %S ' % dep)
                     names = dep.split('@')
                     m2h = SqoopMysql2Hive.objects.get(hive_meta__meta=names[0], mysql_tbl=names[1])
                     parent = ETLObj.objects.get(rel_id=m2h.id, type=4)
