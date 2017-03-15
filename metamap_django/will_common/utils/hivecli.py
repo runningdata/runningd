@@ -55,14 +55,14 @@ def get_tbls(sql):
                            password=settings.HIVE_SERVER['password'],
                            database='default') as conn:
             with conn.cursor() as cur:
-                logger.info('clean sql is %s ' % sql)
+                # logger.info('clean sql is %s ' % sql)
                 # Execute query
                 cur.execute("explain dependency " + sql)
 
                 # Fetch table results
                 deps = json.loads(cur.fetchone()[0])
-                print(' got deps : %s ' % deps)
                 tables_ = deps['input_tables']
+                # print(' got tables_ : %s ' % tables_)
                 for tbl in tables_:
                     result.add(tbl['tablename'])
                 logger.info('analyse sql done ')
