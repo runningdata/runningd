@@ -73,7 +73,7 @@ def clean_etl_data(request):
             try:
                 child = ETL.objects.get(pk=blood.relatedEtlId)
                 parent = ETL.objects.get(name=blood.parentTbl, valid=1)
-                etl_blood, result = ETLBlood.objects.update_or_create(child=ETLObj.objects.get(rel_id=child.id), parent=ETLObj.objects.get(rel_id=parent.id))
+                etl_blood, result = ETLBlood.objects.update_or_create(child=ETLObj.objects.get(rel_id=child.id, type=1), parent=ETLObj.objects.get(rel_id=parent.id, type=1))
                 print(' ETL \'s ETLBlood done : %d ' % etl_blood.id)
             except Exception, e:
                 print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
@@ -123,7 +123,7 @@ def clean_etl_data(request):
                     parent = ETLObj.objects.get(name=dep)
                 except Exception, e:
                     # 如果h2h里面没有，那就在m2h里
-                    print(' >>>>>>>>>>>>>>>>>>>>>>>>> AnaETL \'s dep dep : %S ' % dep)
+                    print(' >>>>>>>>>>>>>>>>>>>>>>>>> AnaETL s dep dep : %s ' % dep)
                     names = dep.split('@')
                     m2h = SqoopMysql2Hive.objects.get(hive_meta__meta=names[0], mysql_tbl=names[1])
                     parent = ETLObj.objects.get(rel_id=m2h.id, type=4)
@@ -133,7 +133,7 @@ def clean_etl_data(request):
             print('ETLObj AnaETL error : %d --> %s' % (etl.id, e))
 
     # 将既有的willdependency_task生成一遍
-    for task in WillDependencyTask.objects.all():
+    for task in WillDependencyTask.objects.filter(valid=1):
         try:
             if task.type == 100:
                 continue
