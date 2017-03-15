@@ -60,7 +60,7 @@ def get_tbls(sql):
                 # matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
                 # if matchObj:
                 #     sql = sql.replace(matchObj.group(1), '-999')
-                sql = sql.replace('reflect("java.net.URLDecoder","decode",a.subclass_name)', '-999')
+                sql = sql.replace('reflect("java.net.URLDecoder","decode",a.subclass_name)', '-999').replace(';', '')
                 cur.execute("explain dependency " + sql)
 
                 # Fetch table results
