@@ -109,7 +109,7 @@ def clean_etl_data(request):
             print('SqoopMysql2Hive \'s error : %d --> %s' % (etl.id, e))
 
     # AnaETL清洗，顺便添加依赖(一般除了m2h就是h2h)
-    for etl in AnaETL.objects.all():
+    for etl in AnaETL.objects.filter(valid=1):
         try:
             if etl.name.__contains__(u'转化率'):
                 print(' %s passed ' % etl.name)
