@@ -120,7 +120,7 @@ def clean_etl_data(request):
             deps = hivecli.get_tbls(etl.query)
             for dep in deps:
                 try:
-                    parent = ETLObj.objects.get(name=dep)
+                    parent = ETLObj.objects.get(name=dep, type=1)
                 except Exception, e:
                     # 如果h2h里面没有，那就在m2h里
                     print(' >>>>>>>>>>>>>>>>>>>>>>>>> AnaETL s dep dep : %s ' % dep)
