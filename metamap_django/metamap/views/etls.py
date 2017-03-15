@@ -23,7 +23,7 @@ from django.views import generic
 
 from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, ETLObj, ETLBlood, SqoopHive2Mysql, \
-    SqoopMysql2Hive, AnaETL
+    SqoopMysql2Hive, AnaETL, JarApp
 
 from will_common.utils import PushUtils
 from will_common.utils import constants
@@ -131,6 +131,14 @@ def clean_etl_data(request):
                 print(' AnaETL \'s ETLBlood done : %d ' % etl_blood.id)
         except Exception, e:
             print('ETLObj AnaETL error : %d --> %s' % (etl.id, e))
+
+    # jar app
+    for etl in JarApp.objects.filter(valid=1):
+        try:
+            etl_obj, result = ETLObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=6)
+            print('ETLObj for JarApp done : %s ' % etl.name)
+        except Exception, e:
+            print('ETLObj for JarApp error :%d --> %s' % (etl.id, e))
 
     # 将既有的willdependency_task生成一遍
     for task in WillDependencyTask.objects.filter(valid=1):
