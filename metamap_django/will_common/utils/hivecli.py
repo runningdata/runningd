@@ -57,9 +57,10 @@ def get_tbls(sql):
             with conn.cursor() as cur:
                 # logger.info('clean sql is %s ' % sql)
                 # Execute query
-                matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
-                if matchObj:
-                    sql = sql.replace(matchObj.group(1), '-999')
+                # matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
+                # if matchObj:
+                #     sql = sql.replace(matchObj.group(1), '-999')
+                sql = sql.replace('reflect("java.net.URLDecoder","decode",a.subclass_name)', '-999')
                 cur.execute("explain dependency " + sql)
 
                 # Fetch table results
