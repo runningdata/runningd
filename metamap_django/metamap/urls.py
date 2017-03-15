@@ -53,8 +53,10 @@ urlpatterns = [
     url(r'^etls/exec_list/(?P<jobid>[0-9]+)/$', etls.ExecLogView.as_view(), name='exec_list'),
 
     url(r'^etls/generate_job_dag/(?P<schedule>[0-9])/$', etls.generate_job_dag, name='generate_job_dag'),
+    url(r'^m2h/generate_job_dag_v2/(?P<schedule>[0-9])/$', etls.generate_job_dag_v2, name='generate_job_dag_v2'),
     url(r'^h2m/generate_job_dag/(?P<schedule>[0-9])/$', sqoop.generate_job_dag, name='generate_sqoop_job_dag'),
     url(r'^m2h/generate_job_dag/(?P<schedule>[0-9])/$', sqoop2.generate_job_dag, name='generate_sqoop2_job_dag'),
+
 
     url(r'^meta/list/$', metas.MetaListView.as_view(), name='meta_list'),
     url(r'^meta/add/$', metas.add, name='add_meta'),
