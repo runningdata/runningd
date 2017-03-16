@@ -336,9 +336,10 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     if etlobj.type == 1:
         job_name = etlobj.name
     elif etlobj.type == 3:
-        # etl = SqoopHive2Mysql.objects.get(pk=etlobj.rel_id)
-        # tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
-        job_name = etlobj.name
+        # H2M的名字不能是hive表了，这样就跟H2H的重复了
+        etl = SqoopHive2Mysql.objects.get(pk=etlobj.rel_id)
+        tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
+        job_name = 'export_' + tbl_name
     elif etlobj.type == 4:
         etl = SqoopMysql2Hive.objects.get(pk=etlobj.rel_id)
         tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
