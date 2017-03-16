@@ -352,6 +352,7 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     with open(job_file, 'w') as f:
         f.write(content)
 
+
 def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1):
     '''
     生成azkaban job文件
@@ -489,9 +490,22 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
                     tasks = WillDependencyTask.objects.filter(schedule=schedule, rel_id=parent.id, valid=1, type=100)
                     if tasks.count() == 1:
                         parent_ids.add(parent.id)
-                        leaf_dependencies.add(parent.name)
+                        #TODO m2h 和 h2m的名字不能直接取parent的name，需要拼meta和tblname
+
+                        if parent.type == 1:
+                            leaf_dependencies.add(parent.name)
+                        elif parent.type == 3:
+                            etl = SqoopHive2Mysql.objects.get(pk=parent.rel_id)
+                            tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
+                            leaf_dependencies.add(tbl_name)
+                        elif parent.type == 4:
+                            etl = SqoopMysql2Hive.objects.get(pk=parent.rel_id)
+                            tbl_name =  etl.hive_meta.meta + '@' + etl.mysql_tbl
+                            leaf_dependencies.add(tbl_name)
+                        else:
+                            print('xxxxxxxxxxxxxxx parent found..........%s ' % parent.name)
                     generate_job_file_v2(child, leaf_dependencies, folder,
-                                                    schedule=schedule)
+                                         schedule=schedule)
                     done_blood.add(blood)
             done_leaf.add(leaf)
             load_nodes_v2(parent_ids, folder, done_blood, done_leaf, schedule)

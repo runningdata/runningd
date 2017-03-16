@@ -541,7 +541,7 @@ def generate_job_dag_v2(request, schedule):
         etlhelper.generate_job_file_v2(ETLObj(name='etl_done_' + folder), final_deps, folder, folder)
         # PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
         #                            '%d etls generated ' % len(done_blood))
-        # ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
+        ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:
         logger.error('error : %s ' % e)
