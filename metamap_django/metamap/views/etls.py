@@ -536,6 +536,11 @@ def generate_job_dag_v2(request, schedule):
                 tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
                 job_name = 'export_' + tbl_name
                 final_deps.add(job_name)
+            elif leaf_etl.type == 4:
+                etl = SqoopMysql2Hive.objects.get(pk=leaf_etl.rel_id)
+                tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
+                job_name = 'import_' + tbl_name
+                final_deps.add(job_name)
             else:
                 final_deps.add(leaf_etl.name)
             leaves.add(leaf_etl.id)

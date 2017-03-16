@@ -513,12 +513,12 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
                         print('parent is SqoopHive2Mysql %s ' % parent.name)
                         etl = SqoopHive2Mysql.objects.get(pk=parent.rel_id)
                         tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
-                        leaf_dependencies.add('import' + tbl_name)
+                        leaf_dependencies.add('export' + tbl_name)
                     elif parent.type == 4:
                         print('parent is SqoopMysql2Hive %s ' % parent.name)
                         etl = SqoopMysql2Hive.objects.get(pk=parent.rel_id)
                         tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
-                        leaf_dependencies.add(tbl_name)
+                        leaf_dependencies.add('import' + tbl_name)
                     else:
                         print('xxxxxxxxxxxxxxx parent found..........%s ' % parent.name)
 
