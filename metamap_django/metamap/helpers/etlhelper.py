@@ -331,7 +331,21 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     :param folder:
     :return:
     '''
-    job_name = etlobj.name
+    # m2h 和 h2m的名字不能直接取parent的name，需要拼meta和tblname
+    print('generating.....for job %s ' % etlobj.name)
+    if etlobj.type == 1:
+        job_name = etlobj.name
+    elif etlobj.type == 3:
+        etl = SqoopHive2Mysql.objects.get(pk=etlobj.rel_id)
+        tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
+        job_name = tbl_name
+    elif etlobj.type == 4:
+        etl = SqoopMysql2Hive.objects.get(pk=etlobj.rel_id)
+        tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
+        job_name = tbl_name
+    else:
+        print('xxxxxxxxxxxxxxx parent found..........%s ' % etlobj.name)
+        raise Exception('xxxxxxxxxxxxxxx parent found..........%s ')
     if not job_name.startswith('etl_done_'):
         # 生成hql文件
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
@@ -351,6 +365,7 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
     with open(job_file, 'w') as f:
         f.write(content)
+    print('generating.....for jobdone %s ' % etlobj.name)
 
 
 def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1):
@@ -481,31 +496,33 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
     for leaf in leafs:
         if leaf not in done_leaf:
             bloods = ETLBlood.objects.filter(child_id=leaf)
+            print('handling leaf : %s ' % leaf)
             leaf_dependencies = set()
             parent_ids = set()
             for blood in bloods:
-                if blood not in done_blood:
-                    child = ETLObj.objects.get(pk=blood.child.id)
-                    parent = ETLObj.objects.get(pk=blood.parent.id)
-                    tasks = WillDependencyTask.objects.filter(schedule=schedule, rel_id=parent.id, valid=1, type=100)
-                    if tasks.count() == 1:
-                        parent_ids.add(parent.id)
-                        #TODO m2h 和 h2m的名字不能直接取parent的name，需要拼meta和tblname
+                parent = ETLObj.objects.get(pk=blood.parent.id)
+                tasks = WillDependencyTask.objects.filter(schedule=schedule, rel_id=parent.id, valid=1, type=100)
+                if tasks.count() == 1:
+                    parent_ids.add(parent.id)
+                    # TODO m2h 和 h2m的名字不能直接取parent的name，需要拼meta和tblname
+                    if parent.type == 1:
+                        print('parent is ETL %s ' % parent.name)
+                        leaf_dependencies.add(parent.name)
+                    elif parent.type == 3:
+                        print('parent is SqoopHive2Mysql %s ' % parent.name)
+                        etl = SqoopHive2Mysql.objects.get(pk=parent.rel_id)
+                        tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
+                        leaf_dependencies.add(tbl_name)
+                    elif parent.type == 4:
+                        print('parent is SqoopMysql2Hive %s ' % parent.name)
+                        etl = SqoopMysql2Hive.objects.get(pk=parent.rel_id)
+                        tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
+                        leaf_dependencies.add(tbl_name)
+                    else:
+                        print('xxxxxxxxxxxxxxx parent found..........%s ' % parent.name)
 
-                        if parent.type == 1:
-                            leaf_dependencies.add(parent.name)
-                        elif parent.type == 3:
-                            etl = SqoopHive2Mysql.objects.get(pk=parent.rel_id)
-                            tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
-                            leaf_dependencies.add(tbl_name)
-                        elif parent.type == 4:
-                            etl = SqoopMysql2Hive.objects.get(pk=parent.rel_id)
-                            tbl_name =  etl.hive_meta.meta + '@' + etl.mysql_tbl
-                            leaf_dependencies.add(tbl_name)
-                        else:
-                            print('xxxxxxxxxxxxxxx parent found..........%s ' % parent.name)
-                    generate_job_file_v2(child, leaf_dependencies, folder,
+            child = ETLObj.objects.get(pk=leaf)
+            generate_job_file_v2(child, leaf_dependencies, folder,
                                          schedule=schedule)
-                    done_blood.add(blood)
             done_leaf.add(leaf)
             load_nodes_v2(parent_ids, folder, done_blood, done_leaf, schedule)
