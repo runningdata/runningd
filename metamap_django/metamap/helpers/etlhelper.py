@@ -518,7 +518,7 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
                         print('parent is SqoopMysql2Hive %s ' % parent.name)
                         etl = SqoopMysql2Hive.objects.get(pk=parent.rel_id)
                         tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
-                        leaf_dependencies.add('import' + tbl_name)
+                        leaf_dependencies.add('import_' + tbl_name)
                     else:
                         print('xxxxxxxxxxxxxxx parent found..........%s ' % parent.name)
 
