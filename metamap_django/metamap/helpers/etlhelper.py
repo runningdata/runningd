@@ -3,12 +3,15 @@
 '''
 created by will 
 '''
+import os
+
 from django.conf import settings
 from django.template import Context, Template
 
 from metamap.db_views import ColMeta, DB
 from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql, ETLBlood
 from will_common.utils import dateutils
+from will_common.utils import ziputils
 from will_common.utils.constants import *
 import logging
 
@@ -127,6 +130,18 @@ def generate_jarapp_script(wd, task, schedule=-1):
             str.append(tem.read())
     elif task.engine_type.id == 2:
         with open('metamap/config/hadoop_template.sh') as tem:
+            str.append(tem.read())
+    elif task.engine_type.id == 4:
+        # 看看zip是否已经解压，先解压到指定目录
+        zipfile = wd + task.jar_file.name
+        dir = wd + 'jars/' + task.name + '/'
+        if not os.path.exists(dir):
+            ziputils.unzip(zipfile, dir)
+        deps = [f for f in os.listdir(dir) if f.endswith('.zip') or f.endswith('.egg') or f.endswith('.py')]
+        if len(deps) > 0:
+            context['deps'] = ','.join(deps)
+        context['wd'] = dir
+        with open('metamap/config/pyspark_template.sh') as tem:
             str.append(tem.read())
     else:
         with open('metamap/config/jar_template.sh') as tem:
@@ -322,6 +337,7 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
     with open(job_file, 'w') as f:
         f.write(content)
 
+
 def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1):
     '''
     生成azkaban job文件
@@ -351,6 +367,7 @@ def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1)
     job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
     with open(job_file, 'w') as f:
         f.write(content)
+
 
 def generate_job_file_v2(blood, parent_node, folder, schedule=-1):
     '''
@@ -382,6 +399,7 @@ def generate_job_file_v2(blood, parent_node, folder, schedule=-1):
     job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
     with open(job_file, 'w') as f:
         f.write(content)
+
 
 def generate_end_job_file(job_name, command, folder, deps):
     # 生成结束的job文件

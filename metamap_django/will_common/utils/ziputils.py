@@ -6,6 +6,8 @@ created by will
 import os, os.path
 import zipfile
 
+import shutil
+
 
 def zip_dir(folder):
     with zipfile.ZipFile(folder + '.zip', 'w') as zipF:
@@ -15,9 +17,9 @@ def zip_dir(folder):
             if os.path.isfile(job):
                 zipF.write(job)
 
-
-
-if __name__ == '__main__':
-    # zip_dir('/usr/local/will/test/shell')
-    with open('/tmp/20160728095015/default@origin_tbl.job', 'w') as r:
-        r.write("ffff")
+def unzip(zip_file, target, delete_target=False):
+    with zipfile.ZipFile(zip_file, 'r') as zipF:
+        if delete_target:
+            print('target %s found , and deleted ' % target)
+            shutil.rmtree(target)
+        zipF.extractall(target)

@@ -3,8 +3,9 @@ import logging
 import os
 import traceback
 
+import shutil
 from django.core.urlresolvers import reverse
-from django.forms import ModelForm, HiddenInput
+from django.forms import ModelForm, HiddenInput, ClearableFileInput
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -12,10 +13,14 @@ from django.shortcuts import render, redirect
 from metamap.helpers import etlhelper
 from metamap.models import JarApp, JarAppExecutions
 from will_common.utils import dateutils
+from will_common.utils import ziputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE, AZKABAN_SCRIPT_LOCATION
 from will_common.views.common import GroupListView
 
 logger = logging.getLogger('django')
+
+WORK_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/'
+WORK_JAR_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/jars/'
 
 
 class IndexView(GroupListView):
@@ -43,7 +48,9 @@ def add(request):
         try:
             form = JarForm(-1, request.POST, request.FILES)
             if form.is_valid():
-                form.save()
+                xx = form.save()
+                if form.is_zip():
+                    ziputils.unzip(WORK_DIR + xx.jar_file.name, WORK_JAR_DIR + xx.name)
                 logger.info('JarApp for %s has been added successfully')
             else:
                 form = JarForm(request.user.userprofile.id)
@@ -52,7 +59,6 @@ def add(request):
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
-
         form = JarForm(request.user.userprofile.id)
         return render(request, 'source/post_edit.html', {'form': form})
 
@@ -63,6 +69,7 @@ class JarForm(ModelForm):
         exclude = ['ctime']
         widgets = {
             'creator': HiddenInput(),
+            'jar_file': ClearableFileInput(attrs={'multiple': True}),
         }
 
     def __init__(self, userid, *args, **kwargs):
@@ -74,6 +81,7 @@ class JarForm(ModelForm):
         if userid != -1:
             fs['creator'].initial = userid
 
+    #
     def save(self, commit=True):
         self.instance.jar_file.name = '%s_%s' % (self.instance.name, self.instance.jar_file.name)
         if self.errors:
@@ -90,11 +98,16 @@ class JarForm(ModelForm):
             self.save_m2m = self._save_m2m
         return self.instance
 
+    def is_zip(self):
+        if self.instance.jar_file:
+            return self.instance.jar_file.name.endswith('.zip')
+        return False
+
 
 def review(request, pk):
     try:
         inst = JarApp.objects.get(pk=pk)
-        hql = etlhelper.generate_jarapp_script('xx', inst)
+        hql = etlhelper.generate_jarapp_script(WORK_DIR, inst)
         return HttpResponse(hql.replace('\n', '<br>'))
     except Exception, e:
         logger.error(e)
@@ -105,8 +118,7 @@ def exec_job(request, pk):
     try:
         jar_task = JarApp.objects.get(pk=pk)
         log = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-jarapp-sche-' + jar_task.name + '.log'
-        work_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/'
-        command = etlhelper.generate_jarapp_script(work_dir, jar_task)
+        command = etlhelper.generate_jarapp_script(WORK_DIR, jar_task)
         execution = JarAppExecutions(logLocation=log, job_id=jar_task.id, status=0)
         execution.save()
         from metamap import tasks
@@ -136,6 +148,9 @@ def get_exec_log(request, execid):
 def delete(request, pk):
     try:
         jar = JarApp.objects.get(pk=pk)
+        if jar.jar_file.name.endswith('.zip'):
+            if os.path.exists(WORK_JAR_DIR + jar.name):
+                shutil.rmtree(WORK_JAR_DIR + jar.name)
         jar_deleted = jar.jar_file.delete()
         deleted = jar.delete()
         logger.info('JarApp for %s has been deleted successfully' % (pk))
@@ -151,10 +166,11 @@ def edit(request, pk):
             if form.is_valid():
                 inst = form.save(commit=False)
                 inst.id = pk
-
                 # whether to delete the original file
                 jar = JarApp.objects.get(pk=pk)
                 if len(request.FILES) > 0:
+                    if form.is_zip():
+                        ziputils.unzip(WORK_DIR + jar.jar_file.name, WORK_JAR_DIR + jar.name, True)
                     jar.jar_file.delete()
                 else:
                     inst.jar_file = jar.jar_file
