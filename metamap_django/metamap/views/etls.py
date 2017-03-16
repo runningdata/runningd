@@ -529,9 +529,16 @@ def generate_job_dag_v2(request, schedule):
         final_deps = set()
         leaves = set()
         for leaf in leafs:
-            leaf_bloods = ETLObj.objects.get(pk=leaf.child_id)
-            final_deps.add(leaf_bloods.name)
-            leaves.add(leaf_bloods.id)
+            leaf_etl = ETLObj.objects.get(pk=leaf.child_id)
+            if leaf_etl.type == 3:
+                # H2M的名字不能是hive表了，这样就跟H2H的重复了
+                etl = SqoopHive2Mysql.objects.get(pk=leaf_etl.rel_id)
+                tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
+                job_name = 'export_' + tbl_name
+                final_deps.add(job_name)
+            else:
+                final_deps.add(leaf_etl.name)
+            leaves.add(leaf_etl.id)
 
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
