@@ -219,6 +219,73 @@ def his(request, tblName):
     return render(request, 'etl/his.html', {'etls': etls, 'tblName': tblName})
 
 
+def add_v2(request):
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                etl = ETL()
+                httputils.post2obj(etl, request.POST, 'id')
+                userutils.add_current_creator(etl, request)
+                find_ = etl.name.find('@')
+                etl.meta = etl.name[0: find_]
+                etl.save()
+                logger.info('ETL has been created successfully : %s ' % etl)
+
+                etlobj, status = ETLObj.objects.update_or_create(name=etl.name, type=1, rel_id=etl.id)
+                deps = hivecli.getTbls(etl)
+                etlobj.update_deps(deps)
+                logger.info('Tblblood has been created successfully : %s' % deps)
+                return HttpResponseRedirect(reverse('metamap:index'))
+        except Exception, e:
+            return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
+    else:
+        return render(request, 'etl/edit.html')
+
+def edit_v2(request, pk):
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                privious_etl = ETL.objects.get(pk=int(pk))
+                privious_etl.valid = 0
+                privious_etl.save()
+
+                deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
+                logger.info('Tblbloods for %s has been deleted successfully' % (pk))
+
+                if int(request.POST['valid']) == 1:
+                    etl = privious_etl
+                    privious_etl.id = None
+                    privious_etl.ctime = timezone.now()
+                    httputils.post2obj(etl, request.POST, 'id')
+                    userutils.add_current_creator(etl, request)
+                    find_ = etl.name.find('@')
+                    etl.meta = etl.name[0: find_]
+
+                    etl.save()
+                    logger.info('ETL has been created successfully : %s ' % etl)
+
+                    tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
+                    for task in tasks:
+                        task.rel_id = etl.id
+                        task.save()
+
+                    logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
+
+                    deps = hivecli.getTbls(etl)
+                    for dep in deps:
+                        logger.info("dep is %s, tblName is %s " % (dep, etl.name))
+                        if etl.name != dep:
+                            tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
+                            tblBlood.save()
+                            logger.info('Tblblood has been created successfully : %s' % tblBlood)
+                    logger.info('Tblblood for %s has been created successfully' % (pk))
+                return HttpResponseRedirect(reverse('metamap:index'))
+        except Exception, e:
+            return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
+    else:
+        etl = ETL.objects.get(pk=pk)
+        return render(request, 'etl/edit.html', {'etl': etl})
+
 def add(request):
     if request.method == 'POST':
         try:

@@ -92,6 +92,9 @@ class JarApp(models.Model):
     ctime = models.DateTimeField(default=timezone.now)
 
 
+class ETLObjRelated():
+    pass
+
 class ETL(models.Model):
     query = models.TextField()
     meta = models.CharField(max_length=20)
@@ -116,10 +119,30 @@ class ETL(models.Model):
         return self.ctime >= timezone.now - datetime.timedelta(days=1)
 
 
-class ETLObj(models.Model):
+class DenpendencyObj(models.Model):
+    def update_deps(self, deps):
+        '''
+        better use this
+        :param deps:
+        :return:
+        '''
+        dep_ids = [ETLObj.objects.get(name=dep).id for dep in deps]
+        self.clean_deps(dep_ids)
+        self.add_deps(dep_ids)
+
+    def add_deps(self, deps):
+        for dep in deps:
+            ETLBlood.objects.update_or_create(child_id=self.id, parent_id=dep)
+
+    def clean_deps(self, deps):
+        older_deps = ETLBlood.objects.filter(child_id=self.id, parent_id__in=deps)
+        older_deps.delete()
+
+
+class ETLObj(DenpendencyObj):
     name = models.CharField(max_length=100, db_column='name')
     type = models.IntegerField(default=1, blank=False, null=False,
-                                help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 sourcefile;6 jarfile")
+                               help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 sourcefile;6 jarfile")
     rel_id = models.IntegerField()
 
 
@@ -131,6 +154,7 @@ class ETLBlood(models.Model):
 
     def __str__(self):
         return self.parent.name + '-->' + self.child.name
+
 
 class TblBlood(models.Model):
     class Meta:
@@ -145,6 +169,7 @@ class TblBlood(models.Model):
 
     def __str__(self):
         return self.parentTbl + '-->' + self.tblName
+
 
 class Meta(models.Model):
     '''
@@ -267,6 +292,7 @@ class SourceAppExecutions(models.Model):
     def __str__(self):
         return self.logLocation
 
+
 class JarAppExecutions(models.Model):
     '''
     单次任务执行记录
@@ -279,6 +305,7 @@ class JarAppExecutions(models.Model):
 
     def __str__(self):
         return self.logLocation
+
 
 class SqoopMysql2HiveExecutions(models.Model):
     '''
