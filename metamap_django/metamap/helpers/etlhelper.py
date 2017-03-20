@@ -3,12 +3,15 @@
 '''
 created by will 
 '''
+import os
+
 from django.conf import settings
 from django.template import Context, Template
 
 from metamap.db_views import ColMeta, DB
 from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql, ETLBlood, ETLObj
 from will_common.utils import dateutils
+from will_common.utils import ziputils
 from will_common.utils.constants import *
 import logging
 
@@ -93,6 +96,8 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
     else:
         str.append(task.mysql_tbl)
     str.append(' --hive-import --hive-overwrite')
+    str.append(' --target-dir ')
+    str.append(task.hive_meta.meta + '_' + task.mysql_tbl)
     str.append('--outdir /server/app/sqoop/vo --bindir /server/app/sqoop/vo --verbose ')
     str.append(' -m %d ' % task.parallel)
     if 'target-dir' in task.option:
@@ -127,6 +132,18 @@ def generate_jarapp_script(wd, task, schedule=-1):
             str.append(tem.read())
     elif task.engine_type.id == 2:
         with open('metamap/config/hadoop_template.sh') as tem:
+            str.append(tem.read())
+    elif task.engine_type.id == 4:
+        # 看看zip是否已经解压，先解压到指定目录
+        zipfile = wd + task.jar_file.name
+        dir = wd + 'jars/' + task.name + '/'
+        if not os.path.exists(dir):
+            ziputils.unzip(zipfile, dir)
+        deps = [f for f in os.listdir(dir) if f.endswith('.zip') or f.endswith('.egg') or f.endswith('.py')]
+        if len(deps) > 0:
+            context['deps'] = ','.join(deps)
+        context['wd'] = dir
+        with open('metamap/config/pyspark_template.sh') as tem:
             str.append(tem.read())
     else:
         with open('metamap/config/jar_template.sh') as tem:
