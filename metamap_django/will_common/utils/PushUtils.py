@@ -52,6 +52,7 @@ def push_email(users, msg):
     if subject and msg and from_email:
         try:
             send_mail(subject, msg, from_email, emails)
+            print('pushed done to %s ' % emails)
         except BadHeaderError:
             return 'Invalid header found.'
         return 'Ok header found.'
