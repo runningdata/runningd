@@ -109,19 +109,19 @@ def clean_etl_data(request):
     # for etl in AnaETL.objects.all():
     #     try:
     #         etl_obj, result = ETLObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=2)
-            # TODO 测试环境hiveserver的HDFS元数据不全面
-            # deps = hivecli.get_tbls(etl.query)
-            # for dep in deps:
-            #     try:
-            #         parent = ETLObj.objects.get(name=dep)
-            #     except Exception, e:
-            #         # 如果h2h里面没有，那就在m2h里
-            #         names = dep.split('@')
-            #         m2h = SqoopMysql2Hive.objects.get(hive_meta__meta=names[0], mysql_tbl=names[1])
-            #         parent = ETLObj.objects.get(rel_id=m2h.id, type=4)
-            #     ETLBlood.objects.update_or_create(parent=parent, child=etl_obj)
-        # except Exception, e:
-        #     print('%d --> %s' % (etl.id, e))
+    # TODO 测试环境hiveserver的HDFS元数据不全面
+    # deps = hivecli.get_tbls(etl.query)
+    # for dep in deps:
+    #     try:
+    #         parent = ETLObj.objects.get(name=dep)
+    #     except Exception, e:
+    #         # 如果h2h里面没有，那就在m2h里
+    #         names = dep.split('@')
+    #         m2h = SqoopMysql2Hive.objects.get(hive_meta__meta=names[0], mysql_tbl=names[1])
+    #         parent = ETLObj.objects.get(rel_id=m2h.id, type=4)
+    #     ETLBlood.objects.update_or_create(parent=parent, child=etl_obj)
+    # except Exception, e:
+    #     print('%d --> %s' % (etl.id, e))
 
     # 将既有的willdependency_task生成一遍
     # for task in WillDependencyTask.objects.all():
@@ -183,7 +183,6 @@ def blood_dag(request, etlid):
         if c_depth != -1:
             bloodhelper.find_child_mermaid(blood, final_bloods, depth=c_depth)
     return render(request, 'etl/blood.html', {'bloods': final_bloods})
-
 
 
 def blood_by_name(request):
@@ -350,44 +349,11 @@ def preview_job_dag(request):
 
 
 def send_email(request):
-    subject = request.POST.get('subject', 'willtest')
-    message = request.POST.get('message', 'willtest')
-    from_email = request.POST.get('from_email', 'yinkerconfluence@yinker.com')
-    if subject and message and from_email:
-        try:
-            send_mail(subject, message, from_email, ['chenxin@yinker.com'])
-        except BadHeaderError:
-            return HttpResponse('Invalid header found.')
-        return HttpResponse('Ok header found.')
-    else:
-        # In reality we'd use a form class
-        # to get proper validation errors.
-        return HttpResponse('Make sure all fields are entered and valid.')
-
-
-def send_email2(request):
-    subject = request.POST.get('subject', 'willtest')
-    message = request.POST.get('message', 'willtest')
-    from_email = request.POST.get('from_email', 'yinkerconfluence@yinker.com')
-    if subject and message and from_email:
-        try:
-            email = EmailMessage(
-                u'中文题目',
-                u'中文内容',
-                'yinkerconfluence@yinker.com',
-                ['chenxin@yinker.com'],
-                ['xuexu@yinker.com'],
-            )
-            email.attach_file(u'/root/月度目标数据-20170210095000')
-
-            email.send()
-        except BadHeaderError:
-            return HttpResponse('Invalid header found.')
-        return HttpResponse('Ok header found.')
-    else:
-        # In reality we'd use a form class
-        # to get proper validation errors.
-        return HttpResponse('Make sure all fields are entered and valid.')
+    try:
+        PushUtils.push_email([request.user], constants.ALERT_MSG % ('2017', 'ss', 'ss', 'ss', 1, 99, 2))
+    except BadHeaderError:
+        return HttpResponse('Invalid header found.')
+    return HttpResponse('Ok header found.')
 
 
 def filedownload(request):
@@ -453,7 +419,6 @@ def restart_job(request):
         return HttpResponse('no auth')
 
 
-
 def generate_job_dag(request, schedule):
     '''
     抽取所有有效的ETL,生成azkaban调度文件
@@ -500,15 +465,15 @@ def generate_job_dag_v2(request, schedule):
         done_leaf = set()
         folder = 'h2h-' + dateutils.now_datetime()
         leafs = ETLBlood.objects.raw("SELECT a.* FROM "
-                                      "metamap_etlblood a "
+                                     "metamap_etlblood a "
                                      "join ("
-                                        "select rel_id from metamap_willdependencytask where `schedule` = " + schedule +" and valid=1 and type!=100 "
-                                        ") b "
-                                            "on a.id = b.rel_id "
-                                     "left outer join ("
-                                     "SELECT DISTINCT parent_id from metamap_etlblood ) c "
-                                        "on a.id = c.parent_id "
-                                    "where c.parent_id is NULL")
+                                     "select rel_id from metamap_willdependencytask where `schedule` = " + schedule + " and valid=1 and type!=100 "
+                                                                                                                      ") b "
+                                                                                                                      "on a.id = b.rel_id "
+                                                                                                                      "left outer join ("
+                                                                                                                      "SELECT DISTINCT parent_id from metamap_etlblood ) c "
+                                                                                                                      "on a.id = c.parent_id "
+                                                                                                                      "where c.parent_id is NULL")
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 

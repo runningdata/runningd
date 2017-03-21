@@ -42,6 +42,7 @@ class IndexView(GroupListView):
             context['search'] = self.request.GET['search']
         return context
 
+
 @transaction.atomic
 def add(request):
     if request.method == 'POST':
@@ -54,6 +55,7 @@ def add(request):
     else:
         return render(request, 'export/edit.html')
 
+
 def review_sql(request, pk):
     try:
         obj = AnaETL.objects.get(id=pk)
@@ -62,6 +64,7 @@ def review_sql(request, pk):
     except Exception, e:
         logger.error(e)
         return HttpResponse(e)
+
 
 def edit(request, pk):
     if request.method == 'POST':

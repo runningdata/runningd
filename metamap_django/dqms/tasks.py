@@ -85,14 +85,14 @@ def runcase(case, check, user):
                         rule.max, re)
                     if check:
                         PushUtils.push_msg_tophone(case.editor.phone, msg)
-                        resp = PushUtils.push_msg(check.managers.all(), msg)
+                        resp = PushUtils.push_both(check.managers.all(), msg)
                         phones = ''
                         for user in check.managers.all():
                             phones = phones + ',' + str(user.phone)
                         alert.target_phone = phones
                         alert.owners = check.managers.all()
                     elif user:
-                        resp = PushUtils.push_msg([user, ], msg)
+                        resp = PushUtils.push_both([user, ], msg)
                         alert.target_phone = user.phone
                         alert.owners = [user, ]
                     alert.push_msg = msg
