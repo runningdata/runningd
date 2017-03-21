@@ -446,6 +446,8 @@ def generate_job_dag(request, schedule):
         etlhelper.generate_job_file(tbl, leafs, folder)
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%d etls generated ' % len(done_blood))
+
+        PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d etls generated ' % len(done_blood))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:
@@ -480,6 +482,7 @@ def generate_job_dag_v2(request, schedule):
         etlhelper.load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule)
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%d etls generated ' % len(done_blood))
+        PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d etls generated ' % len(done_blood))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:

@@ -57,6 +57,17 @@ def push_email(users, msg):
     else:
         return 'Make sure all fields are entered and valid.'
 
+def push_exact_email(email, msg):
+    subject = 'Alert From XStorm'
+    from_email = settings.EMAIL_HOST_USER
+    if subject and msg and from_email:
+        try:
+            send_mail(subject, msg, from_email, [email, ])
+        except BadHeaderError:
+            return 'Invalid header found.'
+        return 'Ok header found.'
+    else:
+        return 'Make sure all fields are entered and valid.'
 
 def push_email2(request):
     subject = request.POST.get('subject', 'willtest')
