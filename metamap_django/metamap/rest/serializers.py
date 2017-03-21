@@ -62,7 +62,7 @@ class ExportsSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Exports
-        fields = ('file_loc', 'start_time', 'end_time', 'command', 'task')
+        fields = ('file_loc', 'start_time', 'end_time')
 
 
 class MetaSerializer(serializers.HyperlinkedModelSerializer):
