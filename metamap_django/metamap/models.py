@@ -8,6 +8,9 @@ from django.utils import timezone
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
 from will_common.models import PeriodicTask, WillDependencyTask, UserProfile
 
+logger = logging.getLogger('django')
+from will_common.utils import hivecli
+
 
 class AnaETL(models.Model):
     name = models.CharField(max_length=20)
@@ -93,9 +96,35 @@ class JarApp(models.Model):
 
 
 class ETLObjRelated():
-    pass
+    '''
+    every etl obj should extend me. for example: m2h, h2h, h2m .etc
+    '''
+    etl_type = 110
 
-class ETL(models.Model):
+    def update_etlobj(self):
+        self.clean_etlobj()
+        obj, succeed = self.add_etlobj()
+        obj.update_deps()
+        return obj
+
+    def add_etlobj(self):
+        return ETLObj.objects.update_or_create(name=self.name, rel_id=self.id, type=self.etl_type)
+
+    def clean_etlobj(self):
+        obj = ETLObj.objects.get(rel_id=self.id, type=self.etl_type)
+        if obj:
+            obj.delete()
+
+    def get_deps(self):
+        '''
+        这个是自动分析的依赖，不同于调度时获取的依赖，这是后者的前一个步骤，注意不要混淆了
+        :return:
+        '''
+        return None
+
+
+class ETL(models.Model, ETLObjRelated):
+    etl_type = 1
     query = models.TextField()
     meta = models.CharField(max_length=20)
     name = models.CharField(max_length=100, db_column='tbl_name', verbose_name=u"ETL名称")
@@ -115,20 +144,32 @@ class ETL(models.Model):
     def __str__(self):
         return self.query
 
+    def get_deps(self):
+        deps = hivecli.getTbls(self)
+
     def was_published_recently(self):
         return self.ctime >= timezone.now - datetime.timedelta(days=1)
 
 
-class DenpendencyObj(models.Model):
-    def update_deps(self, deps):
+class ETLObj(models.Model):
+    name = models.CharField(max_length=100, db_column='name')
+    type = models.IntegerField(default=1, blank=False, null=False,
+                               help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 sourcefile;6 jarfile")
+    rel_id = models.IntegerField()
+
+    def update_deps(self):
         '''
         better use this
         :param deps:
         :return:
         '''
+        # TODO swith dict
+        etl = ETL.objects.get(pk=self.rel_id)
+        deps = etl.get_deps()
         dep_ids = [ETLObj.objects.get(name=dep).id for dep in deps]
         self.clean_deps(dep_ids)
         self.add_deps(dep_ids)
+        logger.info('ETLBlood has been created successfully : %s' % deps)
 
     def add_deps(self, deps):
         for dep in deps:
@@ -136,14 +177,9 @@ class DenpendencyObj(models.Model):
 
     def clean_deps(self, deps):
         older_deps = ETLBlood.objects.filter(child_id=self.id, parent_id__in=deps)
-        older_deps.delete()
+        if older_deps.count() > 0:
+            older_deps.delete()
 
-
-class ETLObj(DenpendencyObj):
-    name = models.CharField(max_length=100, db_column='name')
-    type = models.IntegerField(default=1, blank=False, null=False,
-                               help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 sourcefile;6 jarfile")
-    rel_id = models.IntegerField()
 
 
 class ETLBlood(models.Model):
@@ -196,7 +232,8 @@ class BIUser(models.Model):
         managed = False
 
 
-class SqoopMysql2Hive(models.Model):
+class SqoopMysql2Hive(models.Model, ETLObjRelated):
+    etl_type = 4
     name = models.CharField(max_length=40, null=False, default='none')
     mysql_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_m')
     hive_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_h')
@@ -212,7 +249,8 @@ class SqoopMysql2Hive(models.Model):
     cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='m2h_cgroup', null=True)
 
 
-class SqoopHive2Mysql(models.Model):
+class SqoopHive2Mysql(models.Model, ETLObjRelated):
+    etl_type = 3
     name = models.CharField(max_length=40, null=False, default='none')
     mysql_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_m')
     hive_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_h')
@@ -227,6 +265,10 @@ class SqoopHive2Mysql(models.Model):
     ctime = models.DateTimeField(default=timezone.now)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='h2m_creator', null=True)
     cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='h2m_cgroup', null=True)
+
+    def get_deps(self):
+        # TODO 依赖hive多个表，需要解析sql，目前没有这种需求，为降低错误率，暂时不支持
+        return self.hive_meta.meta + '@' + self.hive_tbl
 
 
 class Exports(models.Model):

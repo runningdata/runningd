@@ -73,7 +73,9 @@ def clean_etl_data(request):
             try:
                 child = ETL.objects.get(pk=blood.relatedEtlId)
                 parent = ETL.objects.get(name=blood.parentTbl, valid=1)
-                etl_blood, result = ETLBlood.objects.update_or_create(child=ETLObj.objects.get(rel_id=child.id, type=1), parent=ETLObj.objects.get(rel_id=parent.id, type=1))
+                etl_blood, result = ETLBlood.objects.update_or_create(child=ETLObj.objects.get(rel_id=child.id, type=1),
+                                                                      parent=ETLObj.objects.get(rel_id=parent.id,
+                                                                                                type=1))
                 print(' ETL \'s ETLBlood done : %d ' % etl_blood.id)
             except Exception, e:
                 print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
@@ -90,7 +92,6 @@ def clean_etl_data(request):
             print(' SqoopHive2Mysql \'s ETLBlood done : %d ' % etl_blood.id)
         except Exception, e:
             print(' SqoopHive2Mysql \'s error : %d --> %s' % (etl.id, e))
-
 
     for etl in SqoopMysql2Hive.objects.all():
         try:
@@ -146,7 +147,8 @@ def clean_etl_data(request):
             if task.type == 100:
                 continue
             etl_obj = ETLObj.objects.get(type=task.type, rel_id=task.rel_id)
-            WillDependencyTask.objects.update_or_create(name=task.name, rel_id=etl_obj.id, type=100, schedule=task.schedule)
+            WillDependencyTask.objects.update_or_create(name=task.name, rel_id=etl_obj.id, type=100,
+                                                        schedule=task.schedule)
             print('WillDependencyTask done : %s' % task.name)
         except Exception, e:
             print('WillDependencyTask error : %d --> %s' % (task.id, e))
@@ -203,7 +205,6 @@ def blood_dag(request, etlid):
     return render(request, 'etl/blood.html', {'bloods': final_bloods})
 
 
-
 def blood_by_name(request):
     etl_name = request.GET['tblName']
     try:
@@ -230,16 +231,13 @@ def add_v2(request):
                 etl.meta = etl.name[0: find_]
                 etl.save()
                 logger.info('ETL has been created successfully : %s ' % etl)
-
-                etlobj, status = ETLObj.objects.update_or_create(name=etl.name, type=1, rel_id=etl.id)
-                deps = hivecli.getTbls(etl)
-                etlobj.update_deps(deps)
-                logger.info('Tblblood has been created successfully : %s' % deps)
+                etl.update_etlobj()
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
         return render(request, 'etl/edit.html')
+
 
 def edit_v2(request, pk):
     if request.method == 'POST':
@@ -249,9 +247,6 @@ def edit_v2(request, pk):
                 privious_etl.valid = 0
                 privious_etl.save()
 
-                deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
-                logger.info('Tblbloods for %s has been deleted successfully' % (pk))
-
                 if int(request.POST['valid']) == 1:
                     etl = privious_etl
                     privious_etl.id = None
@@ -260,31 +255,16 @@ def edit_v2(request, pk):
                     userutils.add_current_creator(etl, request)
                     find_ = etl.name.find('@')
                     etl.meta = etl.name[0: find_]
-
                     etl.save()
                     logger.info('ETL has been created successfully : %s ' % etl)
-
-                    tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
-                    for task in tasks:
-                        task.rel_id = etl.id
-                        task.save()
-
-                    logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
-
-                    deps = hivecli.getTbls(etl)
-                    for dep in deps:
-                        logger.info("dep is %s, tblName is %s " % (dep, etl.name))
-                        if etl.name != dep:
-                            tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
-                            tblBlood.save()
-                            logger.info('Tblblood has been created successfully : %s' % tblBlood)
-                    logger.info('Tblblood for %s has been created successfully' % (pk))
+                    etl.update_etlobj()
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
+
 
 def add(request):
     if request.method == 'POST':
@@ -537,6 +517,7 @@ def restart_job(request):
     else:
         return HttpResponse('no auth')
 
+
 def generate_job_dag(request, schedule):
     '''
     抽取所有有效的ETL,生成azkaban调度文件
@@ -583,15 +564,15 @@ def generate_job_dag_v2(request, schedule):
         done_leaf = set()
         folder = 'generate_job_dag_v2-' + dateutils.now_datetime()
         leafs = ETLBlood.objects.raw("SELECT 1 as id, a.* FROM "
-                                      "(select DISTINCT child_id FROM metamap_etlblood) a "
+                                     "(select DISTINCT child_id FROM metamap_etlblood) a "
                                      "join ("
-                                        "select rel_id from metamap_willdependencytask where `schedule` = " + schedule +" and valid=1 and type = 100 "
-                                        ") b "
-                                            "on a.child_id = b.rel_id "
-                                     "left outer join ("
-                                     "SELECT DISTINCT parent_id from metamap_etlblood ) c "
-                                        "on a.child_id = c.parent_id "
-                                    "where c.parent_id is NULL")
+                                     "select rel_id from metamap_willdependencytask where `schedule` = " + schedule + " and valid=1 and type = 100 "
+                                                                                                                      ") b "
+                                                                                                                      "on a.child_id = b.rel_id "
+                                                                                                                      "left outer join ("
+                                                                                                                      "SELECT DISTINCT parent_id from metamap_etlblood ) c "
+                                                                                                                      "on a.child_id = c.parent_id "
+                                                                                                                      "where c.parent_id is NULL")
 
         final_deps = set()
         leaves = set()
