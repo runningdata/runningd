@@ -42,6 +42,7 @@ def push_msg_tophone(phone, msg):
 def push_both(user_profiles, msg):
     push_email([user_p.user for user_p in user_profiles], msg)
     push_msg(user_profiles, msg)
+    return 'push both success'
 
 
 def push_email(users, msg):

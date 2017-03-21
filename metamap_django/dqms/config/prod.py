@@ -37,8 +37,6 @@ HIVE_SERVER = {
     'password': '',
 }
 
-ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
-
 BROKER_URL = 'redis://10.0.1.97:6379'
 
 # Celery Beat 设置
@@ -62,6 +60,8 @@ CAS_PROVIDE_URL_TO_LOGOUT = True
 # push url
 PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
 PUSH_KEY = '&OKY%~!$^G*JRRF^'
+ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
+ADMIN_EMAIL = 'chenxin@yinker.com'
 
 # Application definition
 INSTALLED_APPS = [
