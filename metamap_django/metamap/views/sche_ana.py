@@ -89,6 +89,8 @@ class ExportsViewSet(viewsets.ModelViewSet):
         group = request.query_params['group']
         if group == 'jlc':
             result = httputils.jlc_auth(user, sid)
+        if group == 'xiaov':
+            result = 'success'
         final_filename = filename + '.csv'
         full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
         if result == 'success':
@@ -107,15 +109,16 @@ class ExportsViewSet(viewsets.ModelViewSet):
         group = request.query_params['group']
         if group == 'jlc':
             response = httputils.jlc_auth(user, sid)
+        if group == 'xiaov':
+            response = 'success'
         if response == 'success':
-            print 'auth done'
             objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
             result = list()
             for export in objs:
                 ana_id = export.task.rel_id
                 ana_etl = AnaETL.objects.get(pk=ana_id)
                 if user != 'xuexu':
-                    if ana_etl.is_auth(user):
+                    if ana_etl.is_auth(user, group):
                         result.append(export)
                 else:
                     result.append(export)

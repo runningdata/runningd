@@ -25,12 +25,12 @@ class AnaETL(models.Model):
 
     __str__ = query
 
-    def is_auth(self, user):
+    def is_auth(self, user, group):
         if len(self.auth_users) == 0:
             return True
         else:
             split = self.auth_users.split(',')
-            if user in split:
+            if user in split and self.cgroup.name == group:
                 return True
         return False
 
