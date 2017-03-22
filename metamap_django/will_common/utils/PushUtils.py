@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*
 import logging
+import traceback
 import urllib2
 
 from django.conf import settings
@@ -8,9 +9,11 @@ from django.core.mail import EmailMessage
 from django.core.mail import send_mail
 from django.http import HttpResponse
 
+from will_common.utils import regxutils
 from will_common.utils.encryptutils import encrpt_msg
 
 push_url = settings.PUSH_URL
+logger = logging.get_task_logger('django')
 
 
 def push_msg(user_profiles, msg):
@@ -27,37 +30,41 @@ def push_msg_tophone(phone, msg):
     req = urllib2.Request(msg_)
     req.add_header('User-Agent',
                    'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36')
-    httpHandler = urllib2.HTTPHandler(debuglevel=1)
-    httpsHandler = urllib2.HTTPSHandler(debuglevel=1)
+    httpHandler = urllib2.HTTPHandler(debuglevel=0)
+    httpsHandler = urllib2.HTTPSHandler(debuglevel=0)
     opener = urllib2.build_opener(httpHandler, httpsHandler)
     urllib2.install_opener(opener)
     resp = urllib2.urlopen(req)
     if resp.getcode() == 200:
-        print resp.read()
+        logger.info(resp.read())
         return 'push phone success'
     else:
         return 'error', resp.read()
 
 
 def push_both(user_profiles, msg):
-    push_email([user_p.user for user_p in user_profiles], msg)
     push_msg(user_profiles, msg)
+    push_email([user_p.user for user_p in user_profiles], msg)
     return 'push both success'
 
 
 def push_email(users, msg):
-    subject = 'Alert From XStorm'
-    from_email = settings.EMAIL_HOST_USER
-    emails = [user.email for user in users]
-    if subject and msg and from_email:
-        try:
-            send_mail(subject, msg, from_email, emails)
-            print('pushed done to %s ' % emails)
-        except BadHeaderError:
-            return 'Invalid header found.'
-        return 'Ok header found.'
-    else:
-        return 'Make sure all fields are entered and valid.'
+    try:
+        subject = 'Alert From XStorm'
+        from_email = settings.EMAIL_HOST_USER
+        emails = [user.email for user in users if user.email and regxutils.check_email(user.email)]
+        if subject and msg and from_email:
+            try:
+                send_mail(subject, msg, from_email, emails)
+                print('pushed done to %s ' % emails)
+            except BadHeaderError:
+                logger.error('Invalid header found for %s .' % emails)
+        else:
+            logger.error('Make sure all fields are entered and valid.')
+    except Exception, e:
+        logger.error('error : %s ' % e)
+        logger.error('traceback is : %s ' % traceback.format_exc())
+
 
 def push_exact_email(email, msg):
     subject = 'Alert From XStorm'
@@ -66,10 +73,10 @@ def push_exact_email(email, msg):
         try:
             send_mail(subject, msg, from_email, [email, ])
         except BadHeaderError:
-            return 'Invalid header found.'
-        return 'Ok header found.'
+            logger.error('Invalid header found for %s .' % email)
     else:
-        return 'Make sure all fields are entered and valid.'
+        logger.error('Make sure all fields are entered and valid.')
+
 
 def push_email2(request):
     subject = request.POST.get('subject', 'willtest')
