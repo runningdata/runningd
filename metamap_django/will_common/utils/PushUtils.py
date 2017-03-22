@@ -13,6 +13,7 @@ from will_common.utils import regxutils
 from will_common.utils.encryptutils import encrpt_msg
 
 push_url = settings.PUSH_URL
+logger = logging.getLogger('django')
 
 
 def push_msg(user_profiles, msg):
@@ -57,12 +58,12 @@ def push_email(users, msg):
                 send_mail(subject, msg, from_email, emails)
                 print('pushed done to %s ' % emails)
             except BadHeaderError:
-                print('Invalid header found for %s .' % emails)
+                logger.error('Invalid header found for %s .' % emails)
         else:
-            print('Make sure all fields are entered and valid.')
+            logger.error('Make sure all fields are entered and valid.')
     except Exception, e:
-        print('error : %s ' % e)
-        print('traceback is : %s ' % traceback.format_exc())
+        logger.error('error : %s ' % e)
+        logger.error('traceback is : %s ' % traceback.format_exc())
 
 
 def push_exact_email(email, msg):
@@ -72,9 +73,9 @@ def push_exact_email(email, msg):
         try:
             send_mail(subject, msg, from_email, [email, ])
         except BadHeaderError:
-            print('Invalid header found for %s .' % email)
+            logger.error('Invalid header found for %s .' % email)
     else:
-        print('Make sure all fields are entered and valid.')
+        logger.error('Make sure all fields are entered and valid.')
 
 
 def push_email2(request):
