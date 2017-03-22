@@ -18,7 +18,7 @@ def post2obj(obj, post, *excludes):
     for k, v in dic.iteritems():
         if k not in excludes:
             if hasattr(obj, k):
-                v = ''.join(v).strip()
+                v = ''.join(v)
                 setattr(obj, k, v)
     logging.info("post params has been copied to  obj -> %s" % obj)
 
