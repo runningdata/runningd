@@ -84,15 +84,15 @@ def runcase(case, check, user):
                         dateutils.format_dbday(timezone.now()), chk_name, case.case_name, rule.measure_name, rule.min,
                         rule.max, re)
                     if check:
-                        PushUtils.push_msg_tophone(case.editor.phone, msg)
-                        resp = PushUtils.push_msg(check.managers.all(), msg)
+                        PushUtils.push_both([case.editor,], msg)
+                        resp = PushUtils.push_both(check.managers.all(), msg)
                         phones = ''
                         for user in check.managers.all():
                             phones = phones + ',' + str(user.phone)
                         alert.target_phone = phones
                         alert.owners = check.managers.all()
                     elif user:
-                        resp = PushUtils.push_msg([user, ], msg)
+                        resp = PushUtils.push_both([user, ], msg)
                         alert.target_phone = user.phone
                         alert.owners = [user, ]
                     alert.push_msg = msg
@@ -109,6 +109,7 @@ def runcase(case, check, user):
         logger.error(e.message)
         print('msg : %s ' % traceback.format_exc())
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), traceback.format_exc())
+        PushUtils.push_exact_email(settings.ADMIN_EMAIL, traceback.format_exc())
         case_inst.status = enums.EXECUTION_STATUS.FAILED
         case_inst.result_mes = e.message
     case_inst.save()

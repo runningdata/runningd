@@ -42,7 +42,6 @@ urlpatterns = [
     url(r'^etls/preview_dag/$', etls.preview_job_dag, name='preview_job_dag'),
     url(r'^etls/blood/(?P<etlid>[0-9]+)/$', etls.blood_dag, name='blood'),
     url(r'^etls/emailtest/$', etls.send_email, name='send_email'),
-    url(r'^etls/email2test/$', etls.send_email2, name='send_email2'),
     url(r'^etls/downloadtest/$', etls.filedownload, name='filedownload'),
     url(r'^etls/restart_job/', etls.restart_job, name='restart_job'),
 

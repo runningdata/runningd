@@ -3,10 +3,14 @@
 '''
 created by will 
 '''
-from rest_framework import serializers
+import pytz
+from django.utils import six
+from rest_framework import serializers, ISO_8601
+from rest_framework.settings import api_settings
 
 from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser, Meta, SqoopHive2Mysql, SqoopMysql2Hive, \
     SourceApp, JarApp
+from will_common.serializers import WillDateTimeField
 
 
 class ETLSerializer(serializers.HyperlinkedModelSerializer):
@@ -20,10 +24,12 @@ class SourceAppSerializer(serializers.HyperlinkedModelSerializer):
         model = SourceApp
         fields = ('name', 'id')
 
+
 class JarAppSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = JarApp
         fields = ('name', 'id')
+
 
 class SqoopHive2MysqlSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -56,13 +62,12 @@ class WillTaskSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ExportsSerializer(serializers.HyperlinkedModelSerializer):
-    task = WillTaskSerializer(required=True)
-    start_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
-    end_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    start_time = WillDateTimeField(format='%Y-%m-%d %H:%M:%S')
+    end_time = WillDateTimeField(format='%Y-%m-%d %H:%M:%S')
 
     class Meta:
         model = Exports
-        fields = ('file_loc', 'start_time', 'end_time', 'command', 'task')
+        fields = ('file_loc', 'start_time', 'end_time')
 
 
 class MetaSerializer(serializers.HyperlinkedModelSerializer):

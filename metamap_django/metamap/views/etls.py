@@ -415,44 +415,11 @@ def preview_job_dag(request):
 
 
 def send_email(request):
-    subject = request.POST.get('subject', 'willtest')
-    message = request.POST.get('message', 'willtest')
-    from_email = request.POST.get('from_email', 'yinkerconfluence@yinker.com')
-    if subject and message and from_email:
-        try:
-            send_mail(subject, message, from_email, ['chenxin@yinker.com'])
-        except BadHeaderError:
-            return HttpResponse('Invalid header found.')
-        return HttpResponse('Ok header found.')
-    else:
-        # In reality we'd use a form class
-        # to get proper validation errors.
-        return HttpResponse('Make sure all fields are entered and valid.')
-
-
-def send_email2(request):
-    subject = request.POST.get('subject', 'willtest')
-    message = request.POST.get('message', 'willtest')
-    from_email = request.POST.get('from_email', 'yinkerconfluence@yinker.com')
-    if subject and message and from_email:
-        try:
-            email = EmailMessage(
-                u'中文题目',
-                u'中文内容',
-                'yinkerconfluence@yinker.com',
-                ['chenxin@yinker.com'],
-                ['xuexu@yinker.com'],
-            )
-            email.attach_file(u'/root/月度目标数据-20170210095000')
-
-            email.send()
-        except BadHeaderError:
-            return HttpResponse('Invalid header found.')
-        return HttpResponse('Ok header found.')
-    else:
-        # In reality we'd use a form class
-        # to get proper validation errors.
-        return HttpResponse('Make sure all fields are entered and valid.')
+    try:
+        PushUtils.push_email([request.user], constants.ALERT_MSG % ('2017', 'ss', 'ss', 'ss', 1, 99, 2))
+    except BadHeaderError:
+        return HttpResponse('Invalid header found.')
+    return HttpResponse('Ok header found.')
 
 
 def filedownload(request):
@@ -545,6 +512,8 @@ def generate_job_dag(request, schedule):
         etlhelper.generate_job_file(tbl, leafs, folder)
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%d etls generated ' % len(done_blood))
+
+        PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d etls generated ' % len(done_blood))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:
