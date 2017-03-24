@@ -12,13 +12,13 @@ import subprocess
 import traceback
 
 from celery import shared_task, task
+from django.conf import settings
 from django.utils import timezone
 
 from dqms.models import DqmsCheckInst, DqmsCheck, DqmsCase, DqmsCaseInst, DqmsAlert
 
 from celery.utils.log import get_task_logger
 
-from metamap_django import settings
 from will_common.models import UserProfile
 from will_common.utils import PushUtils
 from will_common.utils import dateutils
