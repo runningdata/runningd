@@ -5,6 +5,7 @@ created by will
 '''
 import os
 
+from django.conf import settings
 from django.core.files import File
 from django.db import transaction
 from django.http import HttpResponse
@@ -173,6 +174,10 @@ def add(request):
             etl = SqoopMysql2Hive.objects.get(pk=task.rel_id)
         elif task.type == 6:
             etl = JarApp.objects.get(pk=task.rel_id)
+        else:
+            PushUtils.push_exact_email(settings.ADMIN_EMAIL,
+                                       'task %s has no type' % task.name)
+            etl = None
         if etl and etl.creator_id != request.user.userprofile.id:
             PushUtils.push_exact_email(etl.creator.user.email,
                                        'your schedule for %s has been changed by %s' % (etl.name, request.user.email))
@@ -226,7 +231,11 @@ def edit(request, pk):
             etl = SqoopMysql2Hive.objects.get(pk=task.rel_id)
         elif task.type == 6:
             etl = JarApp.objects.get(pk=task.rel_id)
-        if etl and etl.creator_id != request.user.userprofile.id:
+        else:
+            PushUtils.push_exact_email(settings.ADMIN_EMAIL,
+                                       'task %s has no type' % task.name)
+            etl = None
+        if etl is not None and etl.creator_id != request.user.userprofile.id:
             PushUtils.push_exact_email(etl.creator.user.email,
                                        'your schedule for %s has been changed by %s' % (
                                            etl.name, request.user.email))

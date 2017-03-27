@@ -144,7 +144,6 @@ def edit(request, pk):
             PushUtils.push_exact_email(ana.creator.user.email,
                                        'your schedule for %s has been changed by %s' % (ana.name, request.user.email))
         task.save()
-
         cron_task = PeriodicTask.objects.get(willtask_id=pk)
         cron_task.name = task.name
         cron_task.save()
