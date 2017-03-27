@@ -176,7 +176,7 @@ def add(request):
             etl = JarApp.objects.get(pk=task.rel_id)
         else:
             PushUtils.push_exact_email(settings.ADMIN_EMAIL,
-                                       'task %s has no type' % task.name)
+                                       'task %s has no type, its type is : %d ' % (task.name, task.type))
             etl = None
         if etl and etl.creator_id != request.user.userprofile.id:
             PushUtils.push_exact_email(etl.creator.user.email,
@@ -233,7 +233,7 @@ def edit(request, pk):
             etl = JarApp.objects.get(pk=task.rel_id)
         else:
             PushUtils.push_exact_email(settings.ADMIN_EMAIL,
-                                       'task %s has no type' % task.name)
+                                       'task %s has no type, its type is : %d ' % (task.name, task.type))
             etl = None
         if etl is not None and etl.creator_id != request.user.userprofile.id:
             PushUtils.push_exact_email(etl.creator.user.email,
