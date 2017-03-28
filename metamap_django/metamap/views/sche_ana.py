@@ -18,6 +18,7 @@ from will_common.helpers import cronhelper
 from metamap.models import AnaETL, Exports, BIUser
 from metamap.rest.serializers import ExportsSerializer, BIUserSerializer
 from will_common.models import WillDependencyTask, PeriodicTask
+from will_common.utils import PushUtils
 from will_common.utils import constants
 from will_common.utils import httputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
@@ -49,6 +50,10 @@ def add(request):
         httputils.post2obj(task, request.POST, 'id')
         task.type = 2
         task.schedule = 4
+        ana = AnaETL.objects.get(pk=task.rel_id)
+        if ana.creator_id != request.user.userprofile.id:
+            PushUtils.push_exact_email(ana.creator.user.email,
+                                       'your schedule for %s has been changed by %s' % (ana.name, request.user.email))
         task.save()
 
         cron_task = PeriodicTask.objects.create()
@@ -133,8 +138,12 @@ def edit(request, pk):
     if request.POST:
         task = WillDependencyTask.objects.get(pk=pk)
         httputils.post2obj(task, request.POST, 'id')
+        ana = AnaETL.objects.get(pk=task.rel_id)
+        # TODO This should be a normal part for some sub-classes
+        if ana.creator_id != request.user.userprofile.id:
+            PushUtils.push_exact_email(ana.creator.user.email,
+                                       'your schedule for %s has been changed by %s' % (ana.name, request.user.email))
         task.save()
-
         cron_task = PeriodicTask.objects.get(willtask_id=pk)
         cron_task.name = task.name
         cron_task.save()
