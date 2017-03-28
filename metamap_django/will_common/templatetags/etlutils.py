@@ -162,7 +162,7 @@ def clean_blood(blood):
 
 @register.filter
 def is_valid(value):
-    if is_valid == 1:
+    if is_valid == '1':
         return '是'
     return '否'
 
