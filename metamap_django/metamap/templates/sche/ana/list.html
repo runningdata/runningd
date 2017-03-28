@@ -34,7 +34,7 @@
                         <td>{% readable_schedule obj.schedule %}</td>
                         <td>{{ obj.get_schedule }}</td>
                         <td>{{ obj.ctime | date:"Y年m月d日 H时i分" }}</td>
-                        <td>{{ obj.valid }}</td>
+                        <td>{{ obj.valid | is_valid }}</td>
                         <td>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"
