@@ -22,6 +22,7 @@
                 <th>类型</th>
                 <th>策略</th>
                 <th>创建时间</th>
+                <th>是否在线</th>
                 <th>操作</th>
             </tr>
             </thead>
@@ -33,6 +34,7 @@
                         <td>{% readable_sche_type obj.type %}</td>
                         <td>{% readable_schedule obj.schedule %}</td>
                         <td>{{ obj.ctime | date:"Y年m月d日 H时i分" }}</td>
+                        <td>{{ obj.valid | is_valid }}</td>
                         <td>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"
