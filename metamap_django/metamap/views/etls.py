@@ -58,6 +58,13 @@ class IndexView(GroupListView):
             context['search'] = self.request.GET['search']
         return context
 
+def nginx_auth_test(request):
+    resp = HttpResponse()
+    if request.user.id is not None:
+        resp.status_code = 200
+    else:
+        resp.status_code = 401
+    return resp
 
 def clean_etl_data(request):
     # TODO 有些sqoop import的ods表相关的，还没有生成对应的ETLBlood对象，所以当前ETL的H2H也是不完整的血统DAG
