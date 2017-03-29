@@ -37,6 +37,7 @@ EMAIL_USE_TLS = True
 PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
 PUSH_KEY = '&OKY%~!$^G*JRRF^'
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
+ADMIN_EMAIL = 'chenxin@yinker.com'
 ALLOWED_HOSTS = []
 
 CLUTER_QUEUE = 'default'

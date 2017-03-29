@@ -59,6 +59,15 @@ class IndexView(GroupListView):
         return context
 
 
+def nginx_auth_test(request):
+    resp = HttpResponse()
+    if request.user.id is not None:
+        resp.status_code = 200
+    else:
+        resp.status_code = 401
+    return resp
+
+
 def clean_etl_data(request):
     # TODO 有些sqoop import的ods表相关的，还没有生成对应的ETLBlood对象，所以当前ETL的H2H也是不完整的血统DAG
     for etl in ETL.objects.filter(valid=1):
@@ -495,24 +504,36 @@ def generate_job_dag(request, schedule):
         done_blood = set()
         done_leaf = set()
         folder = 'h2h-' + dateutils.now_datetime()
-        leafs = TblBlood.objects.raw("select a.* from "
-                                     + "(select * from metamap_tblblood where valid = 1) a"
-                                     + " join "
-                                     + " (select rel_id from metamap_willdependencytask where schedule=" + schedule + " and valid=1 and type = 1) s "
-                                     + " on s.rel_id = a.related_etl_id"
-                                     + " left outer join "
-                                     + "(select distinct parent_tbl from metamap_tblblood where valid = 1) b"
-                                     + " on a.tbl_name = b.parent_tbl"
-                                     + " where b.parent_tbl is null")
+        # leafs1 = TblBlood.objects.raw("select a.* from "
+        #                               + "(select * from metamap_tblblood where valid = 1) a"
+        #                               + " left outer join "
+        #                               + " (select rel_id from metamap_willdependencytask where schedule=" + schedule + " and valid=1 and type = 1) s "
+        #                               + " on s.rel_id = a.related_etl_id"
+        #                               + " left outer join "
+        #                               + "(select distinct parent_tbl from metamap_tblblood where valid = 1) b"
+        #                               + " on a.tbl_name = b.parent_tbl"
+        #                               + " where b.parent_tbl is null")
+        leafs2 = TblBlood.objects.raw("select a.* from "
+                                      + "(select * from metamap_tblblood where valid = 1) a"
+                                      + " left outer join "
+                                      + "(select distinct parent_tbl from metamap_tblblood where valid = 1) b"
+                                      + " on a.tbl_name = b.parent_tbl"
+                                      + " where b.parent_tbl is null")
+        ok_leafs = set()
+        # todo_leafs = leafs2.exclude(pk__in=leafs1)
+        get_valid_leaves(leafs2, ok_leafs, schedule)
+
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-        etlhelper.load_nodes(leafs, folder, done_blood, done_leaf, schedule)
+        final_leaves = TblBlood.objects.filter(pk__in=ok_leafs)
+        etlhelper.load_nodes(final_leaves, folder, done_blood, done_leaf, schedule)
+
         tbl = TblBlood(tblName='etl_done_' + folder)
-        etlhelper.generate_job_file(tbl, leafs, folder)
+        etlhelper.generate_job_file(tbl, final_leaves, folder)
+
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%d etls generated ' % len(done_blood))
-
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d etls generated ' % len(done_blood))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
@@ -520,6 +541,17 @@ def generate_job_dag(request, schedule):
         logger.error('error : %s ' % e)
         logger.error('traceback is : %s ' % traceback.format_exc())
         return HttpResponse('error')
+
+
+def get_valid_leaves(leafs2, ok_leafs, schedule):
+    for leaf in leafs2:
+        # if this leaf is not scheduled, go check its parent
+        if WillDependencyTask.objects.filter(rel_id=leaf.relatedEtlId, type=1, valid=1,
+                                             schedule=schedule).count() == 0:
+            ps = TblBlood.objects.filter(valid=1, tblName=leaf.parentTbl)
+            get_valid_leaves(ps, ok_leafs, schedule)
+        else:
+            ok_leafs.add(leaf.id)
 
 
 def generate_job_dag_v2(request, schedule):
