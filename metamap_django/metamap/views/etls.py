@@ -364,20 +364,6 @@ def send_email(request):
     return HttpResponse('Ok header found.')
 
 
-def filedownload(request):
-    user = request.GET['user']
-    sid = request.GET['sid']
-    filename = request.GET['filename']
-    result = httputils.jlc_auth(user, sid)
-    if result == 'success':
-        full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
-        if result == 'success':
-            response = FileResponse(open(full_file, 'rb'))
-        response['Content-Disposition'] = 'attachment; filename=te.sh'
-        return response
-    else:
-        return HttpResponse("session is not valid")
-
 
 def restart_job(request):
     '''
