@@ -45,5 +45,5 @@ def check_file(request):
     filename = request.GET['filename']
     logLocation = TMP_EXPORT_FILE_LOCATION + filename
     if os.path.exists(logLocation):
-        return HttpResponse("success", mimetype="application/json")
-    return HttpResponse("not yet", mimetype="application/json")
+        return HttpResponse("success")
+    return HttpResponse("not yet")
