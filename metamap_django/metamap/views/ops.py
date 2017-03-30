@@ -10,7 +10,7 @@ from django.shortcuts import render
 
 from metamap.models import Exports
 from will_common.utils import dateutils
-from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION
+from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
 
 logger = logging.getLogger('django')
 
@@ -24,7 +24,7 @@ def tail_hdfs(request):
     user = request.user
     group = Group.objects.get(user=user)
     filename = 'tailhdfs-' + user.username + dateutils.now_datetime()
-    logLocation = AZKABAN_SCRIPT_LOCATION + filename
+    logLocation = TMP_EXPORT_FILE_LOCATION + filename
     cmd = 'hdfs dfs -cat %s/* | tail -n %s' % (dfs_path, line_num)
     command = 'runuser -l ' + group.name + ' -c "' + cmd + '"'
     with open(logLocation, 'a') as fi:
