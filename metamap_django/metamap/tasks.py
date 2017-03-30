@@ -19,6 +19,7 @@ from metamap.helpers import etlhelper
 from metamap.models import ETL, Executions, WillDependencyTask, AnaETL, Exports, SqoopHive2MysqlExecutions, \
     SqoopHive2Mysql, SqoopMysql2Hive, SqoopMysql2HiveExecutions, SourceApp, SourceAppExecutions, JarApp, \
     JarAppExecutions
+from will_common.utils import PushUtils
 from will_common.utils import enums, dateutils
 
 from celery.utils.log import get_task_logger
@@ -192,6 +193,18 @@ def exec_mysql2hive(taskid):
     execution.save()
     exec_m2h(command, location)
 
+
+@shared_task
+def tail_hdfs(logLocation, command):
+    print 'command is ', command
+    with open(logLocation, 'a') as fi:
+        p = subprocess.Popen([''.join(command)], stdout=fi, stderr=subprocess.STDOUT,
+                             shell=True,
+                             universal_newlines=True)
+        p.wait()
+        returncode = p.returncode
+    # PushUtils.push_exact_email(email, msg)
+    logger.info('tail_hdfs : %s return code is %d' % (command, returncode))
 
 @shared_task
 def exec_sourceapp(taskid):

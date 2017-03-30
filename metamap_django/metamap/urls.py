@@ -32,6 +32,7 @@ urlpatterns = [
 
     url(r'^$', etls.IndexView.as_view(), name='index'),
     url(r'hdfs/tail', ops.tail_hdfs, name='tail_hdfs'),
+    url(r'hdfs/check_file', ops.check_file, name='check_file'),
     url(r'nginx_auth_test', etls.nginx_auth_test, name='nginx_auth_test'),
     url(r'^etls/clean_data/$', etls.clean_etl_data, name='clean_etl_data'),
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
