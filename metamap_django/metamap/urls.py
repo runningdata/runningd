@@ -3,6 +3,7 @@ from rest_framework import routers
 
 from metamap.models import JarAppExecutions, SqoopMysql2HiveExecutions, Executions, SqoopHive2MysqlExecutions
 from metamap.views import jar
+from metamap.views import ops
 from metamap.views import sche_etl, export
 from metamap.views import source
 from metamap.views import sqoop
@@ -30,20 +31,19 @@ router.register(r'sqoop_mysql_meta', SqoopMysqlMetaViewSet)
 urlpatterns = [
 
     url(r'^$', etls.IndexView.as_view(), name='index'),
-
+    url(r'hdfs/tail', ops.tail_hdfs, name='tail_hdfs'),
     url(r'nginx_auth_test', etls.nginx_auth_test, name='nginx_auth_test'),
     url(r'^etls/clean_data/$', etls.clean_etl_data, name='clean_etl_data'),
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
     url(r'^etls/invalid/$', etls.InvalidView.as_view(), name='invalid'),
     url(r'^etls/add/$', etls.add, name='add'),
     url(r'^etls/status/(?P<status>[0-9]+)/$',
-        common.StatusListView.as_view(url_base='etls', model=Executions),  name='status'),
+        common.StatusListView.as_view(url_base='etls', model=Executions), name='status'),
     url(r'^etls/his/(?P<tblName>.*)/$', etls.his, name='his'),
     url(r'^etls/blood/$', etls.blood_by_name, name='blood_by_name'),
     url(r'^etls/preview_dag/$', etls.preview_job_dag, name='preview_job_dag'),
     url(r'^etls/blood/(?P<etlid>[0-9]+)/$', etls.blood_dag, name='blood'),
     url(r'^etls/emailtest/$', etls.send_email, name='send_email'),
-    url(r'^etls/downloadtest/$', etls.filedownload, name='filedownload'),
     url(r'^etls/restart_job/', etls.restart_job, name='restart_job'),
 
     url(r'^etls/review_sql/(?P<etlid>[0-9]+)/$', etls.review_sql, name='review_sql'),
@@ -74,7 +74,7 @@ urlpatterns = [
     url(r'^h2m/execlog/(?P<execid>[0-9]+)/$', sqoop.exec_log, name='sqoop_execlog'),
     url(r'^h2m/getexeclog/(?P<execid>[0-9]+)/$', sqoop.get_exec_log, name='sqoop_getexeclog'),
     url(r'^h2m/status/(?P<status>[0-9]+)/$',
-        common.StatusListView.as_view(url_base='h2m', model=SqoopHive2MysqlExecutions),  name='sqoop_status'),
+        common.StatusListView.as_view(url_base='h2m', model=SqoopHive2MysqlExecutions), name='sqoop_status'),
 
     url(r'^m2h/$', sqoop2.Mysql2HiveListView.as_view(), name='h2m_sqoop2_list'),
     url(r'^m2h/(?P<pk>[0-9]+)/$', sqoop2.edit, name='h2m_sqoop2_edit'),
