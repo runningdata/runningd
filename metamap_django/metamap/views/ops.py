@@ -20,8 +20,6 @@ def tail_hdfs(request):
     line_num = request.GET['line_num']
     if 'sid' in request.GET:
         sid = request.GET['sid']
-    if 'group' in request.GET:
-        group = request.GET['group']
 
     user = request.user
     group = Group.objects.get(user=user)
@@ -42,6 +40,5 @@ def tail_hdfs(request):
     # return HttpResponse(content)
     return render(request, 'ops.html', {'user': request.user.username,
                                         'filename': filename,
-                                        'sid': sid,
-                                        'group': group
+                                        'group': group.name
                                         })
