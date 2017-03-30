@@ -18,7 +18,7 @@
             if (status != 1) {
                 console.log('beginning....');
                 $.ajax({
-                    url: "http://10.1.5.83:8000/metamap/hdfs/tail_file?filename={{ filename }}",
+                    url: "http://10.1.5.83:8000/metamap/hdfs/check_file?filename={{ filename }}",
                     success: function (data) {
                         if (data == "success") {
                             $("#file_link").class = "show";

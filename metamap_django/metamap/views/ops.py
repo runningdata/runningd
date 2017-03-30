@@ -41,7 +41,7 @@ def tail_hdfs(request):
                                                   })
 
 
-def tail_file(request):
+def check_file(request):
     filename = request.GET['filename']
     logLocation = TMP_EXPORT_FILE_LOCATION + filename
     if os.path.exists(logLocation):
