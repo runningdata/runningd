@@ -58,7 +58,6 @@ class IndexView(GroupListView):
             context['search'] = self.request.GET['search']
         return context
 
-
 def nginx_auth_test(request):
     resp = HttpResponse()
     if request.user.id is not None:
