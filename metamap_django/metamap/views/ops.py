@@ -40,5 +40,5 @@ def tail_hdfs(request):
     # return HttpResponse(content)
     return render(request, 'ops.html', {'username': request.user.username,
                                         'filename': filename,
-                                        'group': group.name
+                                        'groupname': group.name
                                         })
