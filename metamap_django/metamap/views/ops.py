@@ -28,9 +28,9 @@ def tail_hdfs(request):
     logLocation = TMP_EXPORT_FILE_LOCATION + filename
     cmd = 'hdfs dfs -cat %s/* | tail -n %s' % (dfs_path, line_num)
     command = 'runuser -l ' + group.name + ' -c "' + cmd + '"'
-    msg = '<a href="http://10.1.5.83:8000/metamap/rest/exports/get_file?filename=%s&user=%s&group=%s&sid=sid">%s点击下载</a>' \
-          % (filename, request.user.username, group.name, filename)
-    tasks.tail_hdfs.delay(logLocation, command, msg)
+    # msg = '<a href="http://10.1.5.83:8000/metamap/rest/exports/get_file?filename=%s&user=%s&group=%s&sid=sid">%s点击下载</a>' \
+    #       % (filename, request.user.username, group.name, filename)
+    tasks.tail_hdfs.delay(logLocation, command)
     # content = 'sth happend, please info the manager'
     # with open(logLocation, 'r') as tt:
     #     content = tt.read()
