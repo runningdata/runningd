@@ -196,6 +196,7 @@ def exec_mysql2hive(taskid):
 
 @shared_task
 def tail_hdfs(logLocation, command):
+    print 'command is ', command
     with open(logLocation, 'a') as fi:
         p = subprocess.Popen([''.join(command)], stdout=fi, stderr=subprocess.STDOUT,
                              shell=True,

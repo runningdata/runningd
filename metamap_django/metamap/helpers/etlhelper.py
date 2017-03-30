@@ -327,7 +327,7 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
         command = "echo " + job_name
 
     # 生成job文件
-    job_type = ' command\nretries=12\nretry.backoff=300000\n'
+    job_type = ' command\nretries=3\nretry.backoff=60000\n'
     dependencies = set()
     for p in parent_node:
         dependencies.add(p.tblName)
@@ -358,7 +358,7 @@ def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1)
         command = "echo " + job_name
 
     # 生成job文件
-    job_type = ' command\nretries=12\nretry.backoff=300000\n'
+    job_type = ' command\nretries=5\nretry.backoff=60000\n'
     dependencies = set()
     for p in parent_names:
         dependencies.add(p)
@@ -390,7 +390,7 @@ def generate_job_file_v2(blood, parent_node, folder, schedule=-1):
         command = "echo " + job_name
 
     # 生成job文件
-    job_type = ' command\nretries=12\nretry.backoff=300000\n'
+    job_type = ' command\nretries=5\nretry.backoff=60000\n'
     dependencies = set()
     for p in parent_node:
         dependencies.add(p.tblName)
@@ -431,7 +431,7 @@ def generate_job_file_h2m(objs, folder):
             f.write(command)
         # 生成job文件
         # job_type = 'command\nretries=12\nretry.backoff=300000\n'
-        job_type = ' command\nretries=12\nretry.backoff=300000\n'
+        job_type = ' command\nretries=5\nretry.backoff=300000\n'
         content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = sh ' + sqoop_file + '\n'
         job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
         with open(job_file, 'w') as f:

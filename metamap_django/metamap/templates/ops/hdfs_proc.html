@@ -22,8 +22,8 @@
                     success: function (data) {
                         console.log('data is ' + data);
                         if (data == "success") {
-                            $("#file_link").class = "show";
-                            $("#waiting").class = "hidden";
+                            $("#file_link").attr("class","show");
+                            $("#waiting").attr("class","hidden");
                             status = 1;
                         }
                     }
