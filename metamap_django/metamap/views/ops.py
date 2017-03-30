@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group
 from django.http import HttpResponse
 import logging
 
+from will_common.utils import dateutils
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION
 
 logger = logging.getLogger('django')
@@ -17,7 +18,7 @@ def tail_hdfs(request):
     user = request.user
     group = Group.objects.get(user=user)
     logLocation = AZKABAN_SCRIPT_LOCATION + 'tailhdfs-' + user.username + dateutils.now_datetime()
-    cmd = 'hdfs dfs -tail -%s %s ' % (line_num, dfs_path)
+    cmd = 'hdfs dfs -cat %s/* | tail -n %s' % (dfs_path, line_num)
     command = 'runuser -l ' + group.name + ' -c "' + cmd + '"'
     with open(logLocation, 'a') as fi:
         p = subprocess.Popen([''.join(command)], stdout=fi, stderr=subprocess.STDOUT,
