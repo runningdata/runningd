@@ -38,7 +38,7 @@ def tail_hdfs(request):
     # with open(logLocation, 'r') as tt:
     #     content = tt.read()
     # return HttpResponse(content)
-    return render(request, 'ops.html', {'user': request.user.username,
+    return render(request, 'ops.html', {'username': request.user.username,
                                         'filename': filename,
                                         'group': group.name
                                         })
