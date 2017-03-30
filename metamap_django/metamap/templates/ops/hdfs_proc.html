@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+
+{% block title %}HDFS数据导出{% endblock %}
+
+{% block content %}
+    <div id="waiting">
+        请等一下哦.......{{ filename }}正在生成中......
+    </div>
+    <div id="file_link" class="hidden">
+        <a href="http://10.1.5.83:8000/metamap/rest/exports/get_file?filename={{ filename }}&user={{ username }}&group={{ groupname }}&sid=sid">{{ filename }}点击下载</a>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript">
+        var status = 0;
+        function getData() {
+            if (status != 1) {
+                console.log('beginning....');
+                $.ajax({
+                    url: "http://10.1.5.83:8000/metamap/hdfs/tail_file?filename={{ filename }}",
+                    success: function (data) {
+                        if (data == "success") {
+                            $("#file_link").class = "show";
+                            $("#waiting").class = "hidden";
+                            status = 1;
+                        }
+                    }
+                });
+                console.log('ending....');
+            }
+        }
+        getData();
+        setInterval(function () {
+            getData();
+        }, 5000);
+    </script>
+{% endblock %}

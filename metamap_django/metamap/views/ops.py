@@ -8,6 +8,7 @@ import logging
 
 from django.shortcuts import render
 
+from metamap import tasks
 from metamap.models import Exports
 from will_common.utils import dateutils
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
@@ -27,18 +28,22 @@ def tail_hdfs(request):
     logLocation = TMP_EXPORT_FILE_LOCATION + filename
     cmd = 'hdfs dfs -cat %s/* | tail -n %s' % (dfs_path, line_num)
     command = 'runuser -l ' + group.name + ' -c "' + cmd + '"'
-    with open(logLocation, 'a') as fi:
-        p = subprocess.Popen([''.join(command)], stdout=fi, stderr=subprocess.STDOUT,
-                             shell=True,
-                             universal_newlines=True)
-        p.wait()
-        returncode = p.returncode
-    logger.info('tail_hdfs : %s return code is %d' % (command, returncode))
+    msg = '<a href="http://10.1.5.83:8000/metamap/rest/exports/get_file?filename=%s&user=%s&group=%s&sid=sid">%s点击下载</a>' \
+          % (filename, request.user.username, group.name, filename)
+    tasks.tail_hdfs.delay(logLocation, command, msg)
     # content = 'sth happend, please info the manager'
     # with open(logLocation, 'r') as tt:
     #     content = tt.read()
     # return HttpResponse(content)
-    return render(request, 'ops.html', {'username': request.user.username,
-                                        'filename': filename,
-                                        'groupname': group.name
-                                        })
+    return render(request, 'ops/hdfs_proc.html', {'username': request.user.username,
+                                                  'filename': filename,
+                                                  'groupname': group.name
+                                                  })
+
+
+def tail_file(request):
+    filename = request.GET['filename']
+    logLocation = TMP_EXPORT_FILE_LOCATION + filename
+    if os.path.exists(logLocation):
+        return HttpResponse("success", mimetype="application/json")
+    return HttpResponse("not yet", mimetype="application/json")
