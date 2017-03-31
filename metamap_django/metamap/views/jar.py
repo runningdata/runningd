@@ -140,6 +140,7 @@ def get_exec_log(request, execid):
             content = log.read().replace('\n', '<br>')
         return HttpResponse(content)
     except IOError, e:
+        logger.error(traceback.format_exc().replace('\n', '<br>'))
         return HttpResponse('')
 
     return HttpResponse(content)
