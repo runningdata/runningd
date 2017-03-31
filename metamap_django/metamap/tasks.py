@@ -203,7 +203,7 @@ def tail_hdfs(logLocation, command):
                              universal_newlines=True)
         p.wait()
         returncode = p.returncode
-    os.rename(fi, fi + '_done')
+    os.rename(logLocation, logLocation + '_done')
     # PushUtils.push_exact_email(email, msg)
     logger.info('tail_hdfs : %s return code is %d' % (command, returncode))
 
