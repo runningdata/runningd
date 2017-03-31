@@ -43,7 +43,7 @@ def tail_hdfs(request):
 
 def check_file(request):
     filename = request.GET['filename']
-    logLocation = TMP_EXPORT_FILE_LOCATION + filename + '_done'
+    logLocation = TMP_EXPORT_FILE_LOCATION + filename
     if os.path.exists(logLocation):
         return HttpResponse("success")
     return HttpResponse("not yet")
