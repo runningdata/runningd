@@ -36,7 +36,7 @@ def tail_hdfs(request):
     #     content = tt.read()
     # return HttpResponse(content)
     return render(request, 'ops/hdfs_proc.html', {'username': request.user.username,
-                                                  'filename': filename,
+                                                  'filename': filename + '_done',
                                                   'groupname': group.name
                                                   })
 
