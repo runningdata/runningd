@@ -1,4 +1,0 @@
-antlr4-python2-runtime==4.5.3
-Django==1.9.7
-MySQL-python==1.2.5
-pyhs2==0.6.0
