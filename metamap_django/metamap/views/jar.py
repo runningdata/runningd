@@ -81,7 +81,6 @@ class JarForm(ModelForm):
         if userid != -1:
             fs['creator'].initial = userid
 
-    #
     def save(self, commit=True):
         self.instance.jar_file.name = '%s_%s' % (self.instance.name, self.instance.jar_file.name)
         if self.errors:
