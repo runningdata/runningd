@@ -294,7 +294,6 @@ def exec_job(request, etlid):
     execution.save()
     from metamap import tasks
     command = 'hive -f ' + location
-    command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     tasks.exec_etl.delay(command, log_location)
     return redirect('metamap:execlog', execid=execution.id)
     # return redirect('metamap:execlog', execid=1)
