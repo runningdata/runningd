@@ -46,7 +46,7 @@ echo "project_zip_file is ${project_zip_file}"
 echo "azkaban host is ${host}"
 
 # 获取session id
-curl -k -X POST --data "username=azkaban&password=azkaban&action=login" http://${host} > ${tmp_output}
+curl -k -X POST --data "username=azkaban&password=15yinker@bj&action=login" http://${host} > ${tmp_output}
 echo result is `cat ${tmp_output}`
 session_id=`cat ${tmp_output} | grep session | awk -F\" '!/[{}]/{print $(NF-1)}'`
 echo "we got session id : $session_id"
