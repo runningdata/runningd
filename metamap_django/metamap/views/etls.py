@@ -58,6 +58,7 @@ class IndexView(GroupListView):
             context['search'] = self.request.GET['search']
         return context
 
+
 def nginx_auth_test(request):
     resp = HttpResponse()
     if request.user.id is not None:
@@ -292,7 +293,9 @@ def exec_job(request, etlid):
     execution = Executions(logLocation=log_location, job_id=etlid, status=0)
     execution.save()
     from metamap import tasks
-    tasks.exec_etl.delay('hive -f ' + location, log_location)
+    command = 'hive -f ' + location
+    command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
+    tasks.exec_etl.delay(command, log_location)
     return redirect('metamap:execlog', execid=execution.id)
     # return redirect('metamap:execlog', execid=1)
 
@@ -362,7 +365,6 @@ def send_email(request):
     except BadHeaderError:
         return HttpResponse('Invalid header found.')
     return HttpResponse('Ok header found.')
-
 
 
 def restart_job(request):
