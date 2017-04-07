@@ -323,6 +323,7 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         generate_etl_file(etl, location, schedule)
         command = "hive -f " + location
+        command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     else:
         command = "echo " + job_name
 
@@ -386,6 +387,7 @@ def generate_job_file_v2(blood, parent_node, folder, schedule=-1):
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         generate_etl_file(etl, location, schedule)
         command = "hive -f " + location
+        command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     else:
         command = "echo " + job_name
 
@@ -426,13 +428,14 @@ def generate_job_file_h2m(objs, folder):
         job_name = obj.name
         task = SqoopHive2Mysql.objects.get(pk=obj.rel_id)
         command = generate_sqoop_hive2mysql(task, schedule=obj.schedule)
+        command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
         sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".h2m"
         with open(sqoop_file, 'w') as f:
             f.write(command)
         # 生成job文件
         # job_type = 'command\nretries=12\nretry.backoff=300000\n'
         job_type = ' command\nretries=5\nretry.backoff=300000\n'
-        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = sh ' + sqoop_file + '\n'
+        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command =  sh ' + sqoop_file + '\n'
         job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
         with open(job_file, 'w') as f:
             f.write(content)
@@ -450,6 +453,7 @@ def generate_job_file_m2h(objs, folder):
         job_name = obj.name
         task = SqoopMysql2Hive.objects.get(pk=obj.rel_id)
         command = generate_sqoop_mysql2hive(task, schedule=obj.schedule)
+        command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
         sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".m2h"
         with open(sqoop_file, 'w') as f:
             f.write(command)
