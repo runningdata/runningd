@@ -11,7 +11,7 @@
                 success: function (data) {
                     if ($("#log").html().length < data.length) {
                         $("#log").html(data);
-                        $("html, body").animate({scrollTop: $(document).height() - $(window).height()});
+                        $("html, body").animate({scrollTop: $(document).height() - window.innerHeight});
                     }
                 }
             });
