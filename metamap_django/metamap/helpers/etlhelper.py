@@ -323,7 +323,7 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         generate_etl_file(etl, location, schedule)
         command = "hive -f " + location
-        command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
+        # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     else:
         command = "echo " + job_name
 
@@ -387,7 +387,7 @@ def generate_job_file_v2(blood, parent_node, folder, schedule=-1):
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         generate_etl_file(etl, location, schedule)
         command = "hive -f " + location
-        command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
+        # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     else:
         command = "echo " + job_name
 
@@ -432,7 +432,7 @@ def generate_job_file_h2m(objs, folder):
         with open(sqoop_file, 'w') as f:
             f.write(h2m)
         command = 'sh ' + sqoop_file
-        command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
+        # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
         # 生成job文件
         # job_type = 'command\nretries=12\nretry.backoff=300000\n'
         job_type = ' command\nretries=5\nretry.backoff=300000\n'
@@ -458,7 +458,7 @@ def generate_job_file_m2h(objs, folder):
         with open(sqoop_file, 'w') as f:
             f.write(m2h)
         command = 'sh ' + sqoop_file
-        command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
+        # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
         # 生成job文件
         # job_type = ' command \nretries=12\nretry.backoff=300000\n'
         job_type = ' command\nretries=12\nretry.backoff=300000\n'
