@@ -8,7 +8,7 @@ import traceback
 from StringIO import StringIO
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import BadHeaderError
 from django.core.mail import EmailMessage
@@ -366,7 +366,7 @@ def send_email(request):
         return HttpResponse('Invalid header found.')
     return HttpResponse('Ok header found.')
 
-
+@permission_required('auth.admin_etl')
 def restart_job(request):
     '''
     指定调度周期与etl名字
@@ -374,53 +374,50 @@ def restart_job(request):
     :param request:
     :return:
     '''
-    if request.user.username == 'admin':
-        if request.method == 'POST':
-            try:
-                final_bloods = set()
-                dependencies = {}
-                schedule = int(request.POST.get('schedule'))
+    if request.method == 'POST':
+        try:
+            final_bloods = set()
+            dependencies = {}
+            schedule = int(request.POST.get('schedule'))
 
-                for name in request.POST.get('names').split(','):
-                    dependencies[name] = set()
-                    for blood in TblBlood.objects.filter(tblName=name):
-                        bloodhelper.find_child_mermaid(blood, final_bloods)
+            for name in request.POST.get('names').split(','):
+                dependencies[name] = set()
+                for blood in TblBlood.objects.filter(tblName=name):
+                    bloodhelper.find_child_mermaid(blood, final_bloods)
 
-                for blood in final_bloods:
-                    child_name = blood.tblName
-                    c_etl = ETL.objects.get(name=child_name, valid=1)
-                    if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=1).exists():
-                        dependencies.setdefault(child_name, set())
-                        parent_name = blood.parentTbl
-                        p_etl = ETL.objects.get(name=parent_name, valid=1)
-                        if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=1).exists():
-                            dependencies.get(child_name).add(parent_name)
+            for blood in final_bloods:
+                child_name = blood.tblName
+                c_etl = ETL.objects.get(name=child_name, valid=1)
+                if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=1).exists():
+                    dependencies.setdefault(child_name, set())
+                    parent_name = blood.parentTbl
+                    p_etl = ETL.objects.get(name=parent_name, valid=1)
+                    if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=1).exists():
+                        dependencies.get(child_name).add(parent_name)
 
-                folder = 'h2h-' + dateutils.now_datetime() + '-restart'
-                os.mkdir(AZKABAN_BASE_LOCATION + folder)
-                os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
+            folder = 'h2h-' + dateutils.now_datetime() + '-restart'
+            os.mkdir(AZKABAN_BASE_LOCATION + folder)
+            os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-                for job_name, parent_names in dependencies.items():
-                    etlhelper.generate_job_file_for_partition(job_name, parent_names, folder, schedule)
-                etlhelper.generate_job_file_for_partition('etl_done_' + folder, dependencies.keys(), folder)
-                task_zipfile = AZKABAN_BASE_LOCATION + folder
-                ziputils.zip_dir(task_zipfile)
-                command = 'sh $METAMAP_HOME/files/azkaban_job_restart.sh %s ' % folder
-                p = subprocess.Popen([''.join(command)],
-                                     shell=True,
-                                     universal_newlines=True)
-                p.wait()
-                returncode = p.returncode
-                logger.info('%s return code is %d' % (command, returncode))
-                return HttpResponse(folder)
-            except Exception, e:
-                logger.error('error : %s ' % e)
-                logger.error('traceback is : %s ' % traceback.format_exc())
-                return HttpResponse('error')
-        else:
-            return render(request, 'etl/restart.html')
+            for job_name, parent_names in dependencies.items():
+                etlhelper.generate_job_file_for_partition(job_name, parent_names, folder, schedule)
+            etlhelper.generate_job_file_for_partition('etl_done_' + folder, dependencies.keys(), folder)
+            task_zipfile = AZKABAN_BASE_LOCATION + folder
+            ziputils.zip_dir(task_zipfile)
+            command = 'sh $METAMAP_HOME/files/azkaban_job_restart.sh %s ' % folder
+            p = subprocess.Popen([''.join(command)],
+                                 shell=True,
+                                 universal_newlines=True)
+            p.wait()
+            returncode = p.returncode
+            logger.info('%s return code is %d' % (command, returncode))
+            return HttpResponse(folder)
+        except Exception, e:
+            logger.error('error : %s ' % e)
+            logger.error('traceback is : %s ' % traceback.format_exc())
+            return HttpResponse('error')
     else:
-        return HttpResponse('no auth')
+        return render(request, 'etl/restart.html')
 
 
 def generate_job_dag(request, schedule):

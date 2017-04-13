@@ -9,7 +9,8 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 {% if user.username == 'admin' %}
-                    <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                    <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
+                                            aria-expanded="false"
                                             class="dropdown-toggle">Hive<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="/metamap/meta/col_search">字段查询</a></li>
@@ -22,10 +23,13 @@
                                         class="dropdown-toggle">M2H<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/metamap/m2h"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
-                        <li><a href="/metamap/m2h/add" ><span class="glyphicon glyphicon-plus"></span>新增</a></li>
-                        <li><a href="/metamap/m2h/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a></li>
-                        <li><a href="/metamap/m2h/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a></li>
-                        <li><a href="/metamap/m2h/status/2/"><span class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
+                        <li><a href="/metamap/m2h/add"><span class="glyphicon glyphicon-plus"></span>新增</a></li>
+                        <li><a href="/metamap/m2h/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>
+                        </li>
+                        <li><a href="/metamap/m2h/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>
+                        </li>
+                        <li><a href="/metamap/m2h/status/2/"><span
+                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
                     </ul>
                 </li>
 
@@ -33,30 +37,39 @@
                                         class="dropdown-toggle">H2H <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/metamap"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
-                        <li><a href="/metamap/etls/add" ><span class="glyphicon glyphicon-plus"></span>新增</a></li>
-                        <li><a href="/metamap/etls/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a></li>
-                        <li><a href="/metamap/etls/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a></li>
-                        <li><a href="/metamap/etls/status/2/"><span class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
+                        <li><a href="/metamap/etls/add"><span class="glyphicon glyphicon-plus"></span>新增</a></li>
+                        <li><a href="/metamap/etls/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>
+                        </li>
+                        <li><a href="/metamap/etls/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>
+                        </li>
+                        <li><a href="/metamap/etls/status/2/"><span
+                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
                     </ul>
                 </li>
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
                                         class="dropdown-toggle">H2M<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/metamap/h2m"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
-                        <li><a href="/metamap/h2m/add" ><span class="glyphicon glyphicon-plus"></span>新增</a></li>
-                        <li><a href="/metamap/h2m/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a></li>
-                        <li><a href="/metamap/h2m/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a></li>
-                        <li><a href="/metamap/h2m/status/2/"><span class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
+                        <li><a href="/metamap/h2m/add"><span class="glyphicon glyphicon-plus"></span>新增</a></li>
+                        <li><a href="/metamap/h2m/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>
+                        </li>
+                        <li><a href="/metamap/h2m/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>
+                        </li>
+                        <li><a href="/metamap/h2m/status/2/"><span
+                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
                     </ul>
                 </li>
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
                                         class="dropdown-toggle">Jar<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/metamap/jar"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
-                        <li><a href="/metamap/jar/add" ><span class="glyphicon glyphicon-plus"></span>新增</a></li>
-                        <li><a href="/metamap/jar/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a></li>
-                        <li><a href="/metamap/jar/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a></li>
-                        <li><a href="/metamap/jar/status/2/"><span class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
+                        <li><a href="/metamap/jar/add"><span class="glyphicon glyphicon-plus"></span>新增</a></li>
+                        <li><a href="/metamap/jar/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>
+                        </li>
+                        <li><a href="/metamap/jar/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>
+                        </li>
+                        <li><a href="/metamap/jar/status/2/"><span
+                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
                     </ul>
                 </li>
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
@@ -69,15 +82,27 @@
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
                                         class="dropdown-toggle">调度<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="{% url 'metamap:sche_list' %}"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
-                        <li><a href="{% url 'metamap:sche_add' %}"><span  class="glyphicon glyphicon-plus"></span>新增</a></li>
+                        <li><a href="{% url 'metamap:sche_list' %}"><span class="glyphicon glyphicon-th-list"></span>列表</a>
+                        </li>
+                        <li><a href="{% url 'metamap:sche_add' %}"><span class="glyphicon glyphicon-plus"></span>新增</a>
+                        </li>
                     </ul>
                 </li>
+                {% if perms.auth.admin_etl %}
+                    <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
+                                            aria-expanded="false"
+                                            class="dropdown-toggle">管理<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'metamap:restart_job' %}"><span
+                                    class="glyphicon glyphicon-th-list"></span>断流重导</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li>
                     <a href="#">
-                            群组：{{ user.groups.first }} &nbsp;&nbsp; 用户： {{ user.username }}
+                        群组：{{ user.groups.first }} &nbsp;&nbsp; 用户： {{ user.username }}
                     </a>
                 </li>
             </ul>
