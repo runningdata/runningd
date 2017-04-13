@@ -3,6 +3,7 @@ import base64
 import json
 import logging
 import os
+import subprocess
 import traceback
 from StringIO import StringIO
 
@@ -402,7 +403,15 @@ def restart_job(request):
                 for job_name, parent_names in dependencies.items():
                     etlhelper.generate_job_file_for_partition(job_name, parent_names, folder, schedule)
                 etlhelper.generate_job_file_for_partition('etl_done_' + folder, dependencies.keys(), folder)
-                ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
+                task_zipfile = AZKABAN_BASE_LOCATION + folder
+                ziputils.zip_dir(task_zipfile)
+                command = 'sh $METAMAP_HOME/files/azkaban_job_restart.sh %s ' % folder
+                p = subprocess.Popen([''.join(command)],
+                                     shell=True,
+                                     universal_newlines=True)
+                p.wait()
+                returncode = p.returncode
+                logger.info('%s return code is %d' % (command, returncode))
                 return HttpResponse(folder)
             except Exception, e:
                 logger.error('error : %s ' % e)
