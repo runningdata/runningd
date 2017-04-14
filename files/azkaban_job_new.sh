@@ -1,8 +1,8 @@
 #!/bin/bash
 
 
-if [ $# -ne 2 ];then
-echo "Usage: azkaban_daily.sh {schedule_type} {job_type/job_url}"
+if [ $# -ne 3 ];then
+echo "Usage: azkaban_daily.sh {schedule_type} {job_type/job_url} {group_name}"
 exit 0
 fi
 
@@ -11,6 +11,7 @@ num=$1
 prefix=$1
 # Based on urls, etc. etls, m2h, h2m
 job_type=$2
+group_name=$3
 if [ $prefix == 0 ]; then
 	prefix=day
 elif [ $prefix == 1 ]; then
@@ -30,7 +31,7 @@ metamap_host=10.0.1.62:8088
 project_desc=${prefix}_schedule
 
 # 调用生成job的任务，返回任务名称或者失败信息
-curl -X GET http://${metamap_host}/metamap/${job_type}/generate_job_dag/${num}/ > ${tmp_output}
+curl -X GET http://${metamap_host}/metamap/${job_type}/generate_job_dag/${num}/${group_name}/ > ${tmp_output}
 filename=`cat ${tmp_output}`
 if [ $filename == "error" -o ${#filename} -ne 18 ]; then
         echo "error happends when generate Job Scripts. ori_filename is ${filename}"
