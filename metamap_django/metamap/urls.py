@@ -31,6 +31,7 @@ router.register(r'sqoop_mysql_meta', SqoopMysqlMetaViewSet)
 urlpatterns = [
 
     url(r'^$', etls.IndexView.as_view(), name='index'),
+    url(r'ops/task_queue', ops.task_queue, name='task_queue'),
     url(r'hdfs/tail', ops.tail_hdfs, name='tail_hdfs'),
     url(r'hdfs/check_file', ops.check_file, name='check_file'),
     url(r'nginx_auth_test', etls.nginx_auth_test, name='nginx_auth_test'),

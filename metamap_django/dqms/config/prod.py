@@ -41,6 +41,7 @@ BROKER_URL = 'redis://10.0.1.97:6379'
 
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERYD_TASK_TIME_LIMIT = 3600
 
 CELERY_ROUTES = {
     'dqms.tasks.exec_dqms': {

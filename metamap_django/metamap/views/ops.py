@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*
+import json
 import os
 import subprocess
 
+from celery.backends import redis
 from django.contrib.auth.models import Group
 from django.http import HttpResponse
 import logging
@@ -11,6 +13,7 @@ from django.shortcuts import render
 from metamap import tasks
 from metamap.models import Exports
 from will_common.utils import dateutils
+from will_common.utils import redisutils
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
 
 logger = logging.getLogger('django')
@@ -47,3 +50,12 @@ def check_file(request):
     if os.path.exists(logLocation):
         return HttpResponse("success")
     return HttpResponse("not yet")
+
+
+def task_queue(request):
+    final_queue = list()
+    for queue_key in redisutils.get_keys():
+        dic, lis = redisutils.get_queue_info(queue_key)
+        final_queue.append(dic)
+        final_queue.append(lis)
+    return HttpResponse(final_queue)
