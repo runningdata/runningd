@@ -117,7 +117,7 @@ def review(request, sqoop_id):
         logger.error(e)
         return HttpResponse(e)
 
-def generate_job_dag(request, schedule):
+def generate_job_dag(request, schedule, group_name='xiaov'):
     '''
     抽取所有有效的ETL,生成azkaban调度文件
     :param request:
@@ -129,11 +129,14 @@ def generate_job_dag(request, schedule):
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-        etlhelper.generate_job_file_h2m(leafs, folder)
+        etlhelper.generate_job_file_h2m(leafs, folder, group_name)
 
         job_name = 'h2m_done_' + dateutils.now_datetime()
         command = 'echo done for h2m'
-        deps = [leaf.name for leaf in leafs]
+        deps = set()
+        for leaf in leafs:
+            if SqoopHive2Mysql.objects.get(pk=leaf.rel_id).cgroup.name == group_name:
+                deps.add(leaf.name)
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d h2m generated ' % len(leafs))
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d h2m generated ' % len(leafs))
