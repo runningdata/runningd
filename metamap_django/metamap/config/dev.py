@@ -69,7 +69,8 @@ djcelery.setup_loader()
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 BROKER_URL = 'redis://localhost:6379'
-
+CELERY_REDIS_HOST = 'localhost'
+CELERY_REDIS_PORT = '6379'
 CELERY_ROUTES = {
     'metamap.tasks.exec_etl_cli': {
         'queue': 'metamap',
