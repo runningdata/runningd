@@ -452,7 +452,10 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-        final_leaves = TblBlood.objects.filter(pk__in=ok_leafs)
+        finals = set()
+        for etl in ETL.objects.filter(cgroup__name=group_name):
+            finals.add(etl.id)
+        final_leaves = TblBlood.objects.filter(pk__in=ok_leafs, relatedEtlId__in=finals)
         etlhelper.load_nodes(final_leaves, folder, done_blood, done_leaf, schedule, group_name=group_name)
 
         tbl = TblBlood(tblName='etl_done_' + folder)
