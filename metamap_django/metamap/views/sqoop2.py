@@ -133,7 +133,7 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
 
         etlhelper.generate_job_file_m2h(leafs, folder, group_name)
 
-        job_name = 'm2h_done_' + dateutils.now_datetime()
+        job_name = 'm2h_done_' + group_name + '_' + dateutils.now_datetime()
         command = 'echo done for sqoop'
         deps = set()
         for leaf in leafs:
@@ -141,7 +141,7 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
                 deps.add(leaf.name)
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d m2h generated ' % len(leafs))
-        PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d m2h generated ' % len(leafs))
+        PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d m2h generated ' % len(deps))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:

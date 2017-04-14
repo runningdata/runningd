@@ -458,7 +458,7 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
         final_leaves = TblBlood.objects.filter(pk__in=ok_leafs, relatedEtlId__in=finals)
         etlhelper.load_nodes(final_leaves, folder, done_blood, done_leaf, schedule, group_name=group_name)
 
-        tbl = TblBlood(tblName='etl_done_' + folder)
+        tbl = TblBlood(tblName='etl_done_' + group_name + '_' + folder)
         etlhelper.generate_job_file(tbl, final_leaves, folder)
 
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),

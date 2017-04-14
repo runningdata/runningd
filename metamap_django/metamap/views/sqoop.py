@@ -29,7 +29,6 @@ from will_common.views.common import GroupListView
 logger = logging.getLogger('info')
 
 
-
 class Hive2MysqlListView(GroupListView):
     template_name = 'sqoop/list.html'
     context_object_name = 'objs'
@@ -47,6 +46,7 @@ class Hive2MysqlListView(GroupListView):
             context['search'] = self.request.GET['search']
         return context
 
+
 def add(request):
     if request.method == 'POST':
         sqoop = SqoopHive2Mysql()
@@ -57,6 +57,7 @@ def add(request):
         return HttpResponseRedirect('/metamap/h2m/')
     else:
         return render(request, 'sqoop/edit.html')
+
 
 @my_decorator('pk')
 def edit(request, pk):
@@ -72,6 +73,7 @@ def edit(request, pk):
         obj = SqoopHive2Mysql.objects.get(pk=pk)
         return render(request, 'sqoop/edit.html', {'obj': obj})
 
+
 def exec_job(request, sqoopid):
     sqoop = SqoopHive2Mysql.objects.get(id=sqoopid)
     location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-sqoop-' + sqoop.name + '.log'
@@ -82,6 +84,7 @@ def exec_job(request, sqoopid):
     tasks.exec_h2m.delay(command, location)
     return redirect('metamap:sqoop_execlog', execid=execution.id)
 
+
 def exec_log(request, execid):
     '''
     获取指定execution的log内容
@@ -90,6 +93,7 @@ def exec_log(request, execid):
     :return:
     '''
     return render(request, 'sqoop/exec_log.html', {'execid': execid})
+
 
 def get_exec_log(request, execid):
     '''
@@ -107,6 +111,7 @@ def get_exec_log(request, execid):
         return HttpResponse('')
     return HttpResponse(content)
 
+
 def review(request, sqoop_id):
     try:
         sqoop = SqoopHive2Mysql.objects.get(id=sqoop_id)
@@ -116,6 +121,7 @@ def review(request, sqoop_id):
     except Exception, e:
         logger.error(e)
         return HttpResponse(e)
+
 
 def generate_job_dag(request, schedule, group_name='xiaov'):
     '''
@@ -131,7 +137,7 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
 
         etlhelper.generate_job_file_h2m(leafs, folder, group_name)
 
-        job_name = 'h2m_done_' + dateutils.now_datetime()
+        job_name = 'h2m_done_' + group_name + '_' + dateutils.now_datetime()
         command = 'echo done for h2m'
         deps = set()
         for leaf in leafs:
@@ -139,7 +145,7 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
                 deps.add(leaf.name)
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d h2m generated ' % len(leafs))
-        PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d h2m generated ' % len(leafs))
+        PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d h2m generated ' % len(deps))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:
