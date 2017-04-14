@@ -420,7 +420,7 @@ def restart_job(request):
         return render(request, 'etl/restart.html')
 
 
-def generate_job_dag(request, schedule):
+def generate_job_dag(request, schedule, group_name='xiaov'):
     '''
     抽取所有有效的ETL,生成azkaban调度文件
     :param request:
@@ -453,7 +453,7 @@ def generate_job_dag(request, schedule):
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
         final_leaves = TblBlood.objects.filter(pk__in=ok_leafs)
-        etlhelper.load_nodes(final_leaves, folder, done_blood, done_leaf, schedule)
+        etlhelper.load_nodes(final_leaves, folder, done_blood, done_leaf, schedule, group_name=group_name)
 
         tbl = TblBlood(tblName='etl_done_' + folder)
         etlhelper.generate_job_file(tbl, final_leaves, folder)
