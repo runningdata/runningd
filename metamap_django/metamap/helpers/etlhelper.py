@@ -478,7 +478,7 @@ def load_nodes(leafs, folder, done_blood, done_leaf, schedule, group_name):
     '''
     for leaf in leafs:
         tbl_name = leaf.tblName
-        if ETL.objects.filter(name=tbl_name, cgroup__name=group_name).count() == 1:
+        if ETL.objects.filter(name=tbl_name, cgroup__name=group_name, valid=1).count() == 1:
             if tbl_name not in done_leaf:
                 print('handling... %s ' % tbl_name)
                 parent_node = TblBlood.objects.raw("select b.* from"
