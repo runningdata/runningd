@@ -72,6 +72,12 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYD_TASK_TIME_LIMIT = 3600
 BROKER_URL = 'redis://10.0.1.97:6379'
 
+CELERY_ROUTES = {
+    'metamap.tasks.exec_jar': {
+        'queue': 'running_jar',
+    },
+}
+
 CELERY_REDIS_HOST = '10.0.1.97'
 CELERY_REDIS_PORT = '6379'
 # CELERY_TASK_SERIALIZER = 'json'
