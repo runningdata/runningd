@@ -10,7 +10,7 @@ from kombu.serialization import pickle
 from metamap.models import ETL
 from will_common.models import WillDependencyTask
 
-pool = redis.ConnectionPool(host=settings.CELERY_REDIS_HOST, port=settings.CELERY_REDIS_PORT, max_connections=2)
+pool = redis.ConnectionPool(host='10.0.1.97', port='6379', max_connections=2)
 
 
 def get_keys():
