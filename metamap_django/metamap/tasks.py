@@ -19,7 +19,6 @@ from metamap.helpers import etlhelper
 from metamap.models import ETL, Executions, WillDependencyTask, AnaETL, Exports, SqoopHive2MysqlExecutions, \
     SqoopHive2Mysql, SqoopMysql2Hive, SqoopMysql2HiveExecutions, SourceApp, SourceAppExecutions, JarApp, \
     JarAppExecutions
-from will_common.utils import PushUtils
 from will_common.utils import enums, dateutils
 
 from celery.utils.log import get_task_logger
@@ -243,7 +242,7 @@ def exec_jarapp(taskid):
     work_dir = os.path.dirname(os.path.dirname(__file__)) + '/'
     command = etlhelper.generate_jarapp_script(work_dir, jar_task)
     print command
-    execution = JarAppExecutions(logLocation=log, job_id=jar_task.id, status=0)
+    execution = JarAppExecutions(logLocation=log, job_id=jar_task.id, status=0, owner=jar_task.creator)
     command = 'runuser -l ' + jar_task.cgroup.name + ' -c "' + command + '"'
     normal_execution(command, execution)
 
@@ -257,6 +256,8 @@ def exec_jar(command, pk):
         p = subprocess.Popen([''.join(command)], stdout=open(execution.logLocation, 'a'), stderr=subprocess.STDOUT,
                              shell=True,
                              universal_newlines=True)
+        execution.pid = p.pid
+        execution.save()
         p.wait()
         returncode = p.returncode
         logger.info('%s return code is %d' % (command, returncode))
@@ -276,6 +277,8 @@ def normal_execution(command, execution):
         p = subprocess.Popen([''.join(command)], stdout=open(execution.logLocation, 'a'), stderr=subprocess.STDOUT,
                              shell=True,
                              universal_newlines=True)
+        execution.pid = p.pid
+        execution.save()
         p.wait()
         returncode = p.returncode
         logger.info('%s return code is %d' % (command, returncode))

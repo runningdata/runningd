@@ -118,7 +118,7 @@ def exec_job(request, pk):
         jar_task = JarApp.objects.get(pk=pk)
         log = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-jarapp-sche-' + jar_task.name + '.log'
         command = etlhelper.generate_jarapp_script(WORK_DIR, jar_task)
-        execution = JarAppExecutions(logLocation=log, job_id=jar_task.id, status=0)
+        execution = JarAppExecutions(logLocation=log, job_id=jar_task.id, status=0, owner=jar_task.creator)
         execution.save()
         from metamap import tasks
         tasks.exec_jar.delay(command, execution.id)
@@ -142,6 +142,15 @@ def get_exec_log(request, execid):
         return HttpResponse('')
 
     return HttpResponse(content)
+
+
+def kill_job(reqeuset, execution_id):
+    pid = JarAppExecutions.objects.get(pk=int(execution_id)).pid
+    out = os.system('kill ' + pid)
+    if out == 0:
+        return HttpResponse('success! kill ' + pid + ' for ' + execution_id)
+    else:
+        return HttpResponse('failed! kill ' + pid + ' for ' + execution_id)
 
 
 def delete(request, pk):

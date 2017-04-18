@@ -4,12 +4,12 @@ from rest_framework import routers
 from metamap.models import JarAppExecutions, SqoopMysql2HiveExecutions, Executions, SqoopHive2MysqlExecutions
 from metamap.views import jar
 from metamap.views import ops
-from metamap.views import sche_etl, export
+from metamap.views import sche_etl
 from metamap.views import source
 from metamap.views import sqoop
 from metamap.views import sqoop2
 from metamap.rest.rest_views import ETLViewSet, SqoopHive2MysqlViewSet, SqoopMysql2HiveViewSet, SourceAppViewSet, \
-    JarAppViewSet, BIUserViewSet, AnaETLViewSet, SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
+    JarAppViewSet, AnaETLViewSet, SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
 from metamap.views.sche_ana import ExportsViewSet
 from views import etls, metas
 from metamap.views import common
@@ -22,7 +22,6 @@ router.register(r'hive2mysql', SqoopHive2MysqlViewSet)
 router.register(r'mysql2hive', SqoopMysql2HiveViewSet)
 router.register(r'sourceapp', SourceAppViewSet)
 router.register(r'jarapp', JarAppViewSet)
-router.register(r'users', BIUserViewSet)
 router.register(r'emails', AnaETLViewSet)
 router.register(r'exports', ExportsViewSet)
 router.register(r'sqoop_hive_meta', SqoopHiveMetaViewSet)

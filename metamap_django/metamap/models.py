@@ -276,6 +276,8 @@ class JarAppExecutions(models.Model):
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)
     status = models.IntegerField(default=-1)
+    owner = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='jar_owner', null=True)
+    pid = models.IntegerField(default=-1)
 
     def __str__(self):
         return self.logLocation
