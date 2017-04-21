@@ -37,8 +37,8 @@ HIVE_SERVER = {
     'password': '',
 }
 
-BROKER_URL = 'redis://10.0.1.97:6379'
-CELERY_REDIS_HOST = '10.0.1.97'
+BROKER_URL = 'redis://10.2.19.97:6379'
+CELERY_REDIS_HOST = '10.2.19.97'
 CELERY_REDIS_PORT = '6379'
 
 # Celery Beat 设置
