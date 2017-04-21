@@ -37,4 +37,9 @@ def get_queue_info(queue_name, count=-1):
                 print ' args is %s ' % body['args'][0]
             count_dict[task_name] = count_dict.get(task_name, 0) + 1
     list_ = sorted(count_dict.items(), key=itemgetter(1), reverse=True)
+    print('queue : %s ' % queue_name)
+    print('list is ')
+    print(list_)
+    print('task_set is ')
+    print(task_set)
     return list_, task_set
