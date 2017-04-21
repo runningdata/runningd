@@ -77,6 +77,8 @@ def edit(request, pk):
                 obj.save()
                 if obj.valid == 0:
                     task = WillDependencyTask.objects.get(type=2, rel_id=obj.id)
+                    task.valid = 0
+                    task.save()
                     ptask = PeriodicTask.objects.get(willtask=task)
                     if ptask.enabled != 0:
                         ptask.enabled = 0
