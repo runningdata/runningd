@@ -14,7 +14,7 @@ pool = redis.ConnectionPool(host=settings.CELERY_REDIS_HOST, port=settings.CELER
 
 def get_keys():
     r = redis.StrictRedis(connection_pool=pool)
-    return [key for key in r.keys() if '_' not in key]
+    return [key for key in r.keys() if '_' not in key and 'unack' not in key]
 
 
 def get_queue_info(queue_name, count=-1):
