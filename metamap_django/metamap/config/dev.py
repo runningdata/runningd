@@ -29,7 +29,7 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 DEBUG = True
 
 SESSION_COOKIE_NAME = 'xsid'
-
+CSRF_COOKIE_NAME = 'xcsrftoken'
 # email settings
 EMAIL_HOST = 'smtp.exmail.qq.com'
 EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
