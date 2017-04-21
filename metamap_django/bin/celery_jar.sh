@@ -23,7 +23,7 @@ function check() {
 
 ###  停止所有celery指定进程
 function stop() {
-    pid=`ps -ef | grep celery |  grep -v dqms | grep ${1} | grep jar | awk '{if($3 == '1') print $2}'`
+    pid=`ps -ef | grep celery |  grep -v dqms | grep ${1} | grep metamap | awk '{if($3 == '1') print $2}'`
     if [[ $pid > 0 ]]; then
         echo "Got ${1} master pid : ${pid}"
         kill $pid

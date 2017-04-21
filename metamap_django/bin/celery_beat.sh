@@ -38,11 +38,11 @@ function stop() {
 ###  1. pull最新代码           ####
 #################################
 
-cd /usr/local/will/metamap \
+cd ${METAMAP_HOME} \
     && git pull
 
 
-cd /usr/local/will/metamap/metamap_django
+cd ${METAMAP_HOME}/metamap_django
 
 
 #################################
