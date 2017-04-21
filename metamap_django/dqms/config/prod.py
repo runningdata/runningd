@@ -28,7 +28,7 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 EEE = 'default_DEV'
-ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83']
+ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83']
 
 HIVE_SERVER = {
     'host': '10.0.1.84',
@@ -151,15 +151,7 @@ DATABASES = {
         'NAME': 'metamap1',
         'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'zjy',
-        'HOST': '10.0.1.73',
-        'PORT': '3306',
-    },
-    'hivemeta': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hive1',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': '10.0.1.73',
+        'HOST': '10.2.19.73',
         'PORT': '3306',
     },
     'dqms_check': {
@@ -167,7 +159,7 @@ DATABASES = {
         'NAME': 'YKX_DW',
         'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'zjy',
-        'HOST': '10.0.1.74',
+        'HOST': '10.2.19.74',
         'PORT': '3306',
     }
 }
