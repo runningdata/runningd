@@ -19,7 +19,6 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
-
 class WillDependencyTask(models.Model):
     name = models.CharField(unique=True, max_length=200)
     schedule = models.IntegerField(null=False, default=1)  # 0 天 1 周 2 月 3 季度 4 cron
