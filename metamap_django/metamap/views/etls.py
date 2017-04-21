@@ -358,14 +358,6 @@ def preview_job_dag(request):
         logger.error('error : %s ' % e)
         return HttpResponse('error')
 
-
-def send_email(request):
-    try:
-        PushUtils.push_email([request.user], constants.ALERT_MSG % ('2017', 'ss', 'ss', 'ss', 1, 99, 2))
-    except BadHeaderError:
-        return HttpResponse('Invalid header found.')
-    return HttpResponse('Ok header found.')
-
 @permission_required('auth.admin_etl')
 def restart_job(request):
     '''

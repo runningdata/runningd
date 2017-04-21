@@ -31,6 +31,8 @@ urlpatterns = [
 
     url(r'^$', etls.IndexView.as_view(), name='index'),
     url(r'ops/task_queue', ops.task_queue, name='task_queue'),
+
+
     url(r'hdfs/tail', ops.tail_hdfs, name='tail_hdfs'),
     url(r'hdfs/check_file', ops.check_file, name='check_file'),
     url(r'nginx_auth_test', etls.nginx_auth_test, name='nginx_auth_test'),
@@ -44,7 +46,6 @@ urlpatterns = [
     url(r'^etls/blood/$', etls.blood_by_name, name='blood_by_name'),
     url(r'^etls/preview_dag/$', etls.preview_job_dag, name='preview_job_dag'),
     url(r'^etls/blood/(?P<etlid>[0-9]+)/$', etls.blood_dag, name='blood'),
-    url(r'^etls/emailtest/$', etls.send_email, name='send_email'),
     url(r'^etls/restart_job/', etls.restart_job, name='restart_job'),
 
     url(r'^etls/review_sql/(?P<etlid>[0-9]+)/$', etls.review_sql, name='review_sql'),
