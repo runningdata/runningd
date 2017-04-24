@@ -26,20 +26,25 @@ def push_msg(user_profiles, msg):
 
 
 def push_msg_tophone(phone, msg):
-    msg_ = push_url % (encrpt_msg(phone), encrpt_msg(msg))
-    req = urllib2.Request(msg_)
-    req.add_header('User-Agent',
-                   'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36')
-    httpHandler = urllib2.HTTPHandler(debuglevel=0)
-    httpsHandler = urllib2.HTTPSHandler(debuglevel=0)
-    opener = urllib2.build_opener(httpHandler, httpsHandler)
-    urllib2.install_opener(opener)
-    resp = urllib2.urlopen(req)
-    if resp.getcode() == 200:
-        logger.info(resp.read())
-        return 'push phone success'
-    else:
-        return 'error', resp.read()
+    try:
+        msg_ = push_url % (encrpt_msg(phone), encrpt_msg(msg))
+        req = urllib2.Request(msg_)
+        req.add_header('User-Agent',
+                       'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36')
+        httpHandler = urllib2.HTTPHandler(debuglevel=0)
+        httpsHandler = urllib2.HTTPSHandler(debuglevel=0)
+        opener = urllib2.build_opener(httpHandler, httpsHandler)
+        urllib2.install_opener(opener)
+        resp = urllib2.urlopen(req)
+        if resp.getcode() == 200:
+            logger.info(resp.read())
+            return 'push phone success'
+        else:
+            return 'error', resp.read()
+    except Exception, e:
+        logger.error('error : %s ' % e)
+        logger.error('traceback is : %s ' % traceback.format_exc())
+        return 'error : %s ' % e
 
 
 def push_both(user_profiles, msg):
