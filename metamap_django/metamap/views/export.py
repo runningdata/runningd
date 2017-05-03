@@ -17,6 +17,7 @@ from rest_framework import viewsets
 from metamap.helpers import etlhelper
 from metamap.models import AnaETL
 from will_common.models import WillDependencyTask, PeriodicTask
+from will_common.utils import constants
 from will_common.utils import httputils
 from will_common.utils import userutils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
@@ -56,6 +57,15 @@ def add(request):
     else:
         return render(request, 'export/edit.html')
 
+
+def get_exec_log(request, log):
+    try:
+        with open(constants.TMP_EXPORT_FILE_LOCATION + log + '.error') as error_file:
+            content = error_file.read()
+        return HttpResponse(content.replace('\n', '<br>'))
+    except Exception, e:
+        logger.error(e)
+        return HttpResponse(e)
 
 def review_sql(request, pk):
     try:
