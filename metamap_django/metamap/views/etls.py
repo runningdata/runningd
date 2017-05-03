@@ -258,14 +258,14 @@ def edit(request, pk):
                     etl.save()
                     logger.info('ETL has been created successfully : %s ' % etl)
 
+                    tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
+                    for task in tasks:
+                        task.rel_id = etl.id
+                        task.save()
+
+                    logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
+
                     if etl.query != previous_query:
-                        tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
-                        for task in tasks:
-                            task.rel_id = etl.id
-                            task.save()
-
-                        logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
-
                         deps = hivecli.getTbls(etl)
                         for dep in deps:
                             logger.info("dep is %s, tblName is %s " % (dep, etl.name))
