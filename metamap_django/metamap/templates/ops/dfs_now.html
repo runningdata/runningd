@@ -4,14 +4,12 @@
 {% block scripts %}
     <script src="{% static 'js/echarts.js' %}"></script>
     <script src="{% static 'js/china.js' %}"></script>
-
 {% endblock %}
-
+{% block title %}今日数仓情况{% endblock %}
 {% block content %}
     <div id="pie" style="height: 1000px"></div>
     <div id="main" style="height: 600px"></div>
     <script>
-
         var valu = [
             {% for k, v in result.items %}
                 {

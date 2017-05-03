@@ -88,6 +88,17 @@
                         </li>
                     </ul>
                 </li>
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                                        class="dropdown-toggle">状态<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'metamap:dfs_usage_his' %}"><span
+                                class="glyphicon glyphicon-th-list"></span>数仓历史</a></li>
+                        <li><a href="{% url 'metamap:dfs_usage' %}"><span
+                                class="glyphicon glyphicon-th-list"></span>今日数仓</a></li>
+                        <li><a href="{% url 'metamap:task_queue' %}"><span
+                                class="glyphicon glyphicon-th-list"></span>队列情况</a></li>
+                    </ul>
+                </li>
                 {% if perms.auth.admin_etl %}
                     <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
                                             aria-expanded="false"
@@ -95,10 +106,6 @@
                         <ul class="dropdown-menu">
                             <li><a href="{% url 'metamap:restart_job' %}"><span
                                     class="glyphicon glyphicon-th-list"></span>断流重导</a></li>
-                            <li><a href="{% url 'metamap:dfs_usage_his' %}"><span
-                                    class="glyphicon glyphicon-th-list"></span>数仓历史</a></li>
-                            <li><a href="{% url 'metamap:dfs_usage' %}"><span
-                                    class="glyphicon glyphicon-th-list"></span>今日数仓</a></li>
                         </ul>
                     </li>
                 {% endif %}

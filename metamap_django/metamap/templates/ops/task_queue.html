@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% block title %}队列总体情况{% endblock %}
 {% block content %}
     {% for k, v in final_queue.items %}
         {{ k }} {{ v }}<p/>
