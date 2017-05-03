@@ -65,7 +65,7 @@ def get_exec_log(request, log):
         return HttpResponse(content.replace('\n', '<br>'))
     except Exception, e:
         logger.error(e)
-        return HttpResponse(e)
+        return HttpResponse('file not found %s ' % log)
 
 def review_sql(request, pk):
     try:
