@@ -72,15 +72,19 @@ def push_email(users, msg):
 
 
 def push_exact_email(email, msg):
-    subject = 'Alert From XStorm'
-    from_email = settings.EMAIL_HOST_USER
-    if subject and msg and from_email:
-        try:
-            send_mail(subject, msg, from_email, [email, ])
-        except BadHeaderError:
-            logger.error('Invalid header found for %s .' % email)
-    else:
-        logger.error('Make sure all fields are entered and valid.')
+    try:
+        subject = 'Alert From XStorm'
+        from_email = settings.EMAIL_HOST_USER
+        if subject and msg and from_email:
+            try:
+                send_mail(subject, msg, from_email, [email, ])
+            except BadHeaderError:
+                logger.error('Invalid header found for %s .' % email)
+        else:
+            logger.error('Make sure all fields are entered and valid.')
+    except Exception, e:
+        logger.error('error : %s ' % e)
+        logger.error('traceback is : %s ' % traceback.format_exc())
 
 
 def push_email2(request):

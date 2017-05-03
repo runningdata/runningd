@@ -16,6 +16,13 @@ def get_keys():
     r = redis.StrictRedis(connection_pool=pool)
     return [key for key in r.keys() if '_' not in key and 'unack' not in key]
 
+def get_queue_count(queue_name, count=-1):
+    r = redis.StrictRedis(connection_pool=pool)
+    count_dict = {}
+    task_set = list()
+    if r.exists(queue_name):
+        messages = r.lrange(queue_name, 0, count)
+    return len(messages)
 
 def get_queue_info(queue_name, count=-1):
     r = redis.StrictRedis(connection_pool=pool)

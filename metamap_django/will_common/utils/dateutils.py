@@ -24,6 +24,9 @@ def days_ago(days):
     dat = datetime.datetime.now() + datetime.timedelta(days=days)
     return dat.strftime("%Y-%m-%d")
 
+def days_ago_key(days):
+    dat = datetime.datetime.now() + datetime.timedelta(days=days)
+    return dat.strftime("%Y%m%d")
 
 def format_day(time):
     return time.strftime("%Y%m%d%H%M%S")

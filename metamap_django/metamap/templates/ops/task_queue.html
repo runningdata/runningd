@@ -1,0 +1,6 @@
+{% extends 'layout.html' %}
+{% block content %}
+    {% for k, v in final_queue.items %}
+        {{ k }} {{ v }}<p/>
+    {% endfor %}
+{% endblock %}

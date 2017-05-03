@@ -95,6 +95,10 @@
                         <ul class="dropdown-menu">
                             <li><a href="{% url 'metamap:restart_job' %}"><span
                                     class="glyphicon glyphicon-th-list"></span>断流重导</a></li>
+                            <li><a href="{% url 'metamap:dfs_usage_his' %}"><span
+                                    class="glyphicon glyphicon-th-list"></span>数仓历史</a></li>
+                            <li><a href="{% url 'metamap:dfs_usage' %}"><span
+                                    class="glyphicon glyphicon-th-list"></span>今日数仓</a></li>
                         </ul>
                     </li>
                 {% endif %}
@@ -108,4 +112,5 @@
             </ul>
         </div>
     </div>
+
 </div>
