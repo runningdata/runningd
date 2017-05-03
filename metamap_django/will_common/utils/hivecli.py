@@ -1,4 +1,6 @@
 import logging
+import os
+import subprocess
 
 import pyhs2, json
 import re
@@ -10,6 +12,29 @@ from will_common.utils import djtemplates
 
 logger = logging.getLogger('django')
 
+def getTbls_v2(etl):
+    result = set()
+    if len(etl.query) == 0:
+        return result
+    sql = djtemplates.get_etl_sql(etl)
+    try:
+        sql = sql[sql.lower().index('select'):]
+        matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
+        if matchObj:
+            sql = sql.replace(matchObj.group(1), '-999')
+        command = 'hive -e   "explain dependency ' + sql + '"'
+        out = os.popen(command).read()
+
+        # Fetch table results
+        deps = json.loads(out)
+        print(' got deps : %s ' % deps)
+        tables_ = deps['input_tables']
+        for tbl in tables_:
+            result.add(tbl['tablename'])
+        logger.info('analyse sql done ')
+    except Pyhs2Exception, e:
+        raise Exception('sql is %s,\n<br> error is %s' % (sql, e))
+    return result
 
 def getTbls(etl):
     result = set()

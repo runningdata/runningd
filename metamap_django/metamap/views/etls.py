@@ -221,7 +221,7 @@ def add(request):
                 etl.meta = etl.name[0: find_]
                 etl.save()
                 logger.info('ETL has been created successfully : %s ' % etl)
-                deps = hivecli.getTbls(etl)
+                deps = hivecli.getTbls_v2(etl)
                 for dep in deps:
                     if etl.name != dep:
                         tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
@@ -266,7 +266,7 @@ def edit(request, pk):
                     logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
 
                     if etl.query != previous_query:
-                        deps = hivecli.getTbls(etl)
+                        deps = hivecli.getTbls_v2(etl)
                         for dep in deps:
                             logger.info("dep is %s, tblName is %s " % (dep, etl.name))
                             if etl.name != dep:
