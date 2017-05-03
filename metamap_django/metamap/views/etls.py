@@ -241,6 +241,7 @@ def edit(request, pk):
                 privious_etl = ETL.objects.get(pk=int(pk))
                 privious_etl.valid = 0
                 privious_etl.save()
+                previous_query = privious_etl.query
 
                 deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
                 logger.info('Tblbloods for %s has been deleted successfully' % (pk))
@@ -257,21 +258,24 @@ def edit(request, pk):
                     etl.save()
                     logger.info('ETL has been created successfully : %s ' % etl)
 
-                    tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
-                    for task in tasks:
-                        task.rel_id = etl.id
-                        task.save()
+                    if etl.query != previous_query:
+                        tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
+                        for task in tasks:
+                            task.rel_id = etl.id
+                            task.save()
 
-                    logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
+                        logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
 
-                    deps = hivecli.getTbls(etl)
-                    for dep in deps:
-                        logger.info("dep is %s, tblName is %s " % (dep, etl.name))
-                        if etl.name != dep:
-                            tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
-                            tblBlood.save()
-                            logger.info('Tblblood has been created successfully : %s' % tblBlood)
-                    logger.info('Tblblood for %s has been created successfully' % (pk))
+                        deps = hivecli.getTbls(etl)
+                        for dep in deps:
+                            logger.info("dep is %s, tblName is %s " % (dep, etl.name))
+                            if etl.name != dep:
+                                tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
+                                tblBlood.save()
+                                logger.info('Tblblood has been created successfully : %s' % tblBlood)
+                        logger.info('Tblblood for %s has been created successfully' % (pk))
+                    else:
+                        logger.info('Tblblood for %s has not been changed' % (pk))
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
