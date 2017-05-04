@@ -79,12 +79,12 @@ def exec_m2h(command, location):
             inmi_tbl = etlhelper.get_hive_inmi_tbl(sqoop.mysql_tbl)
             hive_cmd = 'hive -e "set hive.exec.dynamic.partition.mode=nonstrict;insert overwrite table %s partition(%s) select * from %s; drop table %s;"' % \
                        (inmi_tbl, sqoop.partition_key, sqoop.mysql_tbl, inmi_tbl)
-            p = subprocess.Popen([''.join(command)], stdout=open(execution.logLocation, 'a'), stderr=subprocess.STDOUT,
+            p = subprocess.Popen([''.join(hive_cmd)], stdout=open(execution.logLocation, 'a'), stderr=subprocess.STDOUT,
                                  shell=True,
                                  universal_newlines=True)
             p.wait()
             returncode += p.returncode
-            logger.info('%s return code is %d' % (command, returncode))
+            logger.info('%s hive_cmd return code is %d' % (hive_cmd, returncode))
         if returncode == 0:
             execution.status = enums.EXECUTION_STATUS.DONE
         else:
