@@ -243,8 +243,6 @@ def edit(request, pk):
                 privious_etl.save()
                 previous_query = privious_etl.query
 
-                deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
-                logger.info('Tblbloods for %s has been deleted successfully' % (pk))
 
                 if int(request.POST['valid']) == 1:
                     etl = privious_etl
@@ -266,6 +264,9 @@ def edit(request, pk):
                     logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
 
                     if etl.query != previous_query:
+                        deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
+                        logger.info('Tblbloods for %s has been deleted successfully' % (pk))
+
                         deps = hivecli.getTbls_v2(etl)
                         for dep in deps:
                             logger.info("dep is %s, tblName is %s " % (dep, etl.name))
