@@ -243,7 +243,6 @@ def edit(request, pk):
                 privious_etl.save()
                 previous_query = privious_etl.query
 
-
                 if int(request.POST['valid']) == 1:
                     etl = privious_etl
                     privious_etl.id = None
@@ -276,7 +275,11 @@ def edit(request, pk):
                                 logger.info('Tblblood has been created successfully : %s' % tblBlood)
                         logger.info('Tblblood for %s has been created successfully' % (pk))
                     else:
-                        logger.info('Tblblood for %s has not been changed' % (pk))
+                        for blood in TblBlood.objects.filter(relatedEtlId=pk):
+                            blood.relatedEtlId = etl.id
+                            blood.save()
+                        logger.info(
+                            'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (pk, etl.id))
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
@@ -362,6 +365,7 @@ def preview_job_dag(request):
     except Exception, e:
         logger.error('error : %s ' % e)
         return HttpResponse('error')
+
 
 @permission_required('auth.admin_etl')
 def restart_job(request):
