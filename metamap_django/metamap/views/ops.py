@@ -57,8 +57,22 @@ def check_file(request):
 
 
 def task_queue(request):
-    # i = metamap.celery.app.control.inspect()
-    # print i.active_queues()
+    i = metamap.celery.app.control.inspect()
+    # {u'will_dqms@schedule.yinker.com': [],
+    #  u'will_jar@schedule.yinker.com': [{u'acknowledged': True,
+    #                                     u'args': u"(u'java -cp /server/metamap/metamap_django/jars/xmark_supervise_gettest-1.0-SNAPSHOT.jar -Dtest.user.name=chenxin HTTPGEt \\u53c2\\u65701 \\u53c2\\u65702  2017-05-04', 1865L)",
+    #                                     u'delivery_info': {u'exchange': u'running_jar',
+    #                                                        u'priority': 0,
+    #                                                        u'redelivered': None,
+    #                                                        u'routing_key': u'running_jar'},
+    #                                     u'hostname': u'will_jar@schedule.yinker.com',
+    #                                     u'id': u'ac6cc44e-c184-45fc-82e5-3f56cf5c69bf',
+    #                                     u'kwargs': u'{}',
+    #                                     u'name': u'metamap.tasks.exec_jar',
+    #                                     u'time_start': 1349955.30187257,
+    #                                     u'worker_pid': 21114}],
+    #  u'will_metamap@schedule.yinker.com': []}
+    running = i.active()
     final_queue = dict()
     str = list()
     for queue_key in redisutils.get_keys():
@@ -66,7 +80,11 @@ def task_queue(request):
         final_queue[queue_key] = redisutils.get_queue_count(queue_key)
         str.append('<%s> : %d tasks waiting' % (queue_key, final_queue[queue_key]))
     result = ' | '.join(str)
-    return render(request, 'ops/task_queue.html', {"final_queue": final_queue, "str": result})
+
+    unacked = redisutils.get_dict('unacked')
+    unack_num = len(unacked)
+    return render(request, 'ops/task_queue.html',
+                  {"final_queue": final_queue, "str": result, "running": running, "unack_num": unack_num})
 
 
 def dfs_usage_his(request):
