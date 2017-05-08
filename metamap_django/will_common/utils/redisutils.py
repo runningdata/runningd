@@ -17,6 +17,7 @@ def get_keys():
     return [key for key in r.keys() if '_' not in key and 'unack' not in key]
 
 def get_dict(key):
+    messages = dict()
     r = redis.StrictRedis(connection_pool=pool)
     if r.exists(key):
         messages = r.hgetall(key)
