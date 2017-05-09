@@ -15,8 +15,8 @@ from rest_framework.response import Response
 
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryPeriodictasks
 from will_common.helpers import cronhelper
-from metamap.models import AnaETL, Exports, BIUser
-from metamap.rest.serializers import ExportsSerializer, BIUserSerializer
+from metamap.models import AnaETL, Exports
+from metamap.rest.serializers import ExportsSerializer
 from will_common.models import WillDependencyTask, PeriodicTask
 from will_common.utils import PushUtils
 from will_common.utils import constants

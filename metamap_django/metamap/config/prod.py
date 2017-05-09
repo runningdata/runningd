@@ -27,6 +27,8 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+SESSION_COOKIE_NAME = 'xsid'
+CSRF_COOKIE_NAME = 'xcsrftoken'
 
 # email settings
 EMAIL_HOST = 'smtp.exmail.qq.com'
@@ -40,12 +42,13 @@ PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
 PUSH_KEY = '&OKY%~!$^G*JRRF^'
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 ADMIN_EMAIL = 'chenxin@yinker.com'
+PROC_USER = 'metamap'
 
-ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83', '10.1.5.190']
+ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.1.5.190']
 CLUTER_QUEUE = 'default'
 
 HIVE_SERVER = {
-    'host': '10.0.1.84',
+    'host': 'datanode03.yinker.com',
     'port': 10000,
     'user': 'hdfs',
     'password': '',
@@ -68,9 +71,17 @@ djcelery.setup_loader()
 
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERYD_TASK_TIME_LIMIT = 3600
+BROKER_URL = 'redis://datanode08.yinker.com:6379'
 
-BROKER_URL = 'redis://10.0.1.97:6379'
+CELERY_ROUTES = {
+    'metamap.tasks.exec_jar': {
+        'queue': 'running_jar',
+    },
+}
 
+CELERY_REDIS_HOST = 'datanode08.yinker.com'
+CELERY_REDIS_PORT = '6379'
 # CELERY_TASK_SERIALIZER = 'json'
 # CELERY_ACCEPT_CONTENT = ['application/json']
 # CELERY_RESULT_SERIALIZER = 'json'
@@ -85,6 +96,7 @@ INSTALLED_APPS = [
     'will_common',
     'cas',
     'metamap',
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -147,7 +159,7 @@ DATABASES = {
         'NAME': 'metamap1',
         'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'zjy',
-        'HOST': '10.0.1.73',
+        'HOST': 'prd-mysql01.data.com',
         'PORT': '3306',
     },
     'hivemeta': {
@@ -155,17 +167,9 @@ DATABASES = {
         'NAME': 'hive1',
         'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'zjy',
-        'HOST': '10.0.1.73',
+        'HOST': 'prd-mysql01.data.com',
         'PORT': '3306',
     },
-    'ykx_wd': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'YKX_DW',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': '10.0.1.74',
-        'PORT': '3306',
-    }
 }
 
 # Password validation

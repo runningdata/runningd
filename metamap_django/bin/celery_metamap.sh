@@ -10,7 +10,7 @@ fi
 
 ## 检查当前进程中是否还有celery进程活着
 function check() {
-    lines=`ps -ef |grep celery | grep -v dqms | grep ${1} | wc -l`
+    lines=`ps -ef |grep celery | grep will_metamap | wc -l`
     if [[ $lines > 0 ]]; then
         echo "${lines}: celery ${1} still running..."
         ps -ef |grep celery | grep -v dqms | grep ${1}
@@ -23,7 +23,7 @@ function check() {
 
 ###  停止所有celery指定进程
 function stop() {
-    pid=`ps -ef | grep celery |  grep -v dqms | grep ${1} | awk '{if($3 == '1') print $2}'`
+    pid=`ps -ef | grep celery |  grep will_metamap | awk '{if($3 == '1') print $2}'`
     if [[ $pid > 0 ]]; then
         echo "Got ${1} master pid : ${pid}"
         kill $pid
@@ -68,6 +68,7 @@ export C_FORCE_ROOT=true
  --pidfile="/var/run/celery/%n.pid" \
   --logfile="/var/log/celery/%n.log" \
   --settings=metamap.config.prod \
+  --concurrency=3 \
   --loglevel=info
 
 tail -20 /var/log/celery/will_metamap.log

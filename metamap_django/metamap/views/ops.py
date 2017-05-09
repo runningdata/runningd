@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*
+import json
 import os
 import subprocess
 
+import re
+
+import celery
+from celery.backends import redis
 from django.contrib.auth.models import Group
 from django.http import HttpResponse
 import logging
 
 from django.shortcuts import render
 
+import metamap
 from metamap import tasks
 from metamap.models import Exports
 from will_common.utils import dateutils
+from will_common.utils import redisutils
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
 
 logger = logging.getLogger('django')
@@ -47,3 +54,89 @@ def check_file(request):
     if os.path.exists(logLocation):
         return HttpResponse("success")
     return HttpResponse("not yet")
+
+
+def task_queue(request):
+    i = metamap.celery.app.control.inspect()
+    # {u'will_dqms@schedule.yinker.com': [],
+    #  u'will_jar@schedule.yinker.com': [{u'acknowledged': True,
+    #                                     u'args': u"(u'java -cp /server/metamap/metamap_django/jars/xmark_supervise_gettest-1.0-SNAPSHOT.jar -Dtest.user.name=chenxin HTTPGEt \\u53c2\\u65701 \\u53c2\\u65702  2017-05-04', 1865L)",
+    #                                     u'delivery_info': {u'exchange': u'running_jar',
+    #                                                        u'priority': 0,
+    #                                                        u'redelivered': None,
+    #                                                        u'routing_key': u'running_jar'},
+    #                                     u'hostname': u'will_jar@schedule.yinker.com',
+    #                                     u'id': u'ac6cc44e-c184-45fc-82e5-3f56cf5c69bf',
+    #                                     u'kwargs': u'{}',
+    #                                     u'name': u'metamap.tasks.exec_jar',
+    #                                     u'time_start': 1349955.30187257,
+    #                                     u'worker_pid': 21114}],
+    #  u'will_metamap@schedule.yinker.com': []}
+    running = i.active()
+    final_queue = dict()
+    str = list()
+    for queue_key in redisutils.get_keys():
+        print queue_key
+        final_queue[queue_key] = redisutils.get_queue_count(queue_key)
+        str.append('<%s> : %d tasks waiting' % (queue_key, final_queue[queue_key]))
+    result = ' | '.join(str)
+
+    unacked = redisutils.get_dict('unacked')
+    unack_num = len(unacked)
+    return render(request, 'ops/task_queue.html',
+                  {"final_queue": final_queue, "str": result, "running": running, "unack_num": unack_num})
+
+
+def dfs_usage_his(request):
+    if 'search' in request.GET and '*' != request.GET['search']:
+        db_pattern = re.compile(r'.*' + request.GET['search'] + '.*')
+    else:
+        db_pattern = re.compile(r'.*')
+    pattern = re.compile(r'\s+')
+    final = dict()
+    dateee = set()
+    with open('/tmp/dfs-usage-snapshot_bb.log') as dfs_log:
+        current_datee = ''
+        for line in dfs_log.readlines():
+            if line.startswith('new'):
+                datee = line.split(' ')[2].replace('\n', '')
+                current_datee = datee
+                dateee.add(current_datee)
+            else:
+                size = pattern.split(line)[0]
+                ssize = float(size.split(' ')[0])
+                if pattern.split(line)[1] == 'G':
+                    ssize = ssize * 1024
+                db = pattern.split(line)[2].replace('/', '_').replace('\n', '').replace('_apps_hive_warehouse_', '')
+                if not db_pattern.match(db):
+                    continue
+                if len(db) < 1:
+                    continue
+                if db not in final:
+                    final[db] = dict()
+                final[db][current_datee] = ssize
+    l = list(dateee)
+    l.sort()
+    return render(request, 'ops/hdfs_his.html', {"dateee": l, "dbs": final.keys(), "finall": final})
+
+
+def dfs_usage(request):
+    pattern = re.compile(r'\s+')
+    result = dict()
+    with open('/tmp/dfs-usage-snapshot_bb.log') as dfs_log:
+        current_datee = ''
+        for line in dfs_log.readlines():
+            if line.startswith('new'):
+                datee = line.split(' ')[2].replace('\n', '')
+                if datee == dateutils.now_datekey():
+                    current_datee = datee
+            else:
+                size = pattern.split(line)[0]
+                ssize = float(size.split(' ')[0])
+                if pattern.split(line)[1] == 'G':
+                    ssize = ssize * 1024
+                db = pattern.split(line)[2].replace('/', '_').replace('\n', '').replace('_apps_hive_warehouse_', '')
+                if len(db) < 1:
+                    continue
+                result[db] = ssize
+    return render(request, 'ops/dfs_now.html', {"result": result, })

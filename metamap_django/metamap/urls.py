@@ -4,12 +4,12 @@ from rest_framework import routers
 from metamap.models import JarAppExecutions, SqoopMysql2HiveExecutions, Executions, SqoopHive2MysqlExecutions
 from metamap.views import jar
 from metamap.views import ops
-from metamap.views import sche_etl, export
+from metamap.views import sche_etl
 from metamap.views import source
 from metamap.views import sqoop
 from metamap.views import sqoop2
 from metamap.rest.rest_views import ETLViewSet, SqoopHive2MysqlViewSet, SqoopMysql2HiveViewSet, SourceAppViewSet, \
-    JarAppViewSet, BIUserViewSet, AnaETLViewSet, SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
+    JarAppViewSet, AnaETLViewSet, SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
 from metamap.views.sche_ana import ExportsViewSet
 from views import etls, metas
 from metamap.views import common
@@ -22,7 +22,6 @@ router.register(r'hive2mysql', SqoopHive2MysqlViewSet)
 router.register(r'mysql2hive', SqoopMysql2HiveViewSet)
 router.register(r'sourceapp', SourceAppViewSet)
 router.register(r'jarapp', JarAppViewSet)
-router.register(r'users', BIUserViewSet)
 router.register(r'emails', AnaETLViewSet)
 router.register(r'exports', ExportsViewSet)
 router.register(r'sqoop_hive_meta', SqoopHiveMetaViewSet)
@@ -31,6 +30,11 @@ router.register(r'sqoop_mysql_meta', SqoopMysqlMetaViewSet)
 urlpatterns = [
 
     url(r'^$', etls.IndexView.as_view(), name='index'),
+    url(r'^ops/task_queue/$', ops.task_queue, name='task_queue'),
+    url(r'^ops/dfs_usage_his/$', ops.dfs_usage_his, name='dfs_usage_his'),
+    url(r'^ops/dfs_usage/$', ops.dfs_usage, name='dfs_usage'),
+
+
     url(r'hdfs/tail', ops.tail_hdfs, name='tail_hdfs'),
     url(r'hdfs/check_file', ops.check_file, name='check_file'),
     url(r'nginx_auth_test', etls.nginx_auth_test, name='nginx_auth_test'),
@@ -44,7 +48,6 @@ urlpatterns = [
     url(r'^etls/blood/$', etls.blood_by_name, name='blood_by_name'),
     url(r'^etls/preview_dag/$', etls.preview_job_dag, name='preview_job_dag'),
     url(r'^etls/blood/(?P<etlid>[0-9]+)/$', etls.blood_dag, name='blood'),
-    url(r'^etls/emailtest/$', etls.send_email, name='send_email'),
     url(r'^etls/restart_job/', etls.restart_job, name='restart_job'),
 
     url(r'^etls/review_sql/(?P<etlid>[0-9]+)/$', etls.review_sql, name='review_sql'),
@@ -53,10 +56,10 @@ urlpatterns = [
     url(r'^etls/getexeclog/(?P<execid>[0-9]+)/$', etls.get_exec_log, name='getexeclog'),
     url(r'^etls/exec_list/(?P<jobid>[0-9]+)/$', etls.ExecLogView.as_view(), name='exec_list'),
 
-    url(r'^etls/generate_job_dag/(?P<schedule>[0-9])/$', etls.generate_job_dag, name='generate_job_dag'),
     url(r'^m2h/generate_job_dag_v2/(?P<schedule>[0-9])/$', etls.generate_job_dag_v2, name='generate_job_dag_v2'),
-    url(r'^h2m/generate_job_dag/(?P<schedule>[0-9])/$', sqoop.generate_job_dag, name='generate_sqoop_job_dag'),
-    url(r'^m2h/generate_job_dag/(?P<schedule>[0-9])/$', sqoop2.generate_job_dag, name='generate_sqoop2_job_dag'),
+    url(r'^etls/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', etls.generate_job_dag, name='generate_job_dag'),
+    url(r'^h2m/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', sqoop.generate_job_dag, name='generate_sqoop_job_dag'),
+    url(r'^m2h/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', sqoop2.generate_job_dag, name='generate_sqoop2_job_dag'),
 
 
     url(r'^meta/list/$', metas.MetaListView.as_view(), name='meta_list'),

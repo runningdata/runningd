@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-
+{% load staticfiles %}
 {% block scripts %}
     <script type="text/javascript">
         var status = 0;
@@ -11,7 +11,7 @@
                 success: function (data) {
                     if ($("#log").html().length < data.length) {
                         $("#log").html(data);
-                        $("html, body").animate({scrollTop: $(document).height() - $(window).height()});
+                        $("html, body").animate({scrollTop: $(document).height() - window.innerHeight});
                     }
                 }
             });
@@ -23,11 +23,58 @@
             getData();
             console.log('eeeing....');
         }, 5000);
+
+        function goTop() {
+            $(window).scroll(function (e) {
+                //若滚动条离顶部大于100元素
+                if ($(window).scrollTop() > 100)
+                    $("#gotop").fadeIn(150);//以1秒的间隔渐显id=gotop的元素
+                else
+                    $("#gotop").fadeOut(50);//以1秒的间隔渐隐id=gotop的元素
+            });
+        }
+        ;
+        $(function () {
+            //点击回到顶部的元素
+            $("#gotop").click(function (e) {
+                //以1秒的间隔返回顶部
+                $('body,html').animate({scrollTop: 0}, 1000);
+            });
+            $("#gotop").mouseover(function (e) {
+                $(this).css("background", "url(/static/images/backtop.png) no-repeat 0px 0px");
+            });
+            goTop();//实现回到顶部元素的渐显与渐隐
+
+            $("#killer").click(function (e) {
+                console.log("wanna kill me?");
+            });
+        });
     </script>
 {% endblock %}
 
 {% block title %}执行日志{% endblock %}
 {% block content %}
+    <style type="text/css">
+        #gotop {
+            display: none;
+            width: 55px;
+            height: 55px;
+            position: fixed;
+            right: 50px;
+            bottom: 50px;
+            background: url("{% static 'images/backtop.png' %}") no-repeat 0px 0px;
+        }
+        #killer {
+            width: 55px;
+            height: 55px;
+            position: fixed;
+            right: 53px;
+            bottom: 120px;
+            background: url("{% static 'images/killer2.jpg' %}") no-repeat -77px 0px;
+        }
+    </style>
+    <div id="gotop"></div>
+    <div id="killer"></div>
     <div id="log" class="container bg-info">
     </div>
 {% endblock %}

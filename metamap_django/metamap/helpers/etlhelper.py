@@ -323,6 +323,7 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         generate_etl_file(etl, location, schedule)
         command = "hive -f " + location
+        # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     else:
         command = "echo " + job_name
 
@@ -400,6 +401,7 @@ def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1)
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         generate_etl_file(etl, location, schedule)
         command = "hive -f " + location
+        # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     else:
         command = "echo " + job_name
 
@@ -428,7 +430,7 @@ def generate_end_job_file(job_name, command, folder, deps):
         f.write(content)
 
 
-def generate_job_file_h2m(objs, folder):
+def generate_job_file_h2m(objs, folder, group_name):
     '''
     生成azkaban job文件
     :param blood:
@@ -439,20 +441,23 @@ def generate_job_file_h2m(objs, folder):
     for obj in objs:
         job_name = obj.name
         task = SqoopHive2Mysql.objects.get(pk=obj.rel_id)
-        command = generate_sqoop_hive2mysql(task, schedule=obj.schedule)
-        sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".h2m"
-        with open(sqoop_file, 'w') as f:
-            f.write(command)
-        # 生成job文件
-        # job_type = 'command\nretries=12\nretry.backoff=300000\n'
-        job_type = ' command\nretries=5\nretry.backoff=300000\n'
-        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = sh ' + sqoop_file + '\n'
-        job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
-        with open(job_file, 'w') as f:
-            f.write(content)
+        if task.cgroup.name == group_name:
+            h2m = generate_sqoop_hive2mysql(task, schedule=obj.schedule)
+            sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".h2m"
+            with open(sqoop_file, 'w') as f:
+                f.write(h2m)
+            command = 'sh ' + sqoop_file
+            # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
+            # 生成job文件
+            # job_type = 'command\nretries=12\nretry.backoff=300000\n'
+            job_type = ' command\nretries=5\nretry.backoff=300000\n'
+            content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command =  ' + command + '\n'
+            job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+            with open(job_file, 'w') as f:
+                f.write(content)
 
 
-def generate_job_file_m2h(objs, folder):
+def generate_job_file_m2h(objs, folder, group_name):
     '''
     生成azkaban job文件
     :param blood:
@@ -461,22 +466,26 @@ def generate_job_file_m2h(objs, folder):
     :return:
     '''
     for obj in objs:
+
         job_name = obj.name
         task = SqoopMysql2Hive.objects.get(pk=obj.rel_id)
-        command = generate_sqoop_mysql2hive(task, schedule=obj.schedule)
-        sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".m2h"
-        with open(sqoop_file, 'w') as f:
-            f.write(command)
-        # 生成job文件
-        # job_type = ' command \nretries=12\nretry.backoff=300000\n'
-        job_type = ' command\nretries=12\nretry.backoff=300000\n'
-        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = sh ' + sqoop_file + '\n'
-        job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
-        with open(job_file, 'w') as f:
-            f.write(content)
+        if task.cgroup.name == group_name:
+            m2h = generate_sqoop_mysql2hive(task, schedule=obj.schedule)
+            sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".m2h"
+            with open(sqoop_file, 'w') as f:
+                f.write(m2h)
+            command = 'sh ' + sqoop_file
+            # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
+            # 生成job文件
+            # job_type = ' command \nretries=12\nretry.backoff=300000\n'
+            job_type = ' command\nretries=12\nretry.backoff=300000\n'
+            content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
+            job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+            with open(job_file, 'w') as f:
+                f.write(content)
 
 
-def load_nodes(leafs, folder, done_blood, done_leaf, schedule):
+def load_nodes(leafs, folder, done_blood, done_leaf, schedule, group_name):
     '''
     遍历加载节点
     :param leafs:
@@ -486,21 +495,22 @@ def load_nodes(leafs, folder, done_blood, done_leaf, schedule):
     '''
     for leaf in leafs:
         tbl_name = leaf.tblName
-        if tbl_name not in done_leaf:
-            print('handling... %s ' % tbl_name)
-            parent_node = TblBlood.objects.raw("select b.* from"
-                                               + " metamap_tblblood a join metamap_tblblood b"
-                                               + " on a.parent_tbl = b.tbl_name and b.valid = 1"
-                                               + " JOIN metamap_willdependencytask s "
-                                               + " on s.type = 1 and s.schedule = " + schedule + " and s.rel_id = b.related_etl_id"
-                                               + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
-            if tbl_name not in done_blood:
-                print('not in blood : %s ' % tbl_name)
-                generate_job_file(leaf, parent_node, folder, schedule)
-                done_blood.add(tbl_name)
-            print('parent_node for : %s ,floadr : %s ,sche: %s' % (tbl_name, folder, schedule))
-            done_leaf.add(tbl_name)
-            load_nodes(parent_node, folder, done_blood, done_leaf, schedule)
+        if ETL.objects.filter(name=tbl_name, cgroup__name=group_name, valid=1).count() == 1:
+            if tbl_name not in done_leaf:
+                print('handling... %s ' % tbl_name)
+                parent_node = TblBlood.objects.raw("select b.* from"
+                                                   + " metamap_tblblood a join metamap_tblblood b"
+                                                   + " on a.parent_tbl = b.tbl_name and b.valid = 1"
+                                                   + " JOIN metamap_willdependencytask s "
+                                                   + " on s.type = 1 and s.schedule = " + schedule + " and s.rel_id = b.related_etl_id"
+                                                   + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
+                if tbl_name not in done_blood:
+                    print('not in blood : %s ' % tbl_name)
+                    generate_job_file(leaf, parent_node, folder, schedule)
+                    done_blood.add(tbl_name)
+                print('parent_node for : %s ,floadr : %s ,sche: %s' % (tbl_name, folder, schedule))
+                done_leaf.add(tbl_name)
+                load_nodes(parent_node, folder, done_blood, done_leaf, schedule, group_name)
 
 
 def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):

@@ -1,0 +1,139 @@
+{% extends 'layout.html' %}
+{% load staticfiles %}
+{% load ifdef %}
+{% block scripts %}
+    <script src="{% static 'js/echarts.js' %}"></script>
+    <script src="{% static 'js/china.js' %}"></script>
+{% endblock %}
+{% block title %}今日数仓情况{% endblock %}
+{% block content %}
+    <div id="pie" style="height: 1000px"></div>
+    <div id="main" style="height: 600px"></div>
+    <script>
+        var valu = [
+            {% for k, v in result.items %}
+                {
+                    name: '{{ k }}',
+                    value: {{ v }}
+                },
+            {% endfor %}
+        ]
+        var farmdata = function (echarts) {
+            var myChart = echarts.init(document.getElementById('main'));
+
+            var option = {
+                title: {
+                    text: '当前仓库使用情况',
+                    subtext: '今日数据'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{b}: {c}"
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        mark: {show: true},
+                        dataView: {show: true, readOnly: false},
+                        restore: {show: true},
+                        saveAsImage: {show: true}
+                    }
+                },
+                calculable: false,
+                series: [
+                    {
+                        name: '当前仓库使用情况占比图',
+                        type: 'treemap',
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true,
+                                    formatter: "{b}"
+                                },
+                                borderWidth: 1
+                            },
+                            emphasis: {
+                                label: {
+                                    show: true
+                                }
+                            }
+                        },
+                        data: valu
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+        };
+        // 函数调用
+        farmdata(echarts)
+
+        var pie_option = {
+            title: {
+                text: '当前仓库使用情况占比图',
+                subtext: '今日数据',
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                x: 'left',
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: {show: true},
+                    dataView: {show: true, readOnly: false},
+                    magicType: {
+                        show: true,
+                        type: ['pie', 'funnel'],
+                        option: {
+                            funnel: {
+                                x: '25%',
+                                width: '50%',
+                                funnelAlign: 'left',
+                                max: 1548
+                            }
+                        }
+                    },
+                    restore: {show: true},
+                    saveAsImage: {show: true}
+                }
+            },
+            calculable: true,
+            series: [
+                {
+                    name: '访问来源',
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    data: valu
+                }
+            ]
+        };
+        var pie_chart = echarts.init(document.getElementById('pie'));
+        pie_chart.setOption(pie_option);
+    </script>
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading">当前仓库使用情况</div>
+
+        <!-- Table -->
+        <table class="table">
+            <thead>
+            <td>目录</td>
+            <td>大小（M）</td>
+            </thead>
+            {% for k, v in result.items %}
+                <tr>
+                    <td>{{ k }}</td>
+                    <td>{{ v }}</td>
+                </tr>
+            {% endfor %}
+
+        </table>
+    </div>
+{% endblock %}

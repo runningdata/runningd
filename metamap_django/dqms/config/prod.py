@@ -28,19 +28,22 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 EEE = 'default_DEV'
-ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83']
+ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83']
 
 HIVE_SERVER = {
-    'host': '10.0.1.84',
+    'host': '10.2.19.84',
     'port': 10000,
     'user': 'hdfs',
     'password': '',
 }
 
-BROKER_URL = 'redis://10.0.1.97:6379'
+BROKER_URL = 'redis://10.2.19.97:6379'
+CELERY_REDIS_HOST = '10.2.19.97'
+CELERY_REDIS_PORT = '6379'
 
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERYD_TASK_TIME_LIMIT = 3600
 
 CELERY_ROUTES = {
     'dqms.tasks.exec_dqms': {
@@ -148,23 +151,7 @@ DATABASES = {
         'NAME': 'metamap1',
         'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'zjy',
-        'HOST': '10.0.1.73',
-        'PORT': '3306',
-    },
-    'hivemeta': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hive1',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': '10.0.1.73',
-        'PORT': '3306',
-    },
-    'ykx_wd': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'YKX_DW',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': '10.0.1.74',
+        'HOST': '10.2.19.73',
         'PORT': '3306',
     },
     'dqms_check': {
@@ -172,7 +159,7 @@ DATABASES = {
         'NAME': 'YKX_DW',
         'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'zjy',
-        'HOST': '10.0.1.74',
+        'HOST': '10.2.19.74',
         'PORT': '3306',
     }
 }

@@ -154,14 +154,6 @@ DATABASES = {
         'HOST': '10.0.1.73',
         'PORT': '3306',
     },
-    'ykx_wd': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'YKX_DW',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': '10.0.1.74',
-        'PORT': '3306',
-    }
 }
 
 # Password validation

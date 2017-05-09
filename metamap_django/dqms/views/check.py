@@ -76,6 +76,7 @@ def save(request):
                     check = DqmsCheck()
                 else:
                     check = DqmsCheck.objects.get(pk=request.POST['id'])
+                    origin_name = check.chk_name
                 httputils.post2obj(check, request.POST, 'id')
                 if not check.editor_id:
                     check.creator = request.user.userprofile
@@ -89,8 +90,9 @@ def save(request):
                     for case_id in case_ids.split(','):
                         check.cases.add(DqmsCase.objects.get(pk=case_id))
 
-                cron_task, created = PeriodicTask.objects.get_or_create(name=check.chk_name, queue='dqms')
+                cron_task, created = PeriodicTask.objects.get_or_create(name=origin_name, queue='dqms')
                 cron_task.enabled = check.valid
+                cron_task.name = check.chk_name
                 cron_task.task = 'dqms.tasks.exec_dqms'
                 cron_task.args = '[' + str(check.id) + ']'
 

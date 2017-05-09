@@ -43,12 +43,6 @@ class SqoopMysql2HiveSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('name', 'id')
 
 
-class BIUserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = BIUser
-        fields = ('username',)
-
-
 class AnaETLSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = AnaETL

@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^add/$', export.add, name='add'),
     url(r'^edit/(?P<pk>[0-9]+)/$', export.edit, name='edit'),
     url(r'^review_sql/(?P<pk>[0-9]+)/$', export.review_sql, name='review_sql'),
+    url(r'^error_log/(?P<log>.*)/$', export.get_exec_log, name='error_log'),
 
     url(r'^execlog/(?P<loc>.+)/$', sche_etl.execlog, name='execlog'),
     url(r'^sche/$', sche_ana.ScheDepListView.as_view(), name='sche_list'),

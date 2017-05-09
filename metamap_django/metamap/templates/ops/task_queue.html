@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% block title %}队列总体情况{% endblock %}
+{% block content %}
+    排队中:<br/>
+    common : {{ unack_num }}
+    {% for k, v in final_queue.items %}
+        {{ k }} {{ v }} <br/>
+    {% endfor %}
+
+    执行中：<br/>
+    {% for k, v in running.items %}
+         {{ k }}   {{ v|length }}
+    {% endfor %}
+{% endblock %}

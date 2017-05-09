@@ -3,11 +3,12 @@ import base64
 import json
 import logging
 import os
+import subprocess
 import traceback
 from StringIO import StringIO
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import BadHeaderError
 from django.core.mail import EmailMessage
@@ -57,6 +58,7 @@ class IndexView(GroupListView):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             context['search'] = self.request.GET['search']
         return context
+
 
 def nginx_auth_test(request):
     resp = HttpResponse()
@@ -285,7 +287,7 @@ def add(request):
                 etl.meta = etl.name[0: find_]
                 etl.save()
                 logger.info('ETL has been created successfully : %s ' % etl)
-                deps = hivecli.getTbls(etl)
+                deps = hivecli.getTbls_v2(etl)
                 for dep in deps:
                     if etl.name != dep:
                         tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
@@ -305,9 +307,7 @@ def edit(request, pk):
                 privious_etl = ETL.objects.get(pk=int(pk))
                 privious_etl.valid = 0
                 privious_etl.save()
-
-                deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
-                logger.info('Tblbloods for %s has been deleted successfully' % (pk))
+                previous_query = privious_etl.query
 
                 if int(request.POST['valid']) == 1:
                     etl = privious_etl
@@ -328,14 +328,24 @@ def edit(request, pk):
 
                     logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
 
-                    deps = hivecli.getTbls(etl)
-                    for dep in deps:
-                        logger.info("dep is %s, tblName is %s " % (dep, etl.name))
-                        if etl.name != dep:
-                            tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
-                            tblBlood.save()
-                            logger.info('Tblblood has been created successfully : %s' % tblBlood)
-                    logger.info('Tblblood for %s has been created successfully' % (pk))
+                    if etl.query != previous_query:
+                        deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
+                        logger.info('Tblbloods for %s has been deleted successfully' % (pk))
+
+                        deps = hivecli.getTbls_v2(etl)
+                        for dep in deps:
+                            logger.info("dep is %s, tblName is %s " % (dep, etl.name))
+                            if etl.name != dep:
+                                tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
+                                tblBlood.save()
+                                logger.info('Tblblood has been created successfully : %s' % tblBlood)
+                        logger.info('Tblblood for %s has been created successfully' % (pk))
+                    else:
+                        for blood in TblBlood.objects.filter(relatedEtlId=pk):
+                            blood.relatedEtlId = etl.id
+                            blood.save()
+                        logger.info(
+                            'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (pk, etl.id))
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
@@ -358,7 +368,8 @@ def exec_job(request, etlid):
     execution = Executions(logLocation=log_location, job_id=etlid, status=0)
     execution.save()
     from metamap import tasks
-    tasks.exec_etl.delay('hive -f ' + location, log_location)
+    command = 'hive -f ' + location
+    tasks.exec_etl.delay(command, log_location)
     return redirect('metamap:execlog', execid=execution.id)
     # return redirect('metamap:execlog', execid=1)
 
@@ -422,15 +433,7 @@ def preview_job_dag(request):
         return HttpResponse('error')
 
 
-def send_email(request):
-    try:
-        PushUtils.push_email([request.user], constants.ALERT_MSG % ('2017', 'ss', 'ss', 'ss', 1, 99, 2))
-    except BadHeaderError:
-        return HttpResponse('Invalid header found.')
-    return HttpResponse('Ok header found.')
-
-
-
+@permission_required('auth.admin_etl')
 def restart_job(request):
     '''
     指定调度周期与etl名字
@@ -438,48 +441,53 @@ def restart_job(request):
     :param request:
     :return:
     '''
-    if request.user.username == 'admin':
-        if request.method == 'POST':
-            try:
-                final_bloods = set()
-                dependencies = {}
-                schedule = int(request.POST.get('schedule'))
+    if request.method == 'POST':
+        try:
+            final_bloods = set()
+            dependencies = {}
+            schedule = int(request.POST.get('schedule'))
 
-                for name in request.POST.get('names').split(','):
-                    dependencies[name] = set()
-                    for blood in TblBlood.objects.filter(tblName=name):
-                        bloodhelper.find_child_mermaid(blood, final_bloods)
+            for name in request.POST.get('names').split(','):
+                dependencies[name] = set()
+                for blood in TblBlood.objects.filter(tblName=name):
+                    bloodhelper.find_child_mermaid(blood, final_bloods)
 
-                for blood in final_bloods:
-                    child_name = blood.tblName
-                    c_etl = ETL.objects.get(name=child_name, valid=1)
-                    if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=1).exists():
-                        dependencies.setdefault(child_name, set())
-                        parent_name = blood.parentTbl
-                        p_etl = ETL.objects.get(name=parent_name, valid=1)
-                        if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=1).exists():
-                            dependencies.get(child_name).add(parent_name)
+            for blood in final_bloods:
+                child_name = blood.tblName
+                c_etl = ETL.objects.get(name=child_name, valid=1)
+                if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=1).exists():
+                    dependencies.setdefault(child_name, set())
+                    parent_name = blood.parentTbl
+                    p_etl = ETL.objects.get(name=parent_name, valid=1)
+                    if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=1).exists():
+                        dependencies.get(child_name).add(parent_name)
 
-                folder = 'h2h-' + dateutils.now_datetime() + '-restart'
-                os.mkdir(AZKABAN_BASE_LOCATION + folder)
-                os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
+            folder = 'h2h-' + dateutils.now_datetime() + '-restart'
+            os.mkdir(AZKABAN_BASE_LOCATION + folder)
+            os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-                for job_name, parent_names in dependencies.items():
-                    etlhelper.generate_job_file_for_partition(job_name, parent_names, folder, schedule)
-                etlhelper.generate_job_file_for_partition('etl_done_' + folder, dependencies.keys(), folder)
-                ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
-                return HttpResponse(folder)
-            except Exception, e:
-                logger.error('error : %s ' % e)
-                logger.error('traceback is : %s ' % traceback.format_exc())
-                return HttpResponse('error')
-        else:
-            return render(request, 'etl/restart.html')
+            for job_name, parent_names in dependencies.items():
+                etlhelper.generate_job_file_for_partition(job_name, parent_names, folder, schedule)
+            etlhelper.generate_job_file_for_partition('etl_done_' + folder, dependencies.keys(), folder)
+            task_zipfile = AZKABAN_BASE_LOCATION + folder
+            ziputils.zip_dir(task_zipfile)
+            command = 'sh $METAMAP_HOME/files/azkaban_job_restart.sh %s ' % folder
+            p = subprocess.Popen([''.join(command)],
+                                 shell=True,
+                                 universal_newlines=True)
+            p.wait()
+            returncode = p.returncode
+            logger.info('%s return code is %d' % (command, returncode))
+            return HttpResponse(folder)
+        except Exception, e:
+            logger.error('error : %s ' % e)
+            logger.error('traceback is : %s ' % traceback.format_exc())
+            return HttpResponse('error')
     else:
-        return HttpResponse('no auth')
+        return render(request, 'etl/restart.html')
 
 
-def generate_job_dag(request, schedule):
+def generate_job_dag(request, schedule, group_name='xiaov'):
     '''
     抽取所有有效的ETL,生成azkaban调度文件
     :param request:
@@ -511,10 +519,13 @@ def generate_job_dag(request, schedule):
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-        final_leaves = TblBlood.objects.filter(pk__in=ok_leafs)
-        etlhelper.load_nodes(final_leaves, folder, done_blood, done_leaf, schedule)
+        finals = set()
+        for etl in ETL.objects.filter(cgroup__name=group_name):
+            finals.add(etl.id)
+        final_leaves = TblBlood.objects.filter(pk__in=ok_leafs, relatedEtlId__in=finals)
+        etlhelper.load_nodes(final_leaves, folder, done_blood, done_leaf, schedule, group_name=group_name)
 
-        tbl = TblBlood(tblName='etl_done_' + folder)
+        tbl = TblBlood(tblName='etl_done_' + group_name + '_' + folder)
         etlhelper.generate_job_file(tbl, final_leaves, folder)
 
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),

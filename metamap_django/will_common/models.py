@@ -19,6 +19,11 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
+class CeleryTask():
+    def __init__(self, queue, command, name):
+        self.queue = queue
+        self.command = command
+        self.name = name
 
 class WillDependencyTask(models.Model):
     name = models.CharField(unique=True, max_length=200)

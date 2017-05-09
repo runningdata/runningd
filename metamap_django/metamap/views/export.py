@@ -16,6 +16,8 @@ from rest_framework import viewsets
 
 from metamap.helpers import etlhelper
 from metamap.models import AnaETL
+from will_common.models import WillDependencyTask, PeriodicTask
+from will_common.utils import constants
 from will_common.utils import httputils
 from will_common.utils import userutils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
@@ -56,6 +58,15 @@ def add(request):
         return render(request, 'export/edit.html')
 
 
+def get_exec_log(request, log):
+    try:
+        with open(constants.TMP_EXPORT_FILE_LOCATION + log + '.error') as error_file:
+            content = error_file.read()
+        return HttpResponse(content.replace('\n', '<br>'))
+    except Exception, e:
+        logger.error(e)
+        return HttpResponse('file not found %s ' % log)
+
 def review_sql(request, pk):
     try:
         obj = AnaETL.objects.get(id=pk)
@@ -74,6 +85,14 @@ def edit(request, pk):
                 httputils.post2obj(obj, request.POST, 'id')
                 userutils.add_current_creator(obj, request)
                 obj.save()
+                if obj.valid == 0:
+                    task = WillDependencyTask.objects.get(type=2, rel_id=obj.id)
+                    task.valid = 0
+                    task.save()
+                    ptask = PeriodicTask.objects.get(willtask=task)
+                    if ptask.enabled != 0:
+                        ptask.enabled = 0
+                        ptask.save()
                 return HttpResponseRedirect(reverse('export:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})

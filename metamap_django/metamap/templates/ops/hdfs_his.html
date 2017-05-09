@@ -1,0 +1,117 @@
+{% extends 'layout.html' %}
+{% load staticfiles %}
+{% load ifdef %}
+{% block scripts %}
+    <script src="{% static 'js/echarts.js' %}"></script>
+    <script src="{% static 'js/china.js' %}"></script>
+{% endblock %}
+
+{% block title %}数仓历史{% endblock %}
+
+{% block content %}
+    {% include 'components/search.html' %}
+    <!-- 插入ECharts图表 -->
+    <div id="main" style="height: 600px"></div>
+
+    <script>
+        var farmdata = function (echarts) {
+            var myChart = echarts.init(document.getElementById('main'));
+
+            // 数据库数据插入
+            var dateee = [
+                {% for datee in dateee %}
+                    {{ datee }},
+                {% endfor %}
+            ]
+            var dbs = [
+                {% for db in dbs %}
+                    "{{ db }}",
+                {% endfor %}
+            ]
+            var ser = [
+                {% for dbname in finall %}
+                    {
+                        name: "{{ dbname }}",
+                        type: 'line',
+                        stack: '总量',
+                        data: [
+                            {% get_from_dict finall dbname as datas %}
+                            {% for datee in dateee %}
+                                {% get_date_num  datas datee %},
+                            {% endfor %}
+                        ]
+                    },
+                {% endfor %}
+            ]
+            var option = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: dbs
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        mark: {show: true},
+                        dataView: {show: true, readOnly: false},
+                        magicType: {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                        restore: {show: true},
+                        saveAsImage: {show: true},
+                        dataZoom: {show: true},
+                    }
+                },
+                calculable: true,
+                {#            dataZoom: {#}
+                {#                show: true,#}
+                {#                realtime: true,#}
+                {#                //orient: 'vertical',   // 'horizontal'#}
+                {#                //x: 0,#}
+                {#                y: 36,#}
+                {#                //width: 400,#}
+                {#                height: 20,#}
+                {#                //backgroundColor: 'rgba(221,160,221,0.5)',#}
+                {#                //dataBackgroundColor: 'rgba(138,43,226,0.5)',#}
+                {#                //fillerColor: 'rgba(38,143,26,0.6)',#}
+                {#                //handleColor: 'rgba(128,43,16,0.8)',#}
+                {#                //xAxisIndex:[],#}
+                {#                //yAxisIndex:[],#}
+                {#                start: 40,#}
+                {#                end: 60#}
+                {#            },#}
+                "dataZoom": [
+                    {
+                        "end": 100,
+                        "start": 0,
+                        "type": "inside",
+                        "xAxisIndex": 0
+                    },
+                    {
+                        "end": 100,
+                        "start": 0,
+                        "type": "slider",
+                        "xAxisIndex": 0
+                    }
+                ],
+
+                xAxis: [
+                    {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: dateee
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: ser
+            };
+
+            myChart.setOption(option);
+        };
+        // 函数调用
+        farmdata(echarts)
+    </script>
+{% endblock %}
