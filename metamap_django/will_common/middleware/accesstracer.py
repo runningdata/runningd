@@ -23,9 +23,12 @@ class AccessTracer():
         return None
 
 class AuthTracer():
+
     def process_request(self, request):
+        is_gene = request.path.startswith(
+            '/metamap') and '/rest/' not in request.path and '/generate_job_dag/' not in request.path
         for k, v in settings.PATH_AUTH_DICT.items():
-            if not request.user.has_perm(k) and v in request.path:
+            if not request.user.has_perm(k) and v in request.path and not is_gene:
                 message = u'您没有访问此路径的权限'
                 return render(request, 'common/message.html', {'message': message})
         return None
