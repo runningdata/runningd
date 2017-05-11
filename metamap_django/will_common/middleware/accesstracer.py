@@ -28,8 +28,11 @@ class AuthTracer():
         is_filelist = request.path.startswith(
             'metamap/rest/exports')
         is_gene = '/generate_job_dag/' in request.path
+        if is_filelist or is_gene:
+            return None
+
         for k, v in settings.PATH_AUTH_DICT.items():
-            if not request.user.has_perm(k) and v in request.path and not is_gene and not is_filelist:
+            if not request.user.has_perm(k) and v in request.path:
                 message = u'您没有访问此路径的权限'
                 return render(request, 'common/message.html', {'message': message})
         return None
