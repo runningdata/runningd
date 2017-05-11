@@ -26,7 +26,7 @@ class AuthTracer():
 
     def process_request(self, request):
         is_filelist = request.path.startswith(
-            'metamap/rest/exports')
+            '/metamap/rest/exports')
         is_gene = '/generate_job_dag/' in request.path
         if is_filelist or is_gene:
             return None
