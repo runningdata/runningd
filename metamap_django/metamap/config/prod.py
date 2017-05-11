@@ -115,6 +115,10 @@ REST_FRAMEWORK = {
     ]
 }
 
+PATH_AUTH_DICT = {
+    'auth.access_etl': 'metamap',
+}
+
 MIDDLEWARE_CLASSES = [
     'will_common.middleware.viewexception.ViewException',
     'django.middleware.security.SecurityMiddleware',
@@ -128,6 +132,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'will_common.middleware.accesstracer.AccessTracer',
+    'will_common.middleware.accesstracer.AuthTracer',
 ]
 
 ROOT_URLCONF = 'metamap_django.metamap_urls'

@@ -51,6 +51,10 @@ HIVE_SERVER = {
     'password': '',
 }
 
+PATH_AUTH_DICT = {
+    'auth.access_etl': 'metamap',
+}
+
 # 设置cas服务器地址
 CAS_SERVER_URL = "http://dev.will.com:8081/sso/"
 # CAS_LOGOUT_COMPLETELY = True
@@ -109,6 +113,7 @@ MIDDLEWARE_CLASSES = [
     'cas.middleware.CASMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'will_common.middleware.accesstracer.AuthTracer',
 ]
 
 ROOT_URLCONF = 'metamap_django.metamap_urls'

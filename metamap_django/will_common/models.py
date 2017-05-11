@@ -12,9 +12,17 @@ from will_common.djcelery_models import DjceleryCrontabschedule
 from will_common.djcelery_models import DjceleryIntervalschedule
 
 
+class OrgGroup(models.Model):
+    name = models.CharField(max_length=200, verbose_name=u"组织名称")
+    owners = models.CharField(max_length=100, verbose_name=u"负责人", blank=True, default='')
+    hdfs_path = models.CharField(max_length=100, verbose_name=u"HDFS临时路径", blank=True, default='')
+    def __str__(self):
+        return self.name
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     phone = models.BigIntegerField(default=110)
+    org_group = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='user_cgroup', null=True)
 
     def __str__(self):
         return self.user.username

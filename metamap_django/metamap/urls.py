@@ -10,6 +10,7 @@ from metamap.views import sqoop
 from metamap.views import sqoop2
 from metamap.rest.rest_views import ETLViewSet, SqoopHive2MysqlViewSet, SqoopMysql2HiveViewSet, SourceAppViewSet, \
     JarAppViewSet, AnaETLViewSet, SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
+from metamap.views import usermanager
 from metamap.views.sche_ana import ExportsViewSet
 from views import etls, metas
 from metamap.views import common
@@ -33,7 +34,8 @@ urlpatterns = [
     url(r'^ops/task_queue/$', ops.task_queue, name='task_queue'),
     url(r'^ops/dfs_usage_his/$', ops.dfs_usage_his, name='dfs_usage_his'),
     url(r'^ops/dfs_usage/$', ops.dfs_usage, name='dfs_usage'),
-
+    # url(r'^users/add/$', usermanager.add_user, name='add_user'),
+    # url(r'^users/$', usermanager.list_user, name='list_user'),
 
     url(r'hdfs/tail', ops.tail_hdfs, name='tail_hdfs'),
     url(r'hdfs/check_file', ops.check_file, name='check_file'),
