@@ -19,7 +19,7 @@ urlpatterns = [
     url(r'^sche/$', sche_ana.ScheDepListView.as_view(), name='sche_list'),
     url(r'^sche/(?P<pk>[0-9]+)/$', sche_ana.edit, name='sche_edit'),
     url(r'^sche/add/$', sche_ana.add, name='sche_add'),
-    url(r'^(?P<filename>.+)/$', sche_etl.getfile, name='getfile'),
-
     url(r'^rest/', include(router.urls)),
+
+    url(r'^(?P<filename>.+)/$', sche_etl.getfile, name='getfile'),
 ]
