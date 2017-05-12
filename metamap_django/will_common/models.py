@@ -16,6 +16,11 @@ class OrgGroup(models.Model):
     name = models.CharField(max_length=200, verbose_name=u"组织名称")
     owners = models.CharField(max_length=100, verbose_name=u"负责人", blank=True, default='')
     hdfs_path = models.CharField(max_length=100, verbose_name=u"HDFS临时路径", blank=True, default='')
+    # need_auth = models.IntegerField(default=1, verbose_name=u"是否需要验证", choices=(
+    #     (1, '是'),
+    #     (0, '否'),
+    # ))
+    # auth_uri = models.CharField(max_length=300, verbose_name=u"验证uri", blank=True, default='')
     def __str__(self):
         return self.name
 

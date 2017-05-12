@@ -4,6 +4,8 @@
 created by will 
 '''
 import datetime
+import os
+
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -88,16 +90,24 @@ class ExportsViewSet(viewsets.ModelViewSet):
     @list_route(methods=['GET'])
     def get_file(self, request):
         from django.http import FileResponse
-        user = request.query_params['user']
-        sid = request.query_params['sid']
         filename = request.query_params['filename']
         group = request.query_params['group']
-        if group == 'jlc':
-            result = httputils.jlc_auth(user, sid)
-        if group == 'xiaov':
+        if group == 'xiaov' or group == 'jlc-match':
             result = 'success'
+        else:
+            user = request.query_params['user']
+            sid = request.query_params['sid']
+            if group == 'jlc':
+                result = httputils.jlc_auth(user, sid)
         final_filename = filename + '.csv'
         full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
+        if not os.path.exists(full_file):
+            for f in os.listdir(constants.TMP_EXPORT_FILE_LOCATION):
+                path = os.path.join(constants.TMP_EXPORT_FILE_LOCATION, f)
+                print path
+                if not os.path.isdir(path) and f.startswith(filename) and not f.endswith('.error'):
+                    full_file = f
+                    break
         if result == 'success':
             response = FileResponse(open(full_file, 'rb'))
             response['Content-Disposition'] = 'attachment; filename=%s' % final_filename.encode('utf-8')
@@ -109,14 +119,15 @@ class ExportsViewSet(viewsets.ModelViewSet):
     def get_all(self, request):
         now = timezone.now()
         days = now - datetime.timedelta(days=7)
-        user = request.query_params['user']
-        sid = request.query_params['sid']
         group = request.query_params['group']
-        if group == 'jlc':
-            response = httputils.jlc_auth(user, sid)
-        if group == 'xiaov':
-            response = 'success'
-        if response == 'success':
+        if group == 'xiaov' or group == 'jlc-match':
+            result = 'success'
+        else:
+            user = request.query_params['user']
+            sid = request.query_params['sid']
+            if group == 'jlc':
+                result = httputils.jlc_auth(user, sid)
+        if result == 'success':
             objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
             result = list()
             for export in objs:

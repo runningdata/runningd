@@ -123,7 +123,10 @@ def exec_email_export(taskid):
     export = Exports.objects.create(task=will_task)
     try:
         ana_etl = AnaETL.objects.get(pk=taskid)
-        part = ana_etl.name + '-' + dateutils.now_datetime()
+        if ana_etl.name.startswith('common_'):
+            part = ana_etl.name + '-' + dateutils.now_datekey()
+        else:
+            part = ana_etl.name + '-' + dateutils.now_datetime()
         result = TMP_EXPORT_FILE_LOCATION + part
         result_dir = result + '_dir'
         # if ana_etl.creator:
