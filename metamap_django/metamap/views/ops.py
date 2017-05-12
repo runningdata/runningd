@@ -77,14 +77,13 @@ def task_queue(request):
     str = list()
     for queue_key in redisutils.get_keys():
         print queue_key
-        final_queue[queue_key] = redisutils.get_queue_count(queue_key)
-        str.append('<%s> : %d tasks waiting' % (queue_key, final_queue[queue_key]))
+        final_queue[queue_key] = redisutils.get_list(queue_key)
+        str.append('<%s> : %d tasks waiting' % (queue_key, len(final_queue[queue_key])))
     result = ' | '.join(str)
 
     unacked = redisutils.get_dict('unacked')
-    unack_num = len(unacked)
     return render(request, 'ops/task_queue.html',
-                  {"final_queue": final_queue, "str": result, "running": running, "unack_num": unack_num})
+                  {"final_queue": final_queue, "str": result, "running": running, "unack": unacked})
 
 
 def dfs_usage_his(request):

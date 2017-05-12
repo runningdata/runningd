@@ -57,9 +57,12 @@ urlpatterns = [
     url(r'^etls/getexeclog/(?P<execid>[0-9]+)/$', etls.get_exec_log, name='getexeclog'),
     url(r'^etls/exec_list/(?P<jobid>[0-9]+)/$', etls.ExecLogView.as_view(), name='exec_list'),
 
-    url(r'^etls/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', etls.generate_job_dag, name='generate_job_dag'),
-    url(r'^h2m/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', sqoop.generate_job_dag, name='generate_sqoop_job_dag'),
-    url(r'^m2h/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', sqoop2.generate_job_dag, name='generate_sqoop2_job_dag'),
+    url(r'^etls/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', etls.generate_job_dag,
+        name='generate_job_dag'),
+    url(r'^h2m/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', sqoop.generate_job_dag,
+        name='generate_sqoop_job_dag'),
+    url(r'^m2h/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', sqoop2.generate_job_dag,
+        name='generate_sqoop2_job_dag'),
 
     url(r'^meta/list/$', metas.MetaListView.as_view(), name='meta_list'),
     url(r'^meta/add/$', metas.add, name='add_meta'),

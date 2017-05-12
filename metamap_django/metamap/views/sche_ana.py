@@ -4,6 +4,7 @@
 created by will 
 '''
 import datetime
+import json
 import os
 
 from django.db import transaction
@@ -71,6 +72,9 @@ def add(request):
         cron_task.crontab = cron
         cron.save()
 
+        kw_dict = dict()
+        kw_dict['name'] = task.name + '-' + cron
+        cron_task.kwargs = json.dumps(kw_dict)
         cron_task.save()
 
         tasks = DjceleryPeriodictasks.objects.get(ident=1)
@@ -105,7 +109,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
             for f in os.listdir(constants.TMP_EXPORT_FILE_LOCATION):
                 path = os.path.join(constants.TMP_EXPORT_FILE_LOCATION, f)
                 print path
-                if not os.path.isdir(path) and f.startswith(filename) and not f.endswith('.error'):
+                if not os.path.isdir(path) and f.startswith(filename.encode('utf8')) and not f.endswith('.error'):
                     full_file = f
                     break
         if result == 'success':
@@ -157,12 +161,16 @@ def edit(request, pk):
         task.save()
         cron_task = PeriodicTask.objects.get(willtask_id=pk)
         cron_task.name = task.name
-        cron_task.save()
 
         cron = DjceleryCrontabschedule.objects.get(pk=cron_task.crontab_id)
         cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(
             request.POST['cronexp'])
         cron.save()
+
+        kw_dict = dict()
+        kw_dict['name'] = task.name + '-' + cron
+        cron_task.kwargs = json.dumps(kw_dict)
+        cron_task.save()
 
         ptask = PeriodicTask.objects.get(willtask=pk)
         ptask.enabled = task.valid

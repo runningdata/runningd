@@ -72,12 +72,13 @@ def edit(request, pk):
 
 def exec_job(request, sqoopid):
     sqoop = SqoopMysql2Hive.objects.get(id=sqoopid)
-    location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-sqoop-' + sqoop.name + '.log'
+    dd = dateutils.now_datetime()
+    location = AZKABAN_SCRIPT_LOCATION + dd + '-sqoop-' + sqoop.name + '.log'
     command = etlhelper.generate_sqoop_mysql2hive(sqoop)
     execution = SqoopMysql2HiveExecutions(logLocation=location, job_id=sqoopid, status=0)
     execution.save()
     from metamap import tasks
-    tasks.exec_m2h.delay(command, location)
+    tasks.exec_m2h.delay(command, location, name=sqoop.name + '-' + dd)
     return redirect('metamap:sqoop2_execlog', execid=execution.id)
 
 

@@ -23,6 +23,13 @@ def get_dict(key):
         messages = r.hgetall(key)
     return messages
 
+def get_list(key):
+    messages = list()
+    r = redis.StrictRedis(connection_pool=pool)
+    if r.exists(key):
+        messages = r.lrange(key, 0, -1)
+    return messages
+
 def get_queue_count(queue_name, count=-1):
     r = redis.StrictRedis(connection_pool=pool)
     if r.exists(queue_name):
