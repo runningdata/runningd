@@ -108,8 +108,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
         if not os.path.exists(full_file):
             for f in os.listdir(constants.TMP_EXPORT_FILE_LOCATION):
                 path = os.path.join(constants.TMP_EXPORT_FILE_LOCATION, f)
-                print path
-                if not os.path.isdir(path) and f.startswith(filename.encode('utf8')) and not f.endswith('.error'):
+                if not os.path.isdir(path) and f.startswith(filename.unicode.encode('utf8')) and not f.endswith('.error'):
                     full_file = f
                     break
         if result == 'success':
