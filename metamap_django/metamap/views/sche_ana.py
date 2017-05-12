@@ -120,6 +120,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
         now = timezone.now()
         days = now - datetime.timedelta(days=7)
         group = request.query_params['group']
+        user = ''
         if group == 'xiaov' or group == 'jlc-match':
             result = 'success'
         else:
@@ -133,7 +134,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
             for export in objs:
                 ana_id = export.task.rel_id
                 ana_etl = AnaETL.objects.get(pk=ana_id)
-                if user is not None and user != 'xuexu':
+                if user != 'xuexu' and user != '':
                     if ana_etl.is_auth(user, group):
                         result.append(export)
                 else:
