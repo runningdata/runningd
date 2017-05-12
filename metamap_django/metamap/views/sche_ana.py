@@ -110,7 +110,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
                 path = os.path.join(constants.TMP_EXPORT_FILE_LOCATION, f)
                 print('filename is %s and its type is %s ' % (filename, type(filename)))
                 encode_done = filename.encode('utf8')
-                print('encode filename is %s and its type is %s ' % (filename, type(filename)))
+                print('encode_done is %s and its type is %s ' % (encode_done, type(encode_done)))
                 is_startswith = f.startswith(encode_done)
                 print('f is %s and its type is %s ' % (f, type(f)))
                 if not os.path.isdir(path) and is_startswith and not f.endswith('.error'):
