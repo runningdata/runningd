@@ -40,7 +40,7 @@ def add(x, y):
 
 
 @shared_task
-def exec_h2m(command, location):
+def exec_h2m(command, location, name=''):
     print('command is %s , location is %s' % (command, location))
     execution = SqoopHive2MysqlExecutions.objects.get(logLocation=location)
     execution.end_time = timezone.now()
@@ -63,7 +63,7 @@ def exec_h2m(command, location):
 
 
 @shared_task
-def exec_m2h(command, location):
+def exec_m2h(command, location, name=''):
     print('command is %s , location is %s' % (command, location))
     execution = SqoopMysql2HiveExecutions.objects.get(logLocation=location)
     execution.end_time = timezone.now()
@@ -197,7 +197,7 @@ def exec_mysql2hive(taskid):
 
 
 @shared_task
-def tail_hdfs(logLocation, command):
+def tail_hdfs(logLocation, command, name=''):
     print 'command is ', command
     with open(logLocation, 'a') as fi:
         p = subprocess.Popen([''.join(command)], stdout=fi, stderr=subprocess.STDOUT,
@@ -210,7 +210,7 @@ def tail_hdfs(logLocation, command):
     logger.info('tail_hdfs : %s return code is %d' % (command, returncode))
 
 @shared_task
-def exec_sourceapp(taskid):
+def exec_sourceapp(taskid, name=''):
     '''
     1. cd wd
     2. git clone
@@ -251,7 +251,7 @@ def exec_jarapp(taskid):
 
 
 @shared_task
-def exec_jar(command, pk):
+def exec_jar(command, pk, name=''):
     try:
         execution = JarAppExecutions.objects.get(pk=pk)
         groupuser = JarApp.objects.get(pk=execution.job_id).cgroup.name
@@ -307,5 +307,5 @@ def exec_etl_cli(task_id):
 
 
 @shared_task
-def xsum(numbers):
+def xsum(numbers, name=''):
     return sum(numbers)
