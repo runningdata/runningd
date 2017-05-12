@@ -59,7 +59,8 @@ def add(request):
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
-        return render(request, 'source/post_edit.html')
+        form = JarForm(request.user.userprofile.id)
+        return render(request, 'source/post_edit.html', {'form': form})
 
 class JarForm(ModelForm):
     class Meta:
