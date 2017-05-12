@@ -98,7 +98,7 @@ def exec_m2h(command, location):
 
 
 @shared_task
-def exec_etl(command, log):
+def exec_etl(command, log, name=''):
     execution = Executions.objects.get(logLocation=log)
     execution.end_time = timezone.now()
     try:
