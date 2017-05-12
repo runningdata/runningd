@@ -92,10 +92,10 @@ class ExportsViewSet(viewsets.ModelViewSet):
         from django.http import FileResponse
         filename = request.query_params['filename']
         group = request.query_params['group']
+        user = request.query_params['user']
         if group == 'xiaov' or group == 'jlc-match':
             result = 'success'
         else:
-            user = request.query_params['user']
             sid = request.query_params['sid']
             if group == 'jlc':
                 result = httputils.jlc_auth(user, sid)
@@ -120,11 +120,10 @@ class ExportsViewSet(viewsets.ModelViewSet):
         now = timezone.now()
         days = now - datetime.timedelta(days=7)
         group = request.query_params['group']
-        user = ''
+        user = request.query_params['user']
         if group == 'xiaov' or group == 'jlc-match':
             result = 'success'
         else:
-            user = request.query_params['user']
             sid = request.query_params['sid']
             if group == 'jlc':
                 result = httputils.jlc_auth(user, sid)
@@ -134,7 +133,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
             for export in objs:
                 ana_id = export.task.rel_id
                 ana_etl = AnaETL.objects.get(pk=ana_id)
-                if user != 'xuexu' and user != '':
+                if user != 'xuexu':
                     if ana_etl.is_auth(user, group):
                         result.append(export)
                 else:
