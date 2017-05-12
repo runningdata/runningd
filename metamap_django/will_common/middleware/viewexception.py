@@ -17,6 +17,7 @@ logger = logging.getLogger('error')
 
 class ViewException():
     def process_exception(self, request, exception):
+        print('sssssssssssssssss %s' % exception)
         logger.error(traceback.format_exc())
 
 

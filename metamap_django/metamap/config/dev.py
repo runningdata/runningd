@@ -66,7 +66,6 @@ AUTHENTICATION_BACKENDS = (
     'cas.backends.CASBackend',
 )
 
-
 import djcelery
 
 djcelery.setup_loader()
@@ -103,6 +102,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE_CLASSES = [
+    'will_common.middleware.viewexception.ViewException',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
