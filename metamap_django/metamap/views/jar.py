@@ -115,12 +115,13 @@ def review(request, pk):
 def exec_job(request, pk):
     try:
         jar_task = JarApp.objects.get(pk=pk)
-        log = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-jarapp-sche-' + jar_task.name + '.log'
+        dd = dateutils.now_datetime()
+        log = AZKABAN_SCRIPT_LOCATION + dd + '-jarapp-sche-' + jar_task.name + '.log'
         command = etlhelper.generate_jarapp_script(WORK_DIR, jar_task)
         execution = JarAppExecutions(logLocation=log, job_id=jar_task.id, status=0, owner=jar_task.creator)
         execution.save()
         from metamap import tasks
-        tasks.exec_jar.delay(command, execution.id)
+        tasks.exec_jar.delay(command, execution.id, name=jar_task.name + '-' + dd)
         return redirect('metamap:jar_execlog', execid=execution.id)
     except Exception, e:
         logger.error(e)
