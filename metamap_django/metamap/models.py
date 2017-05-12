@@ -78,17 +78,20 @@ class SourceApp(models.Model):
 
 
 class JarApp(models.Model):
+    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='jar_cgroup', null=True)
     name = models.CharField(max_length=200, verbose_name=u"任务名称")
     engine_type = models.ForeignKey(SourceEngine, on_delete=models.DO_NOTHING,
                                     verbose_name=u"运行工具")
     main_func = models.CharField(max_length=100, verbose_name=u"入口类", blank=True, default='')
     priority = models.IntegerField(default=5, blank=True)
     jar_file = models.FileField(upload_to='jars', blank=True)
-    valid = models.IntegerField(default=1, verbose_name=u"是否生效")
+    valid = models.IntegerField(default=1, verbose_name=u"是否生效", choices=(
+        (1, '是'),
+        (0, '否'),
+    ))
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='jar_creator', null=True)
-    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='jar_cgroup', null=True)
     ctime = models.DateTimeField(default=timezone.now)
 
 class ETL(models.Model):
