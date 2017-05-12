@@ -114,7 +114,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
                 is_startswith = f.startswith(encode_done)
                 print('f is %s and its type is %s ' % (f, type(f)))
                 if not os.path.isdir(path) and is_startswith and not f.endswith('.error'):
-                    full_file = f
+                    full_file = path
                     break
         if result == 'success':
             response = FileResponse(open(full_file, 'rb'))
