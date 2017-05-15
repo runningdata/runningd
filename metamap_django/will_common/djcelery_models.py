@@ -160,9 +160,9 @@ class DjceleryCrontabschedule(models.Model):
         str = []
         str.append(self.minute)
         str.append(self.hour)
-        str.append(self.day_of_week)
         str.append(self.day_of_month)
         str.append(self.month_of_year)
+        str.append(self.day_of_week)
         return ' '.join(str)
 
 

@@ -45,7 +45,7 @@ ADMIN_EMAIL = 'chenxin@yinker.com'
 PROC_USER = 'metamap'
 
 ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.1.5.190']
-CLUTER_QUEUE = 'default'
+CLUTER_QUEUE = 'xstorm'
 
 HIVE_SERVER = {
     'host': 'datanode03.yinker.com',
