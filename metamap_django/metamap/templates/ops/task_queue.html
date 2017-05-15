@@ -2,7 +2,7 @@
 {% load ifdef %}
 {% block title %}队列总体情况{% endblock %}
 {% block content %}
-    {% if unack | length > 0 %}
+    {% if unack|length > 0 %}
         排队中:<br/>
         common : {{ unack | length }} <br/>
         <table>
