@@ -202,7 +202,7 @@ def add(request):
                 request.POST['cronexp'])
             cron_task.crontab = cron
             kw_dict = dict()
-            kw_dict['name'] = task.name + '-' + cron
+            kw_dict['name'] = task.name + '-' + cron.__str__()
             cron_task.kwargs = json.dumps(kw_dict)
             cron.save()
             cron_task.save()
