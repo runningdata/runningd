@@ -301,7 +301,7 @@ executors = {1: exec_etl_sche, 2: exec_email_export, 3: exec_hive2mysql, 4: exec
 
 
 @shared_task
-def exec_etl_cli(task_id):
+def exec_etl_cli(task_id, name=''):
     will_task = WillDependencyTask.objects.get(pk=task_id)
     executors.get(will_task.type)(will_task.rel_id)
 
