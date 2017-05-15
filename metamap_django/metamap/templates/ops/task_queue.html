@@ -5,7 +5,7 @@
     {% if unack|length > 0 %}
         排队中:<br/>
         common : {{ unack | length }} <br/>
-        <table>
+        <table class="table">
             <tr>
                 <th>key</th>
                 <th>任务ID</th>
@@ -26,10 +26,9 @@
     {% endif %}
     <p/>
     {% for k, v in final_queue.items %}
-
         {% if v|length > 0 %}
             <b>队列{{ k }} ： {{ v | length }}</b>
-            <table>
+            <table class="table">
                 <tr>
                     <th>所属队列</th>
                     <th>任务ID</th>
@@ -54,7 +53,7 @@
         {% if v|length > 0 %}
 
             <b>{{ k }} {{ v|length }}</b> <br/>
-            <table>
+            <table class="table">
                 <tr>
                     <th>所属队列</th>
                     <th>任务ID</th>
@@ -66,7 +65,7 @@
                         <td>{{ k }}</td>
                         <td>{{ msg.id }}</td>
                         {#                    <td>{{ body }}</td>#}
-                        <td>{{ msg.kwargs.name }}</td>
+                        <td>{{ msg.kwargs|extract_str_dict:'name' }}</td>
                     </tr>
                 {% endfor %}
             </table>

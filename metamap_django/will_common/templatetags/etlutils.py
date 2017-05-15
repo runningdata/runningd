@@ -166,6 +166,7 @@ def is_valid(value):
         return '是'
     return '否'
 
+
 # @register.filter
 # def clean_blood(value):
 #     return value.replace('@', '__');

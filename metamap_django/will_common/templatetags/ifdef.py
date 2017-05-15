@@ -46,3 +46,7 @@ def get_celery_taskname2(msg):
     body_encoding = m['properties']['body_encoding']
     body = pickle.loads(m['body'].decode(body_encoding))
     return body
+
+@register.filter
+def extract_str_dict(value, key):
+    return eval(value)[key]
