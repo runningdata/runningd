@@ -46,6 +46,22 @@
     <p/>
     执行中：<br/>
     {% for k, v in running.items %}
-        {{ k }}   {{ v|length }} <br/>
+        <b>{{ k }}   {{ v|length }}</b> <br/>
+        <table>
+            <tr>
+                <th>所属队列</th>
+                <th>任务ID</th>
+                {#                <th>value22</th>#}
+                <th>任务名称</th>
+            </tr>
+            {% for msg in v %}
+                <tr>
+                    <td>{{ k }}</td>
+                    <td>{{ msg.id }}</td>
+                    {#                    <td>{{ body }}</td>#}
+                    <td>{{ msg.kwargs.name }}</td>
+                </tr>
+            {% endfor %}
+        </table>
     {% endfor %}
 {% endblock %}
