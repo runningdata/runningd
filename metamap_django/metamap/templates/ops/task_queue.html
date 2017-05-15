@@ -3,7 +3,7 @@
 {% block title %}队列总体情况{% endblock %}
 {% block content %}
     {% if unack|length > 0 %}
-        排队中:<br/>
+        <div class="label">排队中:</div><br/>
         common : {{ unack | length }} <br/>
         <table class="table">
             <tr>
@@ -27,7 +27,7 @@
     <p/>
     {% for k, v in final_queue.items %}
         {% if v|length > 0 %}
-            <b>队列{{ k }} ： {{ v | length }}</b>
+            <div class="label label-warning"><b>队列{{ k }} ： {{ v | length }}</div></b>
             <table class="table">
                 <tr>
                     <th>所属队列</th>
@@ -48,7 +48,7 @@
         {% endif %}
     {% endfor %}
     <p/>
-    执行中：<br/>
+    <div class="label label-success">执行中：</div><br/>
     {% for k, v in running.items %}
         {% if v|length > 0 %}
 

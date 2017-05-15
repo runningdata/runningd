@@ -13,7 +13,7 @@ function check() {
     lines=`ps -ef |grep celery | grep -v dqms | grep will_jar | wc -l`
     if [[ $lines > 0 ]]; then
         echo "${lines}: celery ${1} still running..."
-        ps -ef |grep celery | grep -v dqms | grep ${1}
+        ps -ef |grep celery | grep will_jar | grep ${1}
         return ${lines}
     else
         echo "metamap celery ${1} has been killed"
