@@ -49,4 +49,4 @@ def get_celery_taskname2(msg):
 
 @register.filter
 def extract_str_dict(value, key):
-    return eval(value)[key]
+    return eval(value).get(key, "has no name yet")
