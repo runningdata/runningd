@@ -263,7 +263,7 @@ def edit(request, pk):
                     request.POST['cronexp'])
 
                 kw_dict = dict()
-                kw_dict['name'] = task.name + '-' + cron
+                kw_dict['name'] = task.name + '-' + cron.__str__()
                 cron_task.kwargs = json.dumps(kw_dict)
 
                 cron_task.save()
@@ -282,7 +282,7 @@ def edit(request, pk):
                 cron_task.crontab = cron
                 cron.save()
                 kw_dict = dict()
-                kw_dict['name'] = task.name + '-' + cron
+                kw_dict['name'] = task.name + '-' + cron.__str__()
                 cron_task.kwargs = json.dumps(kw_dict)
                 cron_task.save()
 
