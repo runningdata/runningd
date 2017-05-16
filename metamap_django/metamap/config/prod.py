@@ -230,7 +230,7 @@ LOGGING = {
             'include_html': True,
         },
         'default': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/var/log/metamap_all.log',  # 日志输出文件
             'maxBytes': 1024 * 1024 * 5,  # 文件大小
@@ -251,7 +251,7 @@ LOGGING = {
             'formatter': 'standard'
         },
         'scprits_handler': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/var/log/metamap_script.log',
             'maxBytes': 1024 * 1024 * 5,
@@ -267,7 +267,7 @@ LOGGING = {
         },
         'info': {
             'handlers': ['default'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
         'scripts': {
