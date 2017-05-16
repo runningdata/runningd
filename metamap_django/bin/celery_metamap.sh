@@ -69,7 +69,6 @@ export C_FORCE_ROOT=true
   --logfile="/var/log/celery/%n.log" \
   --settings=metamap.config.prod \
   --autoscale=5,2 \
-  --max-tasks-per-child 50 \
   --loglevel=info
 
 tail -20 /var/log/celery/will_metamap.log
