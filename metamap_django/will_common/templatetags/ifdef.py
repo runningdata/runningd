@@ -50,3 +50,11 @@ def get_celery_taskname2(msg):
 @register.filter
 def extract_str_dict(value, key):
     return eval(value).get(key, "has no name yet")
+
+@register.filter
+def readable_task_queue(value):
+    ss = value.split('@')
+    if len(ss) == 2:
+        return ss[0].replace('will_', '')
+    else:
+        return value

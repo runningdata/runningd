@@ -65,10 +65,11 @@ stop worker
 export C_FORCE_ROOT=true
 
 /server/xstorm/bin/python manage.py celery multi start will_metamap -A metamap \
- --pidfile="/var/run/celery/%n.pid" \
+  --pidfile="/var/run/celery/%n.pid" \
   --logfile="/var/log/celery/%n.log" \
   --settings=metamap.config.prod \
-  --concurrency=3 \
+  --autoscale=5,2 \
+  --max-tasks-per-child 50 \
   --loglevel=info
 
 tail -20 /var/log/celery/will_metamap.log

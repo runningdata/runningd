@@ -69,7 +69,7 @@ class PeriodicTask(models.Model):
     task = models.CharField(max_length=200)
     args = models.TextField(default='[]')
     kwargs = models.TextField(default='{}')
-    queue = models.CharField(max_length=200, blank=True, null=True)
+    queue = models.CharField(max_length=200, blank=True, null=True, default='cron_tsk')
     exchange = models.CharField(max_length=200, blank=True, null=True)
     routing_key = models.CharField(max_length=200, blank=True, null=True)
     expires = models.DateTimeField(blank=True, null=True)
