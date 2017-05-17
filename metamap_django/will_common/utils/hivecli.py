@@ -12,6 +12,7 @@ from will_common.utils import djtemplates
 
 logger = logging.getLogger('django')
 
+
 def getTbls_v2(etl):
     result = set()
     if len(etl.query) == 0:
@@ -22,7 +23,7 @@ def getTbls_v2(etl):
         matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
         if matchObj:
             sql = sql.replace(matchObj.group(1), '-999')
-        f_sql = sql.replace('`','').encode('utf8')
+        f_sql = sql.replace('`', '\'').encode('utf8')
         command = 'hive -e   "explain dependency ' + f_sql + '"'
         out = os.popen(command).read()
 
@@ -35,6 +36,7 @@ def getTbls_v2(etl):
     except Pyhs2Exception, e:
         raise Exception('sql is %s,\n<br> error is %s' % (sql, e))
     return result
+
 
 def getTbls(etl):
     result = set()
@@ -69,6 +71,7 @@ def getTbls(etl):
     except Pyhs2Exception, e:
         raise Exception('sql is %s,\n<br> error is %s' % (sql, e))
     return result
+
 
 def get_tbls(sql):
     result = set()
