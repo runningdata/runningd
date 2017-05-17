@@ -22,7 +22,10 @@ def getTbls_v2(etl):
         matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
         if matchObj:
             sql = sql.replace(matchObj.group(1), '-999')
-        command = 'hive -e   "explain dependency ' + sql + '"'
+        print('sql type is %s ' % type(sql))
+        f_sql = sql.encode('utf8')
+        print(' -> f_sql type is %s ' % type(f_sql))
+        command = 'hive -e   "explain dependency ' + f_sql + '"'
         out = os.popen(command).read()
 
         # Fetch table results
