@@ -8,7 +8,7 @@ import datetime
 from django.utils import timezone
 
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
-from will_common.models import PeriodicTask, WillDependencyTask, UserProfile
+from will_common.models import PeriodicTask, WillDependencyTask, UserProfile, OrgGroup
 
 logger = logging.getLogger('django')
 from will_common.utils import hivecli
@@ -26,7 +26,7 @@ class AnaETL(models.Model):
     valid = models.IntegerField(default=1)
     auth_users = models.TextField(default='', null=False, blank=False)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='ana_creator', null=True)
-    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='ana_cgroup', null=True)
+    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='ana_cgroup', null=True)
 
     __str__ = query
 
@@ -78,24 +78,26 @@ class SourceApp(models.Model):
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='source_creator', null=True)
-    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='source_cgroup', null=True)
+    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='source_cgroup', null=True)
     ctime = models.DateTimeField(default=timezone.now)
 
 
 class JarApp(models.Model):
+    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='jar_cgroup', null=True)
     name = models.CharField(max_length=200, verbose_name=u"任务名称")
     engine_type = models.ForeignKey(SourceEngine, on_delete=models.DO_NOTHING,
                                     verbose_name=u"运行工具")
     main_func = models.CharField(max_length=100, verbose_name=u"入口类", blank=True, default='')
     priority = models.IntegerField(default=5, blank=True)
     jar_file = models.FileField(upload_to='jars', blank=True)
-    valid = models.IntegerField(default=1, verbose_name=u"是否生效")
+    valid = models.IntegerField(default=1, verbose_name=u"是否生效", choices=(
+        (1, '是'),
+        (0, '否'),
+    ))
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='jar_creator', null=True)
-    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='jar_cgroup', null=True)
     ctime = models.DateTimeField(default=timezone.now)
-
 
 class ETLObjRelated():
     '''
@@ -126,7 +128,6 @@ class ETLObjRelated():
 
 
 class ETL(models.Model, ETLObjRelated):
-    etl_type = 1
     query = models.TextField()
     meta = models.CharField(max_length=20)
     name = models.CharField(max_length=100, db_column='tbl_name', verbose_name=u"ETL名称")
@@ -139,7 +140,7 @@ class ETL(models.Model, ETLObjRelated):
     setting = models.CharField(max_length=200, default='')
     variables = models.CharField(max_length=2000, default='')
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='etl_creator', null=True)
-    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='etl_cgroup', null=True)
+    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='etl_cgroup', null=True)
 
     __str__ = query
 
@@ -220,7 +221,7 @@ class Meta(models.Model):
     ctime = models.DateTimeField(default=timezone.now)
     valid = models.IntegerField(default=1)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='meta_creator', null=True)
-    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='meta_cgroup', null=True)
+    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='meta_cgroup', null=True)
 
     def __str__(self):
         return self.meta
@@ -248,7 +249,7 @@ class SqoopMysql2Hive(models.Model, ETLObjRelated):
     partition_key = models.CharField(max_length=300, null=True, default='')
     settings = models.TextField(null=True)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='m2h_creator', null=True)
-    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='m2h_cgroup', null=True)
+    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='m2h_cgroup', null=True)
 
 
 class SqoopHive2Mysql(models.Model, ETLObjRelated):
@@ -266,7 +267,7 @@ class SqoopHive2Mysql(models.Model, ETLObjRelated):
     parallel = models.IntegerField(default=1, verbose_name='并发执行')
     ctime = models.DateTimeField(default=timezone.now)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='h2m_creator', null=True)
-    cgroup = models.ForeignKey(Group, on_delete=models.DO_NOTHING, related_name='h2m_cgroup', null=True)
+    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='h2m_cgroup', null=True)
 
     def get_deps(self):
         # TODO 依赖hive多个表，需要解析sql，目前没有这种需求，为降低错误率，暂时不支持

@@ -1,20 +1,7 @@
-{% load staticfiles %}
+{% extends 'common/nav_layout.html' %}
 {% load ifdef %}
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}"/>
-    <script src="{% static 'js/jquery.js' %}"></script>
-    <script src="{% static 'js/bootstrap.js' %}"></script>
-    {% block scripts %}{% endblock %}
-    <title>XStorm</title>
-</head>
-<body>
-{% include 'components/common_header.html' %}
-
-
-<div class="container">
+{% load staticfiles %}
+{% block content %}
     <div style="margin-top: 105px;
     margin-bottom: auto;">
         <div>
@@ -39,22 +26,13 @@
                 </div>
             </a>
         </div>
-        <div class="col-sm-6 col-md-3">
-            <a href="{{ base_host }}8000/metamap" class="thumbnail">
-                <img src="{% static 'images/ETL.jpg' %}"
-                     alt="通用的占位符缩略图">
-                <div class="caption">
-                    <h3 class="text-center">ETL开发</h3>
-                </div>
-            </a>
-        </div>
-        {% if user.username == 'admin' %}
+        {% if perms.auth.access_etl %}
             <div class="col-sm-6 col-md-3">
-                <a href="{{ request.build_absolute_uri }}user" class="thumbnail">
-                    <img src="{% static 'images/ml.png' %}"
+                <a href="{{ base_host }}8000/metamap" class="thumbnail">
+                    <img src="{% static 'images/ETL.jpg' %}"
                          alt="通用的占位符缩略图">
                     <div class="caption">
-                        <h3 class="text-center">机器学习</h3>
+                        <h3 class="text-center">ETL开发</h3>
                     </div>
                 </a>
             </div>
@@ -69,17 +47,4 @@
             </a>
         </div>
     </div>
-
-
-</div>
-</body>
-
-
-<footer class="modal-footer" style="margin-top: 200px">
-    <div id="copyright" class="container text-center">
-        <p>
-            Copyright &copy; 2016&ndash;2095 WillCup, Inc.
-        </p>
-        <p>Powered by <a href="https://github.com/">Will</p>
-    </div>
-</footer>
+{% endblock %}

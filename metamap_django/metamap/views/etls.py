@@ -356,7 +356,8 @@ def edit(request, pk):
 
 def exec_job(request, etlid):
     etl = ETL.objects.get(id=etlid)
-    location = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-' + etl.name.replace('@', '__') + '.hql'
+    dd = dateutils.now_datetime()
+    location = AZKABAN_SCRIPT_LOCATION + dd + '-' + etl.name.replace('@', '__') + '.hql'
     etlhelper.generate_etl_file(etl, location)
     log_location = location.replace('hql', 'log')
     with open(log_location, 'a') as log:
@@ -369,10 +370,9 @@ def exec_job(request, etlid):
     execution.save()
     from metamap import tasks
     command = 'hive -f ' + location
-    tasks.exec_etl.delay(command, log_location)
+    tasks.exec_etl.delay(command, log_location, name=etl.name + '-' + dd)
     return redirect('metamap:execlog', execid=execution.id)
     # return redirect('metamap:execlog', execid=1)
-
 
 def review_sql(request, etlid):
     try:

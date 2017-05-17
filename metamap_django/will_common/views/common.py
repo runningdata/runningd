@@ -13,6 +13,7 @@ from django.template import RequestContext
 from django.views import generic
 from rest_framework import viewsets
 
+from will_common.models import OrgGroup
 from will_common.serializers import GroupsSerializer
 
 
@@ -106,8 +107,8 @@ from django.utils.translation import ugettext as _
 class GroupListView(generic.ListView):
     def get(self, request, *args, **kwargs):
         if request.user.username != 'admin':
-            current_group = self.request.user.groups.all()
-            self.object_list = self.get_queryset().filter(cgroup__in=current_group)
+            current_group = self.request.user.userprofile.org_group
+            self.object_list = self.get_queryset().filter(cgroup=current_group)
         else:
             self.object_list = self.get_queryset()
         allow_empty = self.get_allow_empty()
@@ -130,5 +131,5 @@ class GroupListView(generic.ListView):
 
 
 class GroupsViewSet(viewsets.ModelViewSet):
-    queryset = Group.objects.all()
+    queryset = OrgGroup.objects.all()
     serializer_class = GroupsSerializer

@@ -1,0 +1,30 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}"/>
+    <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+    {% block scripts %}{% endblock %}
+    <title>XStorm</title>
+</head>
+<body>
+{% include 'components/common_header.html' %}
+
+
+<div class="container" style="height: 600px">
+    {% block content %}
+    {% endblock %}
+</div>
+</body>
+
+
+<footer class="modal-footer">
+    <div id="copyright" class="container text-center">
+        <p>
+            Copyright &copy; 2016&ndash;2095 WillCup, Inc.
+        </p>
+        <p>Powered by <a href="https://github.com/">Will</p>
+    </div>
+</footer>

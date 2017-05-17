@@ -10,10 +10,10 @@ fi
 
 ## 检查当前进程中是否还有celery进程活着
 function check() {
-    lines=`ps -ef |grep celery | grep -v dqms | grep ${1} | grep jar | wc -l`
+    lines=`ps -ef |grep celery | grep -v dqms | grep will_jar | wc -l`
     if [[ $lines > 0 ]]; then
         echo "${lines}: celery ${1} still running..."
-        ps -ef |grep celery | grep -v dqms | grep ${1}
+        ps -ef |grep celery | grep will_jar | grep ${1}
         return ${lines}
     else
         echo "metamap celery ${1} has been killed"
@@ -23,7 +23,7 @@ function check() {
 
 ###  停止所有celery指定进程
 function stop() {
-    pid=`ps -ef | grep celery |  grep -v dqms | grep ${1} | grep metamap | awk '{if($3 == '1') print $2}'`
+    pid=`ps -ef | grep celery |  grep -v dqms | grep will_jar | awk '{if($3 == '1') print $2}'`
     if [[ $pid > 0 ]]; then
         echo "Got ${1} master pid : ${pid}"
         kill $pid

@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from will_common.models import UserProfile
+from will_common.models import UserProfile, OrgGroup
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
@@ -14,6 +14,7 @@ class EmployeeInline(admin.StackedInline):
 # Define a new User admin
 class UserAdmin(BaseUserAdmin):
     inlines = (EmployeeInline, )
+
 
 # Re-register UserAdmin
 admin.site.unregister(User)

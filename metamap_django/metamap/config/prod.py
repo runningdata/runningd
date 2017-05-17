@@ -45,7 +45,7 @@ ADMIN_EMAIL = 'chenxin@yinker.com'
 PROC_USER = 'metamap'
 
 ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.1.5.190']
-CLUTER_QUEUE = 'default'
+CLUTER_QUEUE = 'xstorm'
 
 HIVE_SERVER = {
     'host': 'datanode03.yinker.com',
@@ -115,6 +115,10 @@ REST_FRAMEWORK = {
     ]
 }
 
+PATH_AUTH_DICT = {
+    'auth.access_etl': 'metamap',
+}
+
 MIDDLEWARE_CLASSES = [
     'will_common.middleware.viewexception.ViewException',
     'django.middleware.security.SecurityMiddleware',
@@ -128,6 +132,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'will_common.middleware.accesstracer.AccessTracer',
+    'will_common.middleware.accesstracer.AuthTracer',
 ]
 
 ROOT_URLCONF = 'metamap_django.metamap_urls'
@@ -225,7 +230,7 @@ LOGGING = {
             'include_html': True,
         },
         'default': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/var/log/metamap_all.log',  # 日志输出文件
             'maxBytes': 1024 * 1024 * 5,  # 文件大小
@@ -241,12 +246,12 @@ LOGGING = {
             'formatter': 'standard',
         },
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'standard'
         },
         'scprits_handler': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/var/log/metamap_script.log',
             'maxBytes': 1024 * 1024 * 5,
@@ -257,12 +262,12 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['default', 'console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False
         },
         'info': {
             'handlers': ['default'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
         'scripts': {

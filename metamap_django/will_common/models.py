@@ -12,9 +12,22 @@ from will_common.djcelery_models import DjceleryCrontabschedule
 from will_common.djcelery_models import DjceleryIntervalschedule
 
 
+class OrgGroup(models.Model):
+    name = models.CharField(max_length=200, verbose_name=u"组织名称")
+    owners = models.CharField(max_length=100, verbose_name=u"负责人", blank=True, default='')
+    hdfs_path = models.CharField(max_length=100, verbose_name=u"HDFS临时路径", blank=True, default='')
+    # need_auth = models.IntegerField(default=1, verbose_name=u"是否需要验证", choices=(
+    #     (1, '是'),
+    #     (0, '否'),
+    # ))
+    # auth_uri = models.CharField(max_length=300, verbose_name=u"验证uri", blank=True, default='')
+    def __str__(self):
+        return self.name
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     phone = models.BigIntegerField(default=110)
+    org_group = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='user_cgroup', null=True)
 
     def __str__(self):
         return self.user.username
@@ -56,7 +69,7 @@ class PeriodicTask(models.Model):
     task = models.CharField(max_length=200)
     args = models.TextField(default='[]')
     kwargs = models.TextField(default='{}')
-    queue = models.CharField(max_length=200, blank=True, null=True)
+    queue = models.CharField(max_length=200, blank=True, null=True, default='cron_tsk')
     exchange = models.CharField(max_length=200, blank=True, null=True)
     routing_key = models.CharField(max_length=200, blank=True, null=True)
     expires = models.DateTimeField(blank=True, null=True)

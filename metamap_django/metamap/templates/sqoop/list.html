@@ -41,7 +41,6 @@
     <div class="container">
         {% include 'components/search.html' %}
         <table class="table table-striped">
-            <caption>{{ user.groups.first }}</caption>
             <thead>
             <tr>
                 <th>名称</th>
@@ -67,10 +66,8 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li><a href="/metamap/h2m/{{ obj.id }}/">编辑</a></li>
-                                    {% if user.username == 'admin' %}
                                     <li><a href="#" data-toggle="modal" data-target="#previewsql"
                                            onclick="preview({{ obj.id }})">预览SQL</a></li>
-                                    {% endif %}
                                     <li><a target="view_window" href="/metamap/h2m/exec/{{ obj.id }}/">测试执行</a></li>
                                 </ul>
                             </div>

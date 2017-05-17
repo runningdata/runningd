@@ -28,11 +28,18 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ADMIN_PHONE = ''
-PUSH_URL = 'https://advert.willcup.com/sendMessage.shtml?mobileNo=%s&content=%s'
-PUSH_KEY = '&OKY%~!$^G*JRRF^'
+SESSION_COOKIE_NAME = 'xsid'
+CSRF_COOKIE_NAME = 'xcsrftoken'
+# email settings
+EMAIL_HOST = 'smtp.exmail.qq.com'
+EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
+EMAIL_HOST_PASSWORD = 'YYxx24680'
+EMAIL_USE_TLS = True
 
-EEE = 'DEV'
+PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
+PUSH_KEY = '&OKY%~!$^G*JRRF^'
+ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
+ADMIN_EMAIL = 'chenxin@yinker.com'
 ALLOWED_HOSTS = []
 
 CLUTER_QUEUE = 'default'
@@ -42,6 +49,10 @@ HIVE_SERVER = {
     'port': 10000,
     'user': 'hdfs',
     'password': '',
+}
+
+PATH_AUTH_DICT = {
+    'auth.access_etl': 'metamap',
 }
 
 # 设置cas服务器地址
@@ -55,7 +66,6 @@ AUTHENTICATION_BACKENDS = (
     'cas.backends.CASBackend',
 )
 
-
 import djcelery
 
 djcelery.setup_loader()
@@ -64,7 +74,8 @@ djcelery.setup_loader()
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 BROKER_URL = 'redis://localhost:6379'
-
+CELERY_REDIS_HOST = 'localhost'
+CELERY_REDIS_PORT = '6379'
 CELERY_ROUTES = {
     'metamap.tasks.exec_etl_cli': {
         'queue': 'metamap',
@@ -91,6 +102,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE_CLASSES = [
+    'will_common.middleware.viewexception.ViewException',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -101,6 +113,7 @@ MIDDLEWARE_CLASSES = [
     'cas.middleware.CASMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'will_common.middleware.accesstracer.AuthTracer',
 ]
 
 ROOT_URLCONF = 'metamap_django.metamap_urls'

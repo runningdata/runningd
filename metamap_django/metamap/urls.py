@@ -10,6 +10,7 @@ from metamap.views import sqoop
 from metamap.views import sqoop2
 from metamap.rest.rest_views import ETLViewSet, SqoopHive2MysqlViewSet, SqoopMysql2HiveViewSet, SourceAppViewSet, \
     JarAppViewSet, AnaETLViewSet, SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
+from metamap.views import usermanager
 from metamap.views.sche_ana import ExportsViewSet
 from views import etls, metas
 from metamap.views import common
@@ -22,7 +23,6 @@ router.register(r'hive2mysql', SqoopHive2MysqlViewSet)
 router.register(r'mysql2hive', SqoopMysql2HiveViewSet)
 router.register(r'sourceapp', SourceAppViewSet)
 router.register(r'jarapp', JarAppViewSet)
-router.register(r'emails', AnaETLViewSet)
 router.register(r'exports', ExportsViewSet)
 router.register(r'sqoop_hive_meta', SqoopHiveMetaViewSet)
 router.register(r'sqoop_mysql_meta', SqoopMysqlMetaViewSet)
@@ -33,12 +33,13 @@ urlpatterns = [
     url(r'^ops/task_queue/$', ops.task_queue, name='task_queue'),
     url(r'^ops/dfs_usage_his/$', ops.dfs_usage_his, name='dfs_usage_his'),
     url(r'^ops/dfs_usage/$', ops.dfs_usage, name='dfs_usage'),
-
+    # url(r'^users/add/$', usermanager.add_user, name='add_user'),
+    # url(r'^users/$', usermanager.list_user, name='list_user'),
 
     url(r'hdfs/tail', ops.tail_hdfs, name='tail_hdfs'),
     url(r'hdfs/check_file', ops.check_file, name='check_file'),
     url(r'nginx_auth_test', etls.nginx_auth_test, name='nginx_auth_test'),
-    url(r'^etls/clean_data/$', etls.clean_etl_data, name='clean_etl_data'),
+    # url(r'^etls/clean_data/$', etls.clean_etl_data, name='clean_etl_data'),
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
     url(r'^etls/invalid/$', etls.InvalidView.as_view(), name='invalid'),
     url(r'^etls/add/$', etls.add, name='add'),

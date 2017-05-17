@@ -40,7 +40,7 @@ def add(x, y):
 
 
 @shared_task
-def exec_h2m(command, location):
+def exec_h2m(command, location, name=''):
     print('command is %s , location is %s' % (command, location))
     execution = SqoopHive2MysqlExecutions.objects.get(logLocation=location)
     execution.end_time = timezone.now()
@@ -63,7 +63,7 @@ def exec_h2m(command, location):
 
 
 @shared_task
-def exec_m2h(command, location):
+def exec_m2h(command, location, name=''):
     print('command is %s , location is %s' % (command, location))
     execution = SqoopMysql2HiveExecutions.objects.get(logLocation=location)
     execution.end_time = timezone.now()
@@ -98,7 +98,7 @@ def exec_m2h(command, location):
 
 
 @shared_task
-def exec_etl(command, log):
+def exec_etl(command, log, name=''):
     execution = Executions.objects.get(logLocation=log)
     execution.end_time = timezone.now()
     try:
@@ -123,7 +123,10 @@ def exec_email_export(taskid):
     export = Exports.objects.create(task=will_task)
     try:
         ana_etl = AnaETL.objects.get(pk=taskid)
-        part = ana_etl.name + '-' + dateutils.now_datetime()
+        if ana_etl.name.startswith('common_'):
+            part = ana_etl.name + '-' + dateutils.now_datekey()
+        else:
+            part = ana_etl.name + '-' + dateutils.now_datetime()
         result = TMP_EXPORT_FILE_LOCATION + part
         result_dir = result + '_dir'
         # if ana_etl.creator:
@@ -194,7 +197,7 @@ def exec_mysql2hive(taskid):
 
 
 @shared_task
-def tail_hdfs(logLocation, command):
+def tail_hdfs(logLocation, command, name=''):
     print 'command is ', command
     with open(logLocation, 'a') as fi:
         p = subprocess.Popen([''.join(command)], stdout=fi, stderr=subprocess.STDOUT,
@@ -207,7 +210,7 @@ def tail_hdfs(logLocation, command):
     logger.info('tail_hdfs : %s return code is %d' % (command, returncode))
 
 @shared_task
-def exec_sourceapp(taskid):
+def exec_sourceapp(taskid, name=''):
     '''
     1. cd wd
     2. git clone
@@ -248,7 +251,7 @@ def exec_jarapp(taskid):
 
 
 @shared_task
-def exec_jar(command, pk):
+def exec_jar(command, pk, name=''):
     try:
         execution = JarAppExecutions.objects.get(pk=pk)
         groupuser = JarApp.objects.get(pk=execution.job_id).cgroup.name
@@ -298,11 +301,11 @@ executors = {1: exec_etl_sche, 2: exec_email_export, 3: exec_hive2mysql, 4: exec
 
 
 @shared_task
-def exec_etl_cli(task_id):
+def exec_etl_cli(task_id, name=''):
     will_task = WillDependencyTask.objects.get(pk=task_id)
     executors.get(will_task.type)(will_task.rel_id)
 
 
 @shared_task
-def xsum(numbers):
+def xsum(numbers, name=''):
     return sum(numbers)

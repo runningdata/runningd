@@ -4,6 +4,9 @@
 created by will 
 '''
 import datetime
+import json
+import os
+
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -69,6 +72,9 @@ def add(request):
         cron_task.crontab = cron
         cron.save()
 
+        kw_dict = dict()
+        kw_dict['name'] = task.name + '-' + cron.__str__()
+        cron_task.kwargs = json.dumps(kw_dict)
         cron_task.save()
 
         tasks = DjceleryPeriodictasks.objects.get(ident=1)
@@ -88,16 +94,25 @@ class ExportsViewSet(viewsets.ModelViewSet):
     @list_route(methods=['GET'])
     def get_file(self, request):
         from django.http import FileResponse
-        user = request.query_params['user']
-        sid = request.query_params['sid']
         filename = request.query_params['filename']
         group = request.query_params['group']
-        if group == 'jlc':
-            result = httputils.jlc_auth(user, sid)
-        if group == 'xiaov':
+        user = request.query_params['user']
+        if group == 'xiaov' or group == 'jlc-match':
             result = 'success'
+        else:
+            sid = request.query_params['sid']
+            if group == 'jlc':
+                result = httputils.jlc_auth(user, sid)
         final_filename = filename + '.csv'
         full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
+        if not os.path.exists(full_file):
+            for f in os.listdir(constants.TMP_EXPORT_FILE_LOCATION):
+                path = os.path.join(constants.TMP_EXPORT_FILE_LOCATION, f)
+                encode_done = filename.encode('utf8')
+                is_startswith = f.startswith(encode_done)
+                if not os.path.isdir(path) and is_startswith and not f.endswith('.error'):
+                    full_file = path
+                    break
         if result == 'success':
             response = FileResponse(open(full_file, 'rb'))
             response['Content-Disposition'] = 'attachment; filename=%s' % final_filename.encode('utf-8')
@@ -109,14 +124,15 @@ class ExportsViewSet(viewsets.ModelViewSet):
     def get_all(self, request):
         now = timezone.now()
         days = now - datetime.timedelta(days=7)
-        user = request.query_params['user']
-        sid = request.query_params['sid']
         group = request.query_params['group']
-        if group == 'jlc':
-            response = httputils.jlc_auth(user, sid)
-        if group == 'xiaov':
-            response = 'success'
-        if response == 'success':
+        user = request.query_params['user']
+        if group == 'xiaov' or group == 'jlc-match':
+            result = 'success'
+        else:
+            sid = request.query_params['sid']
+            if group == 'jlc':
+                result = httputils.jlc_auth(user, sid)
+        if result == 'success':
             objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
             result = list()
             for export in objs:
@@ -146,12 +162,16 @@ def edit(request, pk):
         task.save()
         cron_task = PeriodicTask.objects.get(willtask_id=pk)
         cron_task.name = task.name
-        cron_task.save()
 
         cron = DjceleryCrontabschedule.objects.get(pk=cron_task.crontab_id)
         cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(
             request.POST['cronexp'])
         cron.save()
+
+        kw_dict = dict()
+        kw_dict['name'] = task.name + '-' + cron.__str__()
+        cron_task.kwargs = json.dumps(kw_dict)
+        cron_task.save()
 
         ptask = PeriodicTask.objects.get(willtask=pk)
         ptask.enabled = task.valid

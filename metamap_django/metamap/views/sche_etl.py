@@ -3,6 +3,7 @@
 '''
 created by will 
 '''
+import json
 import os
 
 from django.conf import settings
@@ -181,7 +182,8 @@ def add(request):
                 etl = None
             if etl and etl.creator_id != request.user.userprofile.id:
                 PushUtils.push_exact_email(etl.creator.user.email,
-                                           'your schedule for %s has been changed by %s' % (etl.name, request.user.email))
+                                           'your schedule for %s has been changed by %s' % (
+                                           etl.name, request.user.email))
         except:
             print('error happens for %s scheduel ' % task.name)
 
@@ -199,6 +201,9 @@ def add(request):
             cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(
                 request.POST['cronexp'])
             cron_task.crontab = cron
+            kw_dict = dict()
+            kw_dict['name'] = task.name + '-' + cron.__str__()
+            cron_task.kwargs = json.dumps(kw_dict)
             cron.save()
             cron_task.save()
 
@@ -242,7 +247,8 @@ def edit(request, pk):
                 etl = None
             if etl and etl.creator_id != request.user.userprofile.id:
                 PushUtils.push_exact_email(etl.creator.user.email,
-                                           'your schedule for %s has been changed by %s' % (etl.name, request.user.email))
+                                           'your schedule for %s has been changed by %s' % (
+                                           etl.name, request.user.email))
         except:
             print('error happens for %s scheduel ' % task.name)
         task.save()
@@ -251,11 +257,16 @@ def edit(request, pk):
                 cron_task = PeriodicTask.objects.get(willtask_id=pk)
                 cron_task.name = task.name
                 cron_task.enabled = task.valid
-                cron_task.save()
 
                 cron = DjceleryCrontabschedule.objects.get(pk=cron_task.crontab_id)
                 cron.minute, cron.hour, cron.day_of_month, cron.month_of_year, cron.day_of_week = cronhelper.cron_from_str(
                     request.POST['cronexp'])
+
+                kw_dict = dict()
+                kw_dict['name'] = task.name + '-' + cron.__str__()
+                cron_task.kwargs = json.dumps(kw_dict)
+
+                cron_task.save()
                 cron.save()
             else:
                 cron_task = PeriodicTask.objects.create()
@@ -270,6 +281,9 @@ def edit(request, pk):
                     request.POST['cronexp'])
                 cron_task.crontab = cron
                 cron.save()
+                kw_dict = dict()
+                kw_dict['name'] = task.name + '-' + cron.__str__()
+                cron_task.kwargs = json.dumps(kw_dict)
                 cron_task.save()
 
         else:
