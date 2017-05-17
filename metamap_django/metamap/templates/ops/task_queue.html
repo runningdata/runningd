@@ -2,8 +2,8 @@
 {% load ifdef %}
 {% block title %}队列总体情况{% endblock %}
 {% block content %}
+    <div class="label">排队中:</div><br/>
     {% if unack|length > 0 %}
-        <div class="label">排队中:</div><br/>
         common : {{ unack | length }} <br/>
         <table class="table">
             <tr>
