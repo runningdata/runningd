@@ -11,7 +11,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 from metamap.helpers import etlhelper
-from metamap.models import JarApp, JarAppExecutions
+from metamap.models import JarApp, JarAppExecutions, ExecObj
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE, AZKABAN_SCRIPT_LOCATION
@@ -61,6 +61,7 @@ def add(request):
     else:
         form = JarForm(request.user.userprofile.id)
         return render(request, 'source/post_edit.html', {'form': form})
+
 
 class JarForm(ModelForm):
     class Meta:
@@ -126,6 +127,14 @@ def exec_job(request, pk):
     except Exception, e:
         logger.error(e)
         return HttpResponse(e)
+
+
+def edit_deps(request, pk):
+    if request.method == 'POST':
+        return render(request, 'jar/exec_log.html', {'execid': pk})
+    else:
+        obj = ExecObj.objects.get(type=6, rel_id=pk)
+        return render(request, 'jar/exec_log.html', {'execid': pk})
 
 
 def exec_log(request, execid):

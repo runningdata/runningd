@@ -9,7 +9,7 @@ from django.conf import settings
 from django.template import Context, Template
 
 from metamap.db_views import ColMeta, DB
-from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql, ETLBlood, ExecObj
+from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql, ExecBlood, ExecObj
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import *
@@ -523,7 +523,7 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
     '''
     for leaf in leafs:
         if leaf not in done_leaf:
-            bloods = ETLBlood.objects.filter(child_id=leaf)
+            bloods = ExecBlood.objects.filter(child_id=leaf)
             print('handling leaf : %s ' % leaf)
             leaf_dependencies = set()
             parent_ids = set()

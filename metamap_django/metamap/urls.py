@@ -113,6 +113,8 @@ urlpatterns = [
     url(r'^jar/(?P<pk>[0-9]+)/$', jar.edit, name='jar_edit'),
     url(r'^jar/review/(?P<pk>[0-9]+)/$', jar.review, name='jar_review'),
     url(r'^jar/exec/(?P<pk>[0-9]+)/$', jar.exec_job, name='jar_exec'),
+    url(r'^jar/deps/(?P<pk>[0-9]+)/$', jar.edit_deps, name='jar_deps'),
+
     url(r'^jar/execlog/(?P<execid>[0-9]+)/$', jar.exec_log, name='jar_execlog'),
     url(r'^jar/getexeclog/(?P<execid>[0-9]+)/$', jar.get_exec_log, name='jar_getexeclog'),
     url(r'^jar/status/(?P<status>[0-9]+)/$', common.StatusListView.as_view(url_base='jar', model=JarAppExecutions),

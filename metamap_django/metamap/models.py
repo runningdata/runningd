@@ -160,7 +160,7 @@ class ExecObj(models.Model):
         self.get_rel_obj().execute()
 
     def get_deps(self):
-        return ETLBlood.objects.filter(child=self)
+        return ExecBlood.objects.filter(child=self)
 
     def get_rel_obj(self):
         if self.type == 1:
@@ -194,15 +194,15 @@ class ExecObj(models.Model):
 
     def add_deps(self, deps):
         for dep in deps:
-            ETLBlood.objects.update_or_create(child_id=self.id, parent_id=dep)
+            ExecBlood.objects.update_or_create(child_id=self.id, parent_id=dep)
 
     def clean_deps(self, deps):
-        older_deps = ETLBlood.objects.filter(child_id=self.id, parent_id__in=deps)
+        older_deps = ExecBlood.objects.filter(child_id=self.id, parent_id__in=deps)
         if older_deps.count() > 0:
             older_deps.delete()
 
 
-class ETLBlood(models.Model):
+class ExecBlood(models.Model):
     child = models.ForeignKey(ExecObj, on_delete=models.DO_NOTHING, related_name='child')
     parent = models.ForeignKey(ExecObj, on_delete=models.DO_NOTHING, related_name='parent')
     ctime = models.DateTimeField(default=timezone.now)

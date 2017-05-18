@@ -6,7 +6,7 @@ import traceback
 from django.http import HttpResponse
 
 from metamap.helpers import etlhelper
-from metamap.models import ETLBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive
+from metamap.models import ExecBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import AZKABAN_BASE_LOCATION, AZKABAN_SCRIPT_LOCATION
@@ -23,7 +23,7 @@ def generate_job_dag_v2(request, schedule):
         done_blood = set()
         done_leaf = set()
         folder = 'generate_job_dag_v2-' + dateutils.now_datetime()
-        leafs = ETLBlood.objects.raw("SELECT 1 as id, a.* FROM "
+        leafs = ExecBlood.objects.raw("SELECT 1 as id, a.* FROM "
                                      "(select DISTINCT child_id FROM metamap_etlblood) a "
                                      "join ("
                                      "select rel_id from metamap_willdependencytask where `schedule` = " + schedule + " and valid=1 and type = 100 "

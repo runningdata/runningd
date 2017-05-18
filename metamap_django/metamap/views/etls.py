@@ -23,7 +23,7 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 
 from metamap.helpers import bloodhelper, etlhelper
-from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, ExecObj, ETLBlood, SqoopHive2Mysql, \
+from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, ExecObj, ExecBlood, SqoopHive2Mysql, \
     SqoopMysql2Hive, AnaETL, JarApp
 
 from will_common.utils import PushUtils
@@ -83,8 +83,8 @@ def clean_etl_data(request):
             try:
                 child = ETL.objects.get(pk=blood.relatedEtlId)
                 parent = ETL.objects.get(name=blood.parentTbl, valid=1)
-                etl_blood, result = ETLBlood.objects.update_or_create(child=ExecObj.objects.get(rel_id=child.id, type=1),
-                                                                      parent=ExecObj.objects.get(rel_id=parent.id,
+                etl_blood, result = ExecBlood.objects.update_or_create(child=ExecObj.objects.get(rel_id=child.id, type=1),
+                                                                       parent=ExecObj.objects.get(rel_id=parent.id,
                                                                                                  type=1))
                 print(' ETL \'s ETLBlood done : %d ' % etl_blood.id)
             except Exception, e:
@@ -98,7 +98,7 @@ def clean_etl_data(request):
             print('ETLObj for SqoopHive2Mysql done : %s ' % etl.name)
             rel_id = ETL.objects.get(name=tbl_name, valid=1).id
             parent = ExecObj.objects.get(rel_id=rel_id, type=1)
-            etl_blood, result = ETLBlood.objects.update_or_create(child=etl_obj, parent=parent)
+            etl_blood, result = ExecBlood.objects.update_or_create(child=etl_obj, parent=parent)
             print(' SqoopHive2Mysql \'s ETLBlood done : %d ' % etl_blood.id)
         except Exception, e:
             print(' SqoopHive2Mysql \'s error : %d --> %s' % (etl.id, e))
@@ -114,7 +114,7 @@ def clean_etl_data(request):
                     parent = ETL.objects.get(name=blood.parentTbl, valid=1)
                 except Exception, e:
                     child = ExecObj.objects.get(type=1, name=blood.tblName)
-                    etl_blood, result = ETLBlood.objects.update_or_create(parent=etl_obj, child=child)
+                    etl_blood, result = ExecBlood.objects.update_or_create(parent=etl_obj, child=child)
                     print(' SqoopMysql2Hive \'s ETLBlood done : %d ' % etl_blood.id)
         except Exception, e:
             print('SqoopMysql2Hive \'s error : %d --> %s' % (etl.id, e))
@@ -138,7 +138,7 @@ def clean_etl_data(request):
                     names = dep.split('@')
                     m2h = SqoopMysql2Hive.objects.get(hive_meta__meta=names[0], mysql_tbl=names[1])
                     parent = ExecObj.objects.get(rel_id=m2h.id, type=4)
-                etl_blood, result = ETLBlood.objects.update_or_create(parent=parent, child=etl_obj)
+                etl_blood, result = ExecBlood.objects.update_or_create(parent=parent, child=etl_obj)
                 print(' AnaETL \'s ETLBlood done : %d ' % etl_blood.id)
         except Exception, e:
             print('ETLObj AnaETL error : %d --> %s' % (etl.id, e))
