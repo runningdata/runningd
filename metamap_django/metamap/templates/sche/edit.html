@@ -27,6 +27,11 @@
 {% block content %}
     {% csrf_token %}
     {% has_def 'task' as has_task %}
+
+    <i class="fa fa-exclamation-circle fa-lg"></i>
+    <span class="label-info ">
+        每晚11点35分开始扫描yarn进程，kill一切不是以'_online'结尾的程序
+    </span>
     {% if has_task %}
         <form action="." method="POST">
             <div class="form-group">
@@ -73,7 +78,7 @@
             </div>
             <div class="form-group">
                 <label>预设变量</label>
-                <textarea  id="variables" name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
+                <textarea id="variables" name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
             </div>
             <div class="form-group">
                 <label>是否生效</label>
@@ -163,14 +168,14 @@
                                 value="6">JarApp
                     </option>
                     <option
-                                value="4">Mysql2Hive
+                            value="4">Mysql2Hive
                     </option>
                     <option
-                                selected="selected"
-                                value="1">hive ETL
+                            selected="selected"
+                            value="1">hive ETL
                     </option>
                     <option
-                                value="3">Hive2Mysql
+                            value="3">Hive2Mysql
                     </option>
                 </select>
             </div>

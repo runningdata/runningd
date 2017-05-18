@@ -9,8 +9,14 @@
 {% endblock %}
 
 {% block content %}
+
+    <span class="label-info ">
+        每晚11点35分开始扫描yarn进程，kill一切不是以'_online'结尾的程序
+    </span>
+
     {% csrf_token %}
     {% has_def 'task' as has_task %}
+
     {% if has_task %}
         <form action="." method="POST">
             <div class="form-group">

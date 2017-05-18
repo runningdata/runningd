@@ -4,6 +4,7 @@
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.min.css' %}"/>
     <script src="{% static 'js/jquery.js' %}"></script>
     <script src="{% static 'js/bootstrap.js' %}"></script>
     {% block scripts %}{% endblock %}
@@ -12,6 +13,7 @@
 
 <body>
 {% include 'export/header.html' %}
+
 <div class="container">
     {% block content %}{% endblock %}
 
