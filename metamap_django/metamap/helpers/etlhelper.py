@@ -9,7 +9,7 @@ from django.conf import settings
 from django.template import Context, Template
 
 from metamap.db_views import ColMeta, DB
-from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql, ETLBlood, ETLObj
+from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql, ETLBlood, ExecObj
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import *
@@ -365,7 +365,7 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     else:
         print('xxxxxxxxxxxxxxx parent found..........%s ' % etlobj.name)
         raise Exception('xxxxxxxxxxxxxxx parent found..........%s ')
-    if not job_name.startswith('etl_done_'):
+    if not job_name.startswith('etl_v2_done_'):
         # 生成hql文件
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         # TODO 针对不同类型，生成不同文件
@@ -528,7 +528,7 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
             leaf_dependencies = set()
             parent_ids = set()
             for blood in bloods:
-                parent = ETLObj.objects.get(pk=blood.parent.id)
+                parent = ExecObj.objects.get(pk=blood.parent.id)
                 tasks = WillDependencyTask.objects.filter(schedule=schedule, rel_id=parent.id, valid=1, type=100)
                 if tasks.count() == 1:
                     parent_ids.add(parent.id)
@@ -549,7 +549,7 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
                     else:
                         print('xxxxxxxxxxxxxxx parent found..........%s ' % parent.name)
 
-            child = ETLObj.objects.get(pk=leaf)
+            child = ExecObj.objects.get(pk=leaf)
             generate_job_file_v2(child, leaf_dependencies, folder,
                                          schedule=schedule)
             done_leaf.add(leaf)

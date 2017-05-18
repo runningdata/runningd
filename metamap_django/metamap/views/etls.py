@@ -23,7 +23,7 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 
 from metamap.helpers import bloodhelper, etlhelper
-from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, ETLObj, ETLBlood, SqoopHive2Mysql, \
+from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, ExecObj, ETLBlood, SqoopHive2Mysql, \
     SqoopMysql2Hive, AnaETL, JarApp
 
 from will_common.utils import PushUtils
@@ -73,7 +73,7 @@ def clean_etl_data(request):
     # TODO 有些sqoop import的ods表相关的，还没有生成对应的ETLBlood对象，所以当前ETL的H2H也是不完整的血统DAG
     for etl in ETL.objects.filter(valid=1):
         try:
-            etl_obj, result = ETLObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=1)
+            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=1)
             print('ETLObj for ETL done : %s ' % etl.name)
         except Exception, e:
             print('ETLObj for ETL error :%d --> %s' % (etl.id, e))
@@ -83,9 +83,9 @@ def clean_etl_data(request):
             try:
                 child = ETL.objects.get(pk=blood.relatedEtlId)
                 parent = ETL.objects.get(name=blood.parentTbl, valid=1)
-                etl_blood, result = ETLBlood.objects.update_or_create(child=ETLObj.objects.get(rel_id=child.id, type=1),
-                                                                      parent=ETLObj.objects.get(rel_id=parent.id,
-                                                                                                type=1))
+                etl_blood, result = ETLBlood.objects.update_or_create(child=ExecObj.objects.get(rel_id=child.id, type=1),
+                                                                      parent=ExecObj.objects.get(rel_id=parent.id,
+                                                                                                 type=1))
                 print(' ETL \'s ETLBlood done : %d ' % etl_blood.id)
             except Exception, e:
                 print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
@@ -94,10 +94,10 @@ def clean_etl_data(request):
     for etl in SqoopHive2Mysql.objects.all():
         try:
             tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
-            etl_obj, result = ETLObj.objects.update_or_create(name=tbl_name, rel_id=etl.id, type=3)
+            etl_obj, result = ExecObj.objects.update_or_create(name=tbl_name, rel_id=etl.id, type=3)
             print('ETLObj for SqoopHive2Mysql done : %s ' % etl.name)
             rel_id = ETL.objects.get(name=tbl_name, valid=1).id
-            parent = ETLObj.objects.get(rel_id=rel_id, type=1)
+            parent = ExecObj.objects.get(rel_id=rel_id, type=1)
             etl_blood, result = ETLBlood.objects.update_or_create(child=etl_obj, parent=parent)
             print(' SqoopHive2Mysql \'s ETLBlood done : %d ' % etl_blood.id)
         except Exception, e:
@@ -106,14 +106,14 @@ def clean_etl_data(request):
     for etl in SqoopMysql2Hive.objects.all():
         try:
             tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
-            etl_obj, result = ETLObj.objects.update_or_create(name=tbl_name, rel_id=etl.id, type=4)
+            etl_obj, result = ExecObj.objects.update_or_create(name=tbl_name, rel_id=etl.id, type=4)
             print('ETLObj for SqoopMysql2Hive done : %s ' % tbl_name)
             # 导入M2H，把前面缺失的import添加到ETLBlood中去
             for blood in TblBlood.objects.filter(parentTbl=tbl_name):
                 try:
                     parent = ETL.objects.get(name=blood.parentTbl, valid=1)
                 except Exception, e:
-                    child = ETLObj.objects.get(type=1, name=blood.tblName)
+                    child = ExecObj.objects.get(type=1, name=blood.tblName)
                     etl_blood, result = ETLBlood.objects.update_or_create(parent=etl_obj, child=child)
                     print(' SqoopMysql2Hive \'s ETLBlood done : %d ' % etl_blood.id)
         except Exception, e:
@@ -125,19 +125,19 @@ def clean_etl_data(request):
             if etl.name.__contains__(u'转化率'):
                 print(' %s passed ' % etl.name)
                 continue
-            etl_obj, result = ETLObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=2)
+            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=2)
             print('ETLObj for AnaETL done : %s ' % etl.name)
             # TODO 测试环境hiveserver的HDFS元数据不全面
             deps = hivecli.get_tbls(etl.query)
             for dep in deps:
                 try:
-                    parent = ETLObj.objects.get(name=dep, type=1)
+                    parent = ExecObj.objects.get(name=dep, type=1)
                 except Exception, e:
                     # 如果h2h里面没有，那就在m2h里
                     print(' >>>>>>>>>>>>>>>>>>>>>>>>> AnaETL s dep dep : %s ' % dep)
                     names = dep.split('@')
                     m2h = SqoopMysql2Hive.objects.get(hive_meta__meta=names[0], mysql_tbl=names[1])
-                    parent = ETLObj.objects.get(rel_id=m2h.id, type=4)
+                    parent = ExecObj.objects.get(rel_id=m2h.id, type=4)
                 etl_blood, result = ETLBlood.objects.update_or_create(parent=parent, child=etl_obj)
                 print(' AnaETL \'s ETLBlood done : %d ' % etl_blood.id)
         except Exception, e:
@@ -146,7 +146,7 @@ def clean_etl_data(request):
     # jar app
     for etl in JarApp.objects.filter(valid=1):
         try:
-            etl_obj, result = ETLObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=6)
+            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=6)
             print('ETLObj for JarApp done : %s ' % etl.name)
         except Exception, e:
             print('ETLObj for JarApp error :%d --> %s' % (etl.id, e))
@@ -156,7 +156,7 @@ def clean_etl_data(request):
         try:
             if task.type == 100:
                 continue
-            etl_obj = ETLObj.objects.get(type=task.type, rel_id=task.rel_id)
+            etl_obj = ExecObj.objects.get(type=task.type, rel_id=task.rel_id)
             WillDependencyTask.objects.update_or_create(name=task.name, rel_id=etl_obj.id, type=100,
                                                         schedule=task.schedule)
             print('WillDependencyTask done : %s' % task.name)
@@ -548,59 +548,3 @@ def get_valid_leaves(leafs2, ok_leafs, schedule):
             get_valid_leaves(ps, ok_leafs, schedule)
         else:
             ok_leafs.add(leaf.id)
-
-
-def generate_job_dag_v2(request, schedule):
-    '''
-    抽取所有有效的ETL,生成azkaban调度文件
-    :param request:
-    :return:
-    '''
-    try:
-        done_blood = set()
-        done_leaf = set()
-        folder = 'generate_job_dag_v2-' + dateutils.now_datetime()
-        leafs = ETLBlood.objects.raw("SELECT 1 as id, a.* FROM "
-                                     "(select DISTINCT child_id FROM metamap_etlblood) a "
-                                     "join ("
-                                     "select rel_id from metamap_willdependencytask where `schedule` = " + schedule + " and valid=1 and type = 100 "
-                                                                                                                      ") b "
-                                                                                                                      "on a.child_id = b.rel_id "
-                                                                                                                      "left outer join ("
-                                                                                                                      "SELECT DISTINCT parent_id from metamap_etlblood ) c "
-                                                                                                                      "on a.child_id = c.parent_id "
-                                                                                                                      "where c.parent_id is NULL")
-
-        final_deps = set()
-        leaves = set()
-        for leaf in leafs:
-            leaf_etl = ETLObj.objects.get(pk=leaf.child_id)
-            if leaf_etl.type == 3:
-                # H2M的名字不能是hive表了，这样就跟H2H的重复了
-                etl = SqoopHive2Mysql.objects.get(pk=leaf_etl.rel_id)
-                tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
-                job_name = 'export_' + tbl_name
-                final_deps.add(job_name)
-            elif leaf_etl.type == 4:
-                etl = SqoopMysql2Hive.objects.get(pk=leaf_etl.rel_id)
-                tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
-                job_name = 'import_' + tbl_name
-                final_deps.add(job_name)
-            else:
-                final_deps.add(leaf_etl.name)
-            leaves.add(leaf_etl.id)
-
-        os.mkdir(AZKABAN_BASE_LOCATION + folder)
-        os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
-
-        etlhelper.load_nodes_v2(leaves, folder, done_blood, done_leaf, schedule)
-
-        etlhelper.generate_job_file_v2(ETLObj(name='etl_done_' + folder), final_deps, folder, folder)
-        # PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
-        #                            '%d etls generated ' % len(done_blood))
-        ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
-        return HttpResponse(folder)
-    except Exception, e:
-        logger.error('error : %s ' % e)
-        logger.error('traceback is : %s ' % traceback.format_exc())
-        return HttpResponse('error')
