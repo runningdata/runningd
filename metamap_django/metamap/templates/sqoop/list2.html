@@ -45,8 +45,11 @@
             <thead>
             <tr>
                 <th>名称</th>
+                <th>所属组</th>
                 <th>hive</th>
                 <th>mysql</th>
+                <th>创建时间</th>
+                <th>创建人</th>
                 <th>操作</th>
             </tr>
             </thead>
@@ -55,8 +58,11 @@
                 {% for obj in objs %}
                     <tr>
                         <td>{{ obj.name }}</td>
+                        <td>{{ obj.cgroup }}</td>
                         <td>{{ obj.hive_meta.meta }}
                         <td>{{ obj.mysql_meta.meta }}</td>
+                        <td>{{ obj.ctime|date:"Y年m月d日 H时i分" }}</td>
+                        <td>{{ obj.creator.user.username }}</td>
                         </td>
                         <td>
                             {#                            <a class="btn btn-primary btn-sm" href="/metamap/sqoop2/{{ obj.id }}/">编辑</a>#}
