@@ -28,10 +28,10 @@
     {% csrf_token %}
     {% has_def 'task' as has_task %}
 
-    <i class="fa fa-exclamation-circle fa-lg"></i>
-    <span class="label-info ">
-        每晚11点35分开始扫描yarn进程，kill一切不是以'_online'结尾的程序
-    </span>
+    <div class="alert alert-info">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="fa fa-exclamation-circle fa-lg"></i> 每晚11点35分开始扫描yarn进程，kill一切不是以'_online'结尾的程序
+    </div>
     {#    <div class="alert">#}
     {#        <button type="button" class="close" data-dismiss="alert">&times;</button>#}
     {#        <strong>Warning!</strong> Best check yo self, you're not looking too good.#}
