@@ -1,0 +1,79 @@
+{% extends 'layout.html' %}
+{% load staticfiles %}
+{% block scripts %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-select.min.css' %}"/>
+    <script src="{% static 'js/bootstrap-select.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('.addBtn').on('click', function () {
+                //var trID;
+                //trID = $(this).closest('tr'); // table row ID
+                addTableRow();
+            });
+            $('.addBtnRemove').click(function () {
+                $(this).closest('tr').remove();
+            });
+            var i = 1;
+
+            function addTableRow() {
+                var tempTr = '<tr><td><input type="text" id="userName_' + i + '"  name="name" class="form-control"/></td>' +
+                        {#                        '<td><input type="text"  name="email" id="email_' + i + '" class="form-control" /></td>' +#}
+                        {#                        '<td><input type="text" name="pwd" id="password_' + i + '" class="form-control" /></td>' +#}
+                        '<td><span class="glyphicon glyphicon-minus addBtnRemove" id="addBtn_' + i + '"></span></td></tr>';
+                $("#tableAddRow").append(tempTr);
+                $('.addBtnRemove').click(function () {
+                    $(this).closest('tr').remove();
+                })
+                i++;
+            }
+
+            $('#preview').click(function () {
+                {#                dd = GetTableAllData(document.getElementById('tableAddRow'));#}
+                {#                alert(dd);#}
+                var total = $('table input').length;
+                var num = total / 3;
+                var tableData = new Array();
+                for (var i = 0; i < num; i++) {
+                    var obj = {};
+                    obj['child_id'] = $('table input')[i].value;
+                    tableData.push(obj);
+                    {#                    console.log(i + ' -> ' + $('table input')[i].value + '- ' + $('table input')[i + 1].value + '-' + $('table input')[i + 2].value);#}
+                }
+
+                console.log('final one : ' + JSON.stringify(tableData));
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <h3>依赖管理 : {{ obj.name }}</h3>
+            <table class="table table-bordered table-hover" id="tableAddRow">
+                <thead>
+                <tr>
+                    <th>依赖</th>
+                    <th style="width:10px"><span class="glyphicon glyphicon-plus addBtn" id="addBtn_0"></span></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for dep in deps %}
+                    <tr>
+                        <td><input type="text" name="child" class="form-control" value="{{ dep.parent.name }}"/></td>
+                        <td><span class="glyphicon glyphicon-minus addBtnRemove"></span></td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <a id="preview" class="btn btn-info">预览数据</a>
+
+    <select class="selectpicker" multiple title="Choose one of the following..." data-live-search="true">
+        <option data-tokens="ketchup mustard">Hot Dog, Fries and a Soda</option>
+        <option data-tokens="mustard">Burger, Shake and a Smile</option>
+        <option data-tokens="frosting">Sugar, Spice and all things nice</option>
+    </select>
+
+{% endblock %}

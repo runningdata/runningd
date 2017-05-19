@@ -11,7 +11,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 from metamap.helpers import etlhelper
-from metamap.models import JarApp, JarAppExecutions, ExecObj
+from metamap.models import JarApp, JarAppExecutions, ExecObj, ExecBlood
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE, AZKABAN_SCRIPT_LOCATION
@@ -133,8 +133,9 @@ def edit_deps(request, pk):
     if request.method == 'POST':
         return render(request, 'jar/exec_log.html', {'execid': pk})
     else:
-        obj = ExecObj.objects.get(type=6, rel_id=pk)
-        return render(request, 'jar/exec_log.html', {'execid': pk})
+        obj = ExecObj.objects.get(rel_id=pk, type=6)
+        deps = ExecBlood.objects.filter(child__type=6, child__rel_id=pk)
+        return render(request, 'jar/deps.html', {'deps': deps, 'obj': obj})
 
 
 def exec_log(request, execid):
