@@ -131,7 +131,8 @@ def exec_job(request, pk):
 
 def edit_deps(request, pk):
     if request.method == 'POST':
-        return render(request, 'jar/exec_log.html', {'execid': pk})
+        print(request.POST)
+        return render(request, 'source/jar_list.html')
     else:
         obj = ExecObj.objects.get(rel_id=pk, type=6)
         deps = ExecBlood.objects.filter(child__type=6, child__rel_id=pk)

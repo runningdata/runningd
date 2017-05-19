@@ -32,6 +32,10 @@
     <span class="label-info ">
         每晚11点35分开始扫描yarn进程，kill一切不是以'_online'结尾的程序
     </span>
+    {#    <div class="alert">#}
+    {#        <button type="button" class="close" data-dismiss="alert">&times;</button>#}
+    {#        <strong>Warning!</strong> Best check yo self, you're not looking too good.#}
+    {#    </div>#}
     {% if has_task %}
         <form action="." method="POST">
             <div class="form-group">
@@ -41,7 +45,7 @@
             </div>
             <div class="form-group">
                 <label>任务类型</label>
-                <select id="task_type" name="type" onchange='change_type()' class="selectpicker form-control">
+                <select id="task_type" name="type" onchange='change_type()' class="selectpicker show-tick form-control">
                     <option
                             {% if task.type == 6 %}#}
                                 selected="selected"
@@ -143,9 +147,11 @@
                 <label>描述</label>
                 <textarea name="desc" rows="5" class="form-control">{{ task.desc }}</textarea>
             </div>
-            <div class="form-group">
+            <div class="form-group text-center">
 
                 <button type="submit" class="btn btn-primary">提交</button>
+
+                <a id="cancel" class="btn btn-warning" onclick="javascript:history.go(-1);">取消</a>
             </div>
         </form>
         <script type="application/javascript">
@@ -160,7 +166,7 @@
             </div>
             <div class="form-group">
                 <label>任务类型</label>
-                <select id="task_type" name="type" onchange='change_type()' class="selectpicker form-control">
+                <select id="task_type" name="type" onchange='change_type()' class="selectpicker show-tick form-control">
                     <option
                             {% if task.type == 6 %}#}
                                 selected="selected"
@@ -235,9 +241,11 @@
                 <label>描述</label>
                 <textarea name="desc" rows="5" class="form-control"></textarea>
             </div>
-            <div class="form-group">
+            <div class="form-group text-center">
 
                 <button type="submit" class="btn btn-primary">提交</button>
+
+                <a id="cancel" class="btn btn-warning" onclick="javascript:history.go(-1);">取消</a>
             </div>
         </form>
         <script type="application/javascript">
