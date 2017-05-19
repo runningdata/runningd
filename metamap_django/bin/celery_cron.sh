@@ -69,7 +69,7 @@ export C_FORCE_ROOT=true
   --pidfile="/var/run/celery/%n.pid" \
   --logfile="/var/log/celery/%n.log" \
   --settings=metamap.config.prod \
-  --autoscale=10,1 \
+  --autoscale=10,5 \
   --loglevel=info
 
 tail -20 /var/log/celery/will_cron.log

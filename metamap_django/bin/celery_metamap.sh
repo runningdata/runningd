@@ -68,7 +68,7 @@ export C_FORCE_ROOT=true
   --pidfile="/var/run/celery/%n.pid" \
   --logfile="/var/log/celery/%n.log" \
   --settings=metamap.config.prod \
-  --autoscale=5,2 \
+  --autoscale=5,3 \
   --loglevel=info
 
 tail -20 /var/log/celery/will_metamap.log
