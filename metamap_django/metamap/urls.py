@@ -9,7 +9,7 @@ from metamap.views import source
 from metamap.views import sqoop
 from metamap.views import sqoop2
 from metamap.rest.rest_views import ETLViewSet, SqoopHive2MysqlViewSet, SqoopMysql2HiveViewSet, SourceAppViewSet, \
-    JarAppViewSet, AnaETLViewSet, SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet
+    JarAppViewSet, AnaETLViewSet, SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet, ExecObjViewSet
 from metamap.views import usermanager
 from metamap.views.sche_ana import ExportsViewSet
 from views import etls, metas
@@ -24,6 +24,7 @@ router.register(r'mysql2hive', SqoopMysql2HiveViewSet)
 router.register(r'sourceapp', SourceAppViewSet)
 router.register(r'jarapp', JarAppViewSet)
 router.register(r'exports', ExportsViewSet)
+router.register(r'execobjs', ExecObjViewSet)
 router.register(r'sqoop_hive_meta', SqoopHiveMetaViewSet)
 router.register(r'sqoop_mysql_meta', SqoopMysqlMetaViewSet)
 

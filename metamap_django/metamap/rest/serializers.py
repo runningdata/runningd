@@ -9,7 +9,7 @@ from rest_framework import serializers, ISO_8601
 from rest_framework.settings import api_settings
 
 from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser, Meta, SqoopHive2Mysql, SqoopMysql2Hive, \
-    SourceApp, JarApp
+    SourceApp, JarApp, ExecObj
 from will_common.serializers import WillDateTimeField
 
 
@@ -17,6 +17,12 @@ class ETLSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ETL
         fields = ('name', 'valid', 'id')
+
+
+class ExecObjSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ExecObj
+        fields = ('name', 'id')
 
 
 class SourceAppSerializer(serializers.HyperlinkedModelSerializer):

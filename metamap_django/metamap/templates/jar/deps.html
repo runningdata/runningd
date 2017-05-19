@@ -8,7 +8,6 @@
             var result = $('#dep_selector').val();
             var final_result = '';
 
-            console.log('-----> ' + result);
             if (result != null && result.length > 0) {
                 $.each(result, function (index, data) {
                     var cls = "info";
@@ -25,39 +24,60 @@
     </script>
 {% endblock %}
 {% block content %}
-    <div style="height: 400px">
-        <table class="table table-bordered table-hover" id="tableAddRow">
-            <thead>
-            <tr>
-                <th>当前依赖</th>
-            </tr>
-            </thead>
-            <tbody id="preview_tbl">
-            </tbody>
-        </table>
-    </div>
-    <div class="progress">
-        <div class="bar bar-success" style="width: 35%;"></div>
-        <div class="bar bar-warning" style="width: 20%;"></div>
-        <div class="bar bar-danger" style="width: 10%;"></div>
-    </div>
-    <p/>
-    <form action="." method="POST">
-        <input type="hidden" name="exec_id" value="{{ obj.id }}"/>
-
-        <select id="dep_selector" name="deps" class="selectpicker form-control" multiple
-                title="Choose one of the following..."
-                data-live-search="true"
-                onchange="show_tbl()">
-            <option value=1>HFries and a Soda</option>
-            <option value=2>Shake and a Smile</option>
-            <option value=3>Spice and all things nice</option>
-        </select>
-        <p/>
-        <div class="text-center">
-            <button id="save" type="submit" class="btn btn-info">保存</button>
-            <a id="cancel" class="btn btn-warning" onclick="javascript:history.go(-1);">取消</a>
+    <div class="panel panel-primary" style="height: 450px">
+        <div class="panel-heading">当前依赖</div>
+        <div class="panel-body">
+            <table class="table table-bordered table-hover" id="tableAddRow">
+                <tbody id="preview_tbl">
+                </tbody>
+            </table>
         </div>
-    </form>
+    </div>
+    <div class="panel-footer">
+        <form action="." method="POST">
+            <input type="hidden" name="exec_id" value="{{ obj.id }}"/>
 
+            <select id="dep_selector" name="deps" class="selectpicker form-control" multiple
+                    title="Choose one of the following..."
+                    data-live-search="true"
+                    onchange="show_tbl()">
+            </select>
+            <p/>
+            <div class="text-center">
+                <button id="save" type="submit" class="btn btn-info">保存</button>
+                <a id="cancel" class="btn btn-warning" onclick="javascript:history.go(-1);">取消</a>
+            </div>
+        </form>
+    </div>
+
+
+    <script type="application/javascript">
+        var ids = [];
+        {% for dep in deps %}
+            ids.push({{ dep.parent.id }});
+        {% endfor %}
+        console.log(ids);
+        $.ajax({
+                    type: "get",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    url: "/metamap/rest/execobjs/?format=json",
+                    success: function (result) {
+                        $.each(result, function (index, obj) {
+                            if ($.inArray(obj.id, ids) > -1) {
+                                $("#dep_selector").append("<option selected='selected' value='" + obj.id + "'>" + obj.name + "</option>");
+
+                            } else {
+                                $("#dep_selector").append("<option value='" + obj.id + "'>" + obj.name + "</option>");
+                            }
+                        });
+                        show_tbl();
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(errorThrown);
+                    },
+                    async: false             //false表示同步
+                }
+        );
+    </script>
 {% endblock %}

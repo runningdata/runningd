@@ -1,14 +1,29 @@
+from rest_framework import status
+from rest_framework.decorators import list_route
+from rest_framework.response import Response
+
 from metamap.rest.serializers import ETLSerializer, SqoopHive2MysqlSerializer, SqoopMysql2HiveSerializer, \
     SourceAppSerializer, \
-    JarAppSerializer, AnaETLSerializer, MetaSerializer
+    JarAppSerializer, AnaETLSerializer, MetaSerializer, ExecObjSerializer
 from metamap.models import ETL, SqoopHive2Mysql, SqoopMysql2Hive, SourceApp, \
-    JarApp, AnaETL, Meta
+    JarApp, AnaETL, Meta, ExecObj
 from rest_framework import viewsets
 
 
 class ETLViewSet(viewsets.ModelViewSet):
     queryset = ETL.objects.filter(valid=1).order_by('-ctime')
     serializer_class = ETLSerializer
+
+
+class ExecObjViewSet(viewsets.ModelViewSet):
+    queryset = ExecObj.objects.order_by('name')
+    serializer_class = ExecObjSerializer
+
+    # @list_route(methods=['get'])
+    # def get_all(self, request, pk=None):
+    #     deps = ExecObj.objects.filter(creator__user__username=request.user.username).order_by('name')
+    #     serializer = self.get_serializer(deps, many=True)
+    #     return Response(serializer.data)
 
 
 class SourceAppViewSet(viewsets.ModelViewSet):

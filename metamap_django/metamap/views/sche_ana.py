@@ -84,7 +84,6 @@ def add(request):
     else:
         return render(request, 'sche/ana/edit.html')
 
-
 class ExportsViewSet(viewsets.ModelViewSet):
     now = timezone.now()
     days = now - datetime.timedelta(days=7)
