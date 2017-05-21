@@ -33,7 +33,7 @@ ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/dqms/'
 
 
 @shared_task
-def exec_dqms(task_id):
+def exec_dqms(task_id, name='dqms'):
     check = DqmsCheck.objects.get(pk=task_id)
     check.last_run_time = timezone.now()
     check.save()
@@ -53,7 +53,7 @@ def exec_dqms(task_id):
 
 
 @shared_task()
-def run_case(case_id, user_id):
+def run_case(case_id, user_id, name='dqms'):
     case = DqmsCase.objects.get(pk=case_id)
     user = UserProfile.objects.get(user_id=user_id)
     runcase(case, None, user)
