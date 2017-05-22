@@ -97,7 +97,7 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
         str.append(task.mysql_tbl)
     str.append(' --hive-import --hive-overwrite')
     str.append(' --target-dir ')
-    str.append(task.hive_meta.meta + '_' + task.mysql_tbl)
+    str.append(task.hive_meta.meta + '_' + task.name)
     str.append('--outdir /server/app/sqoop/vo --bindir /server/app/sqoop/vo --verbose ')
     str.append(' -m %d ' % task.parallel)
     if 'target-dir' in task.option:

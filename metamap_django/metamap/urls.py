@@ -2,6 +2,7 @@ from django.conf.urls import url, include
 from rest_framework import routers
 
 from metamap.models import JarAppExecutions, SqoopMysql2HiveExecutions, Executions, SqoopHive2MysqlExecutions
+from metamap.views import deps
 from metamap.views import jar
 from metamap.views import ops
 from metamap.views import sche_etl
@@ -40,7 +41,7 @@ urlpatterns = [
     url(r'hdfs/tail', ops.tail_hdfs, name='tail_hdfs'),
     url(r'hdfs/check_file', ops.check_file, name='check_file'),
     url(r'nginx_auth_test', etls.nginx_auth_test, name='nginx_auth_test'),
-    # url(r'^etls/clean_data/$', etls.clean_etl_data, name='clean_etl_data'),
+    url(r'^etls/clean_data/$', etls.clean_etl_data, name='clean_etl_data'),
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
     url(r'^etls/invalid/$', etls.InvalidView.as_view(), name='invalid'),
     url(r'^etls/add/$', etls.add, name='add'),
@@ -58,7 +59,6 @@ urlpatterns = [
     url(r'^etls/getexeclog/(?P<execid>[0-9]+)/$', etls.get_exec_log, name='getexeclog'),
     url(r'^etls/exec_list/(?P<jobid>[0-9]+)/$', etls.ExecLogView.as_view(), name='exec_list'),
 
-    # url(r'^m2h/generate_job_dag_v2/(?P<schedule>[0-9])/$', etls.generate_job_dag_v2, name='generate_job_dag_v2'),
     url(r'^etls/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', etls.generate_job_dag, name='generate_job_dag'),
     url(r'^h2m/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', sqoop.generate_job_dag, name='generate_sqoop_job_dag'),
     url(r'^m2h/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', sqoop2.generate_job_dag, name='generate_sqoop2_job_dag'),
@@ -114,12 +114,14 @@ urlpatterns = [
     url(r'^jar/(?P<pk>[0-9]+)/$', jar.edit, name='jar_edit'),
     url(r'^jar/review/(?P<pk>[0-9]+)/$', jar.review, name='jar_review'),
     url(r'^jar/exec/(?P<pk>[0-9]+)/$', jar.exec_job, name='jar_exec'),
-    url(r'^jar/deps/(?P<pk>[0-9]+)/$', jar.edit_deps, name='jar_deps'),
-
     url(r'^jar/execlog/(?P<execid>[0-9]+)/$', jar.exec_log, name='jar_execlog'),
     url(r'^jar/getexeclog/(?P<execid>[0-9]+)/$', jar.get_exec_log, name='jar_getexeclog'),
     url(r'^jar/status/(?P<status>[0-9]+)/$', common.StatusListView.as_view(url_base='jar', model=JarAppExecutions),
         name='jar_status'),
+
+    url(r'^deps/deps/(?P<pk>[0-9]+)/$', deps.edit_deps, name='jar_deps'),
+    url(r'^deps/generate_job_dag_v2/(?P<schedule>[0-9])/$', deps.generate_job_dag_v2, name='generate_job_dag_v2'),
+
 
     url(r'^source/get_engine_type/$', source.get_engine_type, name='get_engine_type'),
     url(r'^rest/', include(router.urls)),

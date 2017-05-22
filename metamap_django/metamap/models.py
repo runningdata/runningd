@@ -14,7 +14,6 @@ logger = logging.getLogger('django')
 from will_common.utils import hivecli
 
 
-
 class ETLObjRelated(models.Model):
     '''
     every etl obj should extend me. for example: m2h, h2h, h2m .etc
@@ -60,6 +59,7 @@ class ETLObjRelated(models.Model):
         :return:
         '''
         return None
+
 
 class AnaETL(ETLObjRelated):
     headers = models.TextField(null=False, blank=False)
@@ -123,7 +123,6 @@ class JarApp(ETLObjRelated):
     jar_file = models.FileField(upload_to='jars', blank=True)
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
-
 
 
 class ETL(ETLObjRelated):
@@ -206,6 +205,9 @@ class ExecBlood(models.Model):
     child = models.ForeignKey(ExecObj, on_delete=models.DO_NOTHING, related_name='child')
     parent = models.ForeignKey(ExecObj, on_delete=models.DO_NOTHING, related_name='parent')
     ctime = models.DateTimeField(default=timezone.now)
+
+    def __eq__(self, other):
+        return self.child.id == other.child.id and self.parent.id == other.parent.id
 
     def __str__(self):
         return self.parent.name + '-->' + self.child.name
@@ -374,7 +376,6 @@ class SqoopMysql2HiveExecutions(models.Model):
 
     def __str__(self):
         return self.logLocation
-
 
 # class WillDepTask_v2(models.Model):
 #     name = models.CharField(unique=True, max_length=200)

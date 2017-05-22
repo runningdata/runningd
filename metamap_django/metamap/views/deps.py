@@ -3,7 +3,11 @@ import logging
 import os
 import traceback
 
+from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 
 from metamap.helpers import etlhelper
 from metamap.models import ExecBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive
@@ -12,6 +16,29 @@ from will_common.utils import ziputils
 from will_common.utils.constants import AZKABAN_BASE_LOCATION, AZKABAN_SCRIPT_LOCATION
 
 logger = logging.getLogger('django')
+
+
+def edit_deps(request, pk):
+    if request.method == 'POST':
+        with transaction.atomic():
+            new_deps = []
+            for dep in request.POST.getlist('deps'):
+                new_deps.append(ExecBlood(child_id=int(pk), parent_id=int(dep)))
+            old_deps = ExecBlood.objects.filter(child_id=int(pk))
+            for o_dep in old_deps:
+                if not any(o_dep == n_dep for n_dep in new_deps):
+                    o_dep.delete()
+
+            for n_dep in new_deps:
+                if not any(o_dep == n_dep for o_dep in old_deps):
+                    n_dep.save()
+
+            return HttpResponseRedirect(reverse('metamap:index'))
+    else:
+        obj = ExecObj.objects.get(pk=pk)
+        deps = ExecBlood.objects.filter(child_id=pk)
+        return render(request, 'jar/deps.html', {'deps': deps, 'obj': obj})
+
 
 def generate_job_dag_v2(request, schedule):
     '''
@@ -24,15 +51,15 @@ def generate_job_dag_v2(request, schedule):
         done_leaf = set()
         folder = 'generate_job_dag_v2-' + dateutils.now_datetime()
         leafs = ExecBlood.objects.raw("SELECT 1 as id, a.* FROM "
-                                     "(select DISTINCT child_id FROM metamap_etlblood) a "
-                                     "join ("
-                                     "select rel_id from metamap_willdependencytask where `schedule` = " + schedule + " and valid=1 and type = 100 "
-                                                                                                                      ") b "
-                                                                                                                      "on a.child_id = b.rel_id "
-                                                                                                                      "left outer join ("
-                                                                                                                      "SELECT DISTINCT parent_id from metamap_etlblood ) c "
-                                                                                                                      "on a.child_id = c.parent_id "
-                                                                                                                      "where c.parent_id is NULL")
+                                      "(select DISTINCT child_id FROM metamap_execblood) a "
+                                      "join ("
+                                      "select rel_id from metamap_willdependencytask where `schedule` = " + schedule + " and valid=1 and type = 100 "
+                                                                                                                       ") b "
+                                                                                                                       "on a.child_id = b.rel_id "
+                                                                                                                       "left outer join ("
+                                                                                                                       "SELECT DISTINCT parent_id from metamap_execblood ) c "
+                                                                                                                       "on a.child_id = c.parent_id "
+                                                                                                                       "where c.parent_id is NULL")
 
         final_deps = set()
         leaves = set()

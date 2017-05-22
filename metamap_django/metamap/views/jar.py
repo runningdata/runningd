@@ -5,6 +5,7 @@ import traceback
 
 import shutil
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.forms import ModelForm, HiddenInput, ClearableFileInput
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -127,16 +128,6 @@ def exec_job(request, pk):
     except Exception, e:
         logger.error(e)
         return HttpResponse(e)
-
-
-def edit_deps(request, pk):
-    if request.method == 'POST':
-        print(request.POST)
-        return render(request, 'source/jar_list.html')
-    else:
-        obj = ExecObj.objects.get(rel_id=pk, type=6)
-        deps = ExecBlood.objects.filter(child__type=6, child__rel_id=pk)
-        return render(request, 'jar/deps.html', {'deps': deps, 'obj': obj})
 
 
 def exec_log(request, execid):
