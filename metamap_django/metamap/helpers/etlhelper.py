@@ -103,7 +103,7 @@ def generate_sqoop_mysql2hive(task, schedule=-1):
     if 'target-dir' in task.option:
         export_dir = DB.objects.using('hivemeta').filter(name=task.hive_meta.db).first().db_location_uri
         export_dir += '/'
-        export_dir += task.name
+        export_dir += task.mysql_tbl
         export_dir += '/'
         str.append(task.option.replace('target-dir', 'target-dir ' + export_dir))
     else:
