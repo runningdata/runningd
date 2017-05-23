@@ -61,9 +61,11 @@ CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
 
 # push url
-PUSH_URL = 'http://192.168.202.224:8080/sendMessage.shtml?mobileNo=%s&content=%s'
-# PUSH_URL = 'http://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
+# PUSH_URL = 'http://192.168.202.224:8080/sendMessage.shtml?mobileNo=%s&content=%s'
+PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
 PUSH_KEY = '&OKY%~!$^G*JRRF^'
+ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
+ADMIN_EMAIL = 'chenxin@yinker.com'
 
 # Application definition
 INSTALLED_APPS = [

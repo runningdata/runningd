@@ -127,7 +127,7 @@ def push_msg(request):
     owners = OrgGroup.objects.get(name=group).owners
     users = set()
     for owner in owners.split(','):
-        users.add(UserProfile.objects.get(user__name=owner))
+        users.add(UserProfile.objects.get(user__username=owner))
     PushUtils.push_both(users, ' project %s : status : %s' % (prjname, status))
     return HttpResponse('done')
 
