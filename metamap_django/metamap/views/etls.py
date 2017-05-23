@@ -73,7 +73,7 @@ def clean_etl_data(request):
     # TODO 有些sqoop import的ods表相关的，还没有生成对应的ETLBlood对象，所以当前ETL的H2H也是不完整的血统DAG
     for etl in ETL.objects.filter(valid=1):
         try:
-            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=1)
+            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=1, cgroup=etl.cgroup)
             print('ETLObj for ETL done : %s ' % etl.name)
         except Exception, e:
             print('ETLObj for ETL error :%d --> %s' % (etl.id, e))
@@ -83,9 +83,10 @@ def clean_etl_data(request):
             try:
                 child = ETL.objects.get(pk=blood.relatedEtlId)
                 parent = ETL.objects.get(name=blood.parentTbl, valid=1)
-                etl_blood, result = ExecBlood.objects.update_or_create(child=ExecObj.objects.get(rel_id=child.id, type=1),
-                                                                       parent=ExecObj.objects.get(rel_id=parent.id,
-                                                                                                 type=1))
+                etl_blood, result = ExecBlood.objects.update_or_create(
+                    child=ExecObj.objects.get(rel_id=child.id, type=1),
+                    parent=ExecObj.objects.get(rel_id=parent.id,
+                                               type=1))
                 print(' ETL \'s ETLBlood done : %d ' % etl_blood.id)
             except Exception, e:
                 print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
@@ -152,9 +153,11 @@ def clean_etl_data(request):
     #         print('ETLObj for JarApp error :%d --> %s' % (etl.id, e))
     #
     # 将既有的willdependency_task生成一遍
-    for task in WillDependencyTask.objects.filter(valid=1):
+    for task in WillDependencyTask.objects.filter(valid=1, type=1):
         try:
             if task.type == 100:
+                continue
+            if ETL.objects.get(pk=task.rel_id).valid == 0:
                 continue
             etl_obj = ExecObj.objects.get(type=task.type, rel_id=task.rel_id)
             WillDependencyTask.objects.update_or_create(name=task.name, rel_id=etl_obj.id, type=100,
@@ -345,7 +348,8 @@ def edit(request, pk):
                             blood.relatedEtlId = etl.id
                             blood.save()
                         logger.info(
-                            'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (pk, etl.id))
+                            'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (
+                                pk, etl.id))
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
@@ -373,6 +377,7 @@ def exec_job(request, etlid):
     tasks.exec_etl.delay(command, log_location, name=etl.name + '-' + dd)
     return redirect('metamap:execlog', execid=execution.id)
     # return redirect('metamap:execlog', execid=1)
+
 
 def review_sql(request, etlid):
     try:

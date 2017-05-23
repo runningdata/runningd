@@ -35,6 +35,7 @@ urlpatterns = [
     url(r'^ops/task_queue/$', ops.task_queue, name='task_queue'),
     url(r'^ops/dfs_usage_his/$', ops.dfs_usage_his, name='dfs_usage_his'),
     url(r'^ops/dfs_usage/$', ops.dfs_usage, name='dfs_usage'),
+    url(r'^ops/push_msg/$', ops.push_msg, name='push_msg'),
     # url(r'^users/add/$', usermanager.add_user, name='add_user'),
     # url(r'^users/$', usermanager.list_user, name='list_user'),
 
@@ -120,7 +121,7 @@ urlpatterns = [
         name='jar_status'),
 
     url(r'^deps/deps/(?P<pk>[0-9]+)/$', deps.edit_deps, name='jar_deps'),
-    url(r'^deps/generate_job_dag_v2/(?P<schedule>[0-9])/$', deps.generate_job_dag_v2, name='generate_job_dag_v2'),
+    url(r'^deps/generate_job_dag_v2/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', deps.generate_job_dag_v2, name='generate_job_dag_v2'),
 
 
     url(r'^source/get_engine_type/$', source.get_engine_type, name='get_engine_type'),

@@ -16,6 +16,8 @@ from django.shortcuts import render
 import metamap
 from metamap import tasks
 from metamap.models import Exports
+from will_common.models import OrgGroup, UserProfile
+from will_common.utils import PushUtils
 from will_common.utils import dateutils
 from will_common.utils import redisutils
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
@@ -118,6 +120,16 @@ def dfs_usage_his(request):
     l.sort()
     return render(request, 'ops/hdfs_his.html', {"dateee": l, "dbs": final.keys(), "finall": final})
 
+def push_msg(request):
+    group = request.GET['group']
+    prjname = request.GET['prjname']
+    status = request.GET['status']
+    owners = OrgGroup.objects.get(name=group).owners
+    users = set()
+    for owner in owners.split(','):
+        users.add(UserProfile.objects.get(user__name=owner))
+    PushUtils.push_both(users, ' project %s : status : %s' % (prjname, status))
+    return HttpResponse('done')
 
 def dfs_usage(request):
     pattern = re.compile(r'\s+')
