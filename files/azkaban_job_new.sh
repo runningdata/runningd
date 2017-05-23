@@ -85,9 +85,11 @@ function check_exec_status(){
     		status=`cat ${tmp_output} | JSON.sh -b| grep status | grep -v node | awk '{print($2)}'`
 		if [ $status == '"KILLED"' ]; then
 			echo "${execid} has been killed."
+			curl -X GET http://${metamap_host}/metamap/ops/push_msg/?group=${group_name}\&status=${status}\&prjname=${project_name}
 			break
 		elif [ $status == '"FAILED"' ]; then
                         echo "${execid} has been failed."
+			curl -X GET http://${metamap_host}/metamap/ops/push_msg/?group=${group_name}\&status=${status}\&prjname=${project_name}
                         break
 		elif [ $status == '"SUCCEEDED"' ]; then
                         echo "${execid} has been SUCCEEDED."
