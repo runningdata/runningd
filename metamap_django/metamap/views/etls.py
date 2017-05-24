@@ -311,6 +311,7 @@ def edit(request, pk):
                 privious_etl.valid = 0
                 privious_etl.save()
                 previous_query = privious_etl.query
+                privious_name = privious_etl.name
 
                 if int(request.POST['valid']) == 1:
                     etl = privious_etl
@@ -330,7 +331,6 @@ def edit(request, pk):
                         task.save()
 
                     logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
-
 
                     if etl.query != previous_query:
                         deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
@@ -352,6 +352,14 @@ def edit(request, pk):
                         logger.info(
                             'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (
                                 pk, etl.id))
+                else:
+                    bloods = TblBlood.objects.filter(parentTbl=privious_name)
+                    if bloods.count() > 0 and any(
+                                    ETL.objects.filter(pk=bld.relatedEtlId).count() > 0 for bld in bloods):
+                        raise Exception('cannot invalid : a few children depending on it')
+                    for bld in TblBlood.objects.filter(tblName=privious_name):
+                        bld.valid = 0
+                        bld.save()
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
