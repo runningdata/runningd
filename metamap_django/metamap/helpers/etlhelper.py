@@ -320,7 +320,7 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
     job_name = blood.tblName
     if not job_name.startswith('etl_done_'):
         # 生成hql文件
-        etl = ETL.objects.get(name=blood.relatedEtlId, valid=1)
+        etl = ETL.objects.get(id=blood.relatedEtlId, valid=1)
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         generate_etl_file(etl, location, schedule)
         command = "hive -f " + location
