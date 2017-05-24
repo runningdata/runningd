@@ -332,8 +332,7 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
     job_type = ' command\nretries=3\nretry.backoff=60000\n'
     dependencies = set()
     for p in parent_node:
-        if os.path.exists(AZKABAN_BASE_LOCATION + folder + "/" + p.tblName + ".job"):
-            dependencies.add(p.tblName)
+        dependencies.add(p.tblName)
     content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
     if len(dependencies) > 0:
         job_depencied = ','.join(dependencies)

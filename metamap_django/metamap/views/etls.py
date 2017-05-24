@@ -347,6 +347,7 @@ def edit(request, pk):
                     else:
                         for blood in TblBlood.objects.filter(relatedEtlId=pk):
                             blood.relatedEtlId = etl.id
+                            blood.tblName = etl.name
                             blood.save()
                         logger.info(
                             'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (
