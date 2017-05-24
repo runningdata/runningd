@@ -67,6 +67,13 @@ PUSH_KEY = '&OKY%~!$^G*JRRF^'
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 ADMIN_EMAIL = 'chenxin@yinker.com'
 
+
+# email settings
+EMAIL_HOST = 'smtp.exmail.qq.com'
+EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
+EMAIL_HOST_PASSWORD = 'Yanjiu123'
+EMAIL_USE_TLS = True
+
 # Application definition
 INSTALLED_APPS = [
     'djcelery',

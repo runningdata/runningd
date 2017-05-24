@@ -66,7 +66,7 @@ def push_email(users, msg):
                 logger.error('Invalid header found for %s .' % emails)
         else:
             logger.error('Make sure all fields are entered and valid.')
-    except Exception, e:
+    except Exception as e:
         logger.error('error : %s ' % e)
         logger.error('traceback is : %s ' % traceback.format_exc())
 
