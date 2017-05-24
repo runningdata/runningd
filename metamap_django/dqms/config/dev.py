@@ -151,7 +151,7 @@ WSGI_APPLICATION = 'metamap_django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'metamap1',
+        'NAME': 'metamap11',
         'PASSWORD': '',
         'USER': 'root',
         'HOST': 'localhost',

@@ -331,6 +331,7 @@ def edit(request, pk):
 
                     logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
 
+
                     if etl.query != previous_query:
                         deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
                         logger.info('Tblbloods for %s has been deleted successfully' % (pk))
@@ -531,7 +532,8 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
         etlhelper.load_nodes(final_leaves, folder, done_blood, done_leaf, schedule, group_name=group_name)
 
         tbl = TblBlood(tblName='etl_done_' + group_name + '_' + folder)
-        etlhelper.generate_job_file(tbl, final_leaves, folder)
+        final_leaves2 = [leaf for leaf in final_leaves if ETL.objects.filter(pk=leaf.relatedEtlId, valid=1).count() > 0]
+        etlhelper.generate_job_file(tbl, final_leaves2, folder)
 
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%d etls generated ' % len(done_blood))
