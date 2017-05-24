@@ -234,7 +234,8 @@ def generate_sqoop_hive2mysql(task, schedule=-1):
     str.append(' sqoop export ')
     str.append('-Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE)
     str.append(task.mysql_meta.settings)
-    str.append(' --input-fields-terminated-by "\\t" ')
+    if 'input-fields-terminated-by' not in task.option:
+        str.append(' --input-fields-terminated-by "\\t" ')
     str.append('  --update-key ')
     str.append(task.update_key)
     str.append(' --update-mode allowinsert ')
