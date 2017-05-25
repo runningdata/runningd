@@ -155,6 +155,7 @@ def exec_email_export(taskid):
         export.end_time = timezone.now()
         export.file_loc = part
         export.save()
+        os.removedirs(result_dir)
         logger.info('%s return code is %d' % (command, returncode))
     except Exception, e:
         logger.error('ERROR: %s' % traceback.format_exc())
