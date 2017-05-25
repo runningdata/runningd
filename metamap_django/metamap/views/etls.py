@@ -313,53 +313,53 @@ def edit(request, pk):
                 previous_query = privious_etl.query
                 privious_name = privious_etl.name
 
-                if int(request.POST['valid']) == 1:
-                    etl = privious_etl
-                    privious_etl.id = None
-                    privious_etl.ctime = timezone.now()
-                    httputils.post2obj(etl, request.POST, 'id')
-                    userutils.add_current_creator(etl, request)
-                    find_ = etl.name.find('@')
-                    etl.meta = etl.name[0: find_]
+                # if int(request.POST['valid']) == 1:
+                etl = privious_etl
+                privious_etl.id = None
+                privious_etl.ctime = timezone.now()
+                httputils.post2obj(etl, request.POST, 'id')
+                userutils.add_current_creator(etl, request)
+                find_ = etl.name.find('@')
+                etl.meta = etl.name[0: find_]
 
-                    etl.save()
-                    logger.info('ETL has been created successfully : %s ' % etl)
+                etl.save()
+                logger.info('ETL has been created successfully : %s ' % etl)
 
-                    tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
-                    for task in tasks:
-                        task.rel_id = etl.id
-                        task.save()
+                tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
+                for task in tasks:
+                    task.rel_id = etl.id
+                    task.save()
 
-                    logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
+                logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
 
-                    if etl.query != previous_query:
-                        deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
-                        logger.info('Tblbloods for %s has been deleted successfully' % (pk))
+                if etl.query != previous_query:
+                    deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
+                    logger.info('Tblbloods for %s has been deleted successfully' % (pk))
 
-                        deps = hivecli.getTbls_v2(etl)
-                        for dep in deps:
-                            logger.info("dep is %s, tblName is %s " % (dep, etl.name))
-                            if etl.name != dep:
-                                tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
-                                tblBlood.save()
-                                logger.info('Tblblood has been created successfully : %s' % tblBlood)
-                        logger.info('Tblblood for %s has been created successfully' % (pk))
-                    else:
-                        for blood in TblBlood.objects.filter(relatedEtlId=pk):
-                            blood.relatedEtlId = etl.id
-                            blood.tblName = etl.name
-                            blood.save()
-                        logger.info(
-                            'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (
-                                pk, etl.id))
+                    deps = hivecli.getTbls_v2(etl)
+                    for dep in deps:
+                        logger.info("dep is %s, tblName is %s " % (dep, etl.name))
+                        if etl.name != dep:
+                            tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
+                            tblBlood.save()
+                            logger.info('Tblblood has been created successfully : %s' % tblBlood)
+                    logger.info('Tblblood for %s has been created successfully' % (pk))
                 else:
-                    bloods = TblBlood.objects.filter(parentTbl=privious_name)
-                    if bloods.count() > 0 and any(
-                                    ETL.objects.filter(pk=bld.relatedEtlId).count() > 0 for bld in bloods):
-                        raise Exception('cannot invalid : a few children depending on it')
-                    for bld in TblBlood.objects.filter(tblName=privious_name):
-                        bld.valid = 0
-                        bld.save()
+                    for blood in TblBlood.objects.filter(relatedEtlId=pk):
+                        blood.relatedEtlId = etl.id
+                        blood.tblName = etl.name
+                        blood.save()
+                    logger.info(
+                        'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (
+                            pk, etl.id))
+                # else:
+                #     bloods = TblBlood.objects.filter(parentTbl=privious_name)
+                #     if bloods.count() > 0 and any(
+                #                     ETL.objects.filter(pk=bld.relatedEtlId).count() > 0 for bld in bloods):
+                #         raise Exception('cannot invalid : a few children depending on it')
+                #     for bld in TblBlood.objects.filter(tblName=privious_name):
+                #         bld.valid = 0
+                #         bld.save()
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})

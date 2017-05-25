@@ -26,20 +26,20 @@
                 <label>先行SQL（针对target）</label>
                 <textarea name="preSql" rows="13" class="form-control">{{ etl.preSql }}</textarea>
                 <label>是否生效</label>
-                <div class="radio-inline">
-                    <input id="optionsRadios1" type="radio" name="valid"
-                            {% if etl.valid != 0 %}
-                           checked="checked"
-                            {% endif %}
-                           value="1">是
-                </div>
-                <div class="radio-inline">
-                    <input id="optionsRadios3" type="radio" name="valid"
-                            {% if etl.valid == 0 %}
-                           checked="checked"
-                            {% endif %}
-                           value="0">否
-                </div>
+{#                <div class="radio-inline">#}
+{#                    <input id="optionsRadios1" type="radio" name="valid"#}
+{#                            {% if etl.valid != 0 %}#}
+{#                           checked="checked"#}
+{#                            {% endif %}#}
+{#                           value="1">是#}
+{#                </div>#}
+{#                <div class="radio-inline">#}
+{#                    <input id="optionsRadios3" type="radio" name="valid"#}
+{#                            {% if etl.valid == 0 %}#}
+{#                           checked="checked"#}
+{#                            {% endif %}#}
+{#                           value="0">否#}
+{#                </div>#}
                 <br/>
                 <div class="form-group text-center">
 
@@ -69,15 +69,15 @@
                 <textarea name="setting" rows="5" class="form-control"></textarea>
                 <label>先行SQL（针对target）</label>
                 <textarea name="preSql" rows="13" class="form-control"></textarea>
-                <label>是否生效</label>
-                <div class="radio-inline">
-                    <input id="optionsRadios1" type="radio" name="valid"
-                           checked="checked"
-                           value="1">是
-                </div>
-                <div class="radio-inline">
-                    <input id="optionsRadios3" type="radio" name="valid" value="0">否
-                </div>
+{#                <label>是否生效</label>#}
+{#                <div class="radio-inline">#}
+{#                    <input id="optionsRadios1" type="radio" name="valid"#}
+{#                           checked="checked"#}
+{#                           value="1">是#}
+{#                </div>#}
+{#                <div class="radio-inline">#}
+{#                    <input id="optionsRadios3" type="radio" name="valid" value="0">否#}
+{#                </div>#}
                 <br/>
                 <div class="form-group text-center">
 
