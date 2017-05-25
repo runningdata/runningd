@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*
-import base64
 import json
 import logging
 import os
@@ -10,12 +9,8 @@ from StringIO import StringIO
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import BadHeaderError
-from django.core.mail import EmailMessage
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import FileResponse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -23,11 +18,10 @@ from django.utils.decorators import method_decorator
 from django.views import generic
 
 from metamap.helpers import bloodhelper, etlhelper
-from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, ExecObj, ExecBlood, SqoopHive2Mysql, \
-    SqoopMysql2Hive, AnaETL, JarApp
+from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, ExecObj, ExecBlood, \
+    SqoopMysql2Hive
 
 from will_common.utils import PushUtils
-from will_common.utils import constants
 from will_common.utils import encryptutils
 from will_common.utils import hivecli, httputils, dateutils, ziputils
 from will_common.utils import userutils
@@ -36,8 +30,6 @@ from will_common.views.common import GroupListView
 
 logger = logging.getLogger('django')
 
-
-# work_manager = threadpool.WorkManager(10, 3)
 
 @method_decorator(login_required, name='dispatch')
 class IndexView(GroupListView):
@@ -78,18 +70,18 @@ def clean_etl_data(request):
         except Exception, e:
             print('ETLObj for ETL error :%d --> %s' % (etl.id, e))
 
-    for blood in TblBlood.objects.all():
-        if blood.valid == 1:
-            try:
-                child = ETL.objects.get(pk=blood.relatedEtlId)
-                parent = ETL.objects.get(name=blood.parentTbl, valid=1)
-                etl_blood, result = ExecBlood.objects.update_or_create(
-                    child=ExecObj.objects.get(rel_id=child.id, type=1),
-                    parent=ExecObj.objects.get(rel_id=parent.id,
-                                               type=1))
-                print(' ETL \'s ETLBlood done : %d ' % etl_blood.id)
-            except Exception, e:
-                print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
+    # for blood in TblBlood.objects.all():
+    #     if blood.valid == 1:
+    #         try:
+    #             child = ETL.objects.get(pk=blood.relatedEtlId)
+    #             parent = ETL.objects.get(name=blood.parentTbl, valid=1)
+    #             etl_blood, result = ExecBlood.objects.update_or_create(
+    #                 child=ExecObj.objects.get(rel_id=child.id, type=1),
+    #                 parent=ExecObj.objects.get(rel_id=parent.id,
+    #                                            type=1))
+    #             print(' ETL \'s ETLBlood done : %d ' % etl_blood.id)
+    #         except Exception, e:
+    #             print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
 
     # 把hive数据表作为自己的依赖
     # for etl in SqoopHive2Mysql.objects.all():
@@ -104,21 +96,21 @@ def clean_etl_data(request):
     #     except Exception, e:
     #         print(' SqoopHive2Mysql \'s error : %d --> %s' % (etl.id, e))
     #
-    # for etl in SqoopMysql2Hive.objects.all():
-    #     try:
-    #         tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
-    #         etl_obj, result = ExecObj.objects.update_or_create(name=tbl_name, rel_id=etl.id, type=4)
-    #         print('ETLObj for SqoopMysql2Hive done : %s ' % tbl_name)
-    #         # 导入M2H，把前面缺失的import添加到ETLBlood中去
-    #         for blood in TblBlood.objects.filter(parentTbl=tbl_name):
-    #             try:
-    #                 parent = ETL.objects.get(name=blood.parentTbl, valid=1)
-    #             except Exception, e:
-    #                 child = ExecObj.objects.get(type=1, name=blood.tblName)
-    #                 etl_blood, result = ExecBlood.objects.update_or_create(parent=etl_obj, child=child)
-    #                 print(' SqoopMysql2Hive \'s ETLBlood done : %d ' % etl_blood.id)
-    #     except Exception, e:
-    #         print('SqoopMysql2Hive \'s error : %d --> %s' % (etl.id, e))
+    for etl in SqoopMysql2Hive.objects.all():
+        try:
+            tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
+            etl_obj, result = ExecObj.objects.update_or_create(name=tbl_name, rel_id=etl.id, type=4)
+            print('ETLObj for SqoopMysql2Hive done : %s ' % tbl_name)
+            # 导入M2H，把前面缺失的import添加到ETLBlood中去
+            for blood in TblBlood.objects.filter(parentTbl=tbl_name):
+                try:
+                    parent = ETL.objects.get(name=blood.parentTbl, valid=1)
+                except Exception, e:
+                    child = ExecObj.objects.get(type=1, name=blood.tblName)
+                    etl_blood, result = ExecBlood.objects.update_or_create(parent=etl_obj, child=child)
+                    print(' SqoopMysql2Hive \'s ETLBlood done : %d ' % etl_blood.id)
+        except Exception, e:
+            print('SqoopMysql2Hive \'s error : %d --> %s' % (etl.id, e))
     #
     # # AnaETL清洗，顺便添加依赖(一般除了m2h就是h2h)
     # for etl in AnaETL.objects.filter(valid=1):
@@ -321,7 +313,7 @@ def edit(request, pk):
                 userutils.add_current_creator(etl, request)
                 find_ = etl.name.find('@')
                 etl.meta = etl.name[0: find_]
-
+                etl.valid = 1
                 etl.save()
                 logger.info('ETL has been created successfully : %s ' % etl)
 
