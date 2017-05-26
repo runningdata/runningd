@@ -25,7 +25,7 @@
                     <textarea name="query" rows="13" class="form-control">{{ obj.query }}</textarea>
                     <label>预设变量</label>
                     <textarea name="variables" rows="5" class="form-control">{{ obj.variables }}</textarea>
-                    <label>是否生效</label>
+                    {% comment %}<label>是否生效</label>
                     <div class="radio-inline">
                         <input id="optionsRadios1" type="radio" name="valid"
                                 {% if valid != 0 %}
@@ -39,7 +39,7 @@
                                checked="checked"
                                 {% endif %}
                                value="0">否
-                    </div>
+                    </div>{% endcomment %}
                     <br/>
                     <div class="form-group">
                         <label>权限用户</label>
@@ -69,7 +69,7 @@
                     <textarea name="query" rows="13" class="form-control"></textarea>
                     <label>预设变量</label>
                     <textarea name="variables" rows="5" class="form-control"></textarea>
-                    <label>是否生效</label>
+                    {% comment %}<label>是否生效</label>
                     <div class="radio-inline">
                         <input id="optionsRadios1" type="radio" name="valid"
                                checked="checked"
@@ -79,7 +79,7 @@
                         <input id="optionsRadios3" type="radio" name="valid"
                                checked="checked"
                                value="0">否
-                    </div>
+                    </div>{% endcomment %}
                     <br/>
                     <div class="form-group">
                         <label>权限用户</label>
