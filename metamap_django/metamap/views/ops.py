@@ -5,8 +5,6 @@ import subprocess
 
 import re
 
-import celery
-from celery.backends import redis
 from django.contrib.auth.models import Group
 from django.http import HttpResponse
 import logging
@@ -15,7 +13,6 @@ from django.shortcuts import render
 
 import metamap
 from metamap import tasks
-from metamap.models import Exports
 from will_common.models import OrgGroup, UserProfile
 from will_common.utils import PushUtils
 from will_common.utils import dateutils
@@ -102,7 +99,8 @@ def dfs_usage_his(request):
             if line.startswith('new'):
                 datee = line.split(' ')[2].replace('\n', '')
                 current_datee = datee
-                dateee.add(current_datee)
+                if current_datee > dateutils.days_ago_key(-30):
+                    dateee.add(current_datee)
             else:
                 size = pattern.split(line)[0]
                 ssize = float(size.split(' ')[0])

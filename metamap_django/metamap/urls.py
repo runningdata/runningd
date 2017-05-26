@@ -11,6 +11,7 @@ from metamap.views import sqoop
 from metamap.views import sqoop2
 from metamap.rest.rest_views import ETLViewSet, SqoopHive2MysqlViewSet, SqoopMysql2HiveViewSet, SourceAppViewSet, \
     JarAppViewSet, AnaETLViewSet, SqoopHiveMetaViewSet, SqoopMysqlMetaViewSet, ExecObjViewSet
+from metamap.views import to2cleaner
 from metamap.views import usermanager
 from metamap.views.sche_ana import ExportsViewSet
 from views import etls, metas
@@ -42,7 +43,6 @@ urlpatterns = [
     url(r'hdfs/tail', ops.tail_hdfs, name='tail_hdfs'),
     url(r'hdfs/check_file', ops.check_file, name='check_file'),
     url(r'nginx_auth_test', etls.nginx_auth_test, name='nginx_auth_test'),
-    url(r'^etls/clean_data/$', etls.clean_etl_data, name='clean_etl_data'),
     url(r'^etls/(?P<pk>[0-9]+)/$', etls.edit, name='edit'),
     url(r'^etls/invalid/$', etls.InvalidView.as_view(), name='invalid'),
     url(r'^etls/add/$', etls.add, name='add'),
@@ -123,6 +123,13 @@ urlpatterns = [
     url(r'^deps/deps/(?P<pk>[0-9]+)/$', deps.edit_deps, name='jar_deps'),
     url(r'^deps/generate_job_dag_v2/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', deps.generate_job_dag_v2, name='generate_job_dag_v2'),
 
+    url(r'^clean/clean_m2h/$', to2cleaner.clean_M2H, name='clean_m2h'),
+    url(r'^clean/clean_h2m/$', to2cleaner.clean_H2M, name='clean_h2m'),
+    url(r'^clean/clean_etl/$', to2cleaner.clean_etl, name='clean_etl'),
+    url(r'^clean/clean_jar/$', to2cleaner.clean_JAR, name='clean_jar'),
+    url(r'^clean/clean_email/$', to2cleaner.clean_ANA, name='clean_email'),
+    url(r'^clean/clean_blood/$', to2cleaner.clean_blood, name='clean_blood'),
+    url(r'^clean/clean_task/$', to2cleaner.clean_deptask, name='clean_task'),
 
     url(r'^source/get_engine_type/$', source.get_engine_type, name='get_engine_type'),
     url(r'^rest/', include(router.urls)),
