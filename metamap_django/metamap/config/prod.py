@@ -44,11 +44,6 @@ ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 ADMIN_EMAIL = 'chenxin@yinker.com'
 PROC_USER = 'metamap'
 
-KYLIN_REST_URI = 'http://10.2.19.94:7070/kylin/api/query'
-KYLIN_ADMIN_USER = 'ADMIN'
-KYLIN_ADMIN_PWD = 'KYLIN'
-
-
 ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.1.5.190']
 CLUTER_QUEUE = 'xstorm'
 

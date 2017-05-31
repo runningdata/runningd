@@ -66,6 +66,11 @@ PUSH_KEY = '&OKY%~!$^G*JRRF^'
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 ADMIN_EMAIL = 'chenxin@yinker.com'
 
+# kylin
+KYLIN_REST_URI = 'http://10.2.19.94:7070/kylin/api/query'
+KYLIN_ADMIN_USER = 'ADMIN'
+KYLIN_ADMIN_PWD = 'KYLIN'
+
 # email settings
 EMAIL_HOST = 'smtp.exmail.qq.com'
 EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
