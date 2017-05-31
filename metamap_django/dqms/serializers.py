@@ -11,7 +11,7 @@ from dqms.models import DqmsDatasource, DqmsCase, DqmsRule, DqmsCheckInst, DqmsC
 class DqmsDatasourceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = DqmsDatasource
-        fields = ('src_name', 'valid', 'id')
+        fields = ('src_type', 'src_name', 'valid', 'id')
 
 class DqmsCaseSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

@@ -110,6 +110,7 @@
                     $.each(result, function (index, datasrc) {
                         src_data += "<tr>" +
                                 "<td Name='srcId'class='id'>" + datasrc.id + "</td>" +
+                                "<td class='name'>" + datasrc.src_type + "</td>" +
                                 "<td class='name'>" + datasrc.src_name + "</td>" +
                                 "<td>" +
                                 "<button class='btn btn-default btn-xs' onclick=\"addDataSrc(" + datasrc.id + ",'" + datasrc.src_name + "')\">添加</button>" +
@@ -607,6 +608,7 @@
                     <thead>
                     <tr>
                         <th>数据源编号</th>
+                        <th>数据源类型</th>
                         <th>数据源名称</th>
                         <th>操作</th>
                     </tr>
