@@ -119,7 +119,7 @@ def save(request):
         return render(request, 'case/case_edit.html')
 
 def runtest(request, pk):
-    tasks.run_case.delay(pk, request.user.id)
+    tasks.run_case(pk, request.user.id)
     result = dict()
     result['msg'] = 'success'
     return JsonResponse(result)

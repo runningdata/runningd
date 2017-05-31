@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*
 import logging
+
+import re
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 
 from metamap.models import TblBlood, ETL, WillDependencyTask, ExecObj, ExecBlood, \
-    SqoopMysql2Hive, AnaETL, SqoopHive2Mysql, JarApp
+    SqoopMysql2Hive, AnaETL, SqoopHive2Mysql, JarApp, NULLETL
 
 from will_common.utils import hivecli
 
@@ -64,16 +68,60 @@ def clean_ANA(request):
     return HttpResponse('clean_ANA done')
 
 
+def clean_etlp_for_blood(request):
+    '''
+    先清洗所有不是ETL的父节点
+    :param request:
+    :return:
+    '''
+    for blood in TblBlood.objects.all():
+        if blood.valid == 1:
+            try:
+                '''
+                如果不是ETL，那么先看看是不是M2H，如果不是M2H，就暂时搁置为NULLETL， 并创建与之相关联的ExecObj,加入ExecBlood
+                '''
+                try:
+                    parent = ETL.objects.get(name=blood.parentTbl, valid=1)
+                except ObjectDoesNotExist, e:
+                    try:
+                        parent = SqoopMysql2Hive.objects.get(name=blood.parentTbl, valid=1)
+                    except ObjectDoesNotExist, e:
+                        parent, status = NULLETL.objects.get_or_create(name=blood.parentTbl)
+                        logger.error(e.message)
+            except Exception, e:
+                print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
+
+    return HttpResponse('clean_blood done')
+
+
 def clean_blood(request):
     for blood in TblBlood.objects.all():
         if blood.valid == 1:
             try:
                 child = ETL.objects.get(pk=blood.relatedEtlId)
-                parent = ETL.objects.get(name=blood.parentTbl, valid=1)
+                '''
+                如果不是ETL，那么先看看是不是M2H，如果不是M2H，就暂时搁置为NULLETL， 并创建与之相关联的ExecObj,加入ExecBlood
+                '''
+                try:
+                    parent = ETL.objects.get(name=blood.parentTbl, valid=1)
+                except ObjectDoesNotExist, e:
+                    try:
+                        '''
+                        这里有个漏洞，对于M2H并不是默认表名的时候会错把type为4的弄成66
+                        '''
+                        parent = SqoopMysql2Hive.objects.get(name=blood.parentTbl, valid=1)
+                    except ObjectDoesNotExist, e:
+                        parent = NULLETL.objects.get(name=blood.parentTbl)
+                        logger.error(e.message)
+                cc = ExecObj.objects.get(rel_id=child.id, type=1)
+                try:
+                    pp = ExecObj.objects.get(name=parent.name)
+                except ObjectDoesNotExist, e:
+                    pp, status = ExecObj.objects.get_or_create(name=parent.name, rel_id=parent.id, type=66)
+                    logger.error(e.message)
                 etl_blood, result = ExecBlood.objects.update_or_create(
-                    child=ExecObj.objects.get(rel_id=child.id, type=1),
-                    parent=ExecObj.objects.get(rel_id=parent.id,
-                                               type=1))
+                    child=cc,
+                    parent=pp)
                 print(' ETL \'s ETLBlood done : %d ' % etl_blood.id)
             except Exception, e:
                 print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
@@ -93,11 +141,24 @@ def clean_JAR(request):
 
 def clean_deptask(request):
     # 将既有的willdependency_task生成一遍
-    for task in WillDependencyTask.objects.filter(valid=1, type=1):
+    # for task in WillDependencyTask.objects.filter(valid=1, type=1):
+    #     try:
+    #         if task.type == 100:
+    #             continue
+    #         if ETL.objects.get(pk=task.rel_id).valid == 0:
+    #             continue
+    #         etl_obj = ExecObj.objects.get(type=task.type, rel_id=task.rel_id)
+    #         WillDependencyTask.objects.update_or_create(name=task.name, rel_id=etl_obj.id, type=100,
+    #                                                     schedule=task.schedule)
+    #         print('WillDependencyTask done : %s' % task.name)
+    #     except Exception, e:
+    #         print('WillDependencyTask error : %d --> %s' % (task.id, e))
+
+    for task in WillDependencyTask.objects.filter(valid=1, type=4):
         try:
             if task.type == 100:
                 continue
-            if ETL.objects.get(pk=task.rel_id).valid == 0:
+            if SqoopMysql2Hive.objects.get(pk=task.rel_id).valid == 0:
                 continue
             etl_obj = ExecObj.objects.get(type=task.type, rel_id=task.rel_id)
             WillDependencyTask.objects.update_or_create(name=task.name, rel_id=etl_obj.id, type=100,
@@ -112,8 +173,19 @@ def clean_M2H(request):
     for etl in SqoopMysql2Hive.objects.all():
         try:
             tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
+            if 'hive-table' in etl.option:
+                for op in etl.option.split('--'):
+                    if op.startswith('hive-table'):
+                        tbl_name = etl.hive_meta.meta + '@' + re.split('\s', op.strip())[1]
+                        logger.error('%s hive table name: %s ' % (etl.name, tbl_name))
+                        print('%s hive table name %s ' % (etl.name, tbl_name))
+                        break
+                logger.error('%s M2H hive table for %d ' % (etl.name, etl.id))
+                print('%s M2H hive table for %d ' % (etl.name, etl.id))
+                continue
             etl_obj, result = ExecObj.objects.update_or_create(name=tbl_name, rel_id=etl.id, type=4)
             print('ETLObj for SqoopMysql2Hive done : %s ' % tbl_name)
+
             # 导入M2H，把前面缺失的import添加到ETLBlood中去
             for blood in TblBlood.objects.filter(parentTbl=tbl_name):
                 try:

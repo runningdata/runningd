@@ -22,8 +22,6 @@ from will_common.views import common
 urlpatterns = [
     url(r'^$', common.redir_dqms),
     url(r'^dqms/', include('dqms.urls')),
-    url(r'^admin/', admin.site.urls),
-
     url(r'^common/', include('will_common.urls')),
 
     # CAS

@@ -129,6 +129,7 @@ urlpatterns = [
     url(r'^clean/clean_jar/$', to2cleaner.clean_JAR, name='clean_jar'),
     url(r'^clean/clean_email/$', to2cleaner.clean_ANA, name='clean_email'),
     url(r'^clean/clean_blood/$', to2cleaner.clean_blood, name='clean_blood'),
+    url(r'^clean/before_clean_blood/$', to2cleaner.clean_etlp_for_blood, name='before_clean_blood'),
     url(r'^clean/clean_task/$', to2cleaner.clean_deptask, name='clean_task'),
 
     url(r'^source/get_engine_type/$', source.get_engine_type, name='get_engine_type'),

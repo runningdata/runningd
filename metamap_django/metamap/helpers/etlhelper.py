@@ -548,8 +548,10 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
                         tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
                         leaf_dependencies.add('import_' + tbl_name)
                     else:
-                        print('xxxxxxxxxxxxxxx parent found..........%s ' % parent.name)
+                        print('xxxxxxxxxxxxxxx parent found..........%s' % parent.name)
 
+            # 这里只会给给child生成job文件，而不会给他的parent生成 —— 新版本中应该生成！！！
+            # 或者： 外面单独为最顶层的parent任务生成job列表
             child = ExecObj.objects.get(pk=leaf)
             generate_job_file_v2(child, leaf_dependencies, folder,
                                          schedule=schedule)

@@ -5,15 +5,11 @@ import os
 import traceback
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from rest_framework import viewsets
-
 from metamap.helpers import etlhelper
-from metamap.models import SqoopMysql2Hive, Meta, SqoopMysql2HiveExecutions
+from metamap.models import SqoopMysql2Hive, SqoopMysql2HiveExecutions
 from will_common.models import WillDependencyTask
 from will_common.utils import PushUtils
 from will_common.utils import dateutils
@@ -34,7 +30,7 @@ class Mysql2HiveListView(GroupListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             search = self.request.GET['search']
-            return SqoopMysql2Hive.objects.filter(name__contains=search).order_by('-ctime')
+            return SqoopMysql2Hive.objects.filter(name__icontains=search).order_by('-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
         return SqoopMysql2Hive.objects.all().order_by('-ctime')
 

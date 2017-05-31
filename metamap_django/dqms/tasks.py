@@ -26,6 +26,7 @@ from will_common.utils import encryptutils
 from will_common.utils import enums
 from will_common.utils import hivecli
 from will_common.utils import constants
+from will_common.utils import kylincli
 from will_common.utils import mysqlcli
 
 logger = get_task_logger(__name__)
@@ -71,12 +72,14 @@ def runcase(case, check, user):
             result = hivecli.execute(case.sql_pattern)
         elif case.datasrc.src_type == constants.DATASRC_TYPE_MYSQL:
             result = mysqlcli.execute(constants.DATASRC_TYPE_MYSQL_DB, case.sql_pattern)
+        elif case.datasrc.src_type == constants.DATASRC_TYPE_KYLIN:
+            result = kylincli.execute(case.datasrc.src_name, case.sql_pattern)
         else:
             logger.error('cannot recognize datasource type :', case.datasrc.src_type)
         if result:
             for rule in case.dqmsrule_set.all():
                 print('handleing %s ' % rule.measure_column)
-                re = result[rule.measure_column]
+                re = result[rule.measure_column.upper()]
                 print('result is %d , max is %d, min is %d' % (re, rule.max, rule.min))
                 if re > rule.max or re < rule.min:
                     alert = DqmsAlert.objects.create(rule=rule)

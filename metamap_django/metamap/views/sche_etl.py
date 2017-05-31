@@ -95,7 +95,7 @@ class ScheDepListView(generic.ListView):
 
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            objs = WillDependencyTask.objects.filter(name__contains=tbl_name_).order_by('-valid', '-ctime')
+            objs = WillDependencyTask.objects.filter(name__icontains=tbl_name_).order_by('-valid', '-ctime')
             for obj in objs:
                 objs = filters.get(obj.type)(objs, obj)
             return objs

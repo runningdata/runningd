@@ -60,6 +60,9 @@ class ETLObjRelated(models.Model):
         '''
         return None
 
+class NULLETL(ETLObjRelated):
+    type = 66
+    pass
 
 class AnaETL(ETLObjRelated):
     headers = models.TextField(null=False, blank=False)
@@ -67,8 +70,6 @@ class AnaETL(ETLObjRelated):
     author = models.CharField(max_length=20, blank=True, null=True)
     variables = models.CharField(max_length=2000, default='')
     auth_users = models.TextField(default='', null=False, blank=False)
-
-    __str__ = query
 
     def is_auth(self, user, group):
         if len(self.auth_users) == 0:
