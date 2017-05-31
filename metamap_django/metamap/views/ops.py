@@ -138,7 +138,7 @@ def hdfs_files(request):
     out, err = p.communicate()
     print out
     print err
-    return HttpResponse(out)
+    return HttpResponse(out.replace('\n', '<br/>'))
 
 def dfs_usage(request):
     pattern = re.compile(r'\s+')
