@@ -40,7 +40,6 @@ HIVE_SERVER = {
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 
 BROKER_URL = 'redis://localhost:6379'
-
 # CELERY_TASK_SERIALIZER = 'json'
 # CELERY_ACCEPT_CONTENT = ['application/json']
 # CELERY_RESULT_SERIALIZER = 'json'
@@ -49,7 +48,9 @@ BROKER_URL = 'redis://localhost:6379'
 # CELERY_ENABLE_UTC = True
 # CELERY_IMPORTS = ("metamap.taske",)
 
-
+KYLIN_REST_URI = 'http://10.1.5.83:7070/kylin/api/query'
+KYLIN_ADMIN_USER = 'ADMIN'
+KYLIN_ADMIN_PWD = 'KYLIN'
 
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'

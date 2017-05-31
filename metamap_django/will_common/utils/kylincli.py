@@ -2,7 +2,6 @@
 import requests
 import json
 
-
 # cube_name='olap_basic_cube_v2'
 # sql = '''
 # select
@@ -17,22 +16,15 @@ import json
 # '''
 #
 # proj = 'olap_bi_temp'
-
-
+from django.conf import settings
 
 
 def execute(cube_name, sql):
     try:
-        url = 'http://10.2.19.94:7070/kylin/api/query'
-        # url = 'http://10.1.5.83:7070/kylin/api/query'
         params = {'sql': sql, 'offset': 0, 'limit': '1', 'acceptPartial': False, 'project': cube_name}
-
-        username = 'ADMIN'
-        passwd = 'KYLIN'
-        auth_params = (username, passwd)
+        auth_params = (settings.KYLIN_ADMIN_USER, settings.KYLIN_ADMIN_PWD)
         header = {'Content-Type': 'application/json;charset=UTF-8'}
-        print 'Prepare to build .....'
-        rep = requests.post(url=url, json=params, auth=auth_params, headers=header)
+        rep = requests.post(url=settings.KYLIN_REST_URI, json=params, auth=auth_params, headers=header)
         if rep.status_code == 200:
             cols = json.loads(rep.content)['columnMetas']
             colls = [col['name'] for col in cols]
