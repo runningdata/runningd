@@ -129,6 +129,17 @@ def push_msg(request):
     PushUtils.push_both(users, ' project %s : status : %s' % (prjname, status))
     return HttpResponse('done')
 
+def hdfs_files(request):
+    path = '/user/%s' % request.user.username
+    command = 'hdfs dfs -ls /user/admin | grep user | awk \'{print substr($8, length("%s"))}\'' % path
+    p = subprocess.Popen([''.join(command)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         shell=True,
+                         universal_newlines=True)
+    out, err = p.communicate()
+    print out
+    print err
+    return HttpResponse(out)
+
 def dfs_usage(request):
     pattern = re.compile(r'\s+')
     result = dict()

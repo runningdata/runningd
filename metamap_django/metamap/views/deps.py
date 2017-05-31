@@ -123,12 +123,12 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
                     elif parent.type == 3:
                         print('parent is SqoopHive2Mysql %s ' % parent.name)
                         etl = SqoopHive2Mysql.objects.get(pk=parent.rel_id)
-                        tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
+                        tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl.lower()
                         leaf_dependencies.add('export' + tbl_name)
                     elif parent.type == 4:
                         print('parent is SqoopMysql2Hive %s ' % parent.name)
                         etl = SqoopMysql2Hive.objects.get(pk=parent.rel_id)
-                        tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
+                        tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl.lower()
                         leaf_dependencies.add('import_' + tbl_name)
                     elif parent.type == 66:
                         etl = NULLETL.objects.get(pk=parent.rel_id)

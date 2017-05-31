@@ -162,7 +162,8 @@ def clean_deptask(request):
                 continue
             etl_obj = ExecObj.objects.get(type=task.type, rel_id=task.rel_id)
             WillDependencyTask.objects.update_or_create(name=task.name, rel_id=etl_obj.id, type=100,
-                                                        schedule=task.schedule)
+                                                        schedule=task.schedule, variables=task.variables,
+                                                        desc=task.desc)
             print('WillDependencyTask done : %s' % task.name)
         except Exception, e:
             print('WillDependencyTask error : %d --> %s' % (task.id, e))
@@ -172,11 +173,11 @@ def clean_deptask(request):
 def clean_M2H(request):
     for etl in SqoopMysql2Hive.objects.all():
         try:
-            tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
+            tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl.lower()
             if 'hive-table' in etl.option:
                 for op in etl.option.split('--'):
                     if op.startswith('hive-table'):
-                        tbl_name = etl.hive_meta.meta + '@' + re.split('\s', op.strip())[1]
+                        tbl_name = etl.hive_meta.meta + '@' + re.split('\s', op.strip())[1].lower()
                         logger.error('%s hive table name: %s ' % (etl.name, tbl_name))
                         print('%s hive table name %s ' % (etl.name, tbl_name))
                         break
