@@ -140,7 +140,7 @@ def push_msg(request):
 
 def hdfs_files(request):
     path = '/user/%s' % request.user.username
-    command = 'hdfs dfs -ls %s | grep user | awk \'{print substr($8, length("%s") + 1)}\'' % (path, path)
+    command = 'hdfs dfs -ls %s | grep ^[^d] | grep user | awk \'{print substr($8, length("%s") + 1)}\'' % (path, path)
     p = subprocess.Popen([''.join(command)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                          shell=True,
                          universal_newlines=True)
