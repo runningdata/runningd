@@ -38,6 +38,7 @@ urlpatterns = [
     url(r'^ops/dfs_usage/$', ops.dfs_usage, name='dfs_usage'),
     url(r'^ops/push_msg/$', ops.push_msg, name='push_msg'),
     url(r'^ops/hdfs_files/$', ops.hdfs_files, name='push_msg'),
+    url(r'^ops/up_hdfs/$', ops.upload_hdfs_file, name='up_hdfs'),
     # url(r'^users/add/$', usermanager.add_user, name='add_user'),
     # url(r'^users/$', usermanager.list_user, name='list_user'),
 

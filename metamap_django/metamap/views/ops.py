@@ -5,16 +5,22 @@ import subprocess
 
 import re
 
+from django import forms
+from django.conf import settings
 from django.contrib.auth.models import Group
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.http import HttpResponse
 import logging
 
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 import metamap
 from metamap import tasks
 from will_common.models import OrgGroup, UserProfile
 from will_common.utils import PushUtils
+from will_common.utils import constants
 from will_common.utils import dateutils
 from will_common.utils import redisutils
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
@@ -118,6 +124,7 @@ def dfs_usage_his(request):
     l.sort()
     return render(request, 'ops/hdfs_his.html', {"dateee": l, "dbs": final.keys(), "finall": final})
 
+
 def push_msg(request):
     group = request.GET['group']
     prjname = request.GET['prjname']
@@ -129,9 +136,10 @@ def push_msg(request):
     PushUtils.push_both(users, ' project %s : status : %s' % (prjname, status))
     return HttpResponse('done')
 
+
 def hdfs_files(request):
     path = '/user/%s' % request.user.username
-    command = 'hdfs dfs -ls /user/admin | grep user | awk \'{print substr($8, length("%s") + 2)}\'' % path
+    command = 'hdfs dfs -ls %s | grep user | awk \'{print substr($8, length("%s") + 1)}\'' % (path, path)
     p = subprocess.Popen([''.join(command)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                          shell=True,
                          universal_newlines=True)
@@ -139,6 +147,40 @@ def hdfs_files(request):
     print out
     print err
     return HttpResponse(out.replace('\n', '<br/>'))
+
+
+class UploadFileForm(forms.Form):
+    title = forms.CharField(max_length=50)
+    file = forms.FileField()
+
+
+def upload_hdfs_file(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            ff = request.FILES['file']
+            # path = default_storage.save('tmp/somename.mp3', ContentFile(ff.read()))
+            # tmp_file = os.path.join(constants.TMP_HDFS_FILE_LOCATION, path)
+            with default_storage.open('hdfstmp/' + ff.name, 'wb+') as destination:
+                for chunk in ff.chunks():
+                    destination.write(chunk)
+
+            local = 'hdfstmp/' + ff.name
+            path = '/user/%s' % request.user.username + '/'
+            command = 'hdfs dfs -put %s %s' % (local, path)
+            p = subprocess.Popen([''.join(command)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                 shell=True,
+                                 universal_newlines=True)
+            out, err = p.communicate()
+            if p.returncode == 0:
+                return HttpResponseRedirect('/success/url/')
+            else:
+                print(err)
+                return render(request, 'source/post_edit.html', {'form': form})
+    else:
+        form = UploadFileForm()
+    return render(request, 'source/post_edit.html', {'form': form})
+
 
 def dfs_usage(request):
     pattern = re.compile(r'\s+')
