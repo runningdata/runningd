@@ -147,8 +147,19 @@ def hdfs_files(request):
     out, err = p.communicate()
     print out
     print err
-    return render(request, 'ops/hdfs_list.html', {'objs': out.split('\n')})
+    return render(request, 'ops/hdfs_list.html', {'objs': [f for f in out.split('\n') if len(f.strip()) > 0]})
 
+
+def hdfs_del(request, filename):
+    path = '/user/%s' % request.user.username + '/' + filename
+    command = 'hdfs dfs -rm %s ' % path
+    p = subprocess.Popen([''.join(command)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         shell=True,
+                         universal_newlines=True)
+    out, err = p.communicate()
+    print out
+    print err
+    return HttpResponseRedirect(reverse('metamap:hdfs_files'))
 
 class UploadFileForm(forms.Form):
     file = forms.FileField()
