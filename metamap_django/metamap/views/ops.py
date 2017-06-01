@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 import logging
 
@@ -146,11 +147,10 @@ def hdfs_files(request):
     out, err = p.communicate()
     print out
     print err
-    return HttpResponse(out.replace('\n', '<br/>'))
+    return render(request, 'ops/hdfs_list.html', {'objs': out.split('\n')})
 
 
 class UploadFileForm(forms.Form):
-    title = forms.CharField(max_length=50)
     file = forms.FileField()
 
 
@@ -173,7 +173,7 @@ def upload_hdfs_file(request):
                                  universal_newlines=True)
             out, err = p.communicate()
             if p.returncode == 0:
-                return HttpResponseRedirect('/success/url/')
+                return HttpResponseRedirect(reverse('metamap:hdfs_files'))
             else:
                 print(err)
                 return render(request, 'source/post_edit.html', {'form': form})

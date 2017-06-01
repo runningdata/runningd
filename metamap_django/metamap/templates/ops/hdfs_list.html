@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+{% block title %}
+    个人文件夹
+{% endblock %}
+
+{% block scripts %}
+    <STYLE type="text/css">
+        .custab {
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin: 5% 0;
+            box-shadow: 3px 3px 2px #ccc;
+            transition: 0.5s;
+        }
+
+        .custab:hover {
+            box-shadow: 3px 3px 0px transparent;
+            transition: 0.5s;
+        }
+    </STYLE>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="row col-md-6 col-md-offset-2 custyle">
+            <table class="table table-striped custab">
+                <thead>
+                <tr>
+                    <th>文件名</th>
+                    <th class="text-center">Action</th>
+                </tr>
+                </thead>
+                {% for file in files %}
+                <tr>
+                    <td>{{ file }}</td>
+                    <td class="text-center">
+                        <a href="#" class="btn btn-danger btn-xs"><span
+                            class="glyphicon glyphicon-remove"></span> Del</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}
