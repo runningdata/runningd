@@ -14,7 +14,7 @@ from metamap.rest.rest_views import ETLViewSet, SqoopHive2MysqlViewSet, SqoopMys
 from metamap.views import to2cleaner
 from metamap.views import usermanager
 from metamap.views.sche_ana import ExportsViewSet
-from views import etls, metas
+from metamap.views import etls, metas
 from metamap.views import common
 
 app_name = 'metamap'
@@ -66,14 +66,6 @@ urlpatterns = [
     url(r'^etls/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', etls.generate_job_dag, name='generate_job_dag'),
     url(r'^h2m/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', sqoop.generate_job_dag, name='generate_sqoop_job_dag'),
     url(r'^m2h/generate_job_dag/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', sqoop2.generate_job_dag, name='generate_sqoop2_job_dag'),
-
-
-    url(r'^meta/list/$', metas.MetaListView.as_view(), name='meta_list'),
-    url(r'^meta/add/$', metas.add, name='add_meta'),
-    url(r'^meta/(?P<pk>[0-9]+)/$', metas.edit, name='edit_meta'),
-    url(r'^meta/col_search/$', metas.ColView.as_view(), name='col_list'),
-    url(r'^meta/tbl_search/$', metas.TBLView.as_view(), name='tbl_list'),
-    url(r'^meta/tbl_search/(?P<tblid>[0-9]+)/$', metas.get_table, name='tbl_info'),
 
     url(r'^h2m/$', sqoop.Hive2MysqlListView.as_view(), name='h2m_sqoop_list'),
     url(r'^h2m/(?P<pk>[0-9]+)/$', sqoop.edit, name='h2m_sqoop_edit'),

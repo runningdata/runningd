@@ -27,6 +27,9 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+
+SESSION_COOKIE_NAME = 'dqmsid'
+CSRF_COOKIE_NAME = 'dqmscsrftoken'
 EEE = 'default_DEV'
 ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83']
 

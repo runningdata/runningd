@@ -3,14 +3,11 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 
 from metamap.db_views import ColMeta, TBL
-from metamap.models import TblBlood, ETL, Meta
-from django.shortcuts import get_object_or_404, render
+from metamap.models import ETL, Meta
+from django.shortcuts import render
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.views import generic
-from django.utils import timezone
-import datetime
-from django.db import connections
 
 from will_common.utils import httputils
 from will_common.utils import userutils
@@ -43,7 +40,7 @@ def add(request):
         userutils.add_current_creator(meta, request)
         meta.save()
         logger.info('Meta has been created successfully : %s ' % meta)
-        return HttpResponseRedirect(reverse('metamap:meta_list'))
+        return HttpResponseRedirect(reverse('meta:meta_list'))
     else:
         return render(request, 'meta/edit.html')
 
@@ -54,7 +51,7 @@ def edit(request, pk):
         userutils.add_current_creator(meta, request)
         meta.save()
         logger.info('Meta has been created successfully : %s ' % meta)
-        return HttpResponseRedirect(reverse('metamap:meta_list'))
+        return HttpResponseRedirect(reverse('meta:meta_list'))
     else:
         obj = Meta.objects.get(pk=pk)
         return render(request, 'meta/edit.html', {'obj': obj})

@@ -1,5 +1,5 @@
 from django.conf.urls import url
 
-app_name = 'sparkml'
+app_name = 'ops'
 urlpatterns = [
 ]

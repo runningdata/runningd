@@ -151,6 +151,9 @@ def hdfs_files(request):
 
 
 def hdfs_del(request, filename):
+    if '..' in filename:
+        print('error file %s ' % filename)
+        return HttpResponseRedirect(reverse('metamap:hdfs_files'))
     path = '/user/%s' % request.user.username + '/' + filename
     command = 'hdfs dfs -rm %s ' % path
     p = subprocess.Popen([''.join(command)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -160,6 +163,7 @@ def hdfs_del(request, filename):
     print out
     print err
     return HttpResponseRedirect(reverse('metamap:hdfs_files'))
+
 
 class UploadFileForm(forms.Form):
     file = forms.FileField()
