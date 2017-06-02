@@ -31,9 +31,9 @@ def execute(cube_name, sql):
             # types = [col['columnTypeName'] for col in cols]
             vals = json.loads(rep.content)['results'][0]
             result = dict(zip(colls, vals))
-            result = {k: float(v) for k, v in result.items()}
+            result2 = {k: float(v) for k, v in result.items()}
 
-        return result
+        return result2
     except Exception, e:
         print('Error in kylincli : %s ' % e.message)
         return {}

@@ -129,7 +129,9 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
                         print('parent is SqoopMysql2Hive %s ' % parent.name)
                         etl = SqoopMysql2Hive.objects.get(pk=parent.rel_id)
                         tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl.lower()
-                        leaf_dependencies.add('import_' + tbl_name)
+                        # TODO NAME
+                        # leaf_dependencies.add('import_' + tbl_name)
+                        leaf_dependencies.add(etl.name)
                     elif parent.type == 66:
                         etl = NULLETL.objects.get(pk=parent.rel_id)
                         leaf_dependencies.add('unknown_' + etl.name)
@@ -165,7 +167,9 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     elif etlobj.type == 4:
         etl = SqoopMysql2Hive.objects.get(pk=etlobj.rel_id)
         tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
-        job_name = 'import_' + tbl_name
+        # TODO NAME
+        # job_name = 'import_' + tbl_name
+        job_name = etl.name
     else:
         print('xxxxxxxxxxxxxxx parent found..........%s ' % etlobj.name)
         raise Exception('xxxxxxxxxxxxxxx parent found..........%s ')
