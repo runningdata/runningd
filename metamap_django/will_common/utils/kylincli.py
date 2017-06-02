@@ -25,6 +25,7 @@ def execute(cube_name, sql):
         auth_params = (settings.KYLIN_ADMIN_USER, settings.KYLIN_ADMIN_PWD)
         header = {'Content-Type': 'application/json;charset=UTF-8'}
         rep = requests.post(url=settings.KYLIN_REST_URI, json=params, auth=auth_params, headers=header)
+        result = {}
         if rep.status_code == 200:
             cols = json.loads(rep.content)['columnMetas']
             colls = [col['name'] for col in cols]
@@ -32,8 +33,9 @@ def execute(cube_name, sql):
             vals = json.loads(rep.content)['results'][0]
             result = dict(zip(colls, vals))
             result2 = {k: float(v) for k, v in result.items()}
-
-        return result2
+        else:
+            print('Error in kylincli resp status is : %d ' % rep.status_code)
+        return result
     except Exception, e:
         print('Error in kylincli : %s ' % e.message)
         return {}
