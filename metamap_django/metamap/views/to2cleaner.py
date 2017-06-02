@@ -183,7 +183,6 @@ def clean_M2H(request):
                         break
                 logger.error('%s M2H hive table for %d ' % (etl.name, etl.id))
                 print('%s M2H hive table for %d ' % (etl.name, etl.id))
-                continue
             etl_obj, result = ExecObj.objects.update_or_create(name=tbl_name, rel_id=etl.id, type=4)
             print('ETLObj for SqoopMysql2Hive done : %s ' % tbl_name)
 

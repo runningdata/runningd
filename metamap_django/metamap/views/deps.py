@@ -74,8 +74,9 @@ def generate_job_dag_v2(request, schedule, group_name='xiaov'):
                     final_deps.add(job_name)
                 elif leaf_etl.type == 4:
                     etl = SqoopMysql2Hive.objects.get(pk=leaf_etl.rel_id)
-                    tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
-                    job_name = 'import_' + tbl_name
+                    # TOdo NAME
+                    # tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
+                    # job_name = 'import_' + tbl_name
                     final_deps.add(job_name)
                 else:
                     final_deps.add(leaf_etl.name)
@@ -86,7 +87,15 @@ def generate_job_dag_v2(request, schedule, group_name='xiaov'):
 
         load_nodes_v2(leaves, folder, done_blood, done_leaf, schedule)
 
-        generate_job_file_v2(ExecObj(name='etl_v2_done_' + folder), final_deps, folder, folder)
+        generate_job_file_v2(ExecObj(name='etl_v2_done_' + folder), final_deps, folder, schedule)
+
+        # add no blood schedule tasks
+        non_dep_task = set()
+        for tsk in WillDependencyTask.objects.filter(schedule=schedule, type=100).exclude(name__in=final_deps):
+            exec_obj = ExecObj.objects.get(tsk.rel_id)
+            non_dep_task.add(exec_obj.name)
+
+        generate_job_file_v2(ExecObj(name='etl_non_dep_v2_done_' + folder), non_dep_task, folder, schedule)
         # PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
         #                            '%d etls generated ' % len(done_blood))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
