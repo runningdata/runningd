@@ -203,7 +203,6 @@ def edit(request, pk):
                 privious_etl.valid = 0
                 privious_etl.save()
                 previous_query = privious_etl.query
-                privious_name = privious_etl.name
 
                 # if int(request.POST['valid']) == 1:
                 etl = privious_etl
