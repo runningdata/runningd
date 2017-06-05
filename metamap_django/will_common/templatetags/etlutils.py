@@ -16,7 +16,7 @@ def var(var):
 
 @register.simple_tag
 def now_datetime():
-    return datetime.datetime.now().strftime('%Y%m%d%I%M%S')
+    return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 
 
 @register.simple_tag
