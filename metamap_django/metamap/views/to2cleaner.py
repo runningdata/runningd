@@ -125,6 +125,15 @@ def clean_blood(request):
                 print(' ETL \'s ETLBlood done : %d ' % etl_blood.id)
             except Exception, e:
                 print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
+
+    for h2m in ExecObj.objects.filter(type=3):
+        hm = SqoopHive2Mysql.objects.get(pk=h2m.rel_id)
+        tbl_name = hm.hive_meta.meta + '@' + hm.hive_tbl
+        pp = ExecObj.objects.get(name=tbl_name)
+        cc, status = ExecObj.objects.get_or_create(name=h2m.name, rel_id=h2m.id, type=3)
+        ExecBlood.objects.update_or_create(
+                    child=cc,
+                    parent=pp)
     return HttpResponse('clean_blood done')
 
 

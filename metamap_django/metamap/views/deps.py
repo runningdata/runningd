@@ -69,14 +69,17 @@ def generate_job_dag_v2(request, schedule, group_name='xiaov'):
                 if leaf_etl.type == 3:
                     # H2M的名字不能是hive表了，这样就跟H2H的重复了
                     etl = SqoopHive2Mysql.objects.get(pk=leaf_etl.rel_id)
-                    tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
-                    job_name = 'export_' + tbl_name
+                    # TOdo NAME
+                    # tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
+                    # job_name = 'export_' + tbl_name
+                    job_name = etl.name
                     final_deps.add(job_name)
                 elif leaf_etl.type == 4:
                     etl = SqoopMysql2Hive.objects.get(pk=leaf_etl.rel_id)
                     # TOdo NAME
                     # tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
                     # job_name = 'import_' + tbl_name
+                    job_name = etl.name
                     final_deps.add(job_name)
                 else:
                     final_deps.add(leaf_etl.name)
@@ -92,7 +95,7 @@ def generate_job_dag_v2(request, schedule, group_name='xiaov'):
         # add no blood schedule tasks
         non_dep_task = set()
         for tsk in WillDependencyTask.objects.filter(schedule=schedule, type=100).exclude(name__in=final_deps):
-            exec_obj = ExecObj.objects.get(tsk.rel_id)
+            exec_obj = ExecObj.objects.get(pk=tsk.rel_id)
             non_dep_task.add(exec_obj.name)
 
         generate_job_file_v2(ExecObj(name='etl_non_dep_v2_done_' + folder), non_dep_task, folder, schedule)
@@ -133,7 +136,9 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
                         print('parent is SqoopHive2Mysql %s ' % parent.name)
                         etl = SqoopHive2Mysql.objects.get(pk=parent.rel_id)
                         tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl.lower()
-                        leaf_dependencies.add('export' + tbl_name)
+                        # TODO NAME
+                        # leaf_dependencies.add('export' + tbl_name)
+                        leaf_dependencies.add(etl.name)
                     elif parent.type == 4:
                         print('parent is SqoopMysql2Hive %s ' % parent.name)
                         etl = SqoopMysql2Hive.objects.get(pk=parent.rel_id)
@@ -172,7 +177,9 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
         # H2M的名字不能是hive表了，这样就跟H2H的重复了
         etl = SqoopHive2Mysql.objects.get(pk=etlobj.rel_id)
         tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
-        job_name = 'export_' + tbl_name
+        # TODO NAME
+        # job_name = 'export_' + tbl_name
+        job_name = etl.name
     elif etlobj.type == 4:
         etl = SqoopMysql2Hive.objects.get(pk=etlobj.rel_id)
         tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl

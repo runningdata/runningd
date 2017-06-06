@@ -22,6 +22,8 @@
                 <input name="name" value="{{ obj.name }}" type="text" class="form-control"
                        {% if obj %}
                        readonly="readonly"
+                       {% else %}
+                        required
                        {% endif %}
                 >
             </div>
