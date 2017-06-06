@@ -68,6 +68,26 @@ def clean_ANA(request):
     return HttpResponse('clean_ANA done')
 
 
+def is_name(etl, name):
+    '''
+    check whether the m2h is one parent in blood or not
+    :param etl:
+    :param name:
+    :return:
+    '''
+    tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl.lower()
+    if 'hive-table' in etl.option:
+        for op in etl.option.split('--'):
+            if op.startswith('hive-table'):
+                tbl_name = etl.hive_meta.meta + '@' + re.split('\s', op.strip())[1].lower()
+                logger.error('%s hive table name: %s ' % (etl.name, tbl_name))
+                print('%s hive table name %s ' % (etl.name, tbl_name))
+                break
+        logger.error('%s M2H hive table for %d ' % (etl.name, etl.id))
+        print('%s M2H hive table for %d ' % (etl.name, etl.id))
+    return tbl_name == name
+
+
 def clean_etlp_for_blood(request):
     '''
     先清洗所有不是ETL的父节点
@@ -84,7 +104,9 @@ def clean_etlp_for_blood(request):
                     parent = ETL.objects.get(name=blood.parentTbl, valid=1)
                 except ObjectDoesNotExist, e:
                     try:
-                        parent = SqoopMysql2Hive.objects.get(name=blood.parentTbl, valid=1)
+                        m2h_id = 0
+                        if not any(is_name(m2h, blood.parentTbl) for m2h in SqoopMysql2Hive.objects.all()):
+                            parent, status = NULLETL.objects.get_or_create(name=blood.parentTbl)
                     except ObjectDoesNotExist, e:
                         parent, status = NULLETL.objects.get_or_create(name=blood.parentTbl)
                         logger.error(e.message)
@@ -132,8 +154,9 @@ def clean_blood(request):
         pp = ExecObj.objects.get(name=tbl_name)
         cc, status = ExecObj.objects.get_or_create(name=h2m.name, rel_id=h2m.id, type=3)
         ExecBlood.objects.update_or_create(
-                    child=cc,
-                    parent=pp)
+            child=cc,
+            parent=pp)
+        print('add blood for h2m : %s , h2m id is : %d ' % (tbl_name, h2m.rel_id))
     return HttpResponse('clean_blood done')
 
 

@@ -79,7 +79,10 @@ def runcase(case, check, user):
         if result:
             for rule in case.dqmsrule_set.all():
                 print('handleing %s ' % rule.measure_column)
-                re = result[rule.measure_column.upper()]
+                if case.datasrc.src_type == constants.DATASRC_TYPE_KYLIN:
+                    re = result[rule.measure_column.upper()]
+                else:
+                    re = result[rule.measure_column]
                 print('result is %d , max is %d, min is %d' % (re, rule.max, rule.min))
                 if re > rule.max or re < rule.min:
                     alert = DqmsAlert.objects.create(rule=rule)
