@@ -1,14 +1,23 @@
 # !/usr/bin/env python
 # -*- coding:utf-8 -*-
 import logging
+import os
 
+from django.conf import settings
 from django.contrib.auth.models import Group
 from django.db import models
 import datetime
+
+from django.template import Context
+from django.template import Template
 from django.utils import timezone
 
+from metamap.db_views import ColMeta, DB
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
 from will_common.models import PeriodicTask, WillDependencyTask, UserProfile, OrgGroup
+from will_common.utils import dateutils
+from will_common.utils import ziputils
+from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION
 
 logger = logging.getLogger('django')
 from will_common.utils import hivecli
@@ -20,6 +29,7 @@ class ETLObjRelated(models.Model):
     '''
     etl_type = 110
     name = models.CharField(max_length=100, verbose_name=u"任务名称", default='no_name_yet')
+    rel_name = models.TextField(null=True)
     ctime = models.DateTimeField(default=timezone.now)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, null=True)
     cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, null=True, )
@@ -32,12 +42,8 @@ class ETLObjRelated(models.Model):
     class Meta:
         abstract = True
 
-    def get_uniqu_name(self):
-        '''
-        TODO: for generate job name in azkaban
-        :return:
-        '''
-        pass
+    def get_clean_str(self, str_list):
+        return '\n'.join(str_list)
 
     def update_etlobj(self):
         self.clean_etlobj()
@@ -60,9 +66,17 @@ class ETLObjRelated(models.Model):
         '''
         return None
 
+    def get_cmd_prefix(self):
+        return "sh "
+
+    def get_script(self):
+        return "get_script Not supported now...for %s " % self.name
+
+
 class NULLETL(ETLObjRelated):
     type = 66
     pass
+
 
 class AnaETL(ETLObjRelated):
     headers = models.TextField(null=False, blank=False)
@@ -82,6 +96,13 @@ class AnaETL(ETLObjRelated):
 
     def __str__(self):
         return self.name
+
+    def get_script(self):
+        str_list = list()
+        str_list.append('{% load etlutils %}')
+        str_list.append(self.variables)
+        str_list.append(self.query)
+        return str_list
 
 
 class SourceEngine(models.Model):
@@ -125,6 +146,43 @@ class JarApp(ETLObjRelated):
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
 
+    def get_wd(self):
+        log = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-jarapp-sche-' + self.name + '.log'
+        work_dir = os.path.dirname(os.path.dirname(__file__)) + '/'
+        return work_dir
+
+    def get_script(self):
+        str = list()
+        context = Context()
+        context['task'] = self
+        wd = self.get_wd()
+        context['wd'] = wd
+        if self.engine_type.id == 1:
+            with open('metamap/config/spark_template.sh') as tem:
+                str.append(tem.read())
+        elif self.engine_type.id == 2:
+            with open('metamap/config/hadoop_template.sh') as tem:
+                str.append(tem.read())
+        elif self.engine_type.id == 4:
+            # 看看zip是否已经解压，先解压到指定目录
+            zipfile = wd + self.jar_file.name
+            dir = wd + 'jars/' + self.name + '/'
+            if not os.path.exists(dir):
+                ziputils.unzip(zipfile, dir)
+            deps = [f for f in os.listdir(dir) if f.endswith('.zip') or f.endswith('.egg') or f.endswith('.py')]
+            if len(deps) > 0:
+                context['deps'] = ','.join(deps)
+            context['wd'] = dir
+            with open('metamap/config/pyspark_template.sh') as tem:
+                str.append(tem.read())
+        else:
+            with open('metamap/config/jar_template.sh') as tem:
+                str.append(tem.read())
+        template = Template('\n'.join(str))
+        strip = template.render(context).strip()
+        strip = '{% load etlutils %} \n' + strip
+        return {strip, }
+
 
 class ETL(ETLObjRelated):
     query = models.TextField()
@@ -140,6 +198,31 @@ class ETL(ETLObjRelated):
     def __str__(self):
         return self.query
 
+    def get_script(self):
+        str_list = list()
+        str_list.append('{% load etlutils %}')
+        str_list.append('set mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ';')
+        str_list.append("-- job for " + self.name)
+        if self.creator:
+            str_list.append("-- " + self.creator.user.username + '-' + self.name)
+        if self.author:
+            str_list.append("-- author : " + self.author)
+        ctime = self.ctime
+        if (ctime != None):
+            str_list.append("-- create time : " + dateutils.format_day(ctime))
+        else:
+            str_list.append("-- cannot find ctime")
+        str_list.append("\n---------------------------------------- pre settings ")
+        str_list.append(self.setting)
+        str_list.append("\n---------------------------------------- preSql ")
+        str_list.append(self.preSql)
+        str_list.append("\n---------------------------------------- query ")
+        str_list.append(self.query)
+        return str_list
+
+    def get_cmd_prefix(self):
+        return "hive -f "
+
     def get_deps(self):
         deps = hivecli.getTbls_v2(self.query)
         return deps
@@ -149,6 +232,9 @@ class ETL(ETLObjRelated):
 
 
 class ExecObj(models.Model):
+    '''
+    最終確定還是使用ETL的名字吧，不去分析具體的表名字了
+    '''
     name = models.CharField(max_length=100, db_column='name')
     type = models.IntegerField(default=1, blank=False, null=False,
                                help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 sourcefile;6 jarfile")
@@ -159,22 +245,35 @@ class ExecObj(models.Model):
     def execute(self):
         self.get_rel_obj().execute()
 
+    def get_cmd(self, schedule, location):
+        obj = self.get_rel_obj()
+        str_list = obj.get_script()
+        if schedule != -1:
+            tt = WillDependencyTask.objects.get(rel_id=self.id, schedule=schedule, type=100)
+            str_list.append(tt.variables)
+        template = Template(obj.get_clean_str(str_list))
+        script = template.render(Context()).strip()
+        with open(location, 'w') as sc:
+            sc.write(script.encode('utf8'))
+        command = obj.get_cmd_prefix() + location
+        return command
+
     def get_deps(self):
         return ExecBlood.objects.filter(child=self)
 
     def get_rel_obj(self):
         if self.type == 1:
-            return ETL.objects.filter(pk=self.rel_id)
+            return ETL.objects.get(pk=self.rel_id)
         elif self.type == 2:
-            return AnaETL.objects.filter(pk=self.rel_id)
+            return AnaETL.objects.get(pk=self.rel_id)
         elif self.type == 3:
-            return SqoopHive2Mysql.objects.filter(pk=self.rel_id)
+            return SqoopHive2Mysql.objects.get(pk=self.rel_id)
         elif self.type == 4:
-            return SqoopMysql2Hive.objects.filter(pk=self.rel_id)
+            return SqoopMysql2Hive.objects.get(pk=self.rel_id)
         elif self.type == 5:
-            return SourceApp.objects.filter(pk=self.rel_id)
+            return SourceApp.objects.get(pk=self.rel_id)
         elif self.type == 6:
-            return JarApp.objects.filter(pk=self.rel_id)
+            return JarApp.objects.get(pk=self.rel_id)
         else:
             return None
 
@@ -255,7 +354,7 @@ class BIUser(models.Model):
 
 
 class SqoopMysql2Hive(ETLObjRelated):
-    etl_type = 4
+    type = 4
     mysql_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_m')
     hive_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_h')
     columns = models.TextField(null=True)
@@ -266,9 +365,55 @@ class SqoopMysql2Hive(ETLObjRelated):
     partition_key = models.CharField(max_length=300, null=True, default='')
     settings = models.TextField(null=True)
 
+    def get_clean_str(self, str_list):
+        return ' '.join(str_list).replace('\n', ' ').replace('&', '\&')
+
+    def get_hive_inmi_tbl(self, tbl):
+        return tbl + '_inmi'
+
+    def get_script(self):
+        is_partition = True if len(self.partition_key) > 0 else False
+
+        str_list = list()
+        str_list.append('{% load etlutils %}')
+
+        str_list.append(' sqoop import ')
+        str_list.append('-Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE)
+        str_list.append(self.mysql_meta.settings)
+        str_list.append(' --hive-database ')
+        str_list.append(self.hive_meta.db)
+        if self.columns:
+            str_list.append(' --columns')
+            str_list.append(self.columns)
+        if self.where_clause:
+            str_list.append(' --where')
+            str_list.append(self.where_clause)
+        str_list.append(' --table')
+        if is_partition:
+            str_list.append(self.mysql_tbl)
+            str_list.append(' --hive-table ' + self.get_hive_inmi_tbl(self.mysql_tbl))
+        else:
+            str_list.append(self.mysql_tbl)
+        str_list.append(' --hive-import --hive-overwrite')
+        str_list.append(' --target-dir ')
+        str_list.append(self.hive_meta.meta + '_' + self.name)
+        str_list.append('--outdir /server/app/sqoop/vo --bindir /server/app/sqoop/vo --verbose ')
+        str_list.append(' -m %d ' % self.parallel)
+        if 'target-dir' in self.option:
+            export_dir = DB.objects.using('hivemeta').filter(name=self.hive_meta.db).first().db_location_uri
+            export_dir += '/'
+            export_dir += self.mysql_tbl
+            export_dir += '/'
+            str_list.append(self.option.replace('target-dir', 'target-dir ' + export_dir))
+        else:
+            str_list.append(' --delete-target-dir ')
+            str_list.append(self.option)
+
+        return str_list
+
 
 class SqoopHive2Mysql(ETLObjRelated):
-    etl_type = 3
+    type = 3
     mysql_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_m')
     hive_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_h')
     columns = models.TextField(null=True)
@@ -280,9 +425,44 @@ class SqoopHive2Mysql(ETLObjRelated):
     partion_expr = models.TextField(null=True)
     parallel = models.IntegerField(default=1, verbose_name='并发执行')
 
+    def get_clean_str(self, str_list):
+        return ' '.join(str_list).replace('\n', ' ').replace('&', '\&')
+
     def get_deps(self):
         # TODO 依赖hive多个表，需要解析sql，目前没有这种需求，为降低错误率，暂时不支持
         return self.hive_meta.meta + '@' + self.hive_tbl
+
+    def get_script(self):
+        str_list = list()
+        str_list.append('{% load etlutils %}')
+        str_list.append(' sqoop export ')
+        str_list.append('-Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE)
+        str_list.append(self.mysql_meta.settings)
+        if 'input-fields-terminated-by' not in self.option:
+            str_list.append(' --input-fields-terminated-by "\\t" ')
+        str_list.append('  --update-key ')
+        str_list.append(self.update_key)
+        str_list.append(' --update-mode allowinsert ')
+        str_list.append(' --columns ')
+        str_list.append(self.columns)
+        if not settings.DEBUG:
+            export_dir = ColMeta.objects.using('hivemeta').filter(db__name=self.hive_meta.db,
+                                                                  tbl__tbl_name=self.hive_tbl).first().location
+        else:
+            export_dir = ''
+        export_dir += '/'
+        export_dir += self.hive_tbl
+        export_dir += '/'
+        if len(self.partion_expr) != 0:
+            export_dir += self.partion_expr
+        str_list.append(' --export-dir ')
+        str_list.append(export_dir)
+        str_list.append(' --table ')
+        str_list.append(self.mysql_tbl)
+        str_list.append(' --verbose ')
+        str_list.append(' -m %d ' % self.parallel)
+        str_list.append(self.option)
+        return str_list
 
 
 class Exports(models.Model):

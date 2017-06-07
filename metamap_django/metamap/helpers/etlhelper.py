@@ -241,8 +241,11 @@ def generate_sqoop_hive2mysql(task, schedule=-1):
     str.append(' --update-mode allowinsert ')
     str.append(' --columns ')
     str.append(task.columns)
-    export_dir = ColMeta.objects.using('hivemeta').filter(db__name=task.hive_meta.db,
-                                                          tbl__tbl_name=task.hive_tbl).first().location
+    if not settings.DEBUG:
+        export_dir = ColMeta.objects.using('hivemeta').filter(db__name=task.hive_meta.db,
+                                                              tbl__tbl_name=task.hive_tbl).first().location
+    else:
+        export_dir = ''
     export_dir += '/'
     export_dir += task.hive_tbl
     export_dir += '/'
@@ -467,9 +470,8 @@ def generate_job_file_m2h(objs, folder, group_name):
     :return:
     '''
     for obj in objs:
-
-        job_name = obj.name
         task = SqoopMysql2Hive.objects.get(pk=obj.rel_id)
+        job_name = task.name
         if task.cgroup.name == group_name:
             m2h = generate_sqoop_mysql2hive(task, schedule=obj.schedule)
             sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".m2h"

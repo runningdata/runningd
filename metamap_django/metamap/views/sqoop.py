@@ -126,6 +126,7 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
     :param request:
     :return:
     '''
+    current_id = 0
     try:
         folder = 'h2m-' + dateutils.now_datetime()
         leafs = WillDependencyTask.objects.filter(schedule=schedule, type=3, valid=1)
@@ -138,6 +139,7 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
         command = 'echo done for h2m'
         deps = set()
         for leaf in leafs:
+            current_id = leaf.id
             if SqoopHive2Mysql.objects.get(pk=leaf.rel_id).cgroup.name == group_name:
                 deps.add(leaf.name)
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
@@ -146,6 +148,6 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:
-        logger.error('error : %s ' % e)
+        logger.error('error : %s , id is %d' % (e, current_id))
         logger.error('traceback is : %s ' % traceback.format_exc())
         return HttpResponse('error')

@@ -18,7 +18,8 @@ def clean_etl(request):
     # TODO 有些sqoop import的ods表相关的，还没有生成对应的ETLBlood对象，所以当前ETL的H2H也是不完整的血统DAG
     for etl in ETL.objects.filter(valid=1):
         try:
-            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=1, cgroup=etl.cgroup)
+            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=1, cgroup=etl.cgroup,
+                                                               creator=etl.creator)
             print('ETLObj for ETL done : %s ' % etl.name)
         except Exception, e:
             print('ETLObj for ETL error :%d --> %s' % (etl.id, e))
@@ -27,12 +28,12 @@ def clean_etl(request):
 
 def clean_H2M(request):
     # 把hive数据表作为自己的依赖
-    for etl in SqoopHive2Mysql.objects.all():
+    for etl in SqoopHive2Mysql.objects.filter(valid=1):
         try:
-            tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
-            etl_obj, result = ExecObj.objects.update_or_create(name=tbl_name, rel_id=etl.id, type=3)
+            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=3, cgroup=etl.cgroup,
+                                                               creator=etl.creator)
             print('ETLObj for SqoopHive2Mysql done : %s ' % etl.name)
-            rel_id = ETL.objects.get(name=tbl_name, valid=1).id
+            rel_id = ETL.objects.get(name=etl.rel_name, valid=1).id
             parent = ExecObj.objects.get(rel_id=rel_id, type=1)
             etl_blood, result = ExecBlood.objects.update_or_create(child=etl_obj, parent=parent)
             print(' SqoopHive2Mysql \'s ETLBlood done : %d ' % etl_blood.id)
@@ -48,7 +49,8 @@ def clean_ANA(request):
             if etl.name.__contains__(u'转化率'):
                 print(' %s passed ' % etl.name)
                 continue
-            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=2)
+            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=2, cgroup=etl.cgroup,
+                                                               creator=etl.creator)
             print('ETLObj for AnaETL done : %s ' % etl.name)
             # TODO 测试环境hiveserver的HDFS元数据不全面
             deps = hivecli.get_tbls(etl.query)
@@ -68,27 +70,7 @@ def clean_ANA(request):
     return HttpResponse('clean_ANA done')
 
 
-def is_name(etl, name):
-    '''
-    check whether the m2h is one parent in blood or not
-    :param etl:
-    :param name:
-    :return:
-    '''
-    tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl.lower()
-    if 'hive-table' in etl.option:
-        for op in etl.option.split('--'):
-            if op.startswith('hive-table'):
-                tbl_name = etl.hive_meta.meta + '@' + re.split('\s', op.strip())[1].lower()
-                logger.error('%s hive table name: %s ' % (etl.name, tbl_name))
-                print('%s hive table name %s ' % (etl.name, tbl_name))
-                break
-        logger.error('%s M2H hive table for %d ' % (etl.name, etl.id))
-        print('%s M2H hive table for %d ' % (etl.name, etl.id))
-    return tbl_name == name
-
-
-def clean_etlp_for_blood(request):
+def clean_etlp_befor_blood(request):
     '''
     先清洗所有不是ETL的父节点
     :param request:
@@ -104,9 +86,7 @@ def clean_etlp_for_blood(request):
                     parent = ETL.objects.get(name=blood.parentTbl, valid=1)
                 except ObjectDoesNotExist, e:
                     try:
-                        m2h_id = 0
-                        if not any(is_name(m2h, blood.parentTbl) for m2h in SqoopMysql2Hive.objects.all()):
-                            parent, status = NULLETL.objects.get_or_create(name=blood.parentTbl)
+                        SqoopMysql2Hive.objects.get(rel_name=blood.parentTbl)
                     except ObjectDoesNotExist, e:
                         parent, status = NULLETL.objects.get_or_create(name=blood.parentTbl)
                         logger.error(e.message)
@@ -128,19 +108,13 @@ def clean_blood(request):
                     parent = ETL.objects.get(name=blood.parentTbl, valid=1)
                 except ObjectDoesNotExist, e:
                     try:
-                        '''
-                        这里有个漏洞，对于M2H并不是默认表名的时候会错把type为4的弄成66
-                        '''
-                        parent = SqoopMysql2Hive.objects.get(name=blood.parentTbl, valid=1)
+                        # parent = SqoopMysql2Hive.objects.get(name=blood.parentTbl, valid=1)
+                        parent = SqoopMysql2Hive.objects.get(rel_name=blood.parentTbl)
                     except ObjectDoesNotExist, e:
                         parent = NULLETL.objects.get(name=blood.parentTbl)
                         logger.error(e.message)
                 cc = ExecObj.objects.get(rel_id=child.id, type=1)
-                try:
-                    pp = ExecObj.objects.get(name=parent.name)
-                except ObjectDoesNotExist, e:
-                    pp, status = ExecObj.objects.get_or_create(name=parent.name, rel_id=parent.id, type=66)
-                    logger.error(e.message)
+                pp = ExecObj.objects.get(name=parent.name)
                 etl_blood, result = ExecBlood.objects.update_or_create(
                     child=cc,
                     parent=pp)
@@ -150,13 +124,12 @@ def clean_blood(request):
 
     for h2m in ExecObj.objects.filter(type=3):
         hm = SqoopHive2Mysql.objects.get(pk=h2m.rel_id)
-        tbl_name = hm.hive_meta.meta + '@' + hm.hive_tbl
-        pp = ExecObj.objects.get(name=tbl_name)
+        pp = ExecObj.objects.get(name=hm.rel_name)
         cc, status = ExecObj.objects.get_or_create(name=h2m.name, rel_id=h2m.id, type=3)
         ExecBlood.objects.update_or_create(
             child=cc,
             parent=pp)
-        print('add blood for h2m : %s , h2m id is : %d ' % (tbl_name, h2m.rel_id))
+        print('add blood for h2m : %s , h2m id is : %d ' % (hm.rel_name, h2m.rel_id))
     return HttpResponse('clean_blood done')
 
 
@@ -186,12 +159,16 @@ def clean_deptask(request):
     #     except Exception, e:
     #         print('WillDependencyTask error : %d --> %s' % (task.id, e))
 
-    for task in WillDependencyTask.objects.filter(valid=1, type=4):
+    type = int(request.GET['type'])
+    for task in WillDependencyTask.objects.filter(valid=1, type=type):
         try:
             if task.type == 100:
                 continue
-            if SqoopMysql2Hive.objects.get(pk=task.rel_id).valid == 0:
-                continue
+            try:
+                if SqoopMysql2Hive.objects.get(pk=task.rel_id).valid == 0:
+                    continue
+            except ObjectDoesNotExist, e:
+                pass
             etl_obj = ExecObj.objects.get(type=task.type, rel_id=task.rel_id)
             WillDependencyTask.objects.update_or_create(name=task.name, rel_id=etl_obj.id, type=100,
                                                         schedule=task.schedule, variables=task.variables,
@@ -205,23 +182,14 @@ def clean_deptask(request):
 def clean_M2H(request):
     for etl in SqoopMysql2Hive.objects.all():
         try:
-            tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl.lower()
-            if 'hive-table' in etl.option:
-                for op in etl.option.split('--'):
-                    if op.startswith('hive-table'):
-                        tbl_name = etl.hive_meta.meta + '@' + re.split('\s', op.strip())[1].lower()
-                        logger.error('%s hive table name: %s ' % (etl.name, tbl_name))
-                        print('%s hive table name %s ' % (etl.name, tbl_name))
-                        break
-                logger.error('%s M2H hive table for %d ' % (etl.name, etl.id))
-                print('%s M2H hive table for %d ' % (etl.name, etl.id))
-            etl_obj, result = ExecObj.objects.update_or_create(name=tbl_name, rel_id=etl.id, type=4)
-            print('ETLObj for SqoopMysql2Hive done : %s ' % tbl_name)
+            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=4, cgroup=etl.cgroup,
+                                                               creator=etl.creator)
+            print('ETLObj for SqoopMysql2Hive done : %s ' % etl.name)
 
             # 导入M2H，把前面缺失的import添加到ETLBlood中去
-            for blood in TblBlood.objects.filter(parentTbl=tbl_name):
+            for blood in TblBlood.objects.filter(parentTbl=etl.rel_name):
                 try:
-                    parent = ETL.objects.get(name=blood.parentTbl, valid=1)
+                    parent = ETL.objects.get(rel_name=blood.parentTbl, valid=1)
                 except Exception, e:
                     child = ExecObj.objects.get(type=1, name=blood.tblName)
                     etl_blood, result = ExecBlood.objects.update_or_create(parent=etl_obj, child=child)
@@ -229,3 +197,39 @@ def clean_M2H(request):
         except Exception, e:
             print('SqoopMysql2Hive \'s error : %d --> %s' % (etl.id, e))
     return HttpResponse(' clean_M2H done')
+
+
+def clean_rel_name(request):
+    '''
+    清洗M2H和H2M的名字，方便後面過濾查取等
+    :param request:
+    :return:
+    '''
+    for etl in SqoopMysql2Hive.objects.all():
+        tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl.lower()
+        if 'hive-table' in etl.option:
+            for op in etl.option.split('--'):
+                if op.startswith('hive-table'):
+                    tbl_name = etl.hive_meta.meta + '@' + re.split('\s', op.strip())[1].lower()
+                    break
+        etl.rel_name = tbl_name
+        etl.save()
+
+    for etl in SqoopHive2Mysql.objects.all():
+        tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl.lower()
+        etl.rel_name = tbl_name
+        etl.save()
+    return HttpResponse('XX')
+
+
+def clean_all(request):
+    # clean_rel_name(request)
+    clean_etl(request)
+    clean_etlp_befor_blood(request)
+    clean_blood(request)
+    clean_M2H(request)
+    # request.GET['type'] = 1
+    # clean_deptask(request)
+    # request.GET['type'] = 4
+    # clean_deptask(request)
+    return HttpResponse('All Done')
