@@ -83,7 +83,10 @@ def runcase(case, check, user):
                     re = result[rule.measure_column.upper()]
                 else:
                     re = result[rule.measure_column]
-                print('result is %d , max is %d, min is %d' % (re, rule.max, rule.min))
+                try:
+                    print('result is %d , max is %d, min is %d' % (re, rule.max, rule.min))
+                except:
+                    print('error happens ....... result is ' + re)
                 if re > rule.max or re < rule.min:
                     alert = DqmsAlert.objects.create(rule=rule)
                     msg = constants.ALERT_MSG % (

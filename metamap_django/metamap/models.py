@@ -5,6 +5,7 @@ import os
 
 from django.conf import settings
 from django.contrib.auth.models import Group
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 import datetime
 
@@ -27,7 +28,7 @@ class ETLObjRelated(models.Model):
     '''
     every etl obj should extend me. for example: m2h, h2h, h2m .etc
     '''
-    etl_type = 110
+    type = 110
     name = models.CharField(max_length=100, verbose_name=u"任务名称", default='no_name_yet')
     rel_name = models.TextField(null=True)
     ctime = models.DateTimeField(default=timezone.now)
@@ -38,9 +39,21 @@ class ETLObjRelated(models.Model):
         (1, '是'),
         (0, '否'),
     ))
+    exec_obj = models.ForeignKey('ExecObj', on_delete=models.DO_NOTHING, null=True, )
 
     class Meta:
         abstract = True
+    # TODO release after clean
+    # def save(self, *args, **kwargs):
+    #     super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
+    #     exe, created = ExecObj.objects.get_or_create(type=self.type, name=self.name, rel_id = self.id)
+    #     exe.rel_id = self.id
+    #     exe.creator = self.creator
+    #     exe.cgroup = self.cgroup
+    #     exe.save()
+    #     if created:
+    #         self.exec_obj = exe
+    #         super(ETLObjRelated, self).save(*args, **kwargs)
 
     def get_clean_str(self, str_list):
         return '\n'.join(str_list)
@@ -75,10 +88,13 @@ class ETLObjRelated(models.Model):
 
 class NULLETL(ETLObjRelated):
     type = 66
-    pass
+
+    def get_script(self):
+        return "echo task for % s " % self.name
 
 
 class AnaETL(ETLObjRelated):
+    type = 2
     headers = models.TextField(null=False, blank=False)
     query = models.TextField()
     author = models.CharField(max_length=20, blank=True, null=True)
@@ -126,6 +142,7 @@ class CompileTool(models.Model):
 
 
 class SourceApp(ETLObjRelated):
+    type = 5
     engine_type = models.ForeignKey(SourceEngine, on_delete=models.DO_NOTHING,
                                     verbose_name=u"运行工具")
     git_url = models.CharField(max_length=200, verbose_name=u"git地址")
@@ -139,12 +156,31 @@ class SourceApp(ETLObjRelated):
 
 
 class JarApp(ETLObjRelated):
+    type = 6
     engine_type = models.ForeignKey(SourceEngine, on_delete=models.DO_NOTHING,
                                     verbose_name=u"运行工具")
     main_func = models.CharField(max_length=100, verbose_name=u"入口类", blank=True, default='')
     jar_file = models.FileField(upload_to='jars', blank=True)
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
+    outputs = models.TextField(default='', verbose_name=u"输出的表名称，目前只考虑hive表", blank=True, null=True)
+
+    # TODO release after clean
+    # def save(self, *args, **kwargs):
+    #     super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
+    #     if len(self.outputs) > 0:
+    #         new_children = list()
+    #         for output in self.outputs.split(","):
+    #             obj, created = NULLETL.objects.get_or_create(name=output, rel_name=output)
+    #             new_children.append(ExecBlood(child_id=obj.exec_obj.id, parent_id=self.exec_obj.id))
+    #
+    #         old_children = ExecBlood.objects.filter(parent=self.exec_obj)
+    #         for o_child in old_children:
+    #             if not any(o_child == n_child for n_child in new_children):
+    #                 o_child.delete()
+    #         for n_child in new_children:
+    #             if not any(o_child == n_child for o_child in old_children):
+    #                 n_child.save()
 
     def get_wd(self):
         log = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-jarapp-sche-' + self.name + '.log'
@@ -185,6 +221,7 @@ class JarApp(ETLObjRelated):
 
 
 class ETL(ETLObjRelated):
+    type = 1
     query = models.TextField()
     meta = models.CharField(max_length=20)
     author = models.CharField(max_length=20, blank=True, null=True)
@@ -193,7 +230,27 @@ class ETL(ETLObjRelated):
     setting = models.CharField(max_length=200, default='')
     variables = models.CharField(max_length=2000, default='')
 
-    __str__ = query
+    # TODO release after clean
+    # def save(self, *args, **kwargs):
+    #     super(ETLObjRelated, self).save(*args, **kwargs)
+    #     new_deps = []
+    #     for dep in self.get_deps():
+    #         try:
+    #             etl = ETL.objects.get(name=dep, valid=1)
+    #         except ObjectDoesNotExist:
+    #             try:
+    #                 etl = SqoopMysql2Hive.objects.get(rel_name=dep, valid=1)
+    #             except:
+    #                 etl = NULLETL.objects.get(name=dep, valid=1)
+    #         new_deps.append(ExecBlood(child_id=self.exec_obj.id, parent_id=etl.exec_obj.id))
+    #
+    #     old_deps = ExecBlood.objects.filter(child_id=self.exec_obj.id)
+    #     for o_dep in old_deps:
+    #         if not any(o_dep == n_dep for n_dep in new_deps):
+    #             o_dep.delete()
+    #     for n_dep in new_deps:
+    #         if not any(o_dep == n_dep for o_dep in old_deps):
+    #             n_dep.save()
 
     def __str__(self):
         return self.query
@@ -226,9 +283,6 @@ class ETL(ETLObjRelated):
     def get_deps(self):
         deps = hivecli.getTbls_v2(self.query)
         return deps
-
-    def was_published_recently(self):
-        return self.ctime >= timezone.now - datetime.timedelta(days=1)
 
 
 class ExecObj(models.Model):
@@ -274,6 +328,8 @@ class ExecObj(models.Model):
             return SourceApp.objects.get(pk=self.rel_id)
         elif self.type == 6:
             return JarApp.objects.get(pk=self.rel_id)
+        elif self.type == 66:
+            return NULLETL.objects.get(pk=self.rel_id)
         else:
             return None
 
@@ -424,6 +480,12 @@ class SqoopHive2Mysql(ETLObjRelated):
     settings = models.TextField(null=True)
     partion_expr = models.TextField(null=True)
     parallel = models.IntegerField(default=1, verbose_name='并发执行')
+
+    # TODO release this after clean all data
+    # def save(self, *args, **kwargs):
+    #     super(ETLObjRelated, self).save(*args, **kwargs)
+    #     parent = ExecObj.objects.get(name=self.rel_name, type=ETL.type)
+    #     ExecBlood.objects.get_or_create(child=self.exec_obj, parent=parent)
 
     def get_clean_str(self, str_list):
         return ' '.join(str_list).replace('\n', ' ').replace('&', '\&')

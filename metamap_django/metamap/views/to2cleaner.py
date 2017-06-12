@@ -88,7 +88,7 @@ def clean_etlp_befor_blood(request):
                     try:
                         SqoopMysql2Hive.objects.get(rel_name=blood.parentTbl)
                     except ObjectDoesNotExist, e:
-                        parent, status = NULLETL.objects.get_or_create(name=blood.parentTbl)
+                        parent, status = NULLETL.objects.get_or_create(name=blood.parentTbl, rel_name=blood.parentTbl)
                         logger.error(e.message)
             except Exception, e:
                 print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
@@ -98,7 +98,7 @@ def clean_etlp_befor_blood(request):
 
 def clean_blood(request):
     for blood in TblBlood.objects.all():
-        if blood.valid == 1:
+        if blood.valid == 1 and blood.parentTbl != '_dummy_database@_dummy_table':
             try:
                 child = ETL.objects.get(pk=blood.relatedEtlId)
                 '''
@@ -122,14 +122,22 @@ def clean_blood(request):
             except Exception, e:
                 print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
 
-    for h2m in ExecObj.objects.filter(type=3):
-        hm = SqoopHive2Mysql.objects.get(pk=h2m.rel_id)
-        pp = ExecObj.objects.get(name=hm.rel_name)
-        cc, status = ExecObj.objects.get_or_create(name=h2m.name, rel_id=h2m.id, type=3)
-        ExecBlood.objects.update_or_create(
-            child=cc,
-            parent=pp)
-        print('add blood for h2m : %s , h2m id is : %d ' % (hm.rel_name, h2m.rel_id))
+    # for h2m in ExecObj.objects.filter(type=3):
+    #     hm = SqoopHive2Mysql.objects.get(pk=h2m.rel_id)
+    #     if hm.rel_name == '_dummy_database@_dummy_table':
+    #         continue
+    #     try:
+    #         pp = ExecObj.objects.get(name=hm.rel_name)
+    #     except ObjectDoesNotExist, e:
+    #         parent, created = NULLETL.objects.get_or_create(name=blood.parentTbl, rel_name=blood.parentTbl)
+    #         pp, created = ExecObj.objects.get_or_create(name=hm.name, rel_id=parent.id, type=parent.type, creator=hm.creator, cgroup=hm.cgroup)
+    #         logger.error(e.message)
+    #
+    #     cc, status = ExecObj.objects.get_or_create(name=h2m.name, rel_id=h2m.id, type=3, creator=hm.creator, cgroup=hm.cgroup)
+    #     ExecBlood.objects.update_or_create(
+    #         child=cc,
+    #         parent=pp)
+    #     print('add blood for h2m : %s , h2m id is : %d ' % (hm.rel_name, h2m.rel_id))
     return HttpResponse('clean_blood done')
 
 

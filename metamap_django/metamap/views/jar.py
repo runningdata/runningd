@@ -4,15 +4,16 @@ import os
 import traceback
 
 import shutil
+
+import django
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.forms import ModelForm, HiddenInput, ClearableFileInput
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 from metamap.helpers import etlhelper
-from metamap.models import JarApp, JarAppExecutions, ExecObj, ExecBlood
+from metamap.models import JarApp, JarAppExecutions
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE, AZKABAN_SCRIPT_LOCATION
@@ -65,6 +66,7 @@ def add(request):
 
 
 class JarForm(ModelForm):
+
     class Meta:
         model = JarApp
         exclude = ['ctime']
