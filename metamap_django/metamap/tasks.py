@@ -19,7 +19,7 @@ from django.utils import timezone
 from metamap.helpers import etlhelper
 from metamap.models import ETL, Executions, WillDependencyTask, AnaETL, Exports, SqoopHive2MysqlExecutions, \
     SqoopHive2Mysql, SqoopMysql2Hive, SqoopMysql2HiveExecutions, SourceApp, SourceAppExecutions, JarApp, \
-    JarAppExecutions
+    JarAppExecutions, ExecObj
 from will_common.utils import enums, dateutils
 
 from celery.utils.log import get_task_logger
@@ -307,6 +307,11 @@ def exec_etl_cli(task_id, name=''):
     will_task = WillDependencyTask.objects.get(pk=task_id)
     executors.get(will_task.type)(will_task.rel_id)
 
+@shared_task
+def exec_etl_cli2(task_id, name=''):
+    exec_task = WillDependencyTask.objects.get(pk=task_id, type=100)
+    obj = ExecObj.objects.get(pk=exec_task.id)
+    executors.get(obj.type)(obj.rel_id)
 
 @shared_task
 def xsum(numbers, name=''):
