@@ -140,8 +140,9 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
         deps = set()
         for leaf in leafs:
             current_id = leaf.id
-            if SqoopHive2Mysql.objects.get(pk=leaf.rel_id).cgroup.name == group_name:
-                deps.add(leaf.name)
+            h2m = SqoopHive2Mysql.objects.get(pk=leaf.rel_id)
+            if h2m.cgroup.name == group_name:
+                deps.add(h2m.name)
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d h2m generated ' % len(leafs))
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d h2m generated ' % len(deps))
