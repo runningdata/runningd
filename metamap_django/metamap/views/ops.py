@@ -180,7 +180,7 @@ def rerun(request):
         str_list.append('task %s has been rescheduled ' % tt.name)
         tasks.exec_etl_cli.delay(tt.id, tt.name)
         ex.delete()
-    return HttpResponse(''.join(str_list, '<br/>'))
+    return HttpResponse('<br/>'.join(str_list))
 
 def upload_hdfs_file(request):
     if request.method == 'POST':
