@@ -206,8 +206,8 @@ def edit(request, pk):
 
                 # if int(request.POST['valid']) == 1:
                 etl = privious_etl
-                privious_etl.id = None
-                privious_etl.ctime = timezone.now()
+                etl.id = None
+                etl.ctime = timezone.now()
                 httputils.post2obj(etl, request.POST, 'id')
                 userutils.add_current_creator(etl, request)
                 find_ = etl.name.find('@')

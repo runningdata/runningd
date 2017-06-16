@@ -6,7 +6,6 @@ import os
 import re
 from django.conf import settings
 from django.contrib.auth.models import Group
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 import datetime
 
@@ -40,7 +39,7 @@ class ETLObjRelated(models.Model):
         (1, '是'),
         (0, '否'),
     ))
-    exec_obj = models.ForeignKey('ExecObj', on_delete=models.DO_NOTHING, null=True, )
+    # exec_obj = models.ForeignKey('ExecObj', on_delete=models.DO_NOTHING, null=True, )
 
     class Meta:
         abstract = True
