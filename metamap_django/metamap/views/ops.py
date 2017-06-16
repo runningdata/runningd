@@ -172,10 +172,8 @@ class UploadFileForm(forms.Form):
 
 def rerun(request):
     import datetime
-    start_date = datetime.date(2017, 5, 15)
-    end_date = datetime.date(2017, 5, 17)
     str_list = list()
-    for ex in Exports.objects.filter(start_time__range=(start_date, end_date)):
+    for ex in Exports.objects.filter(file_loc__contains='20170616'):
         tt = ex.task
         str_list.append('task %s has been rescheduled ' % tt.name)
         tasks.exec_etl_cli.delay(tt.id, tt.name)
