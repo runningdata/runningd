@@ -19,6 +19,7 @@ from django.shortcuts import render
 
 import metamap
 from metamap import tasks
+from metamap.models import Exports
 from will_common.models import OrgGroup, UserProfile
 from will_common.utils import PushUtils
 from will_common.utils import constants
@@ -168,6 +169,18 @@ def hdfs_del(request, filename):
 class UploadFileForm(forms.Form):
     file = forms.FileField()
 
+
+def rerun(request):
+    import datetime
+    start_date = datetime.date(2017, 5, 15)
+    end_date = datetime.date(2017, 5, 17)
+    str_list = list()
+    for ex in Exports.objects.filter(start_time__range=(start_date, end_date)):
+        tt = ex.task
+        str_list.append('task %s has been rescheduled ' % tt.name)
+        tasks.exec_etl_cli.delay(tt.id, tt.name)
+        ex.delete()
+    return HttpResponse(''.join(str_list, '<br/>'))
 
 def upload_hdfs_file(request):
     if request.method == 'POST':

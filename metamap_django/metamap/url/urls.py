@@ -40,6 +40,7 @@ urlpatterns = [
     url(r'^ops/hdfs_files/$', ops.hdfs_files, name='hdfs_files'),
     url(r'^ops/hdfs_del/(?P<filename>.*)/$', ops.hdfs_del, name='hdfs_del'),
     url(r'^ops/up_hdfs/$', ops.upload_hdfs_file, name='up_hdfs'),
+    url(r'^ops/rerun/$', ops.rerun, name='rerun'),
     # url(r'^users/add/$', usermanager.add_user, name='add_user'),
     # url(r'^users/$', usermanager.list_user, name='list_user'),
 
@@ -127,7 +128,9 @@ urlpatterns = [
     url(r'^clean/clean_blood/$', to2cleaner.clean_blood, name='clean_blood'),
     url(r'^clean/before_clean_blood/$', to2cleaner.clean_etlp_befor_blood, name='before_clean_blood'),
     url(r'^clean/clean_task/$', to2cleaner.clean_deptask, name='clean_task'),
-    url(r'^clean/clean_all/$', to2cleaner.clean_all, name='clean_all'),
+    url(r'^clean/clean_ptask/$', to2cleaner.clean_period_tsk, name='clean_period_tsk'),
+    url(r'^clean/clean_null/$', to2cleaner.clean_null, name='clean_null'),
+
 
     url(r'^source/get_engine_type/$', source.get_engine_type, name='get_engine_type'),
     url(r'^rest/', include(router.urls)),

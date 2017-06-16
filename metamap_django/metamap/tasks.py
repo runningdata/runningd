@@ -310,7 +310,7 @@ def exec_etl_cli(task_id, name=''):
 @shared_task
 def exec_etl_cli2(task_id, name=''):
     exec_task = WillDependencyTask.objects.get(pk=task_id, type=100)
-    obj = ExecObj.objects.get(pk=exec_task.id)
+    obj = ExecObj.objects.get(pk=exec_task.rel_id)
     executors.get(obj.type)(obj.rel_id)
 
 @shared_task

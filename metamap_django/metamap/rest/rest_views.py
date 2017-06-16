@@ -19,11 +19,14 @@ class ExecObjViewSet(viewsets.ModelViewSet):
     queryset = ExecObj.objects.order_by('name')
     serializer_class = ExecObjSerializer
 
-    # @list_route(methods=['get'])
-    # def get_all(self, request, pk=None):
-    #     deps = ExecObj.objects.filter(creator__user__username=request.user.username).order_by('name')
-    #     serializer = self.get_serializer(deps, many=True)
-    #     return Response(serializer.data)
+    @list_route(methods=['get'])
+    def get_all(self, request, pk=None):
+        if request.user.username == 'admin':
+            deps = ExecObj.objects.all().order_by('name')
+        else:
+            deps = ExecObj.objects.filter(cgroup=request.user.userprofile.org_group).order_by('name')
+        serializer = self.get_serializer(deps, many=True)
+        return Response(serializer.data)
 
 
 class SourceAppViewSet(viewsets.ModelViewSet):

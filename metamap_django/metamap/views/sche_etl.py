@@ -16,7 +16,7 @@ from django.views import generic
 from djcelery.models import IntervalSchedule
 
 from metamap import tasks
-from metamap.models import ETL, PeriodicTask, WillDependencyTask, SqoopHive2Mysql, SqoopMysql2Hive, JarApp
+from metamap.models import ETL, PeriodicTask, WillDependencyTask, SqoopHive2Mysql, SqoopMysql2Hive, JarApp, ExecObj
 from will_common.djcelery_models import DjceleryPeriodictasks, DjceleryCrontabschedule
 from will_common.helpers import cronhelper
 from will_common.utils import PushUtils
@@ -167,25 +167,26 @@ def add(request):
         task = WillDependencyTask()
         httputils.post2obj(task, request.POST, 'id')
         # TODO refactor This should be a normal part for some sub-classes
-        try:
-            if int(task.type) == 1:
-                etl = ETL.objects.get(pk=task.rel_id)
-            elif int(task.type) == 3:
-                etl = SqoopHive2Mysql.objects.get(pk=task.rel_id)
-            elif int(task.type) == 4:
-                etl = SqoopMysql2Hive.objects.get(pk=task.rel_id)
-            elif int(task.type) == 6:
-                etl = JarApp.objects.get(pk=task.rel_id)
-            else:
-                PushUtils.push_exact_email(settings.ADMIN_EMAIL,
-                                           'task %s has no type, its type is : %d ' % (task.name, task.type))
-                etl = None
-            if etl and etl.creator_id != request.user.userprofile.id:
-                PushUtils.push_exact_email(etl.creator.user.email,
-                                           'your schedule for %s has been changed by %s' % (
-                                           etl.name, request.user.email))
-        except:
-            print('error happens for %s scheduel ' % task.name)
+        # try:
+            # if int(task.type) == 1:
+            #     etl = ETL.objects.get(pk=task.rel_id)
+            # elif int(task.type) == 3:
+            #     etl = SqoopHive2Mysql.objects.get(pk=task.rel_id)
+            # elif int(task.type) == 4:
+            #     etl = SqoopMysql2Hive.objects.get(pk=task.rel_id)
+            # elif int(task.type) == 6:
+            #     etl = JarApp.objects.get(pk=task.rel_id)
+            # else:
+            #     PushUtils.push_exact_email(settings.ADMIN_EMAIL,
+            #                                'task %s has no type, its type is : %d ' % (task.name, task.type))
+            #     etl = None
+        etl = ExecObj.objects.get(pk=task.rel_id)
+        if etl and etl.creator_id != request.user.userprofile.id:
+            PushUtils.push_exact_email(etl.creator.user.email,
+                                       'your schedule for %s has been changed by %s' % (
+                                       etl.name, request.user.email))
+        # except:
+        #     print('error happens for %s scheduel ' % task.name)
 
         task.save()
 
@@ -194,7 +195,8 @@ def add(request):
             cron_task.name = task.name
             cron_task.willtask = task
             cron_task.enabled = task.valid
-            cron_task.task = 'metamap.tasks.exec_etl_cli'
+            # V2Mark
+            cron_task.task = 'metamap.tasks.exec_etl_cli2'
             cron_task.args = '[' + str(task.id) + ']'
 
             cron = DjceleryCrontabschedule.objects.create()
@@ -232,25 +234,26 @@ def edit(request, pk):
         if task.type == 1 and ETL.objects.get(pk=task.rel_id).valid != 1:
             raise Exception('the etl you choose is invalid now, please rechoose another one')
         # TODO refactor This should be a normal part for some sub-classes
-        try:
-            if int(task.type) == 1:
-                etl = ETL.objects.get(pk=task.rel_id)
-            elif int(task.type) == 3:
-                etl = SqoopHive2Mysql.objects.get(pk=task.rel_id)
-            elif int(task.type) == 4:
-                etl = SqoopMysql2Hive.objects.get(pk=task.rel_id)
-            elif int(task.type) == 6:
-                etl = JarApp.objects.get(pk=task.rel_id)
-            else:
-                PushUtils.push_exact_email(settings.ADMIN_EMAIL,
-                                           'task %s has no type, its type is : %d ' % (task.name, task.type))
-                etl = None
-            if etl and etl.creator_id != request.user.userprofile.id:
-                PushUtils.push_exact_email(etl.creator.user.email,
-                                           'your schedule for %s has been changed by %s' % (
-                                           etl.name, request.user.email))
-        except:
-            print('error happens for %s scheduel ' % task.name)
+        # try:
+        #     if int(task.type) == 1:
+        #         etl = ETL.objects.get(pk=task.rel_id)
+        #     elif int(task.type) == 3:
+        #         etl = SqoopHive2Mysql.objects.get(pk=task.rel_id)
+        #     elif int(task.type) == 4:
+        #         etl = SqoopMysql2Hive.objects.get(pk=task.rel_id)
+        #     elif int(task.type) == 6:
+        #         etl = JarApp.objects.get(pk=task.rel_id)
+        #     else:
+        #         PushUtils.push_exact_email(settings.ADMIN_EMAIL,
+        #                                    'task %s has no type, its type is : %d ' % (task.name, task.type))
+        #         etl = None
+        etl = ExecObj.objects.get(pk=task.rel_id)
+        if etl and etl.creator_id != request.user.userprofile.id:
+            PushUtils.push_exact_email(etl.creator.user.email,
+                                       'your schedule for %s has been changed by %s' % (
+                                       etl.name, request.user.email))
+        # except:
+        #     print('error happens for %s scheduel ' % task.name)
         task.save()
         if int(task.schedule) == 4:
             if PeriodicTask.objects.filter(willtask_id=pk).exists():
@@ -273,7 +276,7 @@ def edit(request, pk):
                 cron_task.name = task.name
                 cron_task.willtask = task
                 cron_task.enabled = task.valid
-                cron_task.task = 'metamap.tasks.exec_etl_cli'
+                cron_task.task = 'metamap.tasks.exec_etl_cli2'
                 cron_task.args = '[' + str(task.id) + ']'
 
                 cron = DjceleryCrontabschedule.objects.create()

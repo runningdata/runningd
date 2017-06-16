@@ -22,7 +22,7 @@ class ETLSerializer(serializers.HyperlinkedModelSerializer):
 class ExecObjSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ExecObj
-        fields = ('name', 'id')
+        fields = ('name', 'id', 'type')
 
 
 class SourceAppSerializer(serializers.HyperlinkedModelSerializer):

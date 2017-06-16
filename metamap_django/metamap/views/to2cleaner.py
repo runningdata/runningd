@@ -2,18 +2,21 @@
 import logging
 
 import re
+import traceback
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.http import HttpResponse
 
 from metamap.models import TblBlood, ETL, WillDependencyTask, ExecObj, ExecBlood, \
     SqoopMysql2Hive, AnaETL, SqoopHive2Mysql, JarApp, NULLETL
+from will_common.models import PeriodicTask
 
 from will_common.utils import hivecli
 
 logger = logging.getLogger('django')
 
-
+@transaction.atomic
 def clean_etl(request):
     # TODO 有些sqoop import的ods表相关的，还没有生成对应的ETLBlood对象，所以当前ETL的H2H也是不完整的血统DAG
     for etl in ETL.objects.filter(valid=1):
@@ -25,7 +28,7 @@ def clean_etl(request):
             print('ETLObj for ETL error :%d --> %s' % (etl.id, e))
     return HttpResponse('clean_etl done')
 
-
+@transaction.atomic
 def clean_H2M(request):
     # 把hive数据表作为自己的依赖
     for etl in SqoopHive2Mysql.objects.filter(valid=1):
@@ -41,35 +44,35 @@ def clean_H2M(request):
             print(' SqoopHive2Mysql \'s error : %d --> %s' % (etl.id, e))
     return HttpResponse('clean_H2M done')
 
-
+@transaction.atomic
 def clean_ANA(request):
     # AnaETL清洗，顺便添加依赖(一般除了m2h就是h2h)
     for etl in AnaETL.objects.filter(valid=1):
         try:
-            if etl.name.__contains__(u'转化率'):
-                print(' %s passed ' % etl.name)
-                continue
+            # if etl.name.__contains__(u'转化率'):
+            #     print(' %s passed ' % etl.name)
+            #     continue
             etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=2, cgroup=etl.cgroup,
                                                                creator=etl.creator)
             print('ETLObj for AnaETL done : %s ' % etl.name)
             # TODO 测试环境hiveserver的HDFS元数据不全面
-            deps = hivecli.get_tbls(etl.query)
-            for dep in deps:
-                try:
-                    parent = ExecObj.objects.get(name=dep, type=1)
-                except Exception, e:
-                    # 如果h2h里面没有，那就在m2h里
-                    print(' >>>>>>>>>>>>>>>>>>>>>>>>> AnaETL s dep dep : %s ' % dep)
-                    names = dep.split('@')
-                    m2h = SqoopMysql2Hive.objects.get(hive_meta__meta=names[0], mysql_tbl=names[1])
-                    parent = ExecObj.objects.get(rel_id=m2h.id, type=4)
-                etl_blood, result = ExecBlood.objects.update_or_create(parent=parent, child=etl_obj)
-                print(' AnaETL \'s ETLBlood done : %d ' % etl_blood.id)
+            # deps = hivecli.get_tbls(etl.query)
+            # for dep in deps:
+            #     try:
+            #         parent = ExecObj.objects.get(name=dep, type=1)
+            #     except Exception, e:
+            #         # 如果h2h里面没有，那就在m2h里
+            #         print(' >>>>>>>>>>>>>>>>>>>>>>>>> AnaETL s dep dep : %s ' % dep)
+            #         names = dep.split('@')
+            #         m2h = SqoopMysql2Hive.objects.get(hive_meta__meta=names[0], mysql_tbl=names[1])
+            #         parent = ExecObj.objects.get(rel_id=m2h.id, type=4)
+            #     etl_blood, result = ExecBlood.objects.update_or_create(parent=parent, child=etl_obj)
+            #     print(' AnaETL \'s ETLBlood done : %d ' % etl_blood.id)
         except Exception, e:
             print('ETLObj AnaETL error : %d --> %s' % (etl.id, e))
     return HttpResponse('clean_ANA done')
 
-
+@transaction.atomic
 def clean_etlp_befor_blood(request):
     '''
     先清洗所有不是ETL的父节点
@@ -88,14 +91,16 @@ def clean_etlp_befor_blood(request):
                     try:
                         SqoopMysql2Hive.objects.get(rel_name=blood.parentTbl)
                     except ObjectDoesNotExist, e:
+                        child = ETL.objects.get(pk=blood.relatedEtlId)
                         parent, status = NULLETL.objects.get_or_create(name=blood.parentTbl, rel_name=blood.parentTbl)
+                        ExecObj.objects.get_or_create(name=parent.name, rel_id=parent.id, type=NULLETL.type, cgroup=child.cgroup)
                         logger.error(e.message)
             except Exception, e:
                 print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
 
     return HttpResponse('clean_blood done')
 
-
+@transaction.atomic
 def clean_blood(request):
     for blood in TblBlood.objects.all():
         if blood.valid == 1 and blood.parentTbl != '_dummy_database@_dummy_table':
@@ -140,7 +145,7 @@ def clean_blood(request):
     #     print('add blood for h2m : %s , h2m id is : %d ' % (hm.rel_name, h2m.rel_id))
     return HttpResponse('clean_blood done')
 
-
+@transaction.atomic
 def clean_JAR(request):
     # jar app
     for etl in JarApp.objects.filter(valid=1):
@@ -151,7 +156,7 @@ def clean_JAR(request):
             print('ETLObj for JarApp error :%d --> %s' % (etl.id, e))
     return HttpResponse(' clean_JAR done')
 
-
+@transaction.atomic
 def clean_deptask(request):
     # 将既有的willdependency_task生成一遍
     # for task in WillDependencyTask.objects.filter(valid=1, type=1):
@@ -186,7 +191,17 @@ def clean_deptask(request):
             print('WillDependencyTask error : %d --> %s' % (task.id, e))
     return HttpResponse(' clean_deptask done')
 
+@transaction.atomic
+def clean_null(request):
+    for null in NULLETL.objects.all():
+        print null.name
+        null_obj = ExecObj.objects.get(type=NULLETL.type, rel_id=null.id)
+        WillDependencyTask.objects.update_or_create(name=null_obj.name, type=100, rel_id=null_obj.id, schedule=0)
+        WillDependencyTask.objects.update_or_create(name=null_obj.name, type=100, rel_id=null_obj.id, schedule=1)
+        WillDependencyTask.objects.update_or_create(name=null_obj.name, type=100, rel_id=null_obj.id, schedule=2)
+    return HttpResponse('ulll done')
 
+@transaction.atomic
 def clean_M2H(request):
     for etl in SqoopMysql2Hive.objects.all():
         try:
@@ -206,7 +221,7 @@ def clean_M2H(request):
             print('SqoopMysql2Hive \'s error : %d --> %s' % (etl.id, e))
     return HttpResponse(' clean_M2H done')
 
-
+@transaction.atomic
 def clean_rel_name(request):
     '''
     清洗M2H和H2M的名字，方便後面過濾查取等
@@ -228,6 +243,27 @@ def clean_rel_name(request):
         etl.rel_name = tbl_name
         etl.save()
     return HttpResponse('XX')
+
+@transaction.atomic
+def clean_period_tsk(request):
+    current_tsk = 0
+    try:
+        for ptask in PeriodicTask.objects.filter(willtask_id__gt=0):
+            o_wtask = WillDependencyTask.objects.get(pk=ptask.willtask_id)
+            current_tsk = ptask.id
+            try:
+                exec_obj = ExecObj.objects.get(type=o_wtask.type, rel_id=o_wtask.rel_id)
+                n_wtask = WillDependencyTask.objects.get(rel_id=exec_obj.id, type=100)
+            except ObjectDoesNotExist, e:
+                print('mark for %s ' % o_wtask.name)
+                continue
+            ptask.task = 'metamap.tasks.exec_etl_cli2'
+            ptask.args = ptask.args.replace(str(o_wtask.id), str(n_wtask.id))
+            ptask.save()
+    except:
+        print('current id is %d ' % current_tsk)
+        print traceback.format_exc()
+    return HttpResponse('pTASK DONE')
 
 
 def clean_all(request):

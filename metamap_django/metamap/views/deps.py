@@ -82,7 +82,10 @@ def generate_job_dag_v2(request, schedule, group_name='xiaov'):
         for tsk in WillDependencyTask.objects.filter(schedule=schedule, type=100, valid=1):
             try:
                 exec_obj = ExecObj.objects.get(pk=tsk.rel_id)
-                if exec_obj.id not in done_leaf and exec_obj.cgroup.name == group_name:
+                if exec_obj.id not in done_leaf and (exec_obj.cgroup and exec_obj.cgroup.name == group_name):
+                    generate_job_file_v2(exec_obj, list(), folder, schedule)
+                    non_dep_task.add(exec_obj.name)
+                elif exec_obj.type == 66:   # the NULLETL without a group id
                     generate_job_file_v2(exec_obj, list(), folder, schedule)
                     non_dep_task.add(exec_obj.name)
             except ObjectDoesNotExist, e:

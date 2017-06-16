@@ -3,6 +3,7 @@
 import logging
 import os
 
+import re
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
@@ -30,7 +31,7 @@ class ETLObjRelated(models.Model):
     '''
     type = 110
     name = models.CharField(max_length=100, verbose_name=u"任务名称", default='no_name_yet')
-    rel_name = models.TextField(null=True)
+    rel_name = models.CharField(max_length=100, verbose_name=u"可读的名字", default='no_name_yet')
     ctime = models.DateTimeField(default=timezone.now)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, null=True)
     cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, null=True, )
@@ -43,6 +44,7 @@ class ETLObjRelated(models.Model):
 
     class Meta:
         abstract = True
+
     # TODO release after clean
     # def save(self, *args, **kwargs):
     #     super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
@@ -82,15 +84,24 @@ class ETLObjRelated(models.Model):
     def get_cmd_prefix(self):
         return "sh "
 
-    def get_script(self):
-        return "get_script Not supported now...for %s " % self.name
+    def get_script(self, str_list, sche_vars=''):
+        str_list.append("get_script Not supported now...for %s " % self.name)
+        return str_list
 
 
 class NULLETL(ETLObjRelated):
     type = 66
 
-    def get_script(self):
-        return "echo task for % s " % self.name
+    # TODO release
+    # def save(self, *args, **kwargs):
+    #     super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
+    #     WillDependencyTask.objects.update_or_create(name=self.name, type=100, rel_id=self.id, schedule=0)
+    #     WillDependencyTask.objects.update_or_create(name=self.name, type=100, rel_id=self.id, schedule=1)
+    #     WillDependencyTask.objects.update_or_create(name=self.name, type=100, rel_id=self.id, schedule=2)
+
+    def get_script(self, str_list, sche_var=''):
+        str_list.append("echo task for % s " % self.name)
+        return str_list
 
 
 class AnaETL(ETLObjRelated):
@@ -113,10 +124,9 @@ class AnaETL(ETLObjRelated):
     def __str__(self):
         return self.name
 
-    def get_script(self):
-        str_list = list()
-        str_list.append('{% load etlutils %}')
+    def get_script(self, str_list, sche_vars=''):
         str_list.append(self.variables)
+        str_list.append(sche_vars)
         str_list.append(self.query)
         return str_list
 
@@ -163,7 +173,7 @@ class JarApp(ETLObjRelated):
     jar_file = models.FileField(upload_to='jars', blank=True)
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
-    outputs = models.TextField(default='', verbose_name=u"输出的表名称，目前只考虑hive表", blank=True, null=True)
+    outputs = models.CharField(max_length=500, default='', verbose_name=u"输出的表名称，目前只考虑hive表", blank=True, null=True)
 
     # TODO release after clean
     # def save(self, *args, **kwargs):
@@ -187,18 +197,17 @@ class JarApp(ETLObjRelated):
         work_dir = os.path.dirname(os.path.dirname(__file__)) + '/'
         return work_dir
 
-    def get_script(self):
-        str = list()
+    def get_script(self, str_list, sche_vars=''):
         context = Context()
         context['task'] = self
         wd = self.get_wd()
         context['wd'] = wd
         if self.engine_type.id == 1:
             with open('metamap/config/spark_template.sh') as tem:
-                str.append(tem.read())
+                str_list.append(tem.read())
         elif self.engine_type.id == 2:
             with open('metamap/config/hadoop_template.sh') as tem:
-                str.append(tem.read())
+                str_list.append(tem.read())
         elif self.engine_type.id == 4:
             # 看看zip是否已经解压，先解压到指定目录
             zipfile = wd + self.jar_file.name
@@ -210,13 +219,13 @@ class JarApp(ETLObjRelated):
                 context['deps'] = ','.join(deps)
             context['wd'] = dir
             with open('metamap/config/pyspark_template.sh') as tem:
-                str.append(tem.read())
+                str_list.append(tem.read())
         else:
             with open('metamap/config/jar_template.sh') as tem:
-                str.append(tem.read())
+                str_list.append(tem.read())
         template = Template('\n'.join(str))
         strip = template.render(context).strip()
-        strip = '{% load etlutils %} \n' + strip
+        strip = '{% load etlutils %} \n' + sche_vars + '\n' + strip
         return {strip, }
 
 
@@ -255,10 +264,9 @@ class ETL(ETLObjRelated):
     def __str__(self):
         return self.query
 
-    def get_script(self):
-        str_list = list()
-        str_list.append('{% load etlutils %}')
-        str_list.append('set mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ';')
+    def get_script(self, str_list, sche_vars=''):
+        str_list.append(self.variables)
+        str_list.append(sche_vars)
         str_list.append("-- job for " + self.name)
         if self.creator:
             str_list.append("-- " + self.creator.user.username + '-' + self.name)
@@ -271,6 +279,7 @@ class ETL(ETLObjRelated):
             str_list.append("-- cannot find ctime")
         str_list.append("\n---------------------------------------- pre settings ")
         str_list.append(self.setting)
+        str_list.append('set mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ';')
         str_list.append("\n---------------------------------------- preSql ")
         str_list.append(self.preSql)
         str_list.append("\n---------------------------------------- query ")
@@ -301,10 +310,13 @@ class ExecObj(models.Model):
 
     def get_cmd(self, schedule, location):
         obj = self.get_rel_obj()
-        str_list = obj.get_script()
+        str_list = list()
+        str_list.append('{% load etlutils %}')
+        sche_vars = ''
         if schedule != -1:
             tt = WillDependencyTask.objects.get(rel_id=self.id, schedule=schedule, type=100)
-            str_list.append(tt.variables)
+            sche_vars = tt.variables
+        str_list = obj.get_script(str_list, sche_vars)
         template = Template(obj.get_clean_str(str_list))
         script = template.render(Context()).strip()
         with open(location, 'w') as sc:
@@ -421,18 +433,27 @@ class SqoopMysql2Hive(ETLObjRelated):
     partition_key = models.CharField(max_length=300, null=True, default='')
     settings = models.TextField(null=True)
 
+    # TODO release this after clean all data
+    # def save(self, *args, **kwargs):
+    #     tbl_name = self.hive_meta.meta + '@' + self.mysql_tbl.lower()
+    #     if 'hive-table' in self.option:
+    #         for op in self.option.split('--'):
+    #             if op.startswith('hive-table'):
+    #                 tbl_name = self.hive_meta.meta + '@' + re.split('\s', op.strip())[1].lower()
+    #                 break
+    #     self.rel_name = tbl_name
+    #     super(ETLObjRelated, self).save(*args, **kwargs)
+
     def get_clean_str(self, str_list):
         return ' '.join(str_list).replace('\n', ' ').replace('&', '\&')
 
     def get_hive_inmi_tbl(self, tbl):
         return tbl + '_inmi'
 
-    def get_script(self):
+    def get_script(self, str_list, sche_vars=''):
         is_partition = True if len(self.partition_key) > 0 else False
-
-        str_list = list()
-        str_list.append('{% load etlutils %}')
-
+        str_list.append(self.settings)
+        str_list.append(sche_vars)
         str_list.append(' sqoop import ')
         str_list.append('-Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE)
         str_list.append(self.mysql_meta.settings)
@@ -483,6 +504,7 @@ class SqoopHive2Mysql(ETLObjRelated):
 
     # TODO release this after clean all data
     # def save(self, *args, **kwargs):
+    #     self.rel_name = self.hive_meta.meta + '@' + self.hive_tbl.lower()
     #     super(ETLObjRelated, self).save(*args, **kwargs)
     #     parent = ExecObj.objects.get(name=self.rel_name, type=ETL.type)
     #     ExecBlood.objects.get_or_create(child=self.exec_obj, parent=parent)
@@ -494,9 +516,9 @@ class SqoopHive2Mysql(ETLObjRelated):
         # TODO 依赖hive多个表，需要解析sql，目前没有这种需求，为降低错误率，暂时不支持
         return self.hive_meta.meta + '@' + self.hive_tbl
 
-    def get_script(self):
-        str_list = list()
-        str_list.append('{% load etlutils %}')
+    def get_script(self, str_list, sche_vars=''):
+        str_list.append(self.settings)
+        str_list.append(sche_vars)
         str_list.append(' sqoop export ')
         str_list.append('-Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE)
         str_list.append(self.mysql_meta.settings)

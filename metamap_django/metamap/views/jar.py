@@ -69,7 +69,7 @@ class JarForm(ModelForm):
 
     class Meta:
         model = JarApp
-        exclude = ['ctime']
+        exclude = ['ctime', 'rel_name', 'exec_obj']
         widgets = {
             'creator': HiddenInput(),
             'jar_file': ClearableFileInput(attrs={'multiple': True}),
