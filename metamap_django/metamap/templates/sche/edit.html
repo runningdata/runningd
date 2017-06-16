@@ -7,34 +7,18 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-select.min.css' %}"/>
     <script src="{% static 'js/bootstrap-select.min.js' %}"></script>
     <script>
-        {#        function change_type() {#}
-        {#            var task_type = $('#task_type').val()#}
-        {#            if (task_type == 1) {#}
-        {#                get_etl();#}
-        {#            } else if (task_type == 3) {#}
-        {#                get_hive2mysql();#}
-        {#            } else if (task_type == 4) {#}
-        {#                get_mysql2hive();#}
-        {#            } else if (task_type == 5) {#}
-        {#                get_sourceapp();#}
-        {#            } else if (task_type == 6) {#}
-        {#                get_jarapp();#}
-        {#            }#}
-        {#        }#}
-
-        function get_type_name(task_type) {
+        function change_type() {
+            var task_type = $('#task_type').val()
             if (task_type == 1) {
-                return "ETL";
-            } else if (task_type == 2) {
-                return "Email";
+                get_etl();
             } else if (task_type == 3) {
-                return "H2M";
+                get_hive2mysql();
             } else if (task_type == 4) {
-                return "M2H";
+                get_mysql2hive();
             } else if (task_type == 5) {
-                return "sourceapp";
+                get_sourceapp();
             } else if (task_type == 6) {
-                return "Jar";
+                get_jarapp();
             }
         }
     </script>
@@ -59,35 +43,35 @@
                 <label>调度名称</label>
                 <input name="name" value="{{ task.name }}" type="text" class="form-control">
             </div>
-            {#            <div class="form-group">#}
-            {#                <label>任务类型</label>#}
-            {#                <select id="task_type" name="type" onchange='change_type()' class="selectpicker show-tick form-control">#}
-            {#                    <option#}
-            {#                            {% if task.type == 6 %}#}
-            {#                                selected="selected"#}
-            {#                            {% endif %}#}
-            {#                                value="6">JarApp#}
-            {#                    </option>#}
-            {#                    <option#}
-            {#                            {% if task.type == 4 %}#}
-            {#                                selected="selected"#}
-            {#                            {% endif %}#}
-            {#                                value="4">Mysql2Hive#}
-            {#                    </option>#}
-            {#                    <option#}
-            {#                            {% if task.type == 1 %}#}
-            {#                                selected="selected"#}
-            {#                            {% endif %}#}
-            {#                                value="1">hive ETL#}
-            {#                    </option>#}
-            {#                    <option#}
-            {#                            {% if task.type == 3 %}#}
-            {#                                selected="selected"#}
-            {#                            {% endif %}#}
-            {#                                value="3">Hive2Mysql#}
-            {#                    </option>#}
-            {#                </select>#}
-            {#            </div>#}
+            <div class="form-group">
+                <label>任务类型</label>
+                <select id="task_type" name="type" onchange='change_type()' class="selectpicker show-tick form-control">
+                    <option
+                            {% if task.type == 6 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="6">JarApp
+                    </option>
+                    <option
+                            {% if task.type == 4 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="4">Mysql2Hive
+                    </option>
+                    <option
+                            {% if task.type == 1 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="1">hive ETL
+                    </option>
+                    <option
+                            {% if task.type == 3 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="3">Hive2Mysql
+                    </option>
+                </select>
+            </div>
             <div class="form-group">
 
                 <label>关联</label>
@@ -180,27 +164,27 @@
                 <label>调度名称</label>
                 <input name="name" value="{{ task.name }}" type="text" class="form-control">
             </div>
-            {#            <div class="form-group">#}
-            {#                <label>任务类型</label>#}
-            {#                <select id="task_type" name="type" onchange='change_type()' class="selectpicker show-tick form-control">#}
-            {#                    <option#}
-            {#                            {% if task.type == 6 %}#}
-            {#                                selected="selected"#}
-            {#                            {% endif %}#}
-            {#                                value="6">JarApp#}
-            {#                    </option>#}
-            {#                    <option#}
-            {#                            value="4">Mysql2Hive#}
-            {#                    </option>#}
-            {#                    <option#}
-            {#                            selected="selected"#}
-            {#                            value="1">hive ETL#}
-            {#                    </option>#}
-            {#                    <option#}
-            {#                            value="3">Hive2Mysql#}
-            {#                    </option>#}
-            {#                </select>#}
-            {#            </div>#}
+            <div class="form-group">
+                <label>任务类型</label>
+                <select id="task_type" name="type" onchange='change_type()' class="selectpicker show-tick form-control">
+                    <option
+                            {% if task.type == 6 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="6">JarApp
+                    </option>
+                    <option
+                            value="4">Mysql2Hive
+                    </option>
+                    <option
+                            selected="selected"
+                            value="1">hive ETL
+                    </option>
+                    <option
+                            value="3">Hive2Mysql
+                    </option>
+                </select>
+            </div>
             <div class="form-group">
 
                 <label>关联</label>
@@ -275,14 +259,14 @@
                         type: "get",
                         dataType: "json",
                         contentType: "application/json;charset=utf-8",
-                        url: "/metamap/rest/execobjs/get_all/?format=json",
+                        url: "/metamap/rest/etls/?format=json",
                         success: function (result) {
                             $("#lunch").html('').selectpicker('refresh');
                             $.each(result, function (index, etl) {
                                 if (id == etl.id) {
-                                    $("#lunch").append("<option selected='selected' value='" + etl.id + "'>" + get_type_name(etl.type) + " -> " + etl.name + "</option>");
+                                    $("#lunch").append("<option selected='selected' value='" + etl.id + "'>" + etl.name + "</option>");
                                 } else {
-                                    $("#lunch").append("<option value='" + etl.id + "'>" + get_type_name(etl.type) + " -> " + etl.name + "</option>");
+                                    $("#lunch").append("<option value='" + etl.id + "'>" + etl.name + "</option>");
                                 }
                             });
                             $("#lunch").selectpicker('refresh');
@@ -294,127 +278,102 @@
                     }
             );
         }
-        get_etl();
-        {#        function get_etl() {#}
-        {#            $.ajax({#}
-        {#                        type: "get",#}
-        {#                        dataType: "json",#}
-        {#                        contentType: "application/json;charset=utf-8",#}
-        {#                        url: "/metamap/rest/etls/?format=json",#}
-        {#                        success: function (result) {#}
-        {#                            $("#lunch").html('').selectpicker('refresh');#}
-        {#                            $.each(result, function (index, etl) {#}
-        {#                                if (id == etl.id) {#}
-        {#                                    $("#lunch").append("<option selected='selected' value='" + etl.id + "'>" + etl.name + "</option>");#}
-        {#                                } else {#}
-        {#                                    $("#lunch").append("<option value='" + etl.id + "'>" + etl.name + "</option>");#}
-        {#                                }#}
-        {#                            });#}
-        {#                            $("#lunch").selectpicker('refresh');#}
-        {#                        },#}
-        {#                        error: function (XMLHttpRequest, textStatus, errorThrown) {#}
-        {#                            alert(errorThrown);#}
-        {#                        },#}
-        {#                        async: false             //false表示同步#}
-        {#                    }#}
-        {#            );#}
-        {#        }#}
-        {#        function get_hive2mysql() {#}
-        {#            $.ajax({#}
-        {#                        type: "get",#}
-        {#                        dataType: "json",#}
-        {#                        contentType: "application/json;charset=utf-8",#}
-        {#                        url: "/metamap/rest/hive2mysql/?format=json",#}
-        {#                        success: function (result) {#}
-        {#                            $("#lunch").html('').selectpicker('refresh');#}
-        {#                            $.each(result, function (index, sqoop) {#}
-        {#                                if (id == sqoop.id) {#}
-        {#                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");#}
-        {#                                } else {#}
-        {#                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");#}
-        {#                                }#}
-        {#                            });#}
-        {#                            $("#lunch").selectpicker('refresh');#}
-        {#                        },#}
-        {#                        error: function (XMLHttpRequest, textStatus, errorThrown) {#}
-        {#                            alert(errorThrown);#}
-        {#                        },#}
-        {#                        async: false             //false表示同步#}
-        {#                    }#}
-        {#            );#}
-        {#        }#}
-        {#        function get_mysql2hive() {#}
-        {#            $.ajax({#}
-        {#                        type: "get",#}
-        {#                        dataType: "json",#}
-        {#                        contentType: "application/json;charset=utf-8",#}
-        {#                        url: "/metamap/rest/mysql2hive/?format=json",#}
-        {#                        success: function (result) {#}
-        {#                            $("#lunch").html('').selectpicker('refresh');#}
-        {#                            $.each(result, function (index, sqoop) {#}
-        {#                                if (id == sqoop.id) {#}
-        {#                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");#}
-        {#                                } else {#}
-        {#                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");#}
-        {#                                }#}
-        {#                            });#}
-        {#                            $("#lunch").selectpicker('refresh');#}
-        {#                        },#}
-        {#                        error: function (XMLHttpRequest, textStatus, errorThrown) {#}
-        {#                            alert(errorThrown);#}
-        {#                        },#}
-        {#                        async: false             //false表示同步#}
-        {#                    }#}
-        {#            );#}
-        {#        }#}
-        {#        function get_sourceapp() {#}
-        {#            $.ajax({#}
-        {#                        type: "get",#}
-        {#                        dataType: "json",#}
-        {#                        contentType: "application/json;charset=utf-8",#}
-        {#                        url: "/metamap/rest/sourceapp/?format=json",#}
-        {#                        success: function (result) {#}
-        {#                            $("#lunch").html('').selectpicker('refresh');#}
-        {#                            $.each(result, function (index, sqoop) {#}
-        {#                                if (id == sqoop.id) {#}
-        {#                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");#}
-        {#                                } else {#}
-        {#                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");#}
-        {#                                }#}
-        {#                            });#}
-        {#                            $("#lunch").selectpicker('refresh');#}
-        {#                        },#}
-        {#                        error: function (XMLHttpRequest, textStatus, errorThrown) {#}
-        {#                            alert(errorThrown);#}
-        {#                        },#}
-        {#                        async: false             //false表示同步#}
-        {#                    }#}
-        {#            );#}
-        {#        }#}
-        {#        function get_jarapp() {#}
-        {#            $.ajax({#}
-        {#                        type: "get",#}
-        {#                        dataType: "json",#}
-        {#                        contentType: "application/json;charset=utf-8",#}
-        {#                        url: "/metamap/rest/jarapp/?format=json",#}
-        {#                        success: function (result) {#}
-        {#                            $("#lunch").html('').selectpicker('refresh');#}
-        {#                            $.each(result, function (index, sqoop) {#}
-        {#                                if (id == sqoop.id) {#}
-        {#                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");#}
-        {#                                } else {#}
-        {#                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");#}
-        {#                                }#}
-        {#                            });#}
-        {#                            $("#lunch").selectpicker('refresh');#}
-        {#                        },#}
-        {#                        error: function (XMLHttpRequest, textStatus, errorThrown) {#}
-        {#                            alert(errorThrown);#}
-        {#                        },#}
-        {#                        async: false             //false表示同步#}
-        {#                    }#}
-        {#            );#}
-        {#        }#}
-        {#        change_type();#}
+        function get_hive2mysql() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/hive2mysql/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, sqoop) {
+                                if (id == sqoop.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        function get_mysql2hive() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/mysql2hive/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, sqoop) {
+                                if (id == sqoop.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        function get_sourceapp() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/sourceapp/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, sqoop) {
+                                if (id == sqoop.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        function get_jarapp() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/jarapp/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, sqoop) {
+                                if (id == sqoop.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        change_type();
     </script>
 {% endblock %}
