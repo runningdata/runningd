@@ -54,8 +54,8 @@ class ETLObjRelated(models.Model):
         exe.cgroup = self.cgroup
         exe.save()
         if created:
-            print('exec_obj %s created for %s' % (self.exec_obj.name, self.name))
-            logger.error('exec_obj %s created for %s' % (self.exec_obj.name, self.name))
+            print('exec_obj %s created for %s' % (exe.name, self.name))
+            logger.error('exec_obj %s created for %s' % (exe.name, self.name))
             self.exec_obj = exe
             super(ETLObjRelated, self).save(*args, **kwargs)
         else:
