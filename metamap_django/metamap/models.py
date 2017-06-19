@@ -48,12 +48,13 @@ class ETLObjRelated(models.Model):
     # TODO release after clean
     def save(self, *args, **kwargs):
         super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
-        exe, created = ExecObj.objects.get_or_create(type=self.type, name=self.name, rel_id = self.id)
+        exe, created = ExecObj.objects.get_or_create(type=self.type, name=self.name, rel_id=self.id)
         exe.rel_id = self.id
         exe.creator = self.creator
         exe.cgroup = self.cgroup
         exe.save()
         if created:
+            logger.error('exec_obj %s created for %s' % (self.exec_obj.name, self.name))
             self.exec_obj = exe
             super(ETLObjRelated, self).save(*args, **kwargs)
 
@@ -507,6 +508,7 @@ class SqoopHive2Mysql(ETLObjRelated):
         self.rel_name = self.hive_meta.meta + '@' + self.hive_tbl.lower()
         super(ETLObjRelated, self).save(*args, **kwargs)
         parent = ExecObj.objects.get(name=self.rel_name, type=ETL.type)
+        logger.error('SqoopHive2Mysql: child is %s , parent is %s' % (self.exec_obj.name, parent.name))
         ExecBlood.objects.get_or_create(child=self.exec_obj, parent=parent)
 
     def get_clean_str(self, str_list):
