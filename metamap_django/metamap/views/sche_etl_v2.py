@@ -256,7 +256,7 @@ def edit(request, pk):
                                        'your schedule for %s has been changed by %s' % (
                                            etl.name, request.user.email))
         else:
-            logger.warn('no creator for task %s, task id is %d ' % (task.name, pk))
+            logger.warn('no creator for task %s, task id is %s ' % (task.name, pk))
         # except:
         #     print('error happens for %s scheduel ' % task.name)
         task.save()
