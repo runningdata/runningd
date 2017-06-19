@@ -29,12 +29,12 @@ from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
 def filter_ana(objjs, obj):
     eo = ExecObj.objects.get(pk=obj.rel_id)
-    print('%s s type is %d ' % (eo.name, eo.type))
+    # print('%s s type is %d ' % (eo.name, eo.type))
     if eo.type != 2:
-        print('%s has been excluded ' % eo.name)
+        # print('%s has been excluded ' % eo.name)
         objjs.exclude(id=obj.id)
     return objjs
-    print('%objjs s count is %d ' % (objjs.count()))
+    # print('%objjs s count is %d ' % (objjs.count()))
 
 class ScheDepListView(generic.ListView):
     template_name = 'sche/ana/list.html'
