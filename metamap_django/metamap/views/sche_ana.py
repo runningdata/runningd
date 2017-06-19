@@ -68,9 +68,9 @@ def add(request):
     if request.POST:
         task = WillDependencyTask()
         httputils.post2obj(task, request.POST, 'id')
-        task.type = 2
+        task.type = 100
         task.schedule = 4
-        ana = AnaETL.objects.get(pk=task.rel_id)
+        ana = ExecObj.objects.get(pk=task.rel_id)
         if ana.creator_id != request.user.userprofile.id:
             PushUtils.push_exact_email(ana.creator.user.email,
                                        'your schedule for %s has been changed by %s' % (ana.name, request.user.email))
@@ -80,7 +80,7 @@ def add(request):
         cron_task.name = task.name
         cron_task.willtask = task
         cron_task.enabled = task.valid
-        cron_task.task = 'metamap.tasks.exec_etl_cli'
+        cron_task.task = 'metamap.tasks.exec_etl_cli2'
         cron_task.args = '[' + str(task.id) + ']'
 
         cron = DjceleryCrontabschedule.objects.create()
@@ -170,7 +170,7 @@ def edit(request, pk):
     if request.POST:
         task = WillDependencyTask.objects.get(pk=pk)
         httputils.post2obj(task, request.POST, 'id')
-        ana = AnaETL.objects.get(pk=task.rel_id)
+        ana = ExecObj.objects.get(pk=task.rel_id)
         # TODO This should be a normal part for some sub-classes
         if ana.creator_id != request.user.userprofile.id:
             PushUtils.push_exact_email(ana.creator.user.email,

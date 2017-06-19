@@ -51,9 +51,9 @@ class SqoopMysql2HiveSerializer(serializers.HyperlinkedModelSerializer):
 
 class AnaETLSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = AnaETL
-        fields = ('name', 'valid', 'id')
-
+        # model = AnaETL
+        model = ExecObj
+        fields = ('name', 'id')
 
 class WillTaskSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

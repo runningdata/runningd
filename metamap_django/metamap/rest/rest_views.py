@@ -60,5 +60,6 @@ class SqoopMysqlMetaViewSet(viewsets.ModelViewSet):
 
 
 class AnaETLViewSet(viewsets.ModelViewSet):
-    queryset = AnaETL.objects.filter(valid=1).order_by('-ctime')
+    # queryset = AnaETL.objects.filter(valid=1).order_by('-ctime')
+    queryset = ExecObj.objects.filter(type=2)
     serializer_class = AnaETLSerializer
