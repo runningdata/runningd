@@ -6,6 +6,7 @@ from metamap.views import deps
 from metamap.views import jar
 from metamap.views import ops
 from metamap.views import sche_etl
+from metamap.views import sche_etl_v2
 from metamap.views import source
 from metamap.views import sqoop
 from metamap.views import sqoop2
@@ -89,15 +90,15 @@ urlpatterns = [
     url(r'^m2h/status/(?P<status>[0-9]+)/$',
         common.StatusListView.as_view(url_base='m2h', model=SqoopMysql2HiveExecutions), name='sqoop2_status'),
 
-    url(r'^tasks/tasks/$', sche_etl.get_all_tasks, name='tasks'),
-    url(r'^tasks/update/$', sche_etl.update_tasks_interval, name='update_tasks_interval'),
+    url(r'^tasks/tasks/$', sche_etl_v2.get_all_tasks, name='tasks'),
+    url(r'^tasks/update/$', sche_etl_v2.update_tasks_interval, name='update_tasks_interval'),
 
-    url(r'^sche/$', sche_etl.ScheDepListView.as_view(), name='sche_list'),
-    url(r'^sche/(?P<pk>[0-9]+)/$', sche_etl.edit, name='sche_edit'),
-    url(r'^sche/etl/(?P<etlid>[0-9]+)/$', sche_etl.sche_etl_list, name='sche_etl_list'),
-    url(r'^schecron/$', sche_etl.sche_cron_list, name='sche_cron_list'),
-    url(r'^sche/add/$', sche_etl.add, name='sche_add'),
-    url(r'^sche/migrate/$', sche_etl.migrate_jobs, name='migrate'),
+    url(r'^sche/$', sche_etl_v2.ScheDepListView.as_view(), name='sche_list'),
+    url(r'^sche/(?P<pk>[0-9]+)/$', sche_etl_v2.edit, name='sche_edit'),
+    url(r'^sche/etl/(?P<etlid>[0-9]+)/$', sche_etl_v2.sche_etl_list, name='sche_etl_list'),
+    url(r'^schecron/$', sche_etl_v2.sche_cron_list, name='sche_cron_list'),
+    url(r'^sche/add/$', sche_etl_v2.add, name='sche_add'),
+    url(r'^sche/migrate/$', sche_etl_v2.migrate_jobs, name='migrate'),
 
     url(r'^source/$', source.IndexView.as_view(), name='source_index'),
     url(r'^source/add/$', source.add, name='source_add'),
