@@ -52,7 +52,7 @@ class ScheDepListView(generic.ListView):
         for tt in objjs:
             eo = ExecObj.objects.get(pk=tt.rel_id)
             if eo.type != 2:
-                objjs.exclude(id=eo.id)
+                objjs = objjs.exclude(id=tt.id)
         print('after count is %d ' % objjs.count())
         return objjs
 
