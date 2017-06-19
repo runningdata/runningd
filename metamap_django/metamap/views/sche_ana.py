@@ -45,8 +45,9 @@ class ScheDepListView(generic.ListView):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
             rere = WillDependencyTask.objects.filter(type=100, name__contains=tbl_name_).order_by('-valid', '-ctime')
-        self.paginate_by = DEFAULT_PAGE_SIEZE
-        rere = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
+        else:
+            self.paginate_by = DEFAULT_PAGE_SIEZE
+            rere = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
         print('count is %d ' % rere.count())
         for tt in rere:
             rere = filter_ana(rere, tt)
