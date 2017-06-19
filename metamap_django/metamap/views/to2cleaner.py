@@ -21,7 +21,7 @@ def clean_etl(request):
     # TODO 有些sqoop import的ods表相关的，还没有生成对应的ETLBlood对象，所以当前ETL的H2H也是不完整的血统DAG
     for etl in ETL.objects.filter(valid=1):
         try:
-            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=1, cgroup=etl.cgroup,
+            etl_obj, result = ExecObj.objects.get_or_create(name=etl.name, rel_id=etl.id, type=1, cgroup=etl.cgroup,
                                                                creator=etl.creator)
             print('ETLObj for ETL done : %s ' % etl.name)
         except Exception, e:
