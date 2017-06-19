@@ -294,7 +294,7 @@ class ETL(ETLObjRelated):
         return "hive -f "
 
     def get_deps(self):
-        deps = hivecli.getTbls_v2(self.query)
+        deps = hivecli.getTbls_v2(self)
         return deps
 
 
