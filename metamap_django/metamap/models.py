@@ -509,7 +509,7 @@ class SqoopHive2Mysql(ETLObjRelated):
     # TODO release this after clean all data
     def save(self, *args, **kwargs):
         self.rel_name = self.hive_meta.meta + '@' + self.hive_tbl.lower()
-        super(ETLObjRelated, self).save(*args, **kwargs)
+        super(SqoopHive2Mysql, self).save(*args, **kwargs)
         parent = ExecObj.objects.get(name=self.rel_name, type=ETL.type)
         print('SqoopHive2Mysql: child is %s , parent is %s' % (self.exec_obj.name, parent.name))
         logger.error('SqoopHive2Mysql: child is %s , parent is %s' % (self.exec_obj.name, parent.name))
