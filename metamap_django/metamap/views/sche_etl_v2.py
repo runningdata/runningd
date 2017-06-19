@@ -79,6 +79,9 @@ class ScheDepListView(generic.ListView):
         return objss
 
     def handle_pass(self, objss, obj):
+        exobj = ExecObj.objects.get(pk=obj.rel_id)
+        if exobj.type == 66:
+            objss = objss.exclude(id=obj.id)
         return objss
 
     # TODO 考虑一下是否合适
@@ -98,7 +101,7 @@ class ScheDepListView(generic.ListView):
 
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            objs = WillDependencyTask.objects.filter(name__icontains=tbl_name_).order_by('-valid', '-ctime')
+            objs = WillDependencyTask.objects.filter(name__icontains=tbl_name_, type=100).order_by('-valid', '-ctime')
             for obj in objs:
                 objs = filters.get(obj.type)(objs, obj)
             return objs
