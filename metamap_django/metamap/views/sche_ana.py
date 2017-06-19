@@ -38,13 +38,14 @@ class ScheDepListView(generic.ListView):
             rere = WillDependencyTask.objects.filter(type=100, name__contains=tbl_name_).order_by('-valid', '-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
         rere = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
+        print('count is %d ' % rere.count())
         for tt in rere:
-            eo = ExecObj.objects.get(id=tt.rel_id)
-
+            eo = ExecObj.objects.get(pk=tt.rel_id)
             print('%s s type is %d ' % (eo.name, eo.type))
             if eo.type != 2:
                 print('%s has been excluded ' % eo.name)
                 rere.exclude(id=tt.id)
+        print('after count is %d ' % rere.count())
         return rere
 
     def get_context_data(self, **kwargs):
