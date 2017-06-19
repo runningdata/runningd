@@ -27,6 +27,14 @@ from will_common.utils import httputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
 
+def filter_ana(objjs, obj):
+    eo = ExecObj.objects.get(pk=obj.rel_id)
+    print('%s s type is %d ' % (eo.name, eo.type))
+    if eo.type != 2:
+        print('%s has been excluded ' % eo.name)
+        objjs.exclude(id=obj.id)
+    return objjs
+
 class ScheDepListView(generic.ListView):
     template_name = 'sche/ana/list.html'
     context_object_name = 'objs'
@@ -40,11 +48,7 @@ class ScheDepListView(generic.ListView):
         rere = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
         print('count is %d ' % rere.count())
         for tt in rere:
-            eo = ExecObj.objects.get(pk=tt.rel_id)
-            print('%s s type is %d ' % (eo.name, eo.type))
-            if eo.type != 2:
-                print('%s has been excluded ' % eo.name)
-                rere.exclude(id=tt.id)
+            rere = filter_ana(tt)
         print('after count is %d ' % rere.count())
         return rere
 
