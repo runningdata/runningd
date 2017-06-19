@@ -47,10 +47,18 @@ def generate_job_dag_v2(request, schedule, group_name='xiaov'):
     :param request:
     :return:
     '''
+    if schedule == '0':
+        red_sche = 'day'
+    elif schedule == '1':
+        red_sche = 'week'
+    elif schedule == '2':
+        red_sche = 'month'
+    else:
+        red_sche = 'unknown'
     try:
         done_blood = set()
         done_leaf = set()
-        folder = group_name + '-' + schedule +'-' +  dateutils.now_datetime()
+        folder = group_name + '-' + red_sche + '-' + dateutils.now_datetime()
         leafs = ExecBlood.objects.raw("SELECT 1 as id, a.* FROM "
                                       "(select DISTINCT child_id FROM metamap_execblood) a "
                                       "join ("
@@ -85,7 +93,7 @@ def generate_job_dag_v2(request, schedule, group_name='xiaov'):
                 if exec_obj.id not in done_leaf and (exec_obj.cgroup and exec_obj.cgroup.name == group_name):
                     generate_job_file_v2(exec_obj, list(), folder, schedule)
                     non_dep_task.add(exec_obj.name)
-                elif exec_obj.type == 66:   # the NULLETL without a group id
+                elif exec_obj.type == 66:  # the NULLETL without a group id
                     generate_job_file_v2(exec_obj, list(), folder, schedule)
                     non_dep_task.add(exec_obj.name)
             except ObjectDoesNotExist, e:
