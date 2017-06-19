@@ -6,6 +6,7 @@ import os
 import re
 from django.conf import settings
 from django.contrib.auth.models import Group
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 import datetime
 
@@ -39,22 +40,22 @@ class ETLObjRelated(models.Model):
         (1, '是'),
         (0, '否'),
     ))
-    # exec_obj = models.ForeignKey('ExecObj', on_delete=models.DO_NOTHING, null=True, )
+    exec_obj = models.ForeignKey('ExecObj', on_delete=models.DO_NOTHING, null=True, )
 
     class Meta:
         abstract = True
 
     # TODO release after clean
-    # def save(self, *args, **kwargs):
-    #     super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
-    #     exe, created = ExecObj.objects.get_or_create(type=self.type, name=self.name, rel_id = self.id)
-    #     exe.rel_id = self.id
-    #     exe.creator = self.creator
-    #     exe.cgroup = self.cgroup
-    #     exe.save()
-    #     if created:
-    #         self.exec_obj = exe
-    #         super(ETLObjRelated, self).save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
+        exe, created = ExecObj.objects.get_or_create(type=self.type, name=self.name, rel_id = self.id)
+        exe.rel_id = self.id
+        exe.creator = self.creator
+        exe.cgroup = self.cgroup
+        exe.save()
+        if created:
+            self.exec_obj = exe
+            super(ETLObjRelated, self).save(*args, **kwargs)
 
     def get_clean_str(self, str_list):
         return '\n'.join(str_list)
@@ -92,11 +93,11 @@ class NULLETL(ETLObjRelated):
     type = 66
 
     # TODO release
-    # def save(self, *args, **kwargs):
-    #     super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
-    #     WillDependencyTask.objects.update_or_create(name=self.name, type=100, rel_id=self.id, schedule=0)
-    #     WillDependencyTask.objects.update_or_create(name=self.name, type=100, rel_id=self.id, schedule=1)
-    #     WillDependencyTask.objects.update_or_create(name=self.name, type=100, rel_id=self.id, schedule=2)
+    def save(self, *args, **kwargs):
+        super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
+        WillDependencyTask.objects.update_or_create(name=self.name, type=100, rel_id=self.id, schedule=0)
+        WillDependencyTask.objects.update_or_create(name=self.name, type=100, rel_id=self.id, schedule=1)
+        WillDependencyTask.objects.update_or_create(name=self.name, type=100, rel_id=self.id, schedule=2)
 
     def get_script(self, str_list, sche_var=''):
         str_list.append("echo task for % s " % self.name)
@@ -175,21 +176,21 @@ class JarApp(ETLObjRelated):
     outputs = models.CharField(max_length=500, default='', verbose_name=u"输出的表名称，目前只考虑hive表", blank=True, null=True)
 
     # TODO release after clean
-    # def save(self, *args, **kwargs):
-    #     super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
-    #     if len(self.outputs) > 0:
-    #         new_children = list()
-    #         for output in self.outputs.split(","):
-    #             obj, created = NULLETL.objects.get_or_create(name=output, rel_name=output)
-    #             new_children.append(ExecBlood(child_id=obj.exec_obj.id, parent_id=self.exec_obj.id))
-    #
-    #         old_children = ExecBlood.objects.filter(parent=self.exec_obj)
-    #         for o_child in old_children:
-    #             if not any(o_child == n_child for n_child in new_children):
-    #                 o_child.delete()
-    #         for n_child in new_children:
-    #             if not any(o_child == n_child for o_child in old_children):
-    #                 n_child.save()
+    def save(self, *args, **kwargs):
+        super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
+        if len(self.outputs) > 0:
+            new_children = list()
+            for output in self.outputs.split(","):
+                obj, created = NULLETL.objects.get_or_create(name=output, rel_name=output)
+                new_children.append(ExecBlood(child_id=obj.exec_obj.id, parent_id=self.exec_obj.id))
+
+            old_children = ExecBlood.objects.filter(parent=self.exec_obj)
+            for o_child in old_children:
+                if not any(o_child == n_child for n_child in new_children):
+                    o_child.delete()
+            for n_child in new_children:
+                if not any(o_child == n_child for o_child in old_children):
+                    n_child.save()
 
     def get_wd(self):
         log = AZKABAN_SCRIPT_LOCATION + dateutils.now_datetime() + '-jarapp-sche-' + self.name + '.log'
@@ -239,26 +240,26 @@ class ETL(ETLObjRelated):
     variables = models.CharField(max_length=2000, default='')
 
     # TODO release after clean
-    # def save(self, *args, **kwargs):
-    #     super(ETLObjRelated, self).save(*args, **kwargs)
-    #     new_deps = []
-    #     for dep in self.get_deps():
-    #         try:
-    #             etl = ETL.objects.get(name=dep, valid=1)
-    #         except ObjectDoesNotExist:
-    #             try:
-    #                 etl = SqoopMysql2Hive.objects.get(rel_name=dep, valid=1)
-    #             except:
-    #                 etl = NULLETL.objects.get(name=dep, valid=1)
-    #         new_deps.append(ExecBlood(child_id=self.exec_obj.id, parent_id=etl.exec_obj.id))
-    #
-    #     old_deps = ExecBlood.objects.filter(child_id=self.exec_obj.id)
-    #     for o_dep in old_deps:
-    #         if not any(o_dep == n_dep for n_dep in new_deps):
-    #             o_dep.delete()
-    #     for n_dep in new_deps:
-    #         if not any(o_dep == n_dep for o_dep in old_deps):
-    #             n_dep.save()
+    def save(self, *args, **kwargs):
+        super(ETLObjRelated, self).save(*args, **kwargs)
+        new_deps = []
+        for dep in self.get_deps():
+            try:
+                etl = ETL.objects.get(name=dep, valid=1)
+            except ObjectDoesNotExist:
+                try:
+                    etl = SqoopMysql2Hive.objects.get(rel_name=dep, valid=1)
+                except:
+                    etl = NULLETL.objects.get(name=dep, valid=1)
+            new_deps.append(ExecBlood(child_id=self.exec_obj.id, parent_id=etl.exec_obj.id))
+
+        old_deps = ExecBlood.objects.filter(child_id=self.exec_obj.id)
+        for o_dep in old_deps:
+            if not any(o_dep == n_dep for n_dep in new_deps):
+                o_dep.delete()
+        for n_dep in new_deps:
+            if not any(o_dep == n_dep for o_dep in old_deps):
+                n_dep.save()
 
     def __str__(self):
         return self.query
@@ -433,15 +434,15 @@ class SqoopMysql2Hive(ETLObjRelated):
     settings = models.TextField(null=True)
 
     # TODO release this after clean all data
-    # def save(self, *args, **kwargs):
-    #     tbl_name = self.hive_meta.meta + '@' + self.mysql_tbl.lower()
-    #     if 'hive-table' in self.option:
-    #         for op in self.option.split('--'):
-    #             if op.startswith('hive-table'):
-    #                 tbl_name = self.hive_meta.meta + '@' + re.split('\s', op.strip())[1].lower()
-    #                 break
-    #     self.rel_name = tbl_name
-    #     super(ETLObjRelated, self).save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        tbl_name = self.hive_meta.meta + '@' + self.mysql_tbl.lower()
+        if 'hive-table' in self.option:
+            for op in self.option.split('--'):
+                if op.startswith('hive-table'):
+                    tbl_name = self.hive_meta.meta + '@' + re.split('\s', op.strip())[1].lower()
+                    break
+        self.rel_name = tbl_name
+        super(ETLObjRelated, self).save(*args, **kwargs)
 
     def get_clean_str(self, str_list):
         return ' '.join(str_list).replace('\n', ' ').replace('&', '\&')
@@ -502,11 +503,11 @@ class SqoopHive2Mysql(ETLObjRelated):
     parallel = models.IntegerField(default=1, verbose_name='并发执行')
 
     # TODO release this after clean all data
-    # def save(self, *args, **kwargs):
-    #     self.rel_name = self.hive_meta.meta + '@' + self.hive_tbl.lower()
-    #     super(ETLObjRelated, self).save(*args, **kwargs)
-    #     parent = ExecObj.objects.get(name=self.rel_name, type=ETL.type)
-    #     ExecBlood.objects.get_or_create(child=self.exec_obj, parent=parent)
+    def save(self, *args, **kwargs):
+        self.rel_name = self.hive_meta.meta + '@' + self.hive_tbl.lower()
+        super(ETLObjRelated, self).save(*args, **kwargs)
+        parent = ExecObj.objects.get(name=self.rel_name, type=ETL.type)
+        ExecBlood.objects.get_or_create(child=self.exec_obj, parent=parent)
 
     def get_clean_str(self, str_list):
         return ' '.join(str_list).replace('\n', ' ').replace('&', '\&')
