@@ -41,6 +41,7 @@ class ScheDepListView(generic.ListView):
         for tt in rere:
             eo = ExecObj.objects.get(id=tt.rel_id)
             if eo.type != 2:
+                print('%s has been excluded ' % eo.name)
                 rere.exclude(id=tt.id)
         return rere
 
