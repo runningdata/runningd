@@ -44,15 +44,17 @@ class ScheDepListView(generic.ListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            rere = WillDependencyTask.objects.filter(type=100, name__contains=tbl_name_).order_by('-valid', '-ctime')
+            objjs = WillDependencyTask.objects.filter(type=100, name__contains=tbl_name_).order_by('-valid', '-ctime')
         else:
             self.paginate_by = DEFAULT_PAGE_SIEZE
-            rere = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
-        print('count is %d ' % rere.count())
-        for tt in rere:
-            rere = filter_ana(rere, tt)
-        print('after count is %d ' % rere.count())
-        return rere
+            objjs = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
+        print('count is %d ' % objjs.count())
+        for tt in objjs:
+            eo = ExecObj.objects.get(pk=tt.rel_id)
+            if eo.type != 2:
+                objjs.exclude(id=eo.id)
+        print('after count is %d ' % objjs.count())
+        return objjs
 
     def get_context_data(self, **kwargs):
         context = super(ScheDepListView, self).get_context_data(**kwargs)

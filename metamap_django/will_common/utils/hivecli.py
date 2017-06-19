@@ -23,7 +23,7 @@ def getTbls_v2(etl):
         matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
         if matchObj:
             sql = sql.replace(matchObj.group(1), '-999')
-        f_sql = sql.replace('`', '\'').encode('utf8')
+        f_sql = sql.replace('`', '\`').encode('utf8')
         command = 'hive -e   "explain dependency ' + f_sql + '"'
         out = os.popen(command).read()
 
