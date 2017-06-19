@@ -26,6 +26,7 @@ from will_common.utils.constants import DEFAULT_PAGE_SIEZE, TMP_EXPORT_FILE_LOCA
 
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
 
+logger = logging.getLogger('django')
 
 def get_all_tasks(request):
     all_periodic_task = PeriodicTask.objects.all()
@@ -249,9 +250,12 @@ def edit(request, pk):
         #         etl = None
         etl = ExecObj.objects.get(pk=task.rel_id)
         if etl and etl.creator_id != request.user.userprofile.id:
-            PushUtils.push_exact_email(etl.creator.user.email,
+            if etl.creator:
+                PushUtils.push_exact_email(etl.creator.user.email,
                                        'your schedule for %s has been changed by %s' % (
                                        etl.name, request.user.email))
+            else:
+                logger.warn('no creator for task %s, task id is %d ' % (task.name, pk))
         # except:
         #     print('error happens for %s scheduel ' % task.name)
         task.save()
