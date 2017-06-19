@@ -34,6 +34,7 @@ def filter_ana(objjs, obj):
         print('%s has been excluded ' % eo.name)
         objjs.exclude(id=obj.id)
     return objjs
+    print('%objjs s count is %d ' % (objjs.count()))
 
 class ScheDepListView(generic.ListView):
     template_name = 'sche/ana/list.html'
