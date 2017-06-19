@@ -248,6 +248,7 @@ class ETL(ETLObjRelated):
         super(ETL, self).save(*args, **kwargs)
         new_deps = []
         for dep in self.get_deps():
+            print('handing dep : %s' % dep)
             try:
                 etl = ETL.objects.get(name=dep, valid=1)
             except ObjectDoesNotExist:
