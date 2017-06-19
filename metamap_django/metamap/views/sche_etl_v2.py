@@ -214,7 +214,7 @@ def add(request):
             tasks.save()
         return redirect('metamap:sche_list')
     else:
-        return render(request, 'sche/edit_bak.html')
+        return render(request, 'sche/edit.html')
 
 
 @transaction.atomic
@@ -306,7 +306,7 @@ def edit(request, pk):
         return redirect('metamap:sche_list')
     else:
         obj = WillDependencyTask.objects.get(pk=pk)
-        return render(request, 'sche/edit_bak.html', {'task': obj})
+        return render(request, 'sche/edit.html', {'task': obj})
 
 
 @transaction.atomic

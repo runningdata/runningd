@@ -1,0 +1,379 @@
+{% extends 'layout.html' %}
+{% load ifdef %}
+{% load staticfiles %}
+{% block title %}调度任务{% endblock %}
+
+{% block scripts %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-select.min.css' %}"/>
+    <script src="{% static 'js/bootstrap-select.min.js' %}"></script>
+    <script>
+        function change_type() {
+            var task_type = $('#task_type').val()
+            if (task_type == 1) {
+                get_etl();
+            } else if (task_type == 3) {
+                get_hive2mysql();
+            } else if (task_type == 4) {
+                get_mysql2hive();
+            } else if (task_type == 5) {
+                get_sourceapp();
+            } else if (task_type == 6) {
+                get_jarapp();
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+    {% has_def 'task' as has_task %}
+
+    <div class="alert alert-info">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="fa fa-exclamation-circle fa-lg"></i> 每晚11点35分开始扫描yarn进程，kill一切不是以'_online'结尾的程序
+    </div>
+    {#    <div class="alert">#}
+    {#        <button type="button" class="close" data-dismiss="alert">&times;</button>#}
+    {#        <strong>Warning!</strong> Best check yo self, you're not looking too good.#}
+    {#    </div>#}
+    {% if has_task %}
+        <form action="." method="POST">
+            <div class="form-group">
+                <input name="id" value="" type="hidden" class="form-control">
+                <label>调度名称</label>
+                <input name="name" value="{{ task.name }}" type="text" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>任务类型</label>
+                <select id="task_type" name="type" onchange='change_type()' class="selectpicker show-tick form-control">
+                    <option
+                            {% if task.type == 6 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="6">JarApp
+                    </option>
+                    <option
+                            {% if task.type == 4 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="4">Mysql2Hive
+                    </option>
+                    <option
+                            {% if task.type == 1 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="1">hive ETL
+                    </option>
+                    <option
+                            {% if task.type == 3 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="3">Hive2Mysql
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+
+                <label>关联</label>
+
+                <select id="lunch" name="rel_id" class="selectpicker form-control" data-live-search="true">
+                    <option class="bs-title-option" value="">选择....</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>预设变量</label>
+                <textarea id="variables" name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
+            </div>
+            <div class="form-group">
+                <label>是否生效</label>
+                <div class="radio-inline">
+                    <input id="optionsRadios1" type="radio" name="valid"
+                            {% if task.valid != 0 %}
+                           checked="checked"
+                            {% endif %}
+                           value="1">是
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="valid"
+                            {% if task.valid == 0 %}
+                           checked="checked"
+                            {% endif %}
+                           value="0">否
+                </div>
+            </div>
+            <div class="form-group">
+                <label>调度方式</label>
+                <div class="radio-inline">
+                    <input id="optionsRadios1" type="radio" name="schedule"
+                            {% if task.schedule == 0 %}
+                           checked="checked"
+                            {% endif %}
+                           value="0">每天
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios1" type="radio" name="schedule"
+                            {% if task.schedule == 1 %}
+                           checked="checked"
+                            {% endif %}
+                           value="1">周【每周第一天】
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="schedule"
+                            {% if task.schedule == 2 %}
+                           checked="checked"
+                            {% endif %}
+                           value="2">月【每月第一天】
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="schedule"
+                            {% if task.schedule == 3 %}
+                           checked="checked"
+                            {% endif %}
+                           value="3">季度【每季第一天】
+                </div>
+                <div class="radio-inline">
+                    <div class="input-group">
+                        <input type="radio" aria-label="自定义" name="schedule"
+                                {% if task.schedule == 4 %}
+                               checked="checked"
+                                {% endif %}
+                               value="4">自定义【cron】
+                        <input type="text" class="inline" name="cronexp" value="{{ task.get_schedule }}">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <input name="id" value="" type="hidden" class="form-control">
+                <label>描述</label>
+                <textarea name="desc" rows="5" class="form-control">{{ task.desc }}</textarea>
+            </div>
+            <div class="form-group text-center">
+
+                <button type="submit" class="btn btn-primary">提交</button>
+
+                <a id="cancel" class="btn btn-warning" onclick="javascript:history.go(-1);">取消</a>
+            </div>
+        </form>
+        <script type="application/javascript">
+            var id = {{ task.rel_id }};
+        </script>
+    {% else %}
+        <form action="." method="POST">
+            <div class="form-group">
+                <input name="id" value="" type="hidden" class="form-control">
+                <label>调度名称</label>
+                <input name="name" value="{{ task.name }}" type="text" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>任务类型</label>
+                <select id="task_type" name="type" onchange='change_type()' class="selectpicker show-tick form-control">
+                    <option
+                            {% if task.type == 6 %}#}
+                                selected="selected"
+                            {% endif %}
+                                value="6">JarApp
+                    </option>
+                    <option
+                            value="4">Mysql2Hive
+                    </option>
+                    <option
+                            selected="selected"
+                            value="1">hive ETL
+                    </option>
+                    <option
+                            value="3">Hive2Mysql
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+
+                <label>关联</label>
+
+                <select id="lunch" name="rel_id" class="selectpicker form-control" data-live-search="true">
+                    <option class="bs-title-option" value="">选择....</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>预设变量</label>
+                <textarea id="variables" name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
+            </div>
+            <div class="form-group">
+                <label>是否生效</label>
+                <div class="radio-inline">
+                    <input id="optionsRadios1" type="radio" name="valid"
+                           checked="checked"
+                           value="1">是
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="valid"
+                           value="0">否
+                </div>
+            </div>
+            <div class="form-group">
+                <label>调度方式</label>
+                <div class="radio-inline">
+                    <input id="optionsRadios1" type="radio" name="schedule"
+                           checked="checked"
+                           value="0">每天
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios1" type="radio" name="schedule"
+                           value="1">周【每周第一天】
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="schedule"
+                           value="2">月【每月第一天】
+                </div>
+                <div class="radio-inline">
+                    <input id="optionsRadios3" type="radio" name="schedule"
+                           value="3">季度【每季第一天】
+                </div>
+                <div class="radio-inline">
+                    <div class="input-group">
+                        <input type="radio" aria-label="自定义" name="schedule"
+                               value="4">自定义【cron】
+                        <input type="text" class="inline" name="cronexp" value="">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <input name="id" value="" type="hidden" class="form-control">
+                <label>描述</label>
+                <textarea name="desc" rows="5" class="form-control"></textarea>
+            </div>
+            <div class="form-group text-center">
+
+                <button type="submit" class="btn btn-primary">提交</button>
+
+                <a id="cancel" class="btn btn-warning" onclick="javascript:history.go(-1);">取消</a>
+            </div>
+        </form>
+        <script type="application/javascript">
+            var id = -1
+        </script>
+    {% endif %}
+
+    <script type="application/javascript">
+        function get_etl() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/etls/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, etl) {
+                                if (id == etl.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + etl.id + "'>" + etl.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + etl.id + "'>" + etl.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        function get_hive2mysql() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/hive2mysql/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, sqoop) {
+                                if (id == sqoop.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        function get_mysql2hive() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/mysql2hive/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, sqoop) {
+                                if (id == sqoop.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        function get_sourceapp() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/sourceapp/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, sqoop) {
+                                if (id == sqoop.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        function get_jarapp() {
+            $.ajax({
+                        type: "get",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        url: "/metamap/rest/jarapp/?format=json",
+                        success: function (result) {
+                            $("#lunch").html('').selectpicker('refresh');
+                            $.each(result, function (index, sqoop) {
+                                if (id == sqoop.id) {
+                                    $("#lunch").append("<option selected='selected' value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                } else {
+                                    $("#lunch").append("<option value='" + sqoop.id + "'>" + sqoop.name + "</option>");
+                                }
+                            });
+                            $("#lunch").selectpicker('refresh');
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(errorThrown);
+                        },
+                        async: false             //false表示同步
+                    }
+            );
+        }
+        change_type();
+    </script>
+{% endblock %}
