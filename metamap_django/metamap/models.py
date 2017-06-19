@@ -245,7 +245,7 @@ class ETL(ETLObjRelated):
 
     # TODO release after clean
     def save(self, *args, **kwargs):
-        super(ETLObjRelated, self).save(*args, **kwargs)
+        super(ETL, self).save(*args, **kwargs)
         new_deps = []
         for dep in self.get_deps():
             try:
