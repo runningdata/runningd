@@ -313,6 +313,7 @@ def clean_exec_obj_id(request):
             etl.save()
         else:
             print('errrrrrrrrrrrrrrrrrrrrrrrrr : %s ' % execobj.name)
+    return HttpResponse('EXEC OBJ CLEAN DONE')
 
 def clean_all(request):
     # clean_rel_name(request)
