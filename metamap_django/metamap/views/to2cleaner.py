@@ -16,17 +16,19 @@ from will_common.utils import hivecli
 
 logger = logging.getLogger('django')
 
+
 @transaction.atomic
 def clean_etl(request):
     # TODO 有些sqoop import的ods表相关的，还没有生成对应的ETLBlood对象，所以当前ETL的H2H也是不完整的血统DAG
     for etl in ETL.objects.filter(valid=1):
         try:
             etl_obj, result = ExecObj.objects.get_or_create(name=etl.name, rel_id=etl.id, type=1, cgroup=etl.cgroup,
-                                                               creator=etl.creator)
+                                                            creator=etl.creator)
             print('ETLObj for ETL done : %s ' % etl.name)
         except Exception, e:
             print('ETLObj for ETL error :%d --> %s' % (etl.id, e))
     return HttpResponse('clean_etl done')
+
 
 @transaction.atomic
 def clean_H2M(request):
@@ -43,6 +45,7 @@ def clean_H2M(request):
         except Exception, e:
             print(' SqoopHive2Mysql \'s error : %d --> %s' % (etl.id, e))
     return HttpResponse('clean_H2M done')
+
 
 @transaction.atomic
 def clean_ANA(request):
@@ -72,6 +75,7 @@ def clean_ANA(request):
             print('ETLObj AnaETL error : %d --> %s' % (etl.id, e))
     return HttpResponse('clean_ANA done')
 
+
 @transaction.atomic
 def clean_etlp_befor_blood(request):
     '''
@@ -93,12 +97,14 @@ def clean_etlp_befor_blood(request):
                     except ObjectDoesNotExist, e:
                         child = ETL.objects.get(pk=blood.relatedEtlId)
                         parent, status = NULLETL.objects.get_or_create(name=blood.parentTbl, rel_name=blood.parentTbl)
-                        ExecObj.objects.get_or_create(name=parent.name, rel_id=parent.id, type=NULLETL.type, cgroup=child.cgroup)
+                        ExecObj.objects.get_or_create(name=parent.name, rel_id=parent.id, type=NULLETL.type,
+                                                      cgroup=child.cgroup)
                         logger.error(e.message)
             except Exception, e:
                 print(' ETL \'s ETLBlood error : %d --> %s' % (blood.id, e))
 
     return HttpResponse('clean_blood done')
+
 
 @transaction.atomic
 def clean_blood(request):
@@ -145,6 +151,7 @@ def clean_blood(request):
     #     print('add blood for h2m : %s , h2m id is : %d ' % (hm.rel_name, h2m.rel_id))
     return HttpResponse('clean_blood done')
 
+
 @transaction.atomic
 def clean_JAR(request):
     # jar app
@@ -155,6 +162,7 @@ def clean_JAR(request):
         except Exception, e:
             print('ETLObj for JarApp error :%d --> %s' % (etl.id, e))
     return HttpResponse(' clean_JAR done')
+
 
 @transaction.atomic
 def clean_deptask(request):
@@ -191,6 +199,7 @@ def clean_deptask(request):
             print('WillDependencyTask error : %d --> %s' % (task.id, e))
     return HttpResponse(' clean_deptask done')
 
+
 @transaction.atomic
 def clean_null(request):
     for null in NULLETL.objects.all():
@@ -200,6 +209,7 @@ def clean_null(request):
         WillDependencyTask.objects.update_or_create(name=null_obj.name, type=100, rel_id=null_obj.id, schedule=1)
         WillDependencyTask.objects.update_or_create(name=null_obj.name, type=100, rel_id=null_obj.id, schedule=2)
     return HttpResponse('ulll done')
+
 
 @transaction.atomic
 def clean_M2H(request):
@@ -220,6 +230,7 @@ def clean_M2H(request):
         except Exception, e:
             print('SqoopMysql2Hive \'s error : %d --> %s' % (etl.id, e))
     return HttpResponse(' clean_M2H done')
+
 
 @transaction.atomic
 def clean_rel_name(request):
@@ -244,6 +255,7 @@ def clean_rel_name(request):
         etl.save()
     return HttpResponse('XX')
 
+
 @transaction.atomic
 def clean_period_tsk(request):
     current_tsk = 0
@@ -266,6 +278,41 @@ def clean_period_tsk(request):
         print traceback.format_exc()
     return HttpResponse('pTASK DONE')
 
+
+@transaction.atomic
+def clean_exec_obj_id(request):
+    '''
+    all test has passed, before release all save method for ETLRelatedObjs. then execute this
+    :param request:
+    :return:
+    '''
+    for execobj in ExecObj.objects.all():
+        if execobj.type == 1:
+            etl = ETL.objects.get(id=execobj.rel_id)
+            etl.exec_obj_id = execobj.id
+            etl.save()
+        elif execobj.type == 2:
+            etl = AnaETL.objects.get(id=execobj.rel_id)
+            etl.exec_obj_id = execobj.id
+            etl.save()
+        elif execobj.type == 3:
+            etl = SqoopHive2Mysql.objects.get(id=execobj.rel_id)
+            etl.exec_obj_id = execobj.id
+            etl.save()
+        elif execobj.type == 4:
+            etl = SqoopMysql2Hive.objects.get(id=execobj.rel_id)
+            etl.exec_obj_id = execobj.id
+            etl.save()
+        elif execobj.type == 6:
+            etl = JarApp.objects.get(id=execobj.rel_id)
+            etl.exec_obj_id = execobj.id
+            etl.save()
+        elif execobj.type == 66:
+            etl = NULLETL.objects.get(id=execobj.rel_id)
+            etl.exec_obj_id = execobj.id
+            etl.save()
+        else:
+            print('errrrrrrrrrrrrrrrrrrrrrrrrr : %s ' % execobj.name)
 
 def clean_all(request):
     # clean_rel_name(request)
