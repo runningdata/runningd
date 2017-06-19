@@ -28,6 +28,7 @@ ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
 
 logger = logging.getLogger('django')
 
+
 def get_all_tasks(request):
     all_periodic_task = PeriodicTask.objects.all()
     return HttpResponse(all_periodic_task)
@@ -169,23 +170,23 @@ def add(request):
         httputils.post2obj(task, request.POST, 'id')
         # TODO refactor This should be a normal part for some sub-classes
         # try:
-            # if int(task.type) == 1:
-            #     etl = ETL.objects.get(pk=task.rel_id)
-            # elif int(task.type) == 3:
-            #     etl = SqoopHive2Mysql.objects.get(pk=task.rel_id)
-            # elif int(task.type) == 4:
-            #     etl = SqoopMysql2Hive.objects.get(pk=task.rel_id)
-            # elif int(task.type) == 6:
-            #     etl = JarApp.objects.get(pk=task.rel_id)
-            # else:
-            #     PushUtils.push_exact_email(settings.ADMIN_EMAIL,
-            #                                'task %s has no type, its type is : %d ' % (task.name, task.type))
-            #     etl = None
+        # if int(task.type) == 1:
+        #     etl = ETL.objects.get(pk=task.rel_id)
+        # elif int(task.type) == 3:
+        #     etl = SqoopHive2Mysql.objects.get(pk=task.rel_id)
+        # elif int(task.type) == 4:
+        #     etl = SqoopMysql2Hive.objects.get(pk=task.rel_id)
+        # elif int(task.type) == 6:
+        #     etl = JarApp.objects.get(pk=task.rel_id)
+        # else:
+        #     PushUtils.push_exact_email(settings.ADMIN_EMAIL,
+        #                                'task %s has no type, its type is : %d ' % (task.name, task.type))
+        #     etl = None
         etl = ExecObj.objects.get(pk=task.rel_id)
         if etl and etl.creator_id != request.user.userprofile.id:
             PushUtils.push_exact_email(etl.creator.user.email,
                                        'your schedule for %s has been changed by %s' % (
-                                       etl.name, request.user.email))
+                                           etl.name, request.user.email))
         # except:
         #     print('error happens for %s scheduel ' % task.name)
 
@@ -249,13 +250,12 @@ def edit(request, pk):
         #                                    'task %s has no type, its type is : %d ' % (task.name, task.type))
         #         etl = None
         etl = ExecObj.objects.get(pk=task.rel_id)
-        if etl and etl.creator_id != request.user.userprofile.id:
-            if etl.creator:
-                PushUtils.push_exact_email(etl.creator.user.email,
+        if etl and etl.creator and etl.creator_id != request.user.userprofile.id:
+            PushUtils.push_exact_email(etl.creator.user.email,
                                        'your schedule for %s has been changed by %s' % (
-                                       etl.name, request.user.email))
-            else:
-                logger.warn('no creator for task %s, task id is %d ' % (task.name, pk))
+                                           etl.name, request.user.email))
+        else:
+            logger.warn('no creator for task %s, task id is %d ' % (task.name, pk))
         # except:
         #     print('error happens for %s scheduel ' % task.name)
         task.save()
