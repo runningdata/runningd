@@ -40,6 +40,8 @@ class ScheDepListView(generic.ListView):
         rere = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
         for tt in rere:
             eo = ExecObj.objects.get(id=tt.rel_id)
+
+            print('%s s type is %d ' % (eo.name, eo.type))
             if eo.type != 2:
                 print('%s has been excluded ' % eo.name)
                 rere.exclude(id=tt.id)
