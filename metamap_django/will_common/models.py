@@ -47,7 +47,7 @@ class WillDependencyTask(models.Model):
     variables = models.TextField()
     desc = models.TextField()
     rel_id = models.IntegerField(null=True, blank=False, help_text="ETL or Email id")
-    type = models.IntegerField(default=1, blank=False, null=False,
+    type = models.IntegerField(default=100, blank=False, null=False,
                                help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 jarfile")
 
     class Meta:
