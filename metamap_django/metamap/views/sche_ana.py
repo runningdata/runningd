@@ -48,7 +48,7 @@ class ScheDepListView(generic.ListView):
         rere = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
         print('count is %d ' % rere.count())
         for tt in rere:
-            rere = filter_ana(tt)
+            rere = filter_ana(rere, tt)
         print('after count is %d ' % rere.count())
         return rere
 
