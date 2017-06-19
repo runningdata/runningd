@@ -50,7 +50,7 @@ def generate_job_dag_v2(request, schedule, group_name='xiaov'):
     try:
         done_blood = set()
         done_leaf = set()
-        folder = group_name + '-' + dateutils.now_datetime()
+        folder = group_name + '-' + schedule +'-' +  dateutils.now_datetime()
         leafs = ExecBlood.objects.raw("SELECT 1 as id, a.* FROM "
                                       "(select DISTINCT child_id FROM metamap_execblood) a "
                                       "join ("
