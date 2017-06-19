@@ -259,6 +259,7 @@ def clean_period_tsk(request):
                 continue
             ptask.task = 'metamap.tasks.exec_etl_cli2'
             ptask.args = ptask.args.replace(str(o_wtask.id), str(n_wtask.id))
+            ptask.willtask_id = n_wtask.id
             ptask.save()
     except:
         print('current id is %d ' % current_tsk)
