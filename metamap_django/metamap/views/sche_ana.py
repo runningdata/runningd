@@ -39,6 +39,7 @@ class ScheDepListView(generic.ListView):
         self.paginate_by = DEFAULT_PAGE_SIEZE
         rere = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
         for tt in rere.values_list():
+            print('tt is %s ' % tt)
             eo = ExecObj.objects.get(id=tt.rel_id)
             if eo.type != 2:
                 rere.exclude(tt)
