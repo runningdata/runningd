@@ -18,7 +18,7 @@ from rest_framework.response import Response
 
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryPeriodictasks
 from will_common.helpers import cronhelper
-from metamap.models import AnaETL, Exports
+from metamap.models import AnaETL, Exports, ExecObj
 from metamap.rest.serializers import ExportsSerializer
 from will_common.models import WillDependencyTask, PeriodicTask
 from will_common.utils import PushUtils
@@ -35,9 +35,14 @@ class ScheDepListView(generic.ListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
-            return WillDependencyTask.objects.filter(type=2, name__contains=tbl_name_).order_by('-valid', '-ctime')
+            rere = WillDependencyTask.objects.filter(type=100, name__contains=tbl_name_).order_by('-valid', '-ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return WillDependencyTask.objects.filter(type=2).order_by('-valid', '-ctime')
+        rere = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
+        for tt in rere:
+            eo = ExecObj.objects.get(id=tt.rel_id)
+            if eo.type != 2:
+                rere.exclude(tt)
+        return rere
 
     def get_context_data(self, **kwargs):
         context = super(ScheDepListView, self).get_context_data(**kwargs)
