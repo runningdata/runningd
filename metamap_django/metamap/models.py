@@ -54,9 +54,12 @@ class ETLObjRelated(models.Model):
         exe.cgroup = self.cgroup
         exe.save()
         if created:
+            print('exec_obj %s created for %s' % (self.exec_obj.name, self.name))
             logger.error('exec_obj %s created for %s' % (self.exec_obj.name, self.name))
             self.exec_obj = exe
             super(ETLObjRelated, self).save(*args, **kwargs)
+        else:
+            print('already has exec_obj %s for %s' % (self.exec_obj.name, self.name))
 
     def get_clean_str(self, str_list):
         return '\n'.join(str_list)
@@ -508,6 +511,7 @@ class SqoopHive2Mysql(ETLObjRelated):
         self.rel_name = self.hive_meta.meta + '@' + self.hive_tbl.lower()
         super(ETLObjRelated, self).save(*args, **kwargs)
         parent = ExecObj.objects.get(name=self.rel_name, type=ETL.type)
+        print('SqoopHive2Mysql: child is %s , parent is %s' % (self.exec_obj.name, parent.name))
         logger.error('SqoopHive2Mysql: child is %s , parent is %s' % (self.exec_obj.name, parent.name))
         ExecBlood.objects.get_or_create(child=self.exec_obj, parent=parent)
 
