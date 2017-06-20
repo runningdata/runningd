@@ -29,9 +29,15 @@ def getTbls_v2(etl):
             fil.write('explain dependency ')
             fil.write(sql.encode('utf-8'))
         command = 'hive -f   ' + fillename + ''
-        out = os.popen(command).read()
+        sp = subprocess.Popen([command, ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = sp.communicate()
+        if sp.returncode != 0:
+            print ('SQL problem out : %s ' % out)
+            print ('SQL problem err : %s ' % err)
 
         # Fetch table results
+        print('out is %s ' % out)
+        print('err is %s ' % err)
         deps = json.loads(out)
         tables_ = deps['input_tables']
         for tbl in tables_:
