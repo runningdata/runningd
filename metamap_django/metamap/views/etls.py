@@ -253,6 +253,7 @@ def edit(request, pk):
                 #         bld.save()
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
+            print(traceback.format_exc())
             return render(request, 'common/500.html', {'msg': e.message})
     else:
         etl = ETL.objects.get(pk=pk)
