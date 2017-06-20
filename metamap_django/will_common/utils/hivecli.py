@@ -23,8 +23,12 @@ def getTbls_v2(etl):
         matchObj = re.match(r'.*,(reflect\(.*\)).*,.*', sql, re.I | re.S)
         if matchObj:
             sql = sql.replace(matchObj.group(1), '-999')
-        f_sql = sql.replace('`', '\`').encode('utf8')
-        command = 'hive -e   "explain dependency ' + f_sql + '"'
+        # f_sql = sql.replace('\\', '\\\\`').replace('`', '\`').encode('utf8')
+        fillename = constants.TMP_SCRIPT_LOCATION + 'explan_' + etl.name
+        with open(fillename, 'w') as fil:
+            fil.write('explain dependency ')
+            fil.write(sql)
+        command = 'hive -f   ' + fillename + ''
         out = os.popen(command).read()
 
         # Fetch table results
