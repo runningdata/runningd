@@ -86,7 +86,7 @@ class ScheDepListView(generic.ListView):
         except ObjectDoesNotExist, e:
             logger.error(' sche error for tt id : %id,   %s ' % (obj.id, traceback.format_exc()))
             return objss
-        if exobj.type == 66:
+        if exobj.type == 66 or exobj.type == 2:
             objss = objss.exclude(id=obj.id)
         return objss
 
