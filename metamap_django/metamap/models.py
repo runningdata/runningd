@@ -296,6 +296,7 @@ class ETL(ETLObjRelated):
 
     def get_deps(self):
         deps = hivecli.getTbls_v2(self)
+        print('ETL deps is ' + deps)
         return deps
 
 
