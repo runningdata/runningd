@@ -49,7 +49,7 @@ class ETLObjRelated(models.Model):
     def save(self, *args, **kwargs):
         if self.valid != 0:
             super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
-            exe, created = ExecObj.objects.get_or_create(type=self.type, name=self.name, rel_id=self.id)
+            exe, created = ExecObj.objects.get_or_create(type=self.type, name=self.name)
             exe.rel_id = self.id
             exe.creator = self.creator
             exe.cgroup = self.cgroup
