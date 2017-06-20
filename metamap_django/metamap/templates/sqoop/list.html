@@ -44,6 +44,7 @@
             <thead>
             <tr>
                 <th>名称</th>
+                <th>对应表</th>
                 <th>所属组</th>
                 <th>hive</th>
                 <th>mysql</th>
@@ -57,6 +58,7 @@
                 {% for obj in objs %}
                     <tr>
                         <td>{{ obj.name }}</td>
+                        <td>{{ obj.rel_name }}</td>
                         <td>{{ obj.cgroup }}</td>
                         <td>{{ obj.hive_meta.meta }}
                         <td>{{ obj.mysql_meta.meta }}</td>
