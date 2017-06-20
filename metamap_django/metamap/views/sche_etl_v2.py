@@ -6,8 +6,10 @@ created by will
 import json
 import logging
 import os
+import traceback
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
 from django.db import transaction
 from django.http import HttpResponse
@@ -79,7 +81,11 @@ class ScheDepListView(generic.ListView):
         return objss
 
     def handle_pass(self, objss, obj):
-        exobj = ExecObj.objects.get(pk=obj.rel_id)
+        try:
+            exobj = ExecObj.objects.get(pk=obj.rel_id)
+        except ObjectDoesNotExist, e:
+            logger.error(' sche error for tt id : %id,   %s ' % (obj.id, traceback.format_exc()))
+            return objss
         if exobj.type == 66:
             objss = objss.exclude(id=obj.id)
         return objss
