@@ -447,7 +447,7 @@ class SqoopMysql2Hive(ETLObjRelated):
                     tbl_name = self.hive_meta.meta + '@' + re.split('\s', op.strip())[1].lower()
                     break
         self.rel_name = tbl_name
-        super(ETLObjRelated, self).save(*args, **kwargs)
+        super(SqoopMysql2Hive, self).save(*args, **kwargs)
 
     def get_clean_str(self, str_list):
         return ' '.join(str_list).replace('\n', ' ').replace('&', '\&')
