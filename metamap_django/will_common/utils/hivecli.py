@@ -27,7 +27,7 @@ def getTbls_v2(etl):
         fillename = constants.TMP_SCRIPT_LOCATION + 'explan_' + etl.name
         with open(fillename, 'w') as fil:
             fil.write('explain dependency ')
-            fil.write(sql)
+            fil.write(sql.encode('utf-8'))
         command = 'hive -f   ' + fillename + ''
         out = os.popen(command).read()
 
