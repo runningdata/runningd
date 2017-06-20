@@ -37,12 +37,9 @@ def getTbls_v2(etl):
         sp = subprocess.Popen([command, ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
         out, err = sp.communicate()
         if sp.returncode != 0:
-            raise Exception('SQL problem out : %s ' % out)
+            raise Exception('SQL problem err : %s ' % err)
 
         # Fetch table results
-        print('out is %s ' % out)
-        print('err is %s ' % err)
-
         deps = json.loads(out)
         tables_ = deps['input_tables']
         for tbl in tables_:
