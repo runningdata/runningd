@@ -313,7 +313,7 @@ class ExecObj(models.Model):
     name = models.CharField(max_length=100, db_column='name')
     type = models.IntegerField(default=1, blank=False, null=False,
                                help_text="1 ETL; 2 EMAIL; 3 Hive2Mysql; 4 Mysql2Hive; 5 sourcefile;6 jarfile")
-    rel_id = models.IntegerField()
+    rel_id = models.IntegerField(default=1)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='etl_v2_creator', null=True)
     cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='etl_v2_cgroup', null=True)
 
