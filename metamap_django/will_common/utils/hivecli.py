@@ -37,8 +37,7 @@ def getTbls_v2(etl):
         sp = subprocess.Popen([command, ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
         out, err = sp.communicate()
         if sp.returncode != 0:
-            print ('SQL problem out : %s ' % out)
-            print ('SQL problem err : %s ' % err)
+            raise Exception('SQL problem out : %s ' % out)
 
         # Fetch table results
         print('out is %s ' % out)
