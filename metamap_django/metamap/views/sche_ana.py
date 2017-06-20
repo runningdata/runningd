@@ -5,8 +5,11 @@ created by will
 '''
 import datetime
 import json
+import logging
 import os
+import traceback
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -26,6 +29,7 @@ from will_common.utils import constants
 from will_common.utils import httputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
+logger = logging.getLogger('django')
 
 def filter_ana(objjs, obj):
     eo = ExecObj.objects.get(pk=obj.rel_id)
@@ -50,7 +54,12 @@ class ScheDepListView(generic.ListView):
             objjs = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
         print('count is %d ' % objjs.count())
         for tt in objjs:
-            eo = ExecObj.objects.get(pk=tt.rel_id)
+            try:
+                eo = ExecObj.objects.get(pk=tt.rel_id)
+            except ObjectDoesNotExist, e:
+                logger.error(' sche error for tt id : %id,   %s ' % (tt.id, traceback.format_exc()))
+                objjs = objjs.exclude(id=tt.id)
+                continue
             if eo.type != 2:
                 objjs = objjs.exclude(id=tt.id)
         print('after count is %d ' % objjs.count())

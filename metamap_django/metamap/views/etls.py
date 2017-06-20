@@ -139,7 +139,7 @@ def add_v2(request):
                 etl.update_etlobj()
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
-            return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
+            return render(request, 'common/500.html', {'msg': e.message})
     else:
         return render(request, 'etl/edit.html')
 
@@ -165,7 +165,7 @@ def edit_v2(request, pk):
                     etl.update_etlobj()
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
-            return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
+            return render(request, 'common/500.html', {'msg': e.message})
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
@@ -190,7 +190,7 @@ def add(request):
                         logger.info('Tblblood has been created successfully : %s' % tblBlood)
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
-            return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
+            return render(request, 'common/500.html', {'msg': e.message})
     else:
         return render(request, 'etl/edit.html')
 
@@ -253,7 +253,7 @@ def edit(request, pk):
                 #         bld.save()
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
-            return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
+            return render(request, 'common/500.html', {'msg': e.message})
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
