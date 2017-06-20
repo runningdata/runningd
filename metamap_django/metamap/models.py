@@ -264,7 +264,8 @@ class ETL(ETLObjRelated):
                             etl = NULLETL.objects.get(name=dep, valid=1)
                         except ObjectDoesNotExist, e:
                             raise Exception('Exception for parent %s, message: %s ' % (dep, e.message))
-                new_deps.append(ExecBlood(child_id=self.exec_obj.id, parent_id=etl.exec_obj.id))
+                if self.exec_obj.id != etl.exec_obj.id:
+                    new_deps.append(ExecBlood(child_id=self.exec_obj.id, parent_id=etl.exec_obj.id))
 
             old_deps = ExecBlood.objects.filter(child_id=self.exec_obj.id)
             for o_dep in old_deps:
