@@ -248,26 +248,28 @@ class ETL(ETLObjRelated):
 
     # TODO release after clean
     def save(self, *args, **kwargs):
-        super(ETL, self).save(*args, **kwargs)
-        new_deps = []
-        for dep in self.get_deps():
-            print('handing dep : %s' % dep)
-            try:
-                etl = ETL.objects.get(name=dep, valid=1)
-            except ObjectDoesNotExist:
-                try:
-                    etl = SqoopMysql2Hive.objects.get(rel_name=dep, valid=1)
-                except:
-                    etl = NULLETL.objects.get(name=dep, valid=1)
-            new_deps.append(ExecBlood(child_id=self.exec_obj.id, parent_id=etl.exec_obj.id))
 
-        old_deps = ExecBlood.objects.filter(child_id=self.exec_obj.id)
-        for o_dep in old_deps:
-            if not any(o_dep == n_dep for n_dep in new_deps):
-                o_dep.delete()
-        for n_dep in new_deps:
-            if not any(o_dep == n_dep for o_dep in old_deps):
-                n_dep.save()
+        super(ETL, self).save(*args, **kwargs)
+        if self.valid != 0:
+            new_deps = []
+            for dep in self.get_deps():
+                print('handing dep : %s' % dep)
+                try:
+                    etl = ETL.objects.get(name=dep, valid=1)
+                except ObjectDoesNotExist:
+                    try:
+                        etl = SqoopMysql2Hive.objects.get(rel_name=dep, valid=1)
+                    except:
+                        etl = NULLETL.objects.get(name=dep, valid=1)
+                new_deps.append(ExecBlood(child_id=self.exec_obj.id, parent_id=etl.exec_obj.id))
+
+            old_deps = ExecBlood.objects.filter(child_id=self.exec_obj.id)
+            for o_dep in old_deps:
+                if not any(o_dep == n_dep for n_dep in new_deps):
+                    o_dep.delete()
+            for n_dep in new_deps:
+                if not any(o_dep == n_dep for o_dep in old_deps):
+                    n_dep.save()
 
     def __str__(self):
         return self.query
