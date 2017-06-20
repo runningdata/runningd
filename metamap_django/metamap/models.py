@@ -245,6 +245,7 @@ class ETL(ETLObjRelated):
 
     # TODO release after clean
     def save(self, *args, **kwargs):
+        print('prequeyr is %s ' % self.query)
         super(ETL, self).save(*args, **kwargs)
         new_deps = []
         for dep in self.get_deps():

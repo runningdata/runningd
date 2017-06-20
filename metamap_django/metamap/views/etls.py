@@ -213,6 +213,7 @@ def edit(request, pk):
                 find_ = etl.name.find('@')
                 etl.meta = etl.name[0: find_]
                 etl.valid = 1
+                print ('eeeeeeeeeedit  query %s ' % etl.query)
                 etl.save()
                 logger.info('ETL has been created successfully : %s ' % etl)
 
