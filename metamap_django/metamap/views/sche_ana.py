@@ -179,6 +179,8 @@ class ExportsViewSet(viewsets.ModelViewSet):
 def edit(request, pk):
     if request.POST:
         task = WillDependencyTask.objects.get(pk=pk)
+        # TODO delete this after new version done
+        origin_ana = ExecObj.objects.get(pk=task.rel_id)
         httputils.post2obj(task, request.POST, 'id')
         ana = ExecObj.objects.get(pk=task.rel_id)
         # TODO This should be a normal part for some sub-classes
@@ -189,8 +191,9 @@ def edit(request, pk):
 
 
         # TODO delete this after new version done
-        v1_task = WillDependencyTask.objects.get(rel_id=ana.rel_id, type=ana.type)
+        v1_task = WillDependencyTask.objects.get(rel_id=origin_ana.rel_id, type=ana.type)
         v1_task.variables = task.variables
+        v1_task.rel_id = ana.rel_id
         v1_task.save()
 
         cron_task = PeriodicTask.objects.get(willtask_id=pk)
