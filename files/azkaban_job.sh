@@ -83,7 +83,11 @@ echo "uploading project ${project_name} successfully"
 #
 function check_exec_status(){
 	execid=$1
-	sleep 10m
+	if [ $is_check != 'check' ];then
+		sleep 10m
+	else
+		sleep 1m
+	fi
 	#查看前execution的执行状态，完成后退出
 	status=RUNNING
 	until [ $status == '"SUCCEEDED"' ]
@@ -103,7 +107,11 @@ function check_exec_status(){
                         break
 		fi
     		echo "${execid} not yet..."
-		sleep 10m	
+		if [ $is_check != 'check' ];then
+        	        sleep 10m
+        	else
+               		sleep 1m
+       		fi	
 	done
 }
 
