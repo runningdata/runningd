@@ -157,8 +157,14 @@ def clean_JAR(request):
     # jar app
     for etl in JarApp.objects.filter(valid=1):
         try:
-            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=6, cgroup=etl.cgroup,
-                                                               creator=etl.creator)
+            # etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=6, cgroup=etl.cgroup,
+            #                                                    creator=etl.creator)
+
+            exexobj = ExecObj.objects.get(name=etl.name, rel_id = etl.id, type = 6)
+            exexobj.cgroup = etl.cgroup
+            exexobj.creator = etl.creator
+            exexobj.save()
+
             print('ETLObj for JarApp done : %s ' % etl.name)
         except Exception, e:
             print('ETLObj for JarApp error :%d --> %s' % (etl.id, e))
