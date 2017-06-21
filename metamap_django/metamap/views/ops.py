@@ -135,6 +135,7 @@ def push_msg(request):
     users = set()
     for owner in owners.split(','):
         users.add(UserProfile.objects.get(user__username=owner))
+    users.add(UserProfile.objects.get(user__username='admin'))
     PushUtils.push_both(users, ' project %s : status : %s' % (prjname, status))
     return HttpResponse('done')
 
