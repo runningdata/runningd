@@ -269,6 +269,12 @@ def edit(request, pk):
         # except:
         #     print('error happens for %s scheduel ' % task.name)
         task.save()
+
+        # TODO delete this after new version done
+        v1_task = WillDependencyTask.objects.get(rel_id=etl.rel_id, type=etl.type)
+        v1_task.variables = task.variables
+        v1_task.save()
+
         if int(task.schedule) == 4:
             if PeriodicTask.objects.filter(willtask_id=pk).exists():
                 cron_task = PeriodicTask.objects.get(willtask_id=pk)

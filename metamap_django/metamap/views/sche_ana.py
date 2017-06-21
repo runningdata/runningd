@@ -185,6 +185,13 @@ def edit(request, pk):
             PushUtils.push_exact_email(ana.creator.user.email,
                                        'your schedule for %s has been changed by %s' % (ana.name, request.user.email))
         task.save()
+
+
+        # TODO delete this after new version done
+        v1_task = WillDependencyTask.objects.get(rel_id=ana.rel_id, type=ana.type)
+        v1_task.variables = task.variables
+        v1_task.save()
+
         cron_task = PeriodicTask.objects.get(willtask_id=pk)
         cron_task.name = task.name
 
