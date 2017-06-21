@@ -86,7 +86,7 @@ function check_exec_status(){
 	if [ $is_check != 'check' ];then
 		sleep 10m
 	else
-		sleep 1m
+		sleep 10s
 	fi
 	#查看前execution的执行状态，完成后退出
 	status=RUNNING
@@ -110,7 +110,7 @@ function check_exec_status(){
 		if [ $is_check != 'check' ];then
         	        sleep 10m
         	else
-               		sleep 1m
+               		sleep 10s
        		fi	
 	done
 }
