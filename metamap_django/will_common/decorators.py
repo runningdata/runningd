@@ -1,10 +1,14 @@
+import logging
+import traceback
 from functools import wraps
 
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 from django.shortcuts import render
-from django.template import Context
-from django.template import Template
 
-from metamap.models import ETL, SqoopHive2Mysql
+from metamap.models import SqoopHive2Mysql
+
+logger = logging.getLogger('django')
 
 
 def my_decorator(key='s'):
@@ -25,11 +29,28 @@ def my_decorator(key='s'):
     return _my_decorator
 
 
-def exeception_printer(key='s'):
-    def _exeception_printer(view_func):
-        def _decorator(request, *args, **kwargs):
-            # try:
-            #     response = view_func(request, *args, **kwargs)
-            # except:
-            response = render(request, 'common/message.html', {'message': 'hello'})
-            return response
+# def exeception_printer():
+#     def _exeception_printer(view_func):
+#         def _decorator(request, *args, **kwargs):
+#             # try:
+#             #     response = view_func(request, *args, **kwargs)
+#             # except:
+#             response = render(request, 'common/message.html', {'message': 'hello'})
+#             return response
+#
+#         return wraps(view_func)(_decorator)
+#
+#     return _exeception_printer
+
+
+def exeception_printer(func):
+    @wraps(func)
+    def returned_wrapper(request, *args, **kwargs):
+        raise Exception('dfd')
+        # try:
+        #     return func(request, *args, **kwargs)
+        # except Exception, e:
+        #     logger.error(traceback.format_exc())
+        #     return render(request, 'common/message.html', {'message': e.message})
+
+    return returned_wrapper
