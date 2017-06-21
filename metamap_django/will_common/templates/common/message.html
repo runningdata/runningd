@@ -2,7 +2,13 @@
 
 
 {% block content %}
-    <div class="alert alert-danger">
-        <b>{{ message }}</b>
+
+    <div class="panel panel-default  alert alert-danger">
+        <div class="panel-heading"><b><h2>{{ message }}</h2></b></div>
+        <div class="panel-body">
+            {% for line in err_stack %}
+            {{ line }} <br/>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}

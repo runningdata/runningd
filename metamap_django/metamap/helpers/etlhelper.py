@@ -312,7 +312,8 @@ def generate_etl_file(etl, location, schedule=-1):
             f.write(final_result.encode('utf-8'))
 
 
-def generate_job_file(blood, parent_node, folder, schedule=-1):
+def generate_job_file(*args, **kwargs):
+    # def generate_job_file(blood, parent_node, folder, schedule=-1):
     '''
     生成azkaban job文件
     :param blood:
@@ -320,14 +321,20 @@ def generate_job_file(blood, parent_node, folder, schedule=-1):
     :param folder:
     :return:
     '''
+    blood = kwargs['blood']
+    parent_node = kwargs['parent_node']
+    folder = kwargs['folder']
+    schedule = kwargs.get('schedule', -1)
+    is_check = kwargs.get('is_check', False)
+
     job_name = blood.tblName
-    if not job_name.startswith('etl_done_'):
-        # 生成hql文件
-        etl = ETL.objects.get(id=blood.relatedEtlId, valid=1)
-        location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
-        generate_etl_file(etl, location, schedule)
-        command = "hive -f " + location
-        # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
+    if not job_name.startswith('etl_done_') and not is_check:
+            # 生成hql文件
+            etl = ETL.objects.get(id=blood.relatedEtlId, valid=1)
+            location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
+            generate_etl_file(etl, location, schedule)
+            command = "hive -f " + location
+            # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     else:
         command = "echo " + job_name
 
@@ -488,7 +495,15 @@ def generate_job_file_m2h(objs, folder, group_name):
                 f.write(content)
 
 
-def load_nodes(leafs, folder, done_blood, done_leaf, schedule, group_name):
+def load_nodes(*args, **kwargs):
+    # def load_nodes(leafs, folder, done_blood, done_leaf, schedule, group_name):
+    leafs = kwargs.get('leafs')
+    folder = kwargs.get('folder')
+    done_blood = kwargs.get('done_blood')
+    done_leaf = kwargs.get('done_leaf')
+    schedule = kwargs.get('schedule', -1)
+    group_name = kwargs.get('group_name', 'jlc')
+    is_check = kwargs.get('is_check', False)
     '''
     遍历加载节点
     :param leafs:
@@ -509,12 +524,14 @@ def load_nodes(leafs, folder, done_blood, done_leaf, schedule, group_name):
                                                    + " where a.valid = 1 and a.tbl_name = '" + leaf.tblName + "'")
                 if tbl_name not in done_blood:
                     print('not in blood : %s ' % tbl_name)
-                    generate_job_file(leaf, parent_node, folder, schedule)
+                    generate_job_file(blood=leaf, parent_node=parent_node, folder=folder, schedule=schedule,
+                                      is_check=is_check)
                     done_blood.add(tbl_name)
                 print('parent_node for : %s ,floadr : %s ,sche: %s' % (tbl_name, folder, schedule))
                 done_leaf.add(tbl_name)
-                load_nodes(parent_node, folder, done_blood, done_leaf, schedule, group_name)
-
+                # load_nodes(parent_node, folder, done_blood, done_leaf, schedule, group_name)
+                load_nodes(leafs=parent_node, folder=folder, done_blood=done_blood, done_leaf=done_leaf,
+                           schedule=schedule, group_name=group_name, is_check=is_check)
 
 def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
     '''
@@ -556,6 +573,6 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
             # 或者： 外面单独为最顶层的parent任务生成job列表
             child = ExecObj.objects.get(pk=leaf)
             generate_job_file_v2(child, leaf_dependencies, folder,
-                                         schedule=schedule)
+                                 schedule=schedule)
             done_leaf.add(leaf)
             load_nodes_v2(parent_ids, folder, done_blood, done_leaf, schedule)

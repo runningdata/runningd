@@ -60,6 +60,7 @@ def nginx_auth_test(request):
         resp.status_code = 401
     return resp
 
+
 def get_json(request):
     queryset = ETL.objects.filter(valid=1).order_by('-ctime')
     io = StringIO()
@@ -401,6 +402,9 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
     :return:
     '''
     try:
+        is_check = False
+        if 'is_check' in request.GET:
+            is_check = True
         done_blood = set()
         done_leaf = set()
         folder = 'h2h-' + dateutils.now_datetime()
@@ -430,11 +434,14 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
         for etl in ETL.objects.filter(cgroup__name=group_name):
             finals.add(etl.id)
         final_leaves = TblBlood.objects.filter(pk__in=ok_leafs, relatedEtlId__in=finals)
-        etlhelper.load_nodes(final_leaves, folder, done_blood, done_leaf, schedule, group_name=group_name)
+        # etlhelper.load_nodes(final_leaves, folder, done_blood, done_leaf, schedule, group_name=group_name)
+        etlhelper.load_nodes(leafs=final_leaves, folder=folder, done_blood=done_blood, done_leaf=done_leaf,
+                             schedule=schedule, group_name=group_name, is_check=is_check)
 
         tbl = TblBlood(tblName='etl_done_' + group_name + '_' + folder)
         final_leaves2 = [leaf for leaf in final_leaves if ETL.objects.filter(pk=leaf.relatedEtlId, valid=1).count() > 0]
-        etlhelper.generate_job_file(tbl, final_leaves2, folder)
+        # etlhelper.generate_job_file(tbl, final_leaves2, folder)
+        etlhelper.generate_job_file(blood=tbl, parent_node=final_leaves2, folder=folder, schedule=schedule, is_check=is_check)
 
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%d etls generated ' % len(done_blood))
