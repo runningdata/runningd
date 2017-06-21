@@ -185,7 +185,7 @@ class JarApp(ETLObjRelated):
     # TODO release after clean
     def save(self, *args, **kwargs):
         super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
-        if self.outputs && len(self.outputs.strip()) > 0:
+        if self.outputs and len(self.outputs.strip()) > 0:
             new_children = list()
             for output in self.outputs.split(","):
                 obj, created = NULLETL.objects.get_or_create(name=output, rel_name=output)
