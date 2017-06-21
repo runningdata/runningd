@@ -202,6 +202,14 @@ def add(request):
 
         task.save()
 
+
+
+        v1_task = WillDependencyTask()
+        httputils.post2obj(task, request.POST, 'id')
+        v1_task.type = etl.type
+        v1_task.save()
+
+
         if int(task.schedule) == 4:
             cron_task = PeriodicTask.objects.create()
             cron_task.name = task.name

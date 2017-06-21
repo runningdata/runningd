@@ -85,6 +85,7 @@ def add(request):
                                        'your schedule for %s has been changed by %s' % (ana.name, request.user.email))
         task.save()
 
+
         cron_task = PeriodicTask.objects.create()
         cron_task.name = task.name
         cron_task.willtask = task
