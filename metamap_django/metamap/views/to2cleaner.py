@@ -263,6 +263,18 @@ def clean_rel_name(request):
     return HttpResponse('XX')
 
 
+def clean_etl_group(requset):
+    for etl in ETL.objects.filter(valid=1):
+        try:
+            eo = ExecObj.objects.get(type=1, rel_id=etl.id)
+            eo.creator = etl.creator
+            eo.cgroup = etl.cgroup
+            eo.save()
+        except:
+            print('error for %s ' % etl.name)
+    return HttpResponse('XX')
+
+
 @transaction.atomic
 def clean_period_tsk(request):
     current_tsk = 0

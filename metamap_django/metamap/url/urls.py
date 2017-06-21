@@ -132,6 +132,7 @@ urlpatterns = [
     url(r'^clean/clean_ptask/$', to2cleaner.clean_period_tsk, name='clean_period_tsk'),
     url(r'^clean/clean_null/$', to2cleaner.clean_null, name='clean_null'),
     url(r'^clean/clean_exec_id/$', to2cleaner.clean_exec_obj_id, name='clean_exec_id'),
+    url(r'^clean/clean_etl_group/$', to2cleaner.clean_etl_group, name='clean_etl_group'),
 
 
     url(r'^source/get_engine_type/$', source.get_engine_type, name='get_engine_type'),
