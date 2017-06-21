@@ -438,7 +438,10 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
         etlhelper.load_nodes(leafs=final_leaves, folder=folder, done_blood=done_blood, done_leaf=done_leaf,
                              schedule=schedule, group_name=group_name, is_check=is_check)
 
-        tbl = TblBlood(tblName='etl_done_' + group_name + '_' + folder)
+        if not is_check:
+            tbl = TblBlood(tblName='etl_done_' + group_name + '_' + folder)
+        else:
+            tbl = TblBlood(tblName='check_etl_done_' + group_name + '_' + folder)
         final_leaves2 = [leaf for leaf in final_leaves if ETL.objects.filter(pk=leaf.relatedEtlId, valid=1).count() > 0]
         # etlhelper.generate_job_file(tbl, final_leaves2, folder)
         etlhelper.generate_job_file(blood=tbl, parent_node=final_leaves2, folder=folder, schedule=schedule, is_check=is_check)
