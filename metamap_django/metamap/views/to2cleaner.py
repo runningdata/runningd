@@ -157,7 +157,8 @@ def clean_JAR(request):
     # jar app
     for etl in JarApp.objects.filter(valid=1):
         try:
-            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=6)
+            etl_obj, result = ExecObj.objects.update_or_create(name=etl.name, rel_id=etl.id, type=6, cgroup=etl.cgroup,
+                                                               creator=etl.creator)
             print('ETLObj for JarApp done : %s ' % etl.name)
         except Exception, e:
             print('ETLObj for JarApp error :%d --> %s' % (etl.id, e))
@@ -314,6 +315,7 @@ def clean_exec_obj_id(request):
         else:
             print('errrrrrrrrrrrrrrrrrrrrrrrrr : %s ' % execobj.name)
     return HttpResponse('EXEC OBJ CLEAN DONE')
+
 
 def clean_all(request):
     # clean_rel_name(request)
