@@ -33,7 +33,7 @@ metamap_host=10.2.19.62:8088
 project_desc=${prefix}_schedule
 
 # 调用生成job的任务，返回任务名称或者失败信息
-if [ $is_check == 'check' ];then
+if [ $is_check != 'check' ];then
 	curl -X GET http://${metamap_host}/metamap/${job_type}/generate_job_dag/${num}/${group_name}/ > ${tmp_output}
 else
 	curl -X GET http://${metamap_host}/metamap/${job_type}/generate_job_dag/${num}/${group_name}/?is_check=${is_check} > ${tmp_output}
