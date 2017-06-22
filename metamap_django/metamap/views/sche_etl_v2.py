@@ -105,6 +105,9 @@ class ScheDepListView(generic.ListView):
         filters = {1: self.handle_etl, 2: self.handle_email_export, 3: self.handle_pass,
                    4: self.handle_pass, 5: self.handle_pass, 6: self.handle_pass, 100: self.handle_pass}
 
+        user_group = self.request.user.userprofile.org_group.name
+        user_name = self.request.user.username
+
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
             objs = WillDependencyTask.objects.filter(name__icontains=tbl_name_, type=100).order_by('-valid', '-ctime')
@@ -112,9 +115,12 @@ class ScheDepListView(generic.ListView):
                 objs = filters.get(obj.type)(objs, obj)
             return objs
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        objs = WillDependencyTask.objects.order_by('-valid', '-ctime')
+        objs = WillDependencyTask.objects.filter(type=100).order_by('-valid', '-ctime')
 
         for obj in objs:
+            if user_name != 'admin' and ExecObj.objects.get(pk=obj.rel_id).cgroup.name != user_group:
+                objs = objs.exclude(id=obj.id)
+                continue
             objs = filters.get(obj.type)(objs, obj)
         return objs
 
