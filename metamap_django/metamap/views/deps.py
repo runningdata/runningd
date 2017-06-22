@@ -3,6 +3,7 @@ import logging
 import os
 import traceback
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -11,7 +12,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 from metamap.models import ExecBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive, NULLETL, ETL, TblBlood
-from will_common.models import WillDependencyTask
+from will_common.models import WillDependencyTask, UserProfile
+from will_common.utils import PushUtils
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import AZKABAN_BASE_LOCATION, AZKABAN_SCRIPT_LOCATION
@@ -19,13 +21,19 @@ from will_common.utils.constants import AZKABAN_BASE_LOCATION, AZKABAN_SCRIPT_LO
 logger = logging.getLogger('django')
 
 
+@transaction.atomic
 def edit_deps(request, pk):
     if request.method == 'POST':
         with transaction.atomic():
             new_deps = []
+            new_deps_names = []
             for dep in request.POST.getlist('deps'):
+                parent = ExecObj.objects.get(pk=int(dep))
+                new_deps_names.append(parent.name)
                 new_deps.append(ExecBlood(child_id=int(pk), parent_id=int(dep)))
             old_deps = ExecBlood.objects.filter(child_id=int(pk))
+            old_deps_names = [dep.parent.name for dep in old_deps]
+
             for o_dep in old_deps:
                 if not any(o_dep == n_dep for n_dep in new_deps):
                     o_dep.delete()
@@ -48,6 +56,15 @@ def edit_deps(request, pk):
             for n_dep in v1_new_deps:
                 if not any(o_dep == n_dep for o_dep in v1_old_deps):
                     n_dep.save()
+
+            # users = [User.objects.get(username='admin'), eo.creator.user, ]
+            # for owner in eo.cgroup.owners.split(','):
+            #     users.append(User.objects.get(username=owner.strip()))
+            users = [UserProfile.objects.get(user=User.objects.get(username='admin')), eo.creator]
+            for owner in eo.cgroup.owners.split(','):
+                users.append(UserProfile.objects.get(user=User.objects.get(username=owner.strip())))
+            PushUtils.push_both(users, '%s \' deps has been modified by %s. old_deps: is %s, new_deps is %s ' % (
+                eo.name, request.user.username, '\n'.join(old_deps_names), '\n'.join(new_deps_names)))
 
             return HttpResponseRedirect(reverse('metamap:index'))
     else:

@@ -19,7 +19,7 @@ logger = logging.getLogger('error')
 class ViewException():
     def process_exception(self, request, exception):
         logger.error(traceback.format_exc())
-        return render(request, 'common/message.html', {'message': exception.message, 'err_stack': traceback.format_stack()})
+        return render(request, 'common/message.html', {'message': exception.message, 'err_stack': traceback.format_exc()})
 
 
 class LoginRequire():
