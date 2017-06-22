@@ -168,7 +168,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
                     eo = ExecObj.objects.get(pk=export.task.rel_id)
                     ana_id = eo.rel_id
                 ana_etl = AnaETL.objects.get(pk=ana_id)
-                if user != 'xuexu':
+                if not (user == 'admin' and group == 'jlc'):
                     if ana_etl.is_auth(user, group):
                         result.append(export)
                 else:
