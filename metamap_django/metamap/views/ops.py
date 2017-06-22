@@ -5,6 +5,7 @@ import subprocess
 
 import re
 
+import time
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import Group
@@ -180,13 +181,15 @@ def rerun(request):
             eo = ExecObj.objects.get(pk=tt.rel_id)
             if eo.cgroup.name == 'jlc':
                 str_list.append('task %s has been rescheduled ' % tt.name)
-                tasks.exec_etl_cli2.delay(args=[tt.id, tt.name], countdown=10)
+                tasks.exec_etl_cli.delay(tt.id, tt.name)
+                time.sleep(3)
                 ex.delete()
         elif tt.type == 2:
             eo = AnaETL.objects.get(pk=tt.rel_id)
             if eo.cgroup.name == 'jlc':
                 str_list.append('task %s has been rescheduled ' % tt.name)
-                tasks.exec_etl_cli.delay(args=[tt.id, tt.name], countdown=10)
+                tasks.exec_etl_cli.delay(tt.id, tt.name)
+                time.sleep(3)
                 ex.delete()
 
     return HttpResponse('<br/>'.join(str_list))
