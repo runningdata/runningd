@@ -181,14 +181,14 @@ def rerun(request):
             eo = ExecObj.objects.get(pk=tt.rel_id)
             if eo.cgroup.name == 'jlc':
                 str_list.append('task %s has been rescheduled ' % tt.name)
-                tasks.exec_etl_cli2.delay(tt.id, tt.name)
+                tasks.exec_etl_cli2.delay(tt.id, name=tt.name)
                 time.sleep(3)
                 # ex.delete()
         elif tt.type == 2:
             eo = AnaETL.objects.get(pk=tt.rel_id)
             if eo.cgroup.name == 'jlc':
                 str_list.append('task %s has been rescheduled ' % tt.name)
-                tasks.exec_etl_cli.delay(tt.id, tt.name)
+                tasks.exec_etl_cli.delay(tt.id, name=tt.name)
                 time.sleep(3)
                 # ex.delete()
 
