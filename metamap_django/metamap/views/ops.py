@@ -19,7 +19,7 @@ from django.shortcuts import render
 
 import metamap
 from metamap import tasks
-from metamap.models import Exports
+from metamap.models import Exports, ExecObj
 from will_common.models import OrgGroup, UserProfile
 from will_common.utils import PushUtils
 from will_common.utils import constants
@@ -174,12 +174,17 @@ class UploadFileForm(forms.Form):
 def rerun(request):
     import datetime
     str_list = list()
-    for ex in Exports.objects.filter(file_loc__contains='20170616'):
+    for ex in Exports.objects.filter(file_loc__contains='20170622'):
         tt = ex.task
-        str_list.append('task %s has been rescheduled ' % tt.name)
-        tasks.exec_etl_cli.delay(tt.id, tt.name)
-        ex.delete()
+        if tt.type == 100:
+            eo = ExecObj.objects.get(pk=tt.rel_id)
+            if eo.cgroup.name == 'jlc':
+                str_list.append('task %s has been rescheduled ' % tt.name)
+                tasks.exec_etl_cli2.delay(args=[tt.id, tt.name], countdown=10)
+                ex.delete()
+
     return HttpResponse('<br/>'.join(str_list))
+
 
 def upload_hdfs_file(request):
     if request.method == 'POST':
