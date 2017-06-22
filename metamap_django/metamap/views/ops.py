@@ -19,7 +19,7 @@ from django.shortcuts import render
 
 import metamap
 from metamap import tasks
-from metamap.models import Exports, ExecObj
+from metamap.models import Exports, ExecObj, AnaETL
 from will_common.models import OrgGroup, UserProfile
 from will_common.utils import PushUtils
 from will_common.utils import constants
@@ -181,6 +181,12 @@ def rerun(request):
             if eo.cgroup.name == 'jlc':
                 str_list.append('task %s has been rescheduled ' % tt.name)
                 tasks.exec_etl_cli2.delay(args=[tt.id, tt.name], countdown=10)
+                ex.delete()
+        elif tt.type == 2:
+            eo = AnaETL.objects.get(pk=tt.rel_id)
+            if eo.cgroup.name == 'jlc':
+                str_list.append('task %s has been rescheduled ' % tt.name)
+                tasks.exec_etl_cli.delay(args=[tt.id, tt.name], countdown=10)
                 ex.delete()
 
     return HttpResponse('<br/>'.join(str_list))
