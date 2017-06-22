@@ -346,3 +346,25 @@ def clean_all(request):
     # request.GET['type'] = 4
     # clean_deptask(request)
     return HttpResponse('All Done')
+
+
+def clean_group(request):
+    result = list()
+    for eo in ExecObj.objects.all():
+        if eo.type == 1:
+            etl = ETL.objects.get(pk=eo.rel_id)
+        elif eo.type == 2:
+            etl = AnaETL.objects.get(pk=eo.rel_id)
+        elif eo.type == 3:
+            etl = SqoopHive2Mysql.objects.get(pk=eo.rel_id)
+        elif eo.type == 4:
+            etl = SqoopMysql2Hive.objects.get(pk=eo.rel_id)
+        elif eo.type == 6:
+            etl = JarApp.objects.get(pk=eo.rel_id)
+
+        if etl.cgroup_id != eo.cgroup_id:
+            eo.cgroup_id = etl.cgroup_id
+            eo.save()
+            result.append(eo.name)
+    return HttpResponse('<br/>'.join(result))
+
