@@ -60,7 +60,11 @@ class ETLObjRelated(models.Model):
                 self.exec_obj = exe
                 super(ETLObjRelated, self).save(*args, **kwargs)
             else:
-                print('already has exec_obj %s for %s' % (self.exec_obj.name, self.name))
+                try:
+                    print('already has exec_obj %s for %s' % (self.exec_obj.name, self.name))
+                except AttributeError, e:
+                    self.exec_obj = exe
+                    print('already has exec_obj %s for %s, but no exec_id' % (self.exec_obj.name, self.name))
         else:
             super(ETLObjRelated, self).save(*args, **kwargs)
 
