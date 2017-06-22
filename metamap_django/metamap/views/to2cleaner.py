@@ -350,6 +350,7 @@ def clean_all(request):
 
 def clean_group(request):
     result = list()
+    nullobj = list()
     for eo in ExecObj.objects.all():
         if eo.type == 1:
             etl = ETL.objects.get(pk=eo.rel_id)
@@ -361,10 +362,13 @@ def clean_group(request):
             etl = SqoopMysql2Hive.objects.get(pk=eo.rel_id)
         elif eo.type == 6:
             etl = JarApp.objects.get(pk=eo.rel_id)
+        elif eo.type == 66:
+            nullobj.append(eo.name)
 
         if etl.cgroup_id != eo.cgroup_id:
             eo.cgroup_id = etl.cgroup_id
-            eo.save()
+            # eo.save()
             result.append(eo.name)
+        print '\n'.join(nullobj)
     return HttpResponse('<br/>'.join(result))
 

@@ -410,6 +410,9 @@ class TblBlood(models.Model):
     valid = models.IntegerField(default=1)
     current = 0
 
+    def __eq__(self, other):
+        return self.relatedEtlId == other.relatedEtlId and self.parentTbl == other.parentTbl and self.valid == other.valid
+
     def __str__(self):
         return self.parentTbl + '-->' + self.tblName
 

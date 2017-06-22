@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from metamap.models import ExecBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive, NULLETL
+from metamap.models import ExecBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive, NULLETL, ETL, TblBlood
 from will_common.models import WillDependencyTask
 from will_common.utils import dateutils
 from will_common.utils import ziputils
@@ -32,6 +32,21 @@ def edit_deps(request, pk):
 
             for n_dep in new_deps:
                 if not any(o_dep == n_dep for o_dep in old_deps):
+                    n_dep.save()
+
+            # TODO delete old version
+            eo = ExecObj.objects.get(pk=pk)
+            v1_new_deps = []
+            for dep in request.POST.getlist('deps'):
+                dep_name = ExecObj.objects.get(pk=dep).name
+                v1_new_deps.append(TblBlood(tblName=eo.name, parentTbl=dep_name, relatedEtlId=eo.rel_id))
+            v1_old_deps = TblBlood.objects.filter(relatedEtlId=eo.rel_id, valid=1)
+            for o_dep in v1_old_deps:
+                if not any(o_dep == n_dep for n_dep in v1_new_deps):
+                    o_dep.delete()
+
+            for n_dep in v1_new_deps:
+                if not any(o_dep == n_dep for o_dep in v1_old_deps):
                     n_dep.save()
 
             return HttpResponseRedirect(reverse('metamap:index'))
