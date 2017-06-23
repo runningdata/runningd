@@ -213,6 +213,7 @@ def add(request):
         v1_task = WillDependencyTask()
         httputils.post2obj(task, request.POST, 'id')
         v1_task.type = etl.type
+        v1_task.rel_id = etl.rel_id
         v1_task.save()
 
 
