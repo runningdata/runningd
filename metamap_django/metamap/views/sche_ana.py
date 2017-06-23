@@ -85,6 +85,12 @@ def add(request):
                                        'your schedule for %s has been changed by %s' % (ana.name, request.user.email))
         task.save()
 
+        v1_task = WillDependencyTask()
+        httputils.post2obj(v1_task, request.POST, 'id')
+        v1_task.type = 2
+        v1_task.schedule = 4
+        v1_task.save()
+
 
         cron_task = PeriodicTask.objects.create()
         cron_task.name = task.name

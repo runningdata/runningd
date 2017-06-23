@@ -101,13 +101,17 @@ def blood_dag(request, etlid):
     p_depth, c_depth = 0, 0
     p_depth = int(request.GET.get('p_depth', default=0))
     c_depth = int(request.GET.get('c_depth', default=0))
+    dep_score = {}
     for blood in bloods:
         blood.current = blood.id
         if p_depth != -1:
             final_bloods.add(blood)
             bloodhelper.find_parent_mermaid(blood, final_bloods, depth=p_depth)
         if c_depth != -1:
-            bloodhelper.find_child_mermaid(blood, final_bloods, depth=c_depth)
+            bloodhelper.find_child_mermaid(blood, final_bloods, dep_score, depth=c_depth)
+
+    large_score = [blood for blood, v in dep_score.items() if v > 20]
+    print('final score')
     return render(request, 'etl/blood.html', {'bloods': final_bloods})
 
 
