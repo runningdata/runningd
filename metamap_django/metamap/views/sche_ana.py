@@ -89,6 +89,7 @@ def add(request):
         httputils.post2obj(v1_task, request.POST, 'id')
         v1_task.type = 2
         v1_task.schedule = 4
+        v1_task.rel_id = ana.rel_id
         v1_task.save()
 
 
