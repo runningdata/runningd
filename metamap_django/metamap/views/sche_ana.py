@@ -31,6 +31,7 @@ from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
 logger = logging.getLogger('django')
 
+
 def filter_ana(objjs, obj):
     eo = ExecObj.objects.get(pk=obj.rel_id)
     # print('%s s type is %d ' % (eo.name, eo.type))
@@ -39,6 +40,7 @@ def filter_ana(objjs, obj):
         objjs.exclude(id=obj.id)
     return objjs
     # print('%objjs s count is %d ' % (objjs.count()))
+
 
 class ScheDepListView(generic.ListView):
     template_name = 'sche/ana/list.html'
@@ -92,7 +94,6 @@ def add(request):
         v1_task.rel_id = ana.rel_id
         v1_task.save()
 
-
         cron_task = PeriodicTask.objects.create()
         cron_task.name = task.name
         cron_task.willtask = task
@@ -117,6 +118,7 @@ def add(request):
         return redirect('export:sche_list')
     else:
         return render(request, 'sche/ana/edit.html')
+
 
 class ExportsViewSet(viewsets.ModelViewSet):
     now = timezone.now()
@@ -190,8 +192,10 @@ class ExportsViewSet(viewsets.ModelViewSet):
 def edit(request, pk):
     if request.POST:
         task = WillDependencyTask.objects.get(pk=pk)
+
         # TODO delete this after new version done
         origin_ana = ExecObj.objects.get(pk=task.rel_id)
+        orig_sche_type = task.schedule
         httputils.post2obj(task, request.POST, 'id')
         ana = ExecObj.objects.get(pk=task.rel_id)
         # TODO This should be a normal part for some sub-classes
@@ -200,10 +204,10 @@ def edit(request, pk):
                                        'your schedule for %s has been changed by %s' % (ana.name, request.user.email))
         task.save()
 
-
         # TODO delete this after new version done
-        v1_task = WillDependencyTask.objects.get(rel_id=origin_ana.rel_id, type=ana.type)
-        v1_task.variables = task.variables
+        v1_task, created = WillDependencyTask.objects.get_or_create(rel_id=origin_ana.rel_id, type=ana.type,
+                                                                    schedule=orig_sche_type)
+        httputils.post2obj(v1_task, request.POST, 'id')
         v1_task.rel_id = ana.rel_id
         v1_task.save()
 
