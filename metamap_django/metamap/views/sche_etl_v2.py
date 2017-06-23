@@ -287,7 +287,7 @@ def edit(request, pk):
         task.save()
 
         # TODO delete this after new version done
-        v1_task = WillDependencyTask.objects.get(rel_id=origin_etl.rel_id, type=etl.type)
+        v1_task = WillDependencyTask.objects.get(rel_id=origin_etl.rel_id, type=etl.type, schedule=task.schedule)
         v1_task.variables = task.variables
         v1_task.rel_id = etl.rel_id
         v1_task.save()
