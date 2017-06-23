@@ -29,17 +29,52 @@ def find_parent_mermaid(blood, final_bloods, init=0, depth=0):
     :return:
     '''
     init += 1
+    if init > 100:
+        return
     bloods = TblBlood.objects.filter(tblName=blood.parentTbl)
     if init != depth or depth < 0:
         if bloods.count() > 0:
             for bld in bloods:
-                if bld in final_bloods:
-                    raise Exception('Already has %s ' % bld)
                 final_bloods.add(bld)
                 find_parent_mermaid(bld, final_bloods, init=init, depth=depth)
 
 
-def find_child_mermaid(blood, final_bloods, dep_score, init=0, depth=0):
+def find_child_mermaid(blood, final_bloods, init=0, depth=0):
+    '''
+    循环遍历当前节点的子节点
+    :param blood:
+    :param final_bloods:
+    :return:
+    '''
+    init += 1
+    if init > 100:
+        return
+    bloods = TblBlood.objects.filter(parentTbl=blood.tblName)
+    if bloods.count() > 0:
+        for bld in bloods:
+            # if bld in final_bloods:
+            #     raise Exception('Already has %s ' % bld)
+            final_bloods.add(bld)
+            if init != depth or depth < 0:
+                find_child_mermaid(bld, final_bloods, init=init, depth=depth)
+
+
+def check_parent_mermaid(blood, init=0, depth=0):
+    '''
+    # 循环遍历当前节点的父节点
+    :param blood:
+    :param final_bloods:
+    :return:
+    '''
+    init += 1
+    bloods = TblBlood.objects.filter(tblName=blood.parentTbl)
+    if init != depth or depth < 0:
+        if bloods.count() > 0:
+            for bld in bloods:
+                check_parent_mermaid(bld, init=init, depth=depth)
+
+
+def check_child_mermaid(blood, dep_score, init=0, depth=0):
     '''
     循环遍历当前节点的子节点
     :param blood:
@@ -55,9 +90,8 @@ def find_child_mermaid(blood, final_bloods, dep_score, init=0, depth=0):
             dep_score[bld] = dep_score.get(bld, 0) + 1
             if dep_score[bld] > 30:
                 break
-            final_bloods.add(bld)
             if init != depth or depth < 0:
-                find_child_mermaid(bld, final_bloods, dep_score, init=init, depth=depth)
+                check_child_mermaid(bld, dep_score, init=init, depth=depth)
 
 
 def check_cycle(etlid):

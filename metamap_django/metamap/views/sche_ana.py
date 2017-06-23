@@ -171,17 +171,18 @@ class ExportsViewSet(viewsets.ModelViewSet):
             objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
             result = list()
             for export in objs:
-                if export.task.type == 2:
-                    ana_id = export.task.rel_id
-                elif export.task.type == 100:
-                    eo = ExecObj.objects.get(pk=export.task.rel_id)
-                    ana_id = eo.rel_id
-                ana_etl = AnaETL.objects.get(pk=ana_id)
-                if not (user == 'admin' and group == 'jlc'):
-                    if ana_etl.is_auth(user, group):
+                if not export.task:
+                    if export.task.type == 2:
+                        ana_id = export.task.rel_id
+                    elif export.task.type == 100:
+                        eo = ExecObj.objects.get(pk=export.task.rel_id)
+                        ana_id = eo.rel_id
+                    ana_etl = AnaETL.objects.get(pk=ana_id)
+                    if not (user == 'admin' and group == 'jlc'):
+                        if ana_etl.is_auth(user, group):
+                            result.append(export)
+                    else:
                         result.append(export)
-                else:
-                    result.append(export)
             serializer = self.get_serializer(result, many=True)
             return Response(serializer.data)
         else:
