@@ -209,6 +209,7 @@ def edit(request, pk):
                                                                     schedule=orig_sche_type)
         httputils.post2obj(v1_task, request.POST, 'id')
         v1_task.rel_id = ana.rel_id
+        v1_task.type = AnaETL.type
         v1_task.save()
 
         cron_task = PeriodicTask.objects.get(willtask_id=pk)
