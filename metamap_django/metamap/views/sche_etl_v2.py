@@ -105,8 +105,11 @@ class ScheDepListView(generic.ListView):
         filters = {1: self.handle_etl, 2: self.handle_email_export, 3: self.handle_pass,
                    4: self.handle_pass, 5: self.handle_pass, 6: self.handle_pass, 100: self.handle_pass}
 
-        user_group = self.request.user.userprofile.org_group.name
         user_name = self.request.user.username
+        if user_name != 'admin':
+            user_group = self.request.user.userprofile.org_group.name
+        else:
+            user_group = ''
 
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             tbl_name_ = self.request.GET['search']
@@ -211,8 +214,12 @@ def add(request):
 
 
         v1_task = WillDependencyTask()
-        httputils.post2obj(task, request.POST, 'id')
+        v1_task.name = etl.name
+        v1_task.variables = task.variables
+        v1_task.desc = task.desc
         v1_task.type = etl.type
+        v1_task.schedule = task.schedule
+
         v1_task.rel_id = etl.rel_id
         v1_task.save()
 
