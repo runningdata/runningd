@@ -26,6 +26,7 @@ from will_common.utils import encryptutils
 from will_common.utils import hivecli, httputils, dateutils, ziputils
 from will_common.utils import userutils
 from will_common.utils.constants import *
+from will_common.utils.customexceptions import RDException
 from will_common.views.common import GroupListView
 
 logger = logging.getLogger('django')
@@ -94,10 +95,16 @@ class EditView(generic.DetailView):
     context_object_name = 'form'
     queryset = ETL.objects.all()
 
+
 def check_dag(request, etlid):
     cycle, has_cycle = bloodhelper.check_cycle(etlid)
     result = [str(c) for c in cycle]
     return HttpResponse('<br>'.join(result))
+
+
+class Depth():
+    depth = 0
+
 
 def blood_dag(request, etlid):
     bloods = TblBlood.objects.filter(relatedEtlId=int(etlid), valid=1)
@@ -105,14 +112,20 @@ def blood_dag(request, etlid):
     p_depth, c_depth = 0, 0
     p_depth = int(request.GET.get('p_depth', default=0))
     c_depth = int(request.GET.get('c_depth', default=0))
+    p_init = Depth()
+    c_init = Depth()
     for blood in bloods:
         blood.current = blood.id
         if p_depth != -1:
             final_bloods.add(blood)
-            bloodhelper.find_parent_mermaid(blood, final_bloods, depth=p_depth)
+            bloodhelper.find_parent_mermaid(blood, final_bloods, init=p_init, depth=p_depth)
         if c_depth != -1:
-            bloodhelper.find_child_mermaid(blood, final_bloods, depth=c_depth)
-    return render(request, 'etl/blood.html', {'bloods': final_bloods})
+            bloodhelper.find_child_mermaid(blood, final_bloods, init=c_init, depth=c_depth)
+
+    health = 'healthy'
+    if p_init.depth > 99 or c_init.depth > 99:
+        health = 'unhealthy'
+    return render(request, 'etl/blood.html', {'bloods': final_bloods, 'health': health})
 
 
 def blood_by_name(request):
@@ -197,10 +210,17 @@ def add(request):
                 ss, has_cycle = bloodhelper.check_cycle(etl.id)
                 if has_cycle:
                     logger.error('etl has_cycle : %s' % etl.name)
-                    pass
+                    raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name),
+                                      '<br/>'.join(
+                                          [str(leaf) for leaf in ss]))
+                else:
+                    logger.info('cycle check passed for %s' % etl.name)
                 return HttpResponseRedirect(reverse('metamap:index'))
+        except RDException, e:
+            return render(request, 'common/message.html', {'message': e.message, 'err_stack': e.err_stack})
         except Exception, e:
-            return render(request, 'common/500.html', {'msg': e.message})
+            print(traceback.format_exc())
+            return render(request, 'common/message.html', {'message': e.message, 'err_stack': traceback.format_exc()})
     else:
         return render(request, 'etl/edit.html')
 
@@ -253,18 +273,20 @@ def edit(request, pk):
                     logger.info(
                         'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (
                             pk, etl.id))
-                # else:
-                #     bloods = TblBlood.objects.filter(parentTbl=privious_name)
-                #     if bloods.count() > 0 and any(
-                #                     ETL.objects.filter(pk=bld.relatedEtlId).count() > 0 for bld in bloods):
-                #         raise Exception('cannot invalid : a few children depending on it')
-                #     for bld in TblBlood.objects.filter(tblName=privious_name):
-                #         bld.valid = 0
-                #         bld.save()
+                ss, has_cycle = bloodhelper.check_cycle(etl.id)
+                if has_cycle:
+                    logger.error('etl has_cycle : %s' % etl.name)
+                    raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
+                        [str(leaf) for leaf in ss]))
+                else:
+                    logger.info('cycle check passed for %s' % etl.name)
                 return HttpResponseRedirect(reverse('metamap:index'))
+        except RDException, e:
+            print(traceback.format_exc())
+            return render(request, 'common/message.html', {'message': e.message, 'err_stack': e.err_stack})
         except Exception, e:
             print(traceback.format_exc())
-            return render(request, 'common/500.html', {'msg': e.message})
+            return render(request, 'common/message.html', {'message': e.message, 'err_stack': traceback.format_exc()})
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
@@ -453,7 +475,8 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
             tbl = TblBlood(tblName='check_etl_done_' + group_name + '_' + folder)
         final_leaves2 = [leaf for leaf in final_leaves if ETL.objects.filter(pk=leaf.relatedEtlId, valid=1).count() > 0]
         # etlhelper.generate_job_file(tbl, final_leaves2, folder)
-        etlhelper.generate_job_file(blood=tbl, parent_node=final_leaves2, folder=folder, schedule=schedule, is_check=is_check)
+        etlhelper.generate_job_file(blood=tbl, parent_node=final_leaves2, folder=folder, schedule=schedule,
+                                    is_check=is_check)
 
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%d etls generated ' % len(done_blood))

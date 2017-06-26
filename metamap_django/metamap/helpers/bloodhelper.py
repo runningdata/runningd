@@ -28,11 +28,11 @@ def find_parent_mermaid(blood, final_bloods, init=0, depth=0):
     :param final_bloods:
     :return:
     '''
-    init += 1
-    if init > 100:
+    init.depth += 1
+    if init.depth > 100:
         return
     bloods = TblBlood.objects.filter(tblName=blood.parentTbl)
-    if init != depth or depth < 0:
+    if init.depth != depth or depth < 0:
         if bloods.count() > 0:
             for bld in bloods:
                 final_bloods.add(bld)
@@ -46,8 +46,8 @@ def find_child_mermaid(blood, final_bloods, init=0, depth=0):
     :param final_bloods:
     :return:
     '''
-    init += 1
-    if init > 100:
+    init.depth += 1
+    if init.depth > 100:
         return
     bloods = TblBlood.objects.filter(parentTbl=blood.tblName)
     if bloods.count() > 0:
@@ -55,7 +55,7 @@ def find_child_mermaid(blood, final_bloods, init=0, depth=0):
             # if bld in final_bloods:
             #     raise Exception('Already has %s ' % bld)
             final_bloods.add(bld)
-            if init != depth or depth < 0:
+            if init.depth != depth or depth < 0:
                 find_child_mermaid(bld, final_bloods, init=init, depth=depth)
 
 
