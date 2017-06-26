@@ -207,14 +207,15 @@ def add(request):
                         tblBlood.save()
                         logger.info('Tblblood has been created successfully : %s' % tblBlood)
 
-                ss, has_cycle = bloodhelper.check_cycle(etl.id)
-                if has_cycle:
-                    logger.error('etl has_cycle : %s' % etl.name)
-                    raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name),
-                                      '<br/>'.join(
-                                          [str(leaf) for leaf in ss]))
-                else:
-                    logger.info('cycle check passed for %s' % etl.name)
+                # TODO release
+                # ss, has_cycle = bloodhelper.check_cycle(etl.id)
+                # if has_cycle:
+                #     logger.error('etl has_cycle : %s' % etl.name)
+                #     raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name),
+                #                       '<br/>'.join(
+                #                           [str(leaf) for leaf in ss]))
+                # else:
+                #     logger.info('cycle check passed for %s' % etl.name)
                 return HttpResponseRedirect(reverse('metamap:index'))
         except RDException, e:
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': e.err_stack})
@@ -273,13 +274,15 @@ def edit(request, pk):
                     logger.info(
                         'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (
                             pk, etl.id))
-                ss, has_cycle = bloodhelper.check_cycle(etl.id)
-                if has_cycle:
-                    logger.error('etl has_cycle : %s' % etl.name)
-                    raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
-                        [str(leaf) for leaf in ss]))
-                else:
-                    logger.info('cycle check passed for %s' % etl.name)
+
+                # TODO release
+                # ss, has_cycle = bloodhelper.check_cycle(etl.id)
+                # if has_cycle:
+                #     logger.error('etl has_cycle : %s' % etl.name)
+                #     raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
+                #         [str(leaf) for leaf in ss]))
+                # else:
+                #     logger.info('cycle check passed for %s' % etl.name)
                 return HttpResponseRedirect(reverse('metamap:index'))
         except RDException, e:
             print(traceback.format_exc())

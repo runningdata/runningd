@@ -11,12 +11,14 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
+from metamap.helpers import bloodhelper
 from metamap.models import ExecBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive, NULLETL, ETL, TblBlood
 from will_common.models import WillDependencyTask, UserProfile
 from will_common.utils import PushUtils
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import AZKABAN_BASE_LOCATION, AZKABAN_SCRIPT_LOCATION
+from will_common.utils.customexceptions import RDException
 
 logger = logging.getLogger('django')
 
@@ -57,12 +59,24 @@ def edit_deps(request, pk):
                 if not any(o_dep == n_dep for o_dep in v1_old_deps):
                     n_dep.save()
 
+            if eo.type == 1:
+                etl = ETL.objects.get(pk=eo.rel_id)
+                ss, has_cycle = bloodhelper.check_cycle(etl.id)
+                if has_cycle:
+                    logger.error('etl has_cycle : %s' % etl.name)
+                    raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name),
+                                      '<br/>'.join(
+                                          [str(leaf) for leaf in ss]))
+                else:
+                    logger.info('cycle check passed for %s' % etl.name)
+
             # users = [User.objects.get(username='admin'), eo.creator.user, ]
             # for owner in eo.cgroup.owners.split(','):
             #     users.append(User.objects.get(username=owner.strip()))
             users = [UserProfile.objects.get(user=User.objects.get(username='admin')), eo.creator]
             for owner in eo.cgroup.owners.split(','):
                 users.append(UserProfile.objects.get(user=User.objects.get(username=owner.strip())))
+
             PushUtils.push_both(users, '%s \' deps has been modified by %s. old_deps: is %s, new_deps is %s ' % (
                 eo.name, request.user.username, '\n'.join(old_deps_names), '\n'.join(new_deps_names)))
 
