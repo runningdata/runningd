@@ -231,6 +231,8 @@ def edit(request, pk):
         try:
             with transaction.atomic():
                 privious_etl = ETL.objects.get(pk=int(pk))
+                if privious_etl.valid != 1:
+                    raise RDException(u'版本问题', u'编辑的etl并不是最新版本')
                 privious_etl.valid = 0
                 privious_etl.save()
                 previous_query = privious_etl.query
@@ -247,6 +249,7 @@ def edit(request, pk):
                 etl.save()
                 logger.info('ETL has been created successfully : %s ' % etl)
 
+                
                 tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
                 for task in tasks:
                     task.rel_id = etl.id
