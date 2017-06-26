@@ -59,55 +59,48 @@ def find_child_mermaid(blood, final_bloods, init=0, depth=0):
                 find_child_mermaid(bld, final_bloods, init=init, depth=depth)
 
 
-def check_parent_mermaid(blood, init=0, depth=0):
+def check_parent_mermaid(blood, dep_score):
     '''
     # 循环遍历当前节点的父节点
     :param blood:
     :param final_bloods:
     :return:
     '''
-    init += 1
     bloods = TblBlood.objects.filter(tblName=blood.parentTbl)
-    if init != depth or depth < 0:
-        if bloods.count() > 0:
-            for bld in bloods:
-                check_parent_mermaid(bld, init=init, depth=depth)
+    if bloods.count() > 0:
+        for bld in bloods:
+            dep_score[bld] = dep_score.get(bld, 0) + 1
+            if dep_score[bld] > 50:
+                break
+            check_parent_mermaid(bld, dep_score)
 
 
-def check_child_mermaid(blood, dep_score, init=0, depth=0):
+def check_child_mermaid(blood, dep_score):
     '''
     循环遍历当前节点的子节点
     :param blood:
     :param final_bloods:
     :return:
     '''
-    init += 1
     bloods = TblBlood.objects.filter(parentTbl=blood.tblName)
     if bloods.count() > 0:
         for bld in bloods:
-            # if bld in final_bloods:
-            #     raise Exception('Already has %s ' % bld)
             dep_score[bld] = dep_score.get(bld, 0) + 1
-            if dep_score[bld] > 30:
+            if dep_score[bld] > 50:
                 break
-            if init != depth or depth < 0:
-                check_child_mermaid(bld, dep_score, init=init, depth=depth)
+            check_child_mermaid(bld, dep_score)
 
 
 def check_cycle(etlid):
     bloods = TblBlood.objects.filter(relatedEtlId=int(etlid), valid=1)
-    final_bloods = set()
-    p_depth, c_depth = 0, 0
     dep_score = {}
     for blood in bloods:
         blood.current = blood.id
-        if p_depth != -1:
-            final_bloods.add(blood)
-            find_parent_mermaid(blood, final_bloods, depth=p_depth)
-        if c_depth != -1:
-            find_child_mermaid(blood, final_bloods, dep_score, depth=c_depth)
+        check_parent_mermaid(blood, dep_score)
+        check_child_mermaid(blood, dep_score)
 
-    large_score = [blood for blood, v in dep_score.items() if v > 20]
-    if any(v > 20 for blood, v in dep_score.items()):
-        return False
-    return True
+    dep_score = sorted(dep_score.items(), lambda x, y: cmp(x[1], y[1]), reverse=True)
+    large_score = [blood for blood, v in dep_score if v > 45]
+    if any(v > 45 for blood, v in dep_score):
+        return large_score, True
+    return large_score, False

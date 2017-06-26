@@ -94,6 +94,10 @@ class EditView(generic.DetailView):
     context_object_name = 'form'
     queryset = ETL.objects.all()
 
+def check_dag(request, etlid):
+    cycle, has_cycle = bloodhelper.check_cycle(etlid)
+    result = [str(c) for c in cycle]
+    return HttpResponse('<br>'.join(result))
 
 def blood_dag(request, etlid):
     bloods = TblBlood.objects.filter(relatedEtlId=int(etlid), valid=1)
@@ -101,17 +105,13 @@ def blood_dag(request, etlid):
     p_depth, c_depth = 0, 0
     p_depth = int(request.GET.get('p_depth', default=0))
     c_depth = int(request.GET.get('c_depth', default=0))
-    dep_score = {}
     for blood in bloods:
         blood.current = blood.id
         if p_depth != -1:
             final_bloods.add(blood)
             bloodhelper.find_parent_mermaid(blood, final_bloods, depth=p_depth)
         if c_depth != -1:
-            bloodhelper.find_child_mermaid(blood, final_bloods, dep_score, depth=c_depth)
-
-    large_score = [blood for blood, v in dep_score.items() if v > 20]
-    print('final score')
+            bloodhelper.find_child_mermaid(blood, final_bloods, depth=c_depth)
     return render(request, 'etl/blood.html', {'bloods': final_bloods})
 
 
@@ -193,6 +193,11 @@ def add(request):
                         tblBlood = TblBlood(tblName=etl.name, parentTbl=dep, relatedEtlId=etl.id)
                         tblBlood.save()
                         logger.info('Tblblood has been created successfully : %s' % tblBlood)
+
+                ss, has_cycle = bloodhelper.check_cycle(etl.id)
+                if has_cycle:
+                    logger.error('etl has_cycle : %s' % etl.name)
+                    pass
                 return HttpResponseRedirect(reverse('metamap:index'))
         except Exception, e:
             return render(request, 'common/500.html', {'msg': e.message})

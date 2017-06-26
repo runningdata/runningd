@@ -171,6 +171,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
             objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
             result = list()
             for export in objs:
+                # if a deptask has been deleted, the export record should not be deleted immediately
                 if WillDependencyTask.objects.filter(pk=export.task_id).count() == 1:
                     if export.task.type == 2:
                         ana_id = export.task.rel_id
