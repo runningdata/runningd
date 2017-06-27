@@ -198,6 +198,9 @@ def add(request):
                 userutils.add_current_creator(etl, request)
                 find_ = etl.name.find('@')
                 etl.meta = etl.name[0: find_]
+
+                if ETL.objects.filter(name=etl.name, valid=1).count() != 0:
+                    raise RDException(u'命名冲突', u'已经存在同名ETL')
                 etl.save()
                 logger.info('ETL has been created successfully : %s ' % etl)
                 deps = hivecli.getTbls_v2(etl)
@@ -249,7 +252,6 @@ def edit(request, pk):
                 etl.save()
                 logger.info('ETL has been created successfully : %s ' % etl)
 
-                
                 tasks = WillDependencyTask.objects.filter(rel_id=pk, type=1)
                 for task in tasks:
                     task.rel_id = etl.id

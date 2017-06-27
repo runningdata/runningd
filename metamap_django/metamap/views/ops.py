@@ -175,22 +175,27 @@ class UploadFileForm(forms.Form):
 def rerun(request):
     import datetime
     str_list = list()
-    for ex in Exports.objects.filter(file_loc__contains='20170621'):
+    file_date = request.GET['file_date']
+    group = request.GET['group']
+    to_delete = request.GET['del']
+    for ex in Exports.objects.filter(file_loc__contains=file_date):
         tt = ex.task
         if tt.type == 100:
             eo = ExecObj.objects.get(pk=tt.rel_id)
-            if eo.cgroup.name == 'jlc':
+            if eo.cgroup.name == group:
                 str_list.append('task %s has been rescheduled ' % tt.name)
                 tasks.exec_etl_cli2.delay(tt.id, name=tt.name)
                 time.sleep(3)
-                # ex.delete()
+                if int(to_delete) == 1:
+                    ex.delete()
         elif tt.type == 2:
             eo = AnaETL.objects.get(pk=tt.rel_id)
-            if eo.cgroup.name == 'jlc':
+            if eo.cgroup.name == group:
                 str_list.append('task %s has been rescheduled ' % tt.name)
                 tasks.exec_etl_cli.delay(tt.id, name=tt.name)
                 time.sleep(3)
-                # ex.delete()
+                if int(to_delete) == 1:
+                    ex.delete()
 
     return HttpResponse('<br/>'.join(str_list))
 

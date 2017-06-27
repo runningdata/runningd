@@ -21,6 +21,7 @@ from will_common.utils import constants
 from will_common.utils import httputils
 from will_common.utils import userutils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
+from will_common.utils.customexceptions import RDException
 from will_common.views.common import GroupListView
 
 logger = logging.getLogger('django')
@@ -50,6 +51,8 @@ def add(request):
     if request.method == 'POST':
         obj = AnaETL()
         httputils.post2obj(obj, request.POST, 'id')
+        if AnaETL.objects.filter(name=obj.name, valid=1).count() != 0:
+            raise RDException(u'命名冲突', u'已经存在同名ETL')
         userutils.add_current_creator(obj, request)
         obj.save()
         logger.info('ETL has been created successfully : %s ' % obj)

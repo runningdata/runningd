@@ -18,6 +18,7 @@ from will_common.utils import httputils
 from will_common.utils import userutils
 from will_common.utils import ziputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE, AZKABAN_SCRIPT_LOCATION, AZKABAN_BASE_LOCATION
+from will_common.utils.customexceptions import RDException
 from will_common.views.common import GroupListView
 
 logger = logging.getLogger('info')
@@ -45,6 +46,8 @@ def add(request):
     if request.method == 'POST':
         sqoop = SqoopMysql2Hive()
         httputils.post2obj(sqoop, request.POST, 'id')
+        if SqoopMysql2Hive.objects.filter(name=sqoop.name, valid=1).count() != 0:
+            raise RDException(u'命名冲突', u'已经存在同名ETL')
         userutils.add_current_creator(sqoop, request)
         sqoop.save()
         logger.info('sqoop has been created successfully : %s ' % sqoop)
