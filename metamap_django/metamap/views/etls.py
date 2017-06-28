@@ -219,6 +219,8 @@ def add(request):
                 #                           [str(leaf) for leaf in ss]))
                 # else:
                 #     logger.info('cycle check passed for %s' % etl.name)
+                if ETL.objects.filter(name=etl.name, valid=1).count() > 1:
+                    raise RDException(u'命名冲突', u'已经存在同名ETL')
                 return HttpResponseRedirect(reverse('metamap:index'))
         except RDException, e:
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': e.err_stack})
@@ -288,6 +290,8 @@ def edit(request, pk):
                 #         [str(leaf) for leaf in ss]))
                 # else:
                 #     logger.info('cycle check passed for %s' % etl.name)
+                if ETL.objects.filter(name=etl.name, valid=1).count() > 1:
+                    raise RDException(u'版本问题', u'编辑的etl并不是最新版本')
                 return HttpResponseRedirect(reverse('metamap:index'))
         except RDException, e:
             print(traceback.format_exc())
