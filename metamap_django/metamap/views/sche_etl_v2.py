@@ -298,6 +298,7 @@ def edit(request, pk):
         v1_task = WillDependencyTask.objects.get(rel_id=origin_etl.rel_id, type=etl.type, schedule=orig_sche_type)
         v1_task.variables = task.variables
         v1_task.rel_id = etl.rel_id
+        v1_task.valid = task.valid
         v1_task.save()
 
         if int(task.schedule) == 4:
