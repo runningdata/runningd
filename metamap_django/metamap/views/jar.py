@@ -7,6 +7,7 @@ import shutil
 
 import django
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.forms import ModelForm, HiddenInput, ClearableFileInput
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -50,10 +51,11 @@ def add(request):
         try:
             form = JarForm(-1, request.POST, request.FILES)
             if form.is_valid():
-                xx = form.save()
-                if form.is_zip():
-                    ziputils.unzip(WORK_DIR + xx.jar_file.name, WORK_JAR_DIR + xx.name)
-                logger.info('JarApp for %s has been added successfully')
+                with transaction.atomic():
+                    xx = form.save()
+                    if form.is_zip():
+                        ziputils.unzip(WORK_DIR + xx.jar_file.name, WORK_JAR_DIR + xx.name)
+                    logger.info('JarApp for %s has been added successfully')
             else:
                 form = JarForm(request.user.userprofile.id)
                 return render(request, 'source/post_edit.html', {'form': form})
@@ -67,7 +69,6 @@ def add(request):
 
 
 class JarForm(ModelForm):
-
     class Meta:
         model = JarApp
         exclude = ['ctime', 'rel_name', 'exec_obj']
@@ -177,17 +178,18 @@ def edit(request, pk):
         try:
             form = JarForm(-1, request.POST, request.FILES)
             if form.is_valid():
-                inst = form.save(commit=False)
-                inst.id = pk
-                # whether to delete the original file
-                jar = JarApp.objects.get(pk=pk)
-                if len(request.FILES) > 0:
-                    if form.is_zip():
-                        ziputils.unzip(WORK_DIR + jar.jar_file.name, WORK_JAR_DIR + jar.name, True)
-                    jar.jar_file.delete()
-                else:
-                    inst.jar_file = jar.jar_file
-                inst.save()
+                with transaction.atomic():
+                    inst = form.save(commit=False)
+                    inst.id = pk
+                    # whether to delete the original file
+                    jar = JarApp.objects.get(pk=pk)
+                    if len(request.FILES) > 0:
+                        if form.is_zip():
+                            ziputils.unzip(WORK_DIR + jar.jar_file.name, WORK_JAR_DIR + jar.name, True)
+                        jar.jar_file.delete()
+                    else:
+                        inst.jar_file = jar.jar_file
+                    inst.save()
             else:
                 print form._errors
                 form = JarForm(request.user.userprofile.id, instance=JarApp.objects.get(pk=pk))
