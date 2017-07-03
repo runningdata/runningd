@@ -340,6 +340,8 @@ class ExecObj(models.Model):
         with open(location, 'w') as sc:
             sc.write(script.encode('utf8'))
         command = obj.get_cmd_prefix() + location
+        if not settings.USE_ROOT:
+            command = 'runuser -l ' + self.cgroup.name + ' -c "' + command + '"'
         return command
 
     def get_deps(self):
