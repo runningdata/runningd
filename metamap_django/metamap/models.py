@@ -105,7 +105,7 @@ class NULLETL(ETLObjRelated):
 
     # TODO release
     def save(self, *args, **kwargs):
-        super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
+        super(NULLETL, self).save(*args, **kwargs)  # Call the "real" save() method.
         WillDependencyTask.objects.get_or_create(name=self.name, type=100, rel_id=self.exec_obj_id, schedule=0)
         WillDependencyTask.objects.get_or_create(name=self.name, type=100, rel_id=self.exec_obj_id, schedule=1)
         WillDependencyTask.objects.get_or_create(name=self.name, type=100, rel_id=self.exec_obj_id, schedule=2)
