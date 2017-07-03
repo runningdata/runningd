@@ -59,6 +59,7 @@ def add(request):
                 return render(request, 'source/post_edit.html', {'form': form})
             return HttpResponseRedirect(reverse('metamap:jar_index'))
         except Exception, e:
+            logger.error(traceback.format_exc())
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
         form = JarForm(request.user.userprofile.id)
