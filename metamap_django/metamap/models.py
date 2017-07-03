@@ -184,7 +184,7 @@ class JarApp(ETLObjRelated):
     jar_file = models.FileField(upload_to='jars', blank=True)
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
-    outputs = models.CharField(max_length=500, default='', verbose_name=u"输出的表名称，目前只考虑hive表", blank=True, null=True)
+    outputs = models.CharField(max_length=500, default='', verbose_name=u"输出的表名称，目前只考虑hive表[dim_tinyv@xx_table,dim_tinyv@yy_table]", blank=True, null=True)
 
     # TODO release after clean
     def save(self, *args, **kwargs):
