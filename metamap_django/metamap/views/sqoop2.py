@@ -74,6 +74,8 @@ def exec_job(request, sqoopid):
     dd = dateutils.now_datetime()
     location = AZKABAN_SCRIPT_LOCATION + dd + '-sqoop-' + sqoop.name + '.log'
     command = etlhelper.generate_sqoop_mysql2hive(sqoop)
+    if not settings.USE_ROOT:
+        command = 'runuser -l ' + sqoop.cgroup.name + ' -c "' + command + '"'
     execution = SqoopMysql2HiveExecutions(logLocation=location, job_id=sqoopid, status=0)
     execution.save()
     from metamap import tasks

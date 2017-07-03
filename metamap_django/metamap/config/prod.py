@@ -38,6 +38,9 @@ EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
 EMAIL_HOST_PASSWORD = 'YYxx24680'
 EMAIL_USE_TLS = True
 
+# use root to execute....
+USE_ROOT = True
+
 
 # push url
 PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
