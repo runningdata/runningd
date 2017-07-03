@@ -39,7 +39,7 @@ if [ $filename == "error" -o ${#filename} -ne 18 ]; then
         exit 1
 fi
 
-project_name=${job_type}_${prefix}_${filename}
+project_name=${group_name}_${job_type}_${prefix}_${filename}
 project_zip_file=/tmp/${filename}.zip
 
 echo "project_name is ${project_name}"

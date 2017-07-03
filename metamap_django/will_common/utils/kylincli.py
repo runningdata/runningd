@@ -35,7 +35,7 @@ def execute(cube_name, sql):
             result2 = {k: float(v) for k, v in result.items()}
         else:
             print('Error in kylincli resp status is : %d ' % rep.status_code)
-        return result
+        return result2
     except Exception, e:
         print('Error in kylincli : %s ' % e.message)
         return {}

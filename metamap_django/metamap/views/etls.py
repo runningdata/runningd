@@ -491,7 +491,7 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
                                     is_check=is_check)
 
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
-                                   '%d etls generated ' % len(done_blood))
+                                   '%d etls generated for group %s ' % (len(done_blood), group_name))
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d etls generated ' % len(done_blood))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)

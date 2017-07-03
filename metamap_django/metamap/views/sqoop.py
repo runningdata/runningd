@@ -147,7 +147,7 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
                 deps.add(leaf.name)
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d h2m generated ' % len(leafs))
-        PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d h2m generated ' % len(deps))
+        PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d h2m generated for group %s ' % (len(deps), group_name))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
     except Exception, e:

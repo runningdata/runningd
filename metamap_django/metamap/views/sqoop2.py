@@ -141,7 +141,7 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
             if m2h.cgroup.name == group_name:
                 deps.add(m2h.name)
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
-        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d m2h generated ' % len(leafs))
+        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d m2h generated for %s ' % (len(leafs), group_name))
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d m2h generated ' % len(deps))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
