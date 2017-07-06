@@ -27,7 +27,7 @@ def add(request):
                 email = request.POST['email']
                 username = email.replace('@yinker.com', '')
                 if 'export' in request.POST or 'xstorm' in request.POST:
-                    if not User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
+                    if not User.objects.filter(username=username, email=email).exists():
                         user = User.objects.create(username=username, email=email, last_login=timezone.now(),
                                                    date_joined=timezone.now(),
                                                    is_active=1, is_staff=0)
@@ -35,29 +35,47 @@ def add(request):
                         user.save()
                     else:
                         user = User.objects.get(username=username, email=email)
+                        user.is_active = 1
+                        user.save()
                     UserProfile.objects.get_or_create(user=user, phone=request.POST['phone'], org_group=group)
+                    permission = AuthPermission.objects.get(codename='access_etl')
+                    auth_user = AuthUser.objects.get(username=user.username)
                     if 'xstorm' in request.POST:
-                        permission = AuthPermission.objects.get(codename='access_etl')
-                        auth_user = AuthUser.objects.get(username=user.username)
                         AuthUserUserPermissions.objects.get_or_create(permission=permission, user=auth_user)
+                    else:
+                        AuthUserUserPermissions.objects.get(permission=permission, user=auth_user).delete()
+                else:
+                    if User.objects.filter(username=username, email=email).exists():
+                        user = User.objects.get(username=username, email=email)
+                        user.is_active = 0
+                        user.save()
                 if 'hue' in request.POST:
                     if User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
-                        return HttpResponse('already exist')
-                    user = User.objects.using(settings.DB_HUE).create(username=username, email=email,
-                                                                      last_login=timezone.now(),
-                                                                      date_joined=timezone.now(),
-                                                                      is_active=1, is_staff=0)
-                    user.set_password(settings.DEFAULT_PASSWD)
-                    user.save()
-                    auth_user = AuthUser.objects.using(settings.DB_HUE).get(username=user.username)
-                    auth_group = AuthGroup.objects.using(settings.DB_HUE).get(name__iexact=group.name)
-                    AuthUserGroups.objects.using(settings.DB_HUE).get_or_create(user=auth_user, group=auth_group)
-                    from fabric.api import run
-                    from fabric.api import env
-                    for hhost in settings.NN_HOSTS:
-                        env.host_string = hhost
-                        print run('useradd %s -G %s' % (username, group.name))
-                    env.host_string = ''
+                        user = User.objects.get(username=username, email=email)
+                        user.is_active = 1
+                        user.save()
+                        print ('user %s for hue already exist' % username)
+                    else:
+                        user = User.objects.using(settings.DB_HUE).create(username=username, email=email,
+                                                                          last_login=timezone.now(),
+                                                                          date_joined=timezone.now(),
+                                                                          is_active=1, is_staff=0)
+                        user.set_password(settings.DEFAULT_PASSWD)
+                        user.save()
+                        auth_user = AuthUser.objects.using(settings.DB_HUE).get(username=user.username)
+                        auth_group = AuthGroup.objects.using(settings.DB_HUE).get(name__iexact=group.name)
+                        AuthUserGroups.objects.using(settings.DB_HUE).get_or_create(user=auth_user, group=auth_group)
+                        from fabric.api import run
+                        from fabric.api import env
+                        for hhost in settings.NN_HOSTS:
+                            env.host_string = hhost
+                            print run('useradd %s -G %s' % (username, group.name))
+                        env.host_string = ''
+                else:
+                    if User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
+                        user = User.objects.get(username=username, email=email)
+                        user.is_active = 0
+                        user.save()
                 return render(request, 'hadmin/edit.html')
         except RDException, e:
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': e.err_stack})
