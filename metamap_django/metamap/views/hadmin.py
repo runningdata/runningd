@@ -28,9 +28,9 @@ def add(request):
                 username = email.replace('@yinker.com', '')
                 if 'export' or 'xstorm' in request.POST:
                     if not User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
-                        user, created = User.objects.create(username=username, email=email, last_login=timezone.now(),
-                                                            date_joined=timezone.now(),
-                                                            is_active=1, is_staff=0, )
+                        user = User.objects.create(username=username, email=email, last_login=timezone.now(),
+                                                   date_joined=timezone.now(),
+                                                   is_active=1, is_staff=0)
                         user.set_password(settings.DEFAULT_PASSWD)
                         user.save()
                     else:
