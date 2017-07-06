@@ -15,7 +15,6 @@ from will_common.utils.customexceptions import RDException
 logger = logging.getLogger('django')
 
 
-@permission_required('access_hadmin')
 def add(request):
     if request.method == 'POST':
         try:

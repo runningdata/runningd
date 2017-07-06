@@ -128,6 +128,7 @@ REST_FRAMEWORK = {
 PATH_AUTH_DICT = {
     'auth.access_etl': '/metamap',
     'auth.access_clean': '/clean',
+    'auth.access_hadmin': '/hadmin',
 }
 
 MIDDLEWARE_CLASSES = [
