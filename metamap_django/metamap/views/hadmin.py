@@ -49,10 +49,9 @@ def add(request):
                                                                       is_active=1, is_staff=0)
                     user.set_password(settings.DEFAULT_PASSWD)
                     user.save()
-                    if 'xstorm' in request.POST:
-                        auth_user = AuthUser.objects.using(settings.DB_HUE).get(username=user.username)
-                        auth_group = AuthGroup.objects.using(settings.DB_HUE).get(name=group.name)
-                        AuthUserGroups.objects.using(settings.DB_HUE).get_or_create(user=auth_user, group=auth_group)
+                    auth_user = AuthUser.objects.using(settings.DB_HUE).get(username=user.username)
+                    auth_group = AuthGroup.objects.using(settings.DB_HUE).get(name__iexact=group.name)
+                    AuthUserGroups.objects.using(settings.DB_HUE).get_or_create(user=auth_user, group=auth_group)
                     from fabric.api import run
                     from fabric.api import env
                     for hhost in settings.NN_HOSTS:
