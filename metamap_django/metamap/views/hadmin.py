@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.utils import timezone
 from django.utils.datetime_safe import datetime
 
 from will_common.djcelery_models import AuthPermission, AuthUserUserPermissions, AuthUser, AuthUserGroups, AuthGroup
@@ -37,7 +38,7 @@ def add(request):
                 if 'hue' in request.POST:
                     if User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
                         return HttpResponse('already exist')
-                    user = User(username=username, email=email, last_login=datetime.now)
+                    user = User(username=username, email=email, last_login=timezone.now)
                     user.set_password(settings.DEFAULT_PASSWD)
                     user.save()
                     if 'xstorm' in request.POST:
