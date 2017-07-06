@@ -27,9 +27,13 @@ def add(request):
                 email = request.POST['email']
                 username = email.replace('@yinker.com', '')
                 if 'export' or 'xstorm' in request.POST:
-                    user, created = User.objects.get_or_create(username=username, email=email)
-                    user.set_password(settings.DEFAULT_PASSWD)
-                    user.save()
+                    if not User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
+                        user, created = User(username=username, email=email, last_login=timezone.now(), date_joined=timezone.now(),
+                                is_active=1, is_staff=0, )
+                        user.set_password(settings.DEFAULT_PASSWD)
+                        user.save()
+                    else:
+                        user = User.objects.get(username=username, email=email)
                     UserProfile.objects.get_or_create(user=user, phone=request.POST['phone'], org_group=group)
                     if 'xstorm' in request.POST:
                         permission = AuthPermission.objects.get(codename='access_etl')
@@ -38,7 +42,8 @@ def add(request):
                 if 'hue' in request.POST:
                     if User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
                         return HttpResponse('already exist')
-                    user = User(username=username, email=email, last_login=timezone.now)
+                    user = User(username=username, email=email, last_login=timezone.now(), date_joined=timezone.now(),
+                                is_active=1, is_staff=0, )
                     user.set_password(settings.DEFAULT_PASSWD)
                     user.save()
                     if 'xstorm' in request.POST:
@@ -59,5 +64,3 @@ def add(request):
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': traceback.format_exc()})
     else:
         return render(request, 'hadmin/edit.html')
-
-
