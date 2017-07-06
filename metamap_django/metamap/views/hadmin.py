@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.shortcuts import render
+from django.utils.datetime_safe import datetime
 
 from will_common.djcelery_models import AuthPermission, AuthUserUserPermissions, AuthUser, AuthUserGroups, AuthGroup
 from will_common.models import WillDependencyTask, UserProfile
@@ -33,7 +34,8 @@ def add(request):
                         auth_user = AuthUser.objects.get(username=user.username)
                         AuthUserUserPermissions.objects.get_or_create(permission=permission, user=auth_user)
                 if 'hue' in request.POST:
-                    user, created = User.objects.using(settings.DB_HUE).get_or_create(username=username, email=email)
+                    if not User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
+                        user = User(username=username, email=email, last_login=datetime.now)
                     user.set_password(settings.DEFAULT_PASSWD)
                     user.save()
                     if 'xstorm' in request.POST:
