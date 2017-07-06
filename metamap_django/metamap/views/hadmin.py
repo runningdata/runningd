@@ -36,7 +36,7 @@ def add(request):
                 if 'hue' in request.POST:
                     if not User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
                         user = User(username=username, email=email, last_login=datetime.now)
-                    user.set_password(settings.DEFAULT_PASSWD)
+                        user.set_password(settings.DEFAULT_PASSWD)
                     user.save()
                     if 'xstorm' in request.POST:
                         auth_user = AuthUser.objects.using(settings.DB_HUE).get(username=user.username)
