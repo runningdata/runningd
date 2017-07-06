@@ -52,6 +52,11 @@ PROC_USER = 'metamap'
 ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.1.5.190']
 CLUTER_QUEUE = 'xstorm'
 
+NN_HOSTS = ['namenode01.yinker.com', 'datanode17.yinker.com']
+DEFAULT_PASSWD = 'qwer1234'
+DB_HUE = 'hue'
+
+
 HIVE_SERVER = {
     'host': 'servicenode07.yinker.com',
     'port': 10000,
@@ -121,7 +126,8 @@ REST_FRAMEWORK = {
 }
 
 PATH_AUTH_DICT = {
-    'auth.access_etl': 'metamap',
+    'auth.access_etl': '/metamap',
+    'auth.access_clean': '/clean',
 }
 
 MIDDLEWARE_CLASSES = [
@@ -175,6 +181,14 @@ DATABASES = {
     'hivemeta': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'hive1',
+        'PASSWORD': 'Zjy@yinker20150309',
+        'USER': 'zjy',
+        'HOST': 'prd-mysql01.data.com',
+        'PORT': '3306',
+    },
+    DB_HUE: {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'hue',
         'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'zjy',
         'HOST': 'prd-mysql01.data.com',

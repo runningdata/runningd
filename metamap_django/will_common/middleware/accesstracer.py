@@ -32,7 +32,7 @@ class AuthTracer():
             return None
 
         for k, v in settings.PATH_AUTH_DICT.items():
-            if not request.user.has_perm(k) and v in request.path:
+            if not request.user.has_perm(k) and request.path.startswith(v):
                 message = u'您没有访问此路径的权限'
                 return render(request, 'common/message.html', {'message': message})
         return None

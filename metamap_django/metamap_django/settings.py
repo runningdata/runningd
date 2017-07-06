@@ -52,7 +52,8 @@ HIVE_SERVER = {
 }
 
 PATH_AUTH_DICT = {
-    'auth.access_etl': 'metamap',
+    'auth.access_etl': '/metamap',
+    'auth.access_clean': '/clean',
 }
 
 # 设置cas服务器地址
