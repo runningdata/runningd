@@ -10,6 +10,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 import datetime
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.template import Context
 from django.template import Template
 from django.utils import timezone
@@ -58,6 +60,8 @@ class ETLObjRelated(models.Model):
                 print('exec_obj %s created for %s , id is %d ' % (exe.name, self.name, exe.id))
                 logger.info('exec_obj %s created for %s' % (exe.name, self.name))
                 self.exec_obj = exe
+                if self.type != 66:
+                    super(ETLObjRelated, self).save(*args, **kwargs)
             else:
                 try:
                     print('already has exec_obj %s for %s' % (self.exec_obj.name, self.name))
@@ -98,6 +102,26 @@ class ETLObjRelated(models.Model):
         str_list.append("get_script Not supported now...for %s " % self.name)
         return str_list
 
+
+# @receiver(post_save, sender=ETLObjRelated)
+# def my_handler(sender, **kwargs):
+#     if sender.valid != 0:
+#         exe, created = ExecObj.objects.get_or_create(type=sender.type, name=sender.name)
+#         exe.rel_id = sender.id
+#         exe.creator = sender.creator
+#         exe.cgroup = sender.cgroup
+#         exe.save()
+#         if created:
+#             print('exec_obj %s created for %s , id is %d ' % (exe.name, sender.name, exe.id))
+#             logger.info('exec_obj %s created for %s' % (exe.name, sender.name))
+#             sender.exec_obj = exe
+#         else:
+#             try:
+#                 print('already has exec_obj %s for %s' % (sender.exec_obj.name, sender.name))
+#             except AttributeError, e:
+#                 sender.exec_obj = exe
+#                 print('already has exec_obj %s for %s, but no exec_id' % (sender.exec_obj.name, sender.name))
+#         sender.save
 
 class NULLETL(ETLObjRelated):
     type = 66
@@ -183,7 +207,9 @@ class JarApp(ETLObjRelated):
     jar_file = models.FileField(upload_to='jars', blank=True)
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
-    outputs = models.CharField(max_length=500, default='', verbose_name=u"输出的表名称，目前只考虑hive表[dim_tinyv@xx_table,dim_tinyv@yy_table]", blank=True, null=True)
+    outputs = models.CharField(max_length=500, default='',
+                               verbose_name=u"输出的表名称，目前只考虑hive表[dim_tinyv@xx_table,dim_tinyv@yy_table]", blank=True,
+                               null=True)
 
     # TODO release after clean
     def save(self, *args, **kwargs):
@@ -192,6 +218,7 @@ class JarApp(ETLObjRelated):
             new_children = list()
             for output in self.outputs.split(","):
                 obj, created = NULLETL.objects.get_or_create(name=output, rel_name=output)
+                obj.save()
                 new_children.append(ExecBlood(child_id=obj.exec_obj.id, parent_id=self.exec_obj.id))
 
             old_children = ExecBlood.objects.filter(parent=self.exec_obj)
