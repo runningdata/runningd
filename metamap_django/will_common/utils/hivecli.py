@@ -43,7 +43,8 @@ def getTbls_v2(etl):
         deps = json.loads(out)
         tables_ = deps['input_tables']
         for tbl in tables_:
-            result.add(tbl['tablename'])
+            if tbl['tablename'] != '_dummy_database@_dummy_table':
+                result.add(tbl['tablename'])
         logger.info('analyse sql done ')
     except Pyhs2Exception, e:
         raise Exception('sql is %s,\n<br> error is %s' % (sql, e))
