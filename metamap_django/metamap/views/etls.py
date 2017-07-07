@@ -403,7 +403,7 @@ def restart_job(request):
             for name in request.POST.get('names').split(','):
                 dependencies[name] = set()
                 for blood in TblBlood.objects.filter(tblName=name):
-                    bloodhelper.find_child_mermaid(blood, final_bloods)
+                    bloodhelper.find_child_mermaid(blood, final_bloods, init=c_init)
 
             for blood in final_bloods:
                 child_name = blood.tblName
