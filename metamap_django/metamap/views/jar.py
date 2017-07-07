@@ -197,6 +197,7 @@ def edit(request, pk):
             logger.info('JarApp for %s has been modified successfully' % pk)
             return HttpResponseRedirect(reverse('metamap:jar_index'))
         except Exception, e:
+            print(traceback.format_exc())
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
         form = JarForm(request.user.userprofile.id, instance=JarApp.objects.get(pk=pk))
