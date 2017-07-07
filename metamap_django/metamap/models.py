@@ -58,7 +58,6 @@ class ETLObjRelated(models.Model):
                 print('exec_obj %s created for %s , id is %d ' % (exe.name, self.name, exe.id))
                 logger.info('exec_obj %s created for %s' % (exe.name, self.name))
                 self.exec_obj = exe
-                super(ETLObjRelated, self).save(*args, **kwargs)
             else:
                 try:
                     print('already has exec_obj %s for %s' % (self.exec_obj.name, self.name))
