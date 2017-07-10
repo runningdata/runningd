@@ -217,7 +217,7 @@ class JarApp(ETLObjRelated):
         if self.outputs and len(self.outputs.strip()) > 0:
             new_children = list()
             for output in self.outputs.split(","):
-                obj, created = NULLETL.objects.get_or_create(name=output, rel_name=output)
+                obj, created = NULLETL.objects.get_or_create(name=output, rel_name=output, cgroup=self.cgroup)
                 obj.save()
                 new_children.append(ExecBlood(child_id=obj.exec_obj.id, parent_id=self.exec_obj.id))
 
