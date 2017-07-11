@@ -25,7 +25,8 @@ else
 	exit 1
 fi
 
-tmp_output=/tmp/${job_type}_${prefix}_tmp_log
+tt=`date +'%Y%m%d%H%M%S'`
+tmp_output=/tmp/${job_type}_${prefix}_${tt}_tmp_log
 host=10.2.19.62:8081
 metamap_host=10.2.19.62:8088
 project_desc=${prefix}_schedule
