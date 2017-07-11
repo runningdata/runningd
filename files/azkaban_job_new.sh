@@ -96,7 +96,8 @@ function check_exec_status(){
                         echo "${execid} has been SUCCEEDED."
                         break
 		fi
-    		echo "${execid} not yet..."
+		clock=`date +'%Y%m%d%H%M%S'`
+    		echo "Time: ${clock}  ${execid} not yet..."
 		sleep 10m	
 	done
 }
