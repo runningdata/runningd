@@ -50,7 +50,7 @@ def add(request):
                         user.save()
                 if 'hue' in request.POST:
                     if User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
-                        user = User.objects.get(username=username, email=email)
+                        user = User.objects.using(settings.DB_HUE).get(username=username, email=email)
                         user.is_active = 1
                         user.save()
                         print ('user %s for hue already exist' % username)
