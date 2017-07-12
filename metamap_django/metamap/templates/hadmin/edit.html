@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-{% load ifdef %}
+{% load etlutils %}
 
 {% block title %}添加人员{% endblock %}
 
@@ -18,13 +18,13 @@
             <label>权限</label>
             <div class="form-group">
                 <label class="checkbox-inline">
-                    <input type="checkbox" name="hue"  value="1"> HUE
+                    <input type="checkbox" name="hue" value="1"> HUE
                 </label>
                 <label class="checkbox-inline">
-                    <input type="checkbox" name="export"  value="1"> XStorm导数
+                    <input type="checkbox" name="export" value="1"> 数据导出
                 </label>
                 <label class="checkbox-inline">
-                    <input type="checkbox" name="xstorm"  value="1"> XStorm所有
+                    <input type="checkbox" name="xstorm" value="1"> 修改ETL
                 </label>
 
             </div>
@@ -40,4 +40,30 @@
     </form>
     <script>
     </script>
+
+    <table class="table table-striped">
+        <caption></caption>
+        <thead>
+        <tr>
+            <th>名称</th>
+            <th>电话</th>
+            <th>邮箱</th>
+            <th>当前权限[XStorm]</th>
+            <th>是否生效</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if objs %}
+            {% for obj in objs %}
+                <tr>
+                    <td>{{ obj.user.username }}</td>
+                    <td>{{ obj.phone }}</td>
+                    <td>{{ obj.user.email }}</td>
+                    <td>{{ obj.user.get_all_permissions|readable_auth }}</td>
+                    <td>{{ obj.user.is_active|is_valid }}</td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+        </tbody>
+    </table>
 {% endblock %}

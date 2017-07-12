@@ -83,4 +83,5 @@ def add(request):
             print(traceback.format_exc())
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': traceback.format_exc()})
     else:
-        return render(request, 'hadmin/edit.html')
+        users = UserProfile.objects.filter(org_group=request.user.userprofile.org_group).order_by('-user__is_active')
+        return render(request, 'hadmin/edit.html', {'objs': users})

@@ -167,6 +167,19 @@ def is_valid(value):
     return '否'
 
 
+
+AUTH_DICT = dict()
+AUTH_DICT['auth.access_etl'] = u'修改ETL'
+AUTH_DICT['auth.access_hadmin'] = u'人员管理'
+AUTH_DICT['auth.admin_etl'] = u'管理ETL'
+
+
+@register.filter
+def readable_auth(lis):
+    result = u'数据导出'
+    for l in lis:
+        result += u',' + AUTH_DICT[l]
+    return result
 # @register.filter
 # def clean_blood(value):
 #     return value.replace('@', '__');
