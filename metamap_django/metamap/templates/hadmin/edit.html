@@ -95,9 +95,9 @@
                                     {% if hue_users %}
                                         {% for obj in hue_users %}
                                             <tr>
-                                                <td>{{ obj.username }}</td>
-                                                <td>{{ obj.email }}</td>
-                                                <td>{{ obj.is_active|is_valid }}</td>
+                                                <td>{{ obj.user.username }}</td>
+                                                <td>{{ obj.user.email }}</td>
+                                                <td>{{ obj.user.is_active|is_valid }}</td>
                                             </tr>
                                         {% endfor %}
                                     {% endif %}
