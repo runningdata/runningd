@@ -3,16 +3,15 @@ import logging
 import traceback
 
 from django.conf import settings
-from django.contrib.auth.decorators import permission_required
+import json
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
-from django.utils.datetime_safe import datetime
 
 from will_common.djcelery_models import AuthPermission, AuthUserUserPermissions, AuthUser, AuthUserGroups, AuthGroup
-from will_common.models import WillDependencyTask, UserProfile
+from will_common.models import UserProfile
+from will_common.utils import PushUtils
 from will_common.utils.customexceptions import RDException
 
 logger = logging.getLogger('django')
@@ -76,6 +75,8 @@ def add(request):
                         user = User.objects.get(username=username, email=email)
                         user.is_active = 0
                         user.save()
+                PushUtils.push_both(UserProfile.objects.filter(user_id=1), '%s auth changed by %s, to %s ' % (
+                username, request.user.username, json.dumps(request.POST)))
                 return render(request, 'hadmin/edit.html')
         except RDException, e:
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': e.err_stack})

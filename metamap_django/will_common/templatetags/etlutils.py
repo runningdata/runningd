@@ -178,7 +178,7 @@ AUTH_DICT['auth.admin_etl'] = u'管理ETL'
 def readable_auth(lis):
     result = u'数据导出'
     for l in lis:
-        result += u',' + AUTH_DICT[l]
+        result += u',' + AUTH_DICT.get(l, u'其他')
     return result
 # @register.filter
 # def clean_blood(value):
