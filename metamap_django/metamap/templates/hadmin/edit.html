@@ -40,30 +40,75 @@
     </form>
     <script>
     </script>
+    <div class="container">
+        <div class="row">
+            <div>
+                <div class="panel with-nav-tabs panel-info">
+                    <div class="panel-heading">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#tab1info" data-toggle="tab">XStorm用户</a></li>
+                            <li><a href="#tab2info" data-toggle="tab">HUE用户</a></li>
+                        </ul>
+                    </div>
+                    <div class="panel-body">
+                        <div class="tab-content">
+                            <div class="tab-pane fade in active" id="tab1info">
+                                <table class="table table-striped">
+                                    <caption></caption>
+                                    <thead>
+                                    <tr>
+                                        <th>名称</th>
+                                        <th>电话</th>
+                                        <th>邮箱</th>
+                                        <th>当前权限[XStorm]</th>
+                                        <th>是否生效</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% if xstorm_users %}
+                                        {% for obj in xstorm_users %}
+                                            <tr>
+                                                <td>{{ obj.user.username }}</td>
+                                                <td>{{ obj.phone }}</td>
+                                                <td>{{ obj.user.email }}</td>
+                                                <td>{{ obj.user.get_all_permissions|readable_auth }}</td>
+                                                <td>{{ obj.user.is_active|is_valid }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="tab2info">
 
-    <table class="table table-striped">
-        <caption></caption>
-        <thead>
-        <tr>
-            <th>名称</th>
-            <th>电话</th>
-            <th>邮箱</th>
-            <th>当前权限[XStorm]</th>
-            <th>是否生效</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% if objs %}
-            {% for obj in objs %}
-                <tr>
-                    <td>{{ obj.user.username }}</td>
-                    <td>{{ obj.phone }}</td>
-                    <td>{{ obj.user.email }}</td>
-                    <td>{{ obj.user.get_all_permissions|readable_auth }}</td>
-                    <td>{{ obj.user.is_active|is_valid }}</td>
-                </tr>
-            {% endfor %}
-        {% endif %}
-        </tbody>
-    </table>
+
+                                <table class="table table-striped">
+                                    <caption></caption>
+                                    <thead>
+                                    <tr>
+                                        <th>名称</th>
+                                        <th>邮箱</th>
+                                        <th>是否生效</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% if hue_users %}
+                                        {% for obj in hue_users %}
+                                            <tr>
+                                                <td>{{ obj.username }}</td>
+                                                <td>{{ obj.email }}</td>
+                                                <td>{{ obj.is_active|is_valid }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

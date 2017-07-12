@@ -76,7 +76,7 @@ def add(request):
                         user.is_active = 0
                         user.save()
                 PushUtils.push_both(UserProfile.objects.filter(user_id=1), '%s auth changed by %s, to %s ' % (
-                username, request.user.username, json.dumps(request.POST)))
+                    username, request.user.username, json.dumps(request.POST)))
                 return render(request, 'hadmin/edit.html')
         except RDException, e:
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': e.err_stack})
@@ -84,5 +84,8 @@ def add(request):
             print(traceback.format_exc())
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': traceback.format_exc()})
     else:
-        users = UserProfile.objects.filter(org_group=request.user.userprofile.org_group).order_by('-user__is_active')
-        return render(request, 'hadmin/edit.html', {'objs': users})
+        xstorm_users = UserProfile.objects.filter(org_group=request.user.userprofile.org_group).order_by(
+            '-user__is_active')
+        hue_users = AuthUserGroups.objects.using(settings.DB_HUE).filter(
+            group__name=request.user.userprofile.org_group.name)
+        return render(request, 'hadmin/edit.html', {'xstorm_users': xstorm_users, 'hue_users': hue_users})
