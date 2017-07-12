@@ -19,6 +19,7 @@ logger = logging.getLogger('error')
 class ViewException():
     def process_exception(self, request, exception):
         logger.error(traceback.format_exc())
+        print(traceback.format_exc())
         if hasattr(exception, 'err_stack'):
             return render(request, 'common/message.html',
                           {'message': exception.message, 'err_stack': exception.err_stack})
