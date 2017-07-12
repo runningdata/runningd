@@ -86,8 +86,7 @@ def add(request):
     else:
         xstorm_users = UserProfile.objects.filter(org_group=request.user.userprofile.org_group).order_by(
             '-user__is_active')
-        hue_users = None
-        # hue_users = AuthUserGroups.objects.using(settings.DB_HUE).filter(
-        #     group__name=request.user.userprofile.org_group.name).order_by(
-        #     '-user__is_active')
+        hue_users = AuthUserGroups.objects.using(settings.DB_HUE).filter(
+            group__name=request.user.userprofile.org_group.name).order_by(
+            '-user__is_active')
         return render(request, 'hadmin/edit.html', {'xstorm_users': xstorm_users, 'hue_users': hue_users})
