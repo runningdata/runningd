@@ -24,8 +24,8 @@ def add(request):
             with transaction.atomic():
                 group = request.user.userprofile.org_group
                 # check all
-                email = request.POST['email']
-                username = email.replace('@yinker.com', '')
+                email = request.POST['email'].strip()
+                username = email.replace('@yinker.com', '').strip()
                 if 'export' in request.POST or 'xstorm' in request.POST:
                     if not User.objects.filter(username=username, email=email).exists():
                         user = User.objects.create(username=username, email=email, last_login=timezone.now(),
