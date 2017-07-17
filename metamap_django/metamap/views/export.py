@@ -61,6 +61,13 @@ def add(request):
         return render(request, 'export/edit.html')
 
 
+def exec_job(request, sqoopid):
+    sqoop = AnaETL.objects.get(id=sqoopid)
+    from metamap import tasks
+    tasks.exec_execobj.delay(sqoop.exec_obj_id, name=sqoop.name)
+    return redirect('/metamap/executions/status/0/')
+
+
 def get_exec_log(request, log):
     try:
         with open(constants.TMP_EXPORT_FILE_LOCATION + log + '.error') as error_file:
@@ -69,6 +76,7 @@ def get_exec_log(request, log):
     except Exception, e:
         logger.error(e)
         return HttpResponse('file not found %s ' % log)
+
 
 def review_sql(request, pk):
     try:

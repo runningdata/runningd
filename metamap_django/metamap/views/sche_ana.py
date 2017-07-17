@@ -159,7 +159,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
     @list_route(methods=['GET'])
     def get_all(self, request):
         now = timezone.now()
-        days = now - datetime.timedelta(days=7)
+        days = now - datetime.timedelta(days=17)
         group = request.query_params['group']
         user = request.query_params['user']
         if group == 'xiaov' or group == 'jlc-match':

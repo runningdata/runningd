@@ -21,7 +21,7 @@ from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryInterva
 from will_common.models import PeriodicTask, WillDependencyTask, UserProfile, OrgGroup
 from will_common.utils import dateutils
 from will_common.utils import ziputils
-from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION
+from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
 
 logger = logging.getLogger('django')
 from will_common.utils import hivecli
@@ -161,7 +161,17 @@ class AnaETL(ETLObjRelated):
     def get_script(self, str_list, sche_vars=''):
         str_list.append(self.variables)
         str_list.append(sche_vars)
-        str_list.append(self.query)
+        if self.name.startswith('common_'):
+            part = self.name + '-' + dateutils.now_datekey()
+        else:
+            part = self.name + '-' + dateutils.now_datetime()
+        result = TMP_EXPORT_FILE_LOCATION + part
+        result_dir = result + '_dir'
+        pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
+        sql = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr + self.query
+        str_list.append(sql)
+        command = 'cat %s/* | iconv -f utf-8 -c -t gb18030 >> %s' % (result_dir, result)
+        str_list.append(command)
         return str_list
 
 
@@ -260,7 +270,7 @@ class JarApp(ETLObjRelated):
         else:
             with open('metamap/config/jar_template.sh') as tem:
                 str_list.append(tem.read())
-        template = Template('\n'.join(str))
+        template = Template('\n'.join(str_list))
         strip = template.render(context).strip()
         strip = '{% load etlutils %} \n' + sche_vars + '\n' + strip
         return {strip, }
@@ -635,6 +645,13 @@ class Executions(models.Model):
     def __str__(self):
         return self.logLocation
 
+class ExecutionsV2(models.Model):
+    log_location = models.CharField(max_length=120)
+    job = models.ForeignKey(ExecObj, on_delete=models.CASCADE, null=False)
+    cmd_shot = models.TextField()
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(null=True)
+    status = models.IntegerField(default=-1)
 
 class SqoopHive2MysqlExecutions(models.Model):
     '''

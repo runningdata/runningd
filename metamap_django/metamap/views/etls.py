@@ -306,24 +306,26 @@ def edit(request, pk):
 
 def exec_job(request, etlid):
     etl = ETL.objects.get(id=etlid)
-    dd = dateutils.now_datetime()
-    location = AZKABAN_SCRIPT_LOCATION + dd + '-' + etl.name.replace('@', '__') + '.hql'
-    etlhelper.generate_etl_file(etl, location)
-    log_location = location.replace('hql', 'log')
-    with open(log_location, 'a') as log:
-        with open(location, 'r') as hql:
-            log.write(hql.read())
-    # work_manager.add_job(threadpool.do_job, 'hive -f ' + location, log_location)
-    # logger.info(
-    #     'job for %s has been executed, current pool size is %d' % (etl.name, work_manager.work_queue.qsize()))
-    execution = Executions(logLocation=log_location, job_id=etlid, status=0)
-    execution.save()
     from metamap import tasks
-    command = 'hive -f ' + location
-    if not settings.USE_ROOT:
-        command = 'runuser -l ' + etl.cgroup.name + ' -c "' + command + '"'
-    tasks.exec_etl.delay(command, log_location, name=etl.name + '-' + dd)
-    return redirect('metamap:execlog', execid=execution.id)
+    tasks.exec_execobj.delay(etl.exec_obj_id, name=etl.name)
+    return redirect('/metamap/executions/status/0/')
+    # dd = dateutils.now_datetime()
+    # location = AZKABAN_SCRIPT_LOCATION + dd + '-' + etl.name.replace('@', '__') + '.hql'
+    # etlhelper.generate_etl_file(etl, location)
+    # log_location = location.replace('hql', 'log')
+    # with open(log_location, 'a') as log:
+    #     with open(location, 'r') as hql:
+    #         log.write(hql.read())
+    # # work_manager.add_job(threadpool.do_job, 'hive -f ' + location, log_location)
+    # # logger.info(
+    # #     'job for %s has been executed, current pool size is %d' % (etl.name, work_manager.work_queue.qsize()))
+    # execution = Executions(logLocation=log_location, job_id=etlid, status=0)
+    # execution.save()
+    # command = 'hive -f ' + location
+    # if not settings.USE_ROOT:
+    #     command = 'runuser -l ' + etl.cgroup.name + ' -c "' + command + '"'
+    # tasks.exec_etl.delay(command, log_location, name=etl.name + '-' + dd)
+    # return redirect('metamap:execlog', execid=execution.id)
     # return redirect('metamap:execlog', execid=1)
 
 

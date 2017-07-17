@@ -17,16 +17,17 @@ import logging
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.views import generic
 
 import metamap
 from metamap import tasks
-from metamap.models import Exports, ExecObj, AnaETL
+from metamap.models import Exports, ExecObj, AnaETL, Executions, ExecutionsV2
 from will_common.models import OrgGroup, UserProfile
 from will_common.utils import PushUtils
 from will_common.utils import constants
 from will_common.utils import dateutils
 from will_common.utils import redisutils
-from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
+from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION, DEFAULT_PAGE_SIEZE
 
 logger = logging.getLogger('django')
 
@@ -172,32 +173,62 @@ class UploadFileForm(forms.Form):
     file = forms.FileField()
 
 
-def rerun(request):
-    import datetime
-    str_list = list()
-    file_date = request.GET['file_date']
-    group = request.GET['group']
-    to_delete = request.GET['del']
-    for ex in Exports.objects.filter(file_loc__contains=file_date):
-        tt = ex.task
-        if tt.type == 100:
-            eo = ExecObj.objects.get(pk=tt.rel_id)
-            if eo.cgroup.name == group:
-                str_list.append('task %s has been rescheduled ' % tt.name)
-                tasks.exec_etl_cli2.delay(tt.id, name=tt.name)
-                time.sleep(3)
-                if int(to_delete) == 1:
-                    ex.delete()
-        elif tt.type == 2:
-            eo = AnaETL.objects.get(pk=tt.rel_id)
-            if eo.cgroup.name == group:
-                str_list.append('task %s has been rescheduled ' % tt.name)
-                tasks.exec_etl_cli.delay(tt.id, name=tt.name)
-                time.sleep(3)
-                if int(to_delete) == 1:
-                    ex.delete()
+def exec_log(request, execid):
+    '''
+    获取指定execution的log内容
+    :param request:
+    :param execid:
+    :return:
+    '''
+    return render(request, 'executions/exec_log.html', {'execid': execid})
 
-    return HttpResponse('<br/>'.join(str_list))
+
+def get_exec_log(request, execid):
+    '''
+    获取指定execution的log内容
+    :param request:
+    :param execid:
+    :return:
+    '''
+    execution = ExecutionsV2.objects.get(pk=execid)
+
+    try:
+        with open(execution.log_location, 'r') as log:
+            content = log.read().replace('\n', '<br>')
+    except:
+        return HttpResponse('')
+    return HttpResponse(content)
+
+
+def rerun(request):
+    if request.method == 'POST':
+        str_list = list()
+        file_date = request.POST['file_date']
+        to_delete = request.POST['is_del']
+        for ex in Exports.objects.filter(file_loc__contains=file_date):
+            tt = ex.task
+            if tt.type == 100:
+                eo = ExecObj.objects.get(pk=tt.rel_id)
+                if eo.cgroup == request.user.userprofile.org_group:
+                    # TODO if this task is already in queue, then go pass
+                    str_list.append('task %s has been rescheduled ' % tt.name)
+                    tasks.exec_etl_cli2.delay(tt.id, name=tt.name)
+                    time.sleep(3)
+                    if int(to_delete) == 1:
+                        ex.delete()
+            elif tt.type == 2:
+                eo = AnaETL.objects.get(pk=tt.rel_id)
+                if eo.cgroup.name == request.user.userprofile.org_group:
+                    str_list.append('task %s has been rescheduled ' % tt.name)
+                    tasks.exec_etl_cli.delay(tt.id, name=tt.name)
+                    time.sleep(3)
+                    if int(to_delete) == 1:
+                        ex.delete()
+
+        return HttpResponse('<br/>'.join(str_list))
+    else:
+
+        return render(request, 'hadmin/rerun.html')
 
 
 def upload_hdfs_file(request):

@@ -8,6 +8,15 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
+                                            aria-expanded="false"
+                                            class="dropdown-toggle">新版执行记录<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/metamap/executions/status/0/">执行中</a></li>
+                            <li><a href="/metamap/executions/status/1/">已完成</a></li>
+                            <li><a href="/metamap/executions/status/2/">已失败</a></li>
+                        </ul>
+                </li>
                 {% if user.username == 'admin' %}
                     <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
                                             aria-expanded="false"
@@ -110,6 +119,10 @@
                                     class="glyphicon glyphicon-th-list"></span>断流重导</a></li>
                             <li><a href="{% url 'hadmin:hadmin_add' %}"><span
                                     class="glyphicon glyphicon-th-list"></span>人员添加</a></li>
+                            {% if user.username == 'admin' %}
+                                <li><a href="{% url 'hadmin:rerun' %}"><span
+                                        class="glyphicon glyphicon-th-list"></span>导出重调</a></li>
+                            {% endif %}
                         </ul>
                     </li>
                 {% endif %}

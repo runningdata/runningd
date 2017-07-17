@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+{% load etlutils %}
+
+{% block title %}任务重调{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div>
+                <div class="panel with-nav-tabs panel-primary">
+                    <div class="panel-heading">
+                        导数任务重调
+                    </div>
+                    <div class="panel-body">
+                        {% csrf_token %}
+                        <form action="." method="POST">
+                            <div class="form-group">
+                                <label>重调日期 [例：20170712]</label>
+                                <input name="email" value="" type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>是否删除既有任务</label>
+                                <div class="form-inline">
+                                    <label>是</label><input name="is_del" value=1 type="radio">
+                                    <label>否</label><input name="is_del" value=0 type="radio">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-group text-center">
+
+                                    <button type="submit" class="btn btn-primary">提交</button>
+
+                                    <a id="cancel" class="btn btn-warning" onclick="javascript:history.go(-1);">取消</a>
+                                </div>
+                            </div>
+                        </form>
+                        <script>
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}

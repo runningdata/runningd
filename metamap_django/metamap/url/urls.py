@@ -1,8 +1,10 @@
 from django.conf.urls import url, include
 from rest_framework import routers
 
-from metamap.models import JarAppExecutions, SqoopMysql2HiveExecutions, Executions, SqoopHive2MysqlExecutions
+from metamap.models import JarAppExecutions, SqoopMysql2HiveExecutions, Executions, SqoopHive2MysqlExecutions, \
+    ExecutionsV2
 from metamap.views import deps
+from metamap.views import export
 from metamap.views import jar
 from metamap.views import ops
 from metamap.views import sche_etl
@@ -41,7 +43,7 @@ urlpatterns = [
     url(r'^ops/hdfs_files/$', ops.hdfs_files, name='hdfs_files'),
     url(r'^ops/hdfs_del/(?P<filename>.*)/$', ops.hdfs_del, name='hdfs_del'),
     url(r'^ops/up_hdfs/$', ops.upload_hdfs_file, name='up_hdfs'),
-    url(r'^ops/rerun/$', ops.rerun, name='rerun'),
+    url(r'^ops/up_hdfs/$', ops.upload_hdfs_file, name='up_hdfs'),
     # url(r'^users/add/$', usermanager.add_user, name='add_user'),
     # url(r'^users/$', usermanager.list_user, name='list_user'),
 
@@ -75,11 +77,19 @@ urlpatterns = [
     url(r'^h2m/add/$', sqoop.add, name='h2m_sqoop_add'),
     url(r'^h2m/review/(?P<sqoop_id>[0-9]+)/$', sqoop.review, name='h2m_ssqoop_review'),
 
+    url(r'^ana/exec/(?P<sqoopid>[0-9]+)/$', export.exec_job, name='export_exec'),
+
     url(r'^h2m/exec/(?P<sqoopid>[0-9]+)/$', sqoop.exec_job, name='sqoop_exec'),
     url(r'^h2m/execlog/(?P<execid>[0-9]+)/$', sqoop.exec_log, name='sqoop_execlog'),
     url(r'^h2m/getexeclog/(?P<execid>[0-9]+)/$', sqoop.get_exec_log, name='sqoop_getexeclog'),
     url(r'^h2m/status/(?P<status>[0-9]+)/$',
         common.StatusListView.as_view(url_base='h2m', model=SqoopHive2MysqlExecutions), name='sqoop_status'),
+
+    url(r'^executions/status/(?P<status>[0-9]+)/$',
+        common.StatusListView.as_view(url_base='executions', model=ExecutionsV2), name='executions_status'),
+    url(r'^executions/execlog/(?P<execid>[0-9]+)/$', ops.exec_log, name='executions_execlog'),
+    url(r'^executions/getexeclog/(?P<execid>[0-9]+)/$', ops.get_exec_log, name='executions_getexeclog'),
+
 
     url(r'^m2h/$', sqoop2.Mysql2HiveListView.as_view(), name='h2m_sqoop2_list'),
     url(r'^m2h/(?P<pk>[0-9]+)/$', sqoop2.edit, name='h2m_sqoop2_edit'),

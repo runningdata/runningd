@@ -1,0 +1,6 @@
+{% block url_script %}
+    <script type="text/javascript">
+        var urlB = "/metamap/executions/getexeclog/" +{{ execid }} +"/";
+    </script>
+{% endblock %}
+{% include 'components/common_exec_log.html' %}

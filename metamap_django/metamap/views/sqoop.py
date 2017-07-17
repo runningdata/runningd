@@ -75,16 +75,19 @@ def edit(request, pk):
 
 def exec_job(request, sqoopid):
     sqoop = SqoopHive2Mysql.objects.get(id=sqoopid)
-    dd = dateutils.now_datetime()
-    location = AZKABAN_SCRIPT_LOCATION + dd + '-sqoop-' + sqoop.name + '.log'
-    command = etlhelper.generate_sqoop_hive2mysql(sqoop)
-    if not settings.USE_ROOT:
-        command = 'runuser -l ' + sqoop.cgroup.name + ' -c "' + command + '"'
-    execution = SqoopHive2MysqlExecutions(logLocation=location, job_id=sqoopid, status=0)
-    execution.save()
     from metamap import tasks
-    tasks.exec_h2m.delay(command, location, name=sqoop.name + '-' + dd)
-    return redirect('metamap:sqoop_execlog', execid=execution.id)
+    tasks.exec_execobj.delay(sqoop.exec_obj_id, name=sqoop.name)
+    return redirect('/metamap/executions/status/0/')
+    # dd = dateutils.now_datetime()
+    # location = AZKABAN_SCRIPT_LOCATION + dd + '-sqoop-' + sqoop.name + '.log'
+    # command = etlhelper.generate_sqoop_hive2mysql(sqoop)
+    # if not settings.USE_ROOT:
+    #     command = 'runuser -l ' + sqoop.cgroup.name + ' -c "' + command + '"'
+    # execution = SqoopHive2MysqlExecutions(logLocation=location, job_id=sqoopid, status=0)
+    # execution.save()
+    # from metamap import tasks
+    # tasks.exec_h2m.delay(command, location, name=sqoop.name + '-' + dd)
+    # return redirect('metamap:sqoop_execlog', execid=execution.id)
 
 
 def exec_log(request, execid):

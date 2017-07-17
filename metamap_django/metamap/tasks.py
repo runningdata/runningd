@@ -19,7 +19,7 @@ from django.utils import timezone
 from metamap.helpers import etlhelper
 from metamap.models import ETL, Executions, WillDependencyTask, AnaETL, Exports, SqoopHive2MysqlExecutions, \
     SqoopHive2Mysql, SqoopMysql2Hive, SqoopMysql2HiveExecutions, SourceApp, SourceAppExecutions, JarApp, \
-    JarAppExecutions, ExecObj
+    JarAppExecutions, ExecObj, ExecutionsV2
 from will_common.utils import enums, dateutils
 
 from celery.utils.log import get_task_logger
@@ -211,6 +211,7 @@ def tail_hdfs(logLocation, command, name=''):
     # PushUtils.push_exact_email(email, msg)
     logger.info('tail_hdfs : %s return code is %d' % (command, returncode))
 
+
 @shared_task
 def exec_sourceapp(taskid, name=''):
     '''
@@ -307,11 +308,44 @@ def exec_etl_cli(task_id, name=''):
     will_task = WillDependencyTask.objects.get(pk=task_id)
     executors.get(will_task.type)(will_task.rel_id)
 
+
+@shared_task
+def exec_execobj(exec_id, schedule=-1, name=''):
+    obj = ExecObj.objects.get(pk=exec_id)
+
+    # TODO New execution version
+    tt = dateutils.now_datetime()
+    log_location = AZKABAN_SCRIPT_LOCATION + tt + '-sche-' + obj.name.replace('@', '__') + '.error'
+    script_location = AZKABAN_SCRIPT_LOCATION + tt + '-sche-' + obj.name.replace('@', '__') + '.rd'
+    execution = ExecutionsV2.objects.create(job=obj, log_location=log_location,
+                                            cmd_shot=obj.get_cmd(schedule=schedule, location=script_location))
+    execution.end_time = timezone.now()
+    command = execution.cmd_shot
+    try:
+        p = subprocess.Popen([''.join(command)], stdout=open(log_location, 'a'), stderr=subprocess.STDOUT, shell=True,
+                             universal_newlines=True)
+        p.wait()
+        returncode = p.returncode
+        logger.info('%s return code is %d' % (command, returncode))
+        if returncode == 0:
+            execution.status = enums.EXECUTION_STATUS.DONE
+        else:
+            execution.status = enums.EXECUTION_STATUS.FAILED
+    except Exception, e:
+        logger.error(e)
+        execution.status = enums.EXECUTION_STATUS.FAILED
+    execution.end_time = timezone.now()
+    execution.save()
+
+
 @shared_task
 def exec_etl_cli2(task_id, name=''):
     exec_task = WillDependencyTask.objects.get(pk=task_id, type=100)
-    obj = ExecObj.objects.get(pk=exec_task.rel_id)
-    executors.get(obj.type)(obj.rel_id)
+    exec_execobj(exec_task.rel_id, schedule=4, name=name)
+
+    # obj = ExecObj.objects.get(pk=exec_task.rel_id)
+    # executors.get(obj.type)(obj.rel_id)
+
 
 @shared_task
 def xsum(numbers, name=''):

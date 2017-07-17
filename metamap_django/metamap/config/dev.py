@@ -28,6 +28,7 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ENV_PRD = False
+USE_ROOT = True
 
 SESSION_COOKIE_NAME = 'xsid'
 CSRF_COOKIE_NAME = 'xcsrftoken'
@@ -77,14 +78,14 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 BROKER_URL = 'redis://localhost:6379'
 CELERY_REDIS_HOST = 'localhost'
 CELERY_REDIS_PORT = '6379'
-CELERY_ROUTES = {
-    'metamap.tasks.exec_etl_cli': {
-        'queue': 'metamap',
-    },
-    'metamap.tasks.exec_etl': {
-        'queue': 'metamap',
-    },
-}
+# CELERY_ROUTES = {
+#     'metamap.tasks.exec_etl_cli': {
+#         'queue': 'metamap',
+#     },
+#     'metamap.tasks.exec_etl': {
+#         'queue': 'metamap',
+#     },
+# }
 
 # Application definition
 
