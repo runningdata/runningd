@@ -207,7 +207,7 @@ class StatusListView(generic.ListView):
 
     def get(self, request, status):
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        if request.user.username != 'admin':
+        if request.user.username == 'admin':
             self.object_list = ExecutionsV2.objects.filter(status=status).exclude(job__type=2).order_by('-start_time')
         else:
             self.object_list = ExecutionsV2.objects.filter(status=status,
