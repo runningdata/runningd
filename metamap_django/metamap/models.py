@@ -315,7 +315,7 @@ class ETL(ETLObjRelated):
     def __str__(self):
         return self.query
 
-    def get_script(self, str_list, sche_vars=''):
+    def et_script(self, str_list, sche_vars=''):
         str_list.append(self.variables)
         str_list.append(sche_vars)
         str_list.append("-- job for " + self.name)

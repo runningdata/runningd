@@ -83,10 +83,10 @@ class ExecutionsV2Serializer(serializers.HyperlinkedModelSerializer):
         fields = ('file_loc', 'start_time', 'end_time', 'file_status')
 
     def get_file_loc(self, obj):
-        return obj.log_location
+        return obj.log_location.replace('/var/azkaban-metamap/', '').replace('.error', '')[0:-2]
 
     def get_file_status(self, obj):
-        return  etlutils.readable_status(obj.status)
+        return etlutils.readable_status(obj.status)
 
 
 class MetaSerializer(serializers.HyperlinkedModelSerializer):
