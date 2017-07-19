@@ -163,6 +163,10 @@ class AnaETL(ETLObjRelated):
         else:
             part = self.name + '-' + dateutils.now_datetime()
         result = TMP_EXPORT_FILE_LOCATION + part
+        with open(result, 'w') as wa:
+            header = self.headers
+            wa.write(header.encode('gb18030'))
+            wa.write('\n')
         result_dir = result + '_dir'
         pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
         sql = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr + self.query + '\"'
