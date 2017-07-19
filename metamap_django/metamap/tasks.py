@@ -315,8 +315,8 @@ def exec_execobj(exec_id, schedule=-1, name=''):
 
     # TODO New execution version
     tt = dateutils.now_datetime()
-    log_location = AZKABAN_SCRIPT_LOCATION + tt + '-sche-' + obj.name.replace('@', '__') + '.error'
-    script_location = AZKABAN_SCRIPT_LOCATION + tt + '-sche-' + obj.name.replace('@', '__') + '.rd'
+    log_location = AZKABAN_SCRIPT_LOCATION + obj.name.replace('@', '__') + tt + '.error'
+    script_location = AZKABAN_SCRIPT_LOCATION + obj.name.replace('@', '__') + tt + '.rd'
     execution = ExecutionsV2.objects.create(job=obj, log_location=log_location,
                                             cmd_shot=obj.get_cmd(schedule=schedule, location=script_location))
     execution.end_time = timezone.now()
