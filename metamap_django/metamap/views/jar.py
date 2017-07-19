@@ -122,7 +122,10 @@ def exec_job(request, pk):
     try:
         jar_task = JarApp.objects.get(pk=pk)
         from metamap import tasks
-        tasks.exec_execobj.delay(jar_task.exec_obj_id, name=jar_task.name)
+        if jar_task.exec_obj:
+            tasks.exec_execobj.delay(jar_task.exec_obj_id, name=jar_task.name + dateutils.now_datetime())
+        else:
+            raise Exception('exec obj for jar task %s is null' % jar_task.name)
         return redirect('/metamap/executions/status/0/')
         # dd = dateutils.now_datetime()
         # log = AZKABAN_SCRIPT_LOCATION + dd + '-jarapp-sche-' + jar_task.name + '.log'

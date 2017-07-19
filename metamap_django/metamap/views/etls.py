@@ -307,7 +307,10 @@ def edit(request, pk):
 def exec_job(request, etlid):
     etl = ETL.objects.get(id=etlid)
     from metamap import tasks
-    tasks.exec_execobj.delay(etl.exec_obj_id, name=etl.name)
+    if etl.exec_obj:
+        tasks.exec_execobj.delay(etl.exec_obj_id, name=etl.name + dateutils.now_datetime())
+    else:
+        raise Exception('exec obj for etl task %s is null' % etl.name)
     return redirect('/metamap/executions/status/0/')
     # dd = dateutils.now_datetime()
     # location = AZKABAN_SCRIPT_LOCATION + dd + '-' + etl.name.replace('@', '__') + '.hql'

@@ -24,12 +24,12 @@
                     <ul class="dropdown-menu">
                         <li><a href="/metamap/m2h"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
                         <li><a href="/metamap/m2h/add"><span class="glyphicon glyphicon-plus"></span>新增</a></li>
-                        <li><a href="/metamap/m2h/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>
-                        </li>
-                        <li><a href="/metamap/m2h/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>
-                        </li>
-                        <li><a href="/metamap/m2h/status/2/"><span
-                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
+                        {#                        <li><a href="/metamap/m2h/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>#}
+                        {#                        </li>#}
+                        {#                        <li><a href="/metamap/m2h/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>#}
+                        {#                        </li>#}
+                        {#                        <li><a href="/metamap/m2h/status/2/"><span#}
+                        {#                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>#}
                     </ul>
                 </li>
 
@@ -38,12 +38,12 @@
                     <ul class="dropdown-menu">
                         <li><a href="/metamap"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
                         <li><a href="/metamap/etls/add"><span class="glyphicon glyphicon-plus"></span>新增</a></li>
-                        <li><a href="/metamap/etls/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>
-                        </li>
-                        <li><a href="/metamap/etls/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>
-                        </li>
-                        <li><a href="/metamap/etls/status/2/"><span
-                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
+                        {#                        <li><a href="/metamap/etls/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>#}
+                        {#                        </li>#}
+                        {#                        <li><a href="/metamap/etls/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>#}
+                        {#                        </li>#}
+                        {#                        <li><a href="/metamap/etls/status/2/"><span#}
+                        {#                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>#}
                     </ul>
                 </li>
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
@@ -51,12 +51,12 @@
                     <ul class="dropdown-menu">
                         <li><a href="/metamap/h2m"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
                         <li><a href="/metamap/h2m/add"><span class="glyphicon glyphicon-plus"></span>新增</a></li>
-                        <li><a href="/metamap/h2m/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>
-                        </li>
-                        <li><a href="/metamap/h2m/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>
-                        </li>
-                        <li><a href="/metamap/h2m/status/2/"><span
-                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
+                        {#                        <li><a href="/metamap/h2m/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>#}
+                        {#                        </li>#}
+                        {#                        <li><a href="/metamap/h2m/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>#}
+                        {#                        </li>#}
+                        {#                        <li><a href="/metamap/h2m/status/2/"><span#}
+                        {#                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>#}
                     </ul>
                 </li>
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
@@ -64,12 +64,12 @@
                     <ul class="dropdown-menu">
                         <li><a href="/metamap/jar"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
                         <li><a href="/metamap/jar/add"><span class="glyphicon glyphicon-plus"></span>新增</a></li>
-                        <li><a href="/metamap/jar/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>
-                        </li>
-                        <li><a href="/metamap/jar/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>
-                        </li>
-                        <li><a href="/metamap/jar/status/2/"><span
-                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
+                        {#                        <li><a href="/metamap/jar/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>#}
+                        {#                        </li>#}
+                        {#                        <li><a href="/metamap/jar/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>#}
+                        {#                        </li>#}
+                        {#                        <li><a href="/metamap/jar/status/2/"><span#}
+                        {#                                class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>#}
                     </ul>
                 </li>
 
@@ -85,9 +85,14 @@
                                         aria-expanded="false"
                                         class="dropdown-toggle">新版执行记录<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="/metamap/executions/status/0/">执行中</a></li>
-                        <li><a href="/metamap/executions/status/1/">已完成</a></li>
-                        <li><a href="/metamap/executions/status/2/">已失败</a></li>
+                        <li><a href="{% url 'metamap:task_queue' %}"><span
+                                class="glyphicon glyphicon-th-list"></span>队列中</a></li>
+                        <li><a href="/metamap/executions/status/0/"><span class="glyphicon glyphicon-adjust"></span>执行中</a>
+                        </li>
+                        <li><a href="/metamap/executions/status/1/"><span class="glyphicon glyphicon-ok-circle"></span>已完成</a>
+                        </li>
+                        <li><a href="/metamap/executions/status/2/">
+                            <span class="glyphicon glyphicon-ban-circle"></span>已失败</a></li>
                     </ul>
                 </li>
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
@@ -106,8 +111,6 @@
                                 class="glyphicon glyphicon-th-list"></span>数仓历史</a></li>
                         <li><a href="{% url 'metamap:dfs_usage' %}"><span
                                 class="glyphicon glyphicon-th-list"></span>今日数仓</a></li>
-                        <li><a href="{% url 'metamap:task_queue' %}"><span
-                                class="glyphicon glyphicon-th-list"></span>队列情况</a></li>
                         <li><a href="http://10.1.5.83:7777/cluster/apps/RUNNING"><span
                                 class="glyphicon glyphicon-th-list"></span>Yarn</a></li>
                     </ul>

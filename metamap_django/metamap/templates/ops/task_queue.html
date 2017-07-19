@@ -2,70 +2,92 @@
 {% load ifdef %}
 {% block title %}队列总体情况{% endblock %}
 {% block content %}
-    <div class="label">排队中:</div><br/>
-    {% if unack|length > 0 %}
-        common : {{ unack | length }} <br/>
-        <table class="table">
-            <tr>
-                <th>key</th>
-                <th>任务ID</th>
-                {#            <th>value</th>#}
-                <th>任务名称</th>
-            </tr>
-            {% for k, v in unack.items %}
-                {% get_celery_taskname v as body %}
-                <tr>
-                    <td>{{ k }}</td>
-                    <td>{{ body.id }}</td>
-                    {#                <td>{{ body }}</td>#}
-                    {#                <td>{{ body.args }}</td>#}
-                    <td>{{ body.kwargs.name }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% endif %}
-    <p/>
-    {% for k, v in final_queue.items %}
-        {% if v|length > 0 %}
-            <div class="label label-warning">队列{{ k }} ： {{ v | length }}</div>
+    <div class="container">
+        <div class="pull-left">
+            <div class="btn-group">
+                <a href="{% url 'metamap:task_queue' %}">
+                    <button type="button" class="btn btn-info btn-filter" data-target="all">队列中</button>
+                </a>
+                <a href="/metamap/executions/status/0/">
+                    <button type="button" class="btn btn-warning btn-filter" data-target="onaylanan">执行中</button>
+                </a>
+                <a href="/metamap/executions/status/1/">
+                    <button type="button" class="btn btn-success btn-filter" data-target="bekleyen">已完成</button>
+                </a>
+                <a href="/metamap/executions/status/2/">
+                    <button type="button" class="btn btn-danger btn-filter" data-target="iptal">已失败</button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="label">排队中:</div>
+        <br/>
+        {% if unack|length > 0 %}
+            common : {{ unack | length }} <br/>
             <table class="table">
                 <tr>
+                    <th>key</th>
                     <th>任务ID</th>
-                    {#                <th>value22</th>#}
+                    {#            <th>value</th>#}
                     <th>任务名称</th>
                 </tr>
-                {% for msg in v %}
-                    {% get_celery_taskname2 msg as body %}
+                {% for k, v in unack.items %}
+                    {% get_celery_taskname v as body %}
                     <tr>
+                        <td>{{ k }}</td>
                         <td>{{ body.id }}</td>
-                        {#                    <td>{{ body }}</td>#}
+                        {#                <td>{{ body }}</td>#}
+                        {#                <td>{{ body.args }}</td>#}
                         <td>{{ body.kwargs.name }}</td>
                     </tr>
                 {% endfor %}
             </table>
         {% endif %}
-    {% endfor %}
-    <p/>
-    <div class="label label-success">执行中：</div><br/>
-    {% for k, v in running.items %}
-        {% if v|length > 0 %}
-
-            <b>{{ k|readable_task_queue }} {{ v|length }}</b> <br/>
-            <table class="table">
-                <tr>
-                    <th>任务ID</th>
-                    {#                <th>value22</th>#}
-                    <th>任务名称</th>
-                </tr>
-                {% for msg in v %}
+        <p/>
+        {% for k, v in final_queue.items %}
+            {% if v|length > 0 %}
+                <div class="label label-warning">队列{{ k }} ： {{ v | length }}</div>
+                <table class="table">
                     <tr>
-                        <td>{{ msg.id }}</td>
-                        {#                    <td>{{ body }}</td>#}
-                        <td>{{ msg.kwargs|extract_str_dict:'name' }}</td>
+                        <th>任务ID</th>
+                        {#                <th>value22</th>#}
+                        <th>任务名称</th>
                     </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-    {% endfor %}
+                    {% for msg in v %}
+                        {% get_celery_taskname2 msg as body %}
+                        <tr>
+                            <td>{{ body.id }}</td>
+                            {#                    <td>{{ body }}</td>#}
+                            <td>{{ body.kwargs.name }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        {% endfor %}
+        <p/>
+        <div class="label label-success">执行中：</div>
+        <br/>
+        {% for k, v in running.items %}
+            {% if v|length > 0 %}
+
+                <b>{{ k|readable_task_queue }} {{ v|length }}</b> <br/>
+                <table class="table">
+                    <tr>
+                        <th>任务ID</th>
+                        {#                <th>value22</th>#}
+                        <th>任务名称</th>
+                    </tr>
+                    {% for msg in v %}
+                        <tr>
+                            <td>{{ msg.id }}</td>
+                            {#                    <td>{{ body }}</td>#}
+                            <td>{{ msg.kwargs|extract_str_dict:'name' }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        {% endfor %}
+    </div>
 
 {% endblock %}

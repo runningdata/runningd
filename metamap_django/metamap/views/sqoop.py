@@ -76,7 +76,10 @@ def edit(request, pk):
 def exec_job(request, sqoopid):
     sqoop = SqoopHive2Mysql.objects.get(id=sqoopid)
     from metamap import tasks
-    tasks.exec_execobj.delay(sqoop.exec_obj_id, name=sqoop.name)
+    if sqoop.exec_obj:
+        tasks.exec_execobj.delay(sqoop.exec_obj_id, name=sqoop.name + dateutils.now_datetime())
+    else:
+        raise Exception('exec obj for h2m task %s is null' % sqoop.name)
     return redirect('/metamap/executions/status/0/')
     # dd = dateutils.now_datetime()
     # location = AZKABAN_SCRIPT_LOCATION + dd + '-sqoop-' + sqoop.name + '.log'

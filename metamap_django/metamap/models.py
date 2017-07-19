@@ -8,10 +8,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-import datetime
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.template import Context
 from django.template import Template
 from django.utils import timezone

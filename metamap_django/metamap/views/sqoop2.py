@@ -72,7 +72,10 @@ def edit(request, pk):
 def exec_job(request, sqoopid):
     sqoop = SqoopMysql2Hive.objects.get(id=sqoopid)
     from metamap import tasks
-    tasks.exec_execobj.delay(sqoop.exec_obj_id, name=sqoop.name)
+    if sqoop.exec_obj:
+        tasks.exec_execobj.delay(sqoop.exec_obj_id, name=sqoop.name + dateutils.now_datetime())
+    else:
+        raise Exception('exec obj for m2h task %s is null' % sqoop.name)
     return redirect('/metamap/executions/status/0/')
     # dd = dateutils.now_datetime()
     # location = AZKABAN_SCRIPT_LOCATION + dd + '-sqoop-' + sqoop.name + '.log'
@@ -146,7 +149,8 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
             if m2h.cgroup.name == group_name:
                 deps.add(m2h.name)
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
-        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), '%d m2h generated for %s ' % (len(leafs), group_name))
+        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
+                                   '%d m2h generated for %s ' % (len(leafs), group_name))
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d m2h generated ' % len(deps))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)
