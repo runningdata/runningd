@@ -17,5 +17,6 @@ urlpatterns = [
     url(r'^clean_null/$', to2cleaner.clean_null, name='clean_null'),
     url(r'^clean_exec_id/$', to2cleaner.clean_exec_obj_id, name='clean_exec_id'),
     url(r'^clean_group/$', to2cleaner.clean_group, name='clean_group'),
+    url(r'^clean_exports/$', to2cleaner.clean_exports, name='clean_exports'),
 
 ]

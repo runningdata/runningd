@@ -11,6 +11,7 @@ from rest_framework.settings import api_settings
 from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser, Meta, SqoopHive2Mysql, SqoopMysql2Hive, \
     SourceApp, JarApp, ExecObj, ExecutionsV2
 from will_common.serializers import WillDateTimeField
+from will_common.templatetags import etlutils
 
 
 class ETLSerializer(serializers.HyperlinkedModelSerializer):
@@ -74,14 +75,18 @@ class ExportsSerializer(serializers.HyperlinkedModelSerializer):
 class ExecutionsV2Serializer(serializers.HyperlinkedModelSerializer):
     start_time = WillDateTimeField(format='%Y-%m-%d %H:%M:%S')
     end_time = WillDateTimeField(format='%Y-%m-%d %H:%M:%S')
-    file_loc = serializers.SerializerMethodField('get_file_loc')
+    file_loc = serializers.SerializerMethodField()
+    file_status = serializers.SerializerMethodField()
 
     class Meta:
         model = ExecutionsV2
-        fields = ('file_loc', 'start_time', 'end_time')
+        fields = ('file_loc', 'start_time', 'end_time', 'file_status')
 
     def get_file_loc(self, obj):
         return obj.log_location
+
+    def get_file_status(self, obj):
+        return  etlutils.readable_status(obj.status)
 
 
 class MetaSerializer(serializers.HyperlinkedModelSerializer):

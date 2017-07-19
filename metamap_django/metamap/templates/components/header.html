@@ -8,15 +8,6 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
-                                            aria-expanded="false"
-                                            class="dropdown-toggle">新版执行记录<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="/metamap/executions/status/0/">执行中</a></li>
-                            <li><a href="/metamap/executions/status/1/">已完成</a></li>
-                            <li><a href="/metamap/executions/status/2/">已失败</a></li>
-                        </ul>
-                </li>
                 {% if user.username == 'admin' %}
                     <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
                                             aria-expanded="false"
@@ -81,11 +72,22 @@
                                 class="glyphicon glyphicon-ban-circle"></span>最近失败</a></li>
                     </ul>
                 </li>
+
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
                                         class="dropdown-toggle">Meta<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/meta/list">查询meta</a></li>
                         <li><a href="/meta/add">新增meta</a></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
+                                        aria-expanded="false"
+                                        class="dropdown-toggle">新版执行记录<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/metamap/executions/status/0/">执行中</a></li>
+                        <li><a href="/metamap/executions/status/1/">已完成</a></li>
+                        <li><a href="/metamap/executions/status/2/">已失败</a></li>
                     </ul>
                 </li>
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"

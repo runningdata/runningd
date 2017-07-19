@@ -21,8 +21,8 @@ from rest_framework.response import Response
 
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryPeriodictasks
 from will_common.helpers import cronhelper
-from metamap.models import AnaETL, Exports, ExecObj
-from metamap.rest.serializers import ExportsSerializer
+from metamap.models import AnaETL, Exports, ExecObj, ExecutionsV2
+from metamap.rest.serializers import ExportsSerializer, ExecutionsV2Serializer
 from will_common.models import WillDependencyTask, PeriodicTask
 from will_common.utils import PushUtils
 from will_common.utils import constants
@@ -125,7 +125,8 @@ class ExportsViewSet(viewsets.ModelViewSet):
     now = timezone.now()
     days = now - datetime.timedelta(days=7)
     queryset = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
-    serializer_class = ExportsSerializer
+    # serializer_class = ExportsSerializer
+    serializer_class = ExecutionsV2Serializer
 
     @list_route(methods=['GET'])
     def get_file(self, request):
@@ -169,22 +170,30 @@ class ExportsViewSet(viewsets.ModelViewSet):
             if group == 'jlc':
                 result = httputils.jlc_auth(user, sid)
         if result == 'success':
-            objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
+            # objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
+            objs = ExecutionsV2.objects.filter(start_time__gt=days, job__type=2).order_by('-start_time')
             result = list()
             for export in objs:
-                # if a deptask has been deleted, the export record should not be deleted immediately
-                if WillDependencyTask.objects.filter(pk=export.task_id).count() == 1:
-                    if export.task.type == 2:
-                        ana_id = export.task.rel_id
-                    elif export.task.type == 100:
-                        eo = ExecObj.objects.get(pk=export.task.rel_id)
-                        ana_id = eo.rel_id
-                    ana_etl = AnaETL.objects.get(pk=ana_id)
+                if ExecObj.objects.filter(pk=export.job_id).count() == 1:
+                    ana_etl = AnaETL.objects.get(pk=export.job.rel_id)
                     if not (user == 'admin' and group == 'jlc'):
                         if ana_etl.is_auth(user, group):
                             result.append(export)
                     else:
                         result.append(export)
+                # if a deptask has been deleted, the export record should not be deleted immediately
+                # if WillDependencyTask.objects.filter(pk=export.task_id).count() == 1:
+                #     if export.task.type == 2:
+                #         ana_id = export.task.rel_id
+                #     elif export.task.type == 100:
+                #         eo = ExecObj.objects.get(pk=export.task.rel_id)
+                #         ana_id = eo.rel_id
+                #     ana_etl = AnaETL.objects.get(pk=ana_id)
+                #     if not (user == 'admin' and group == 'jlc'):
+                #         if ana_etl.is_auth(user, group):
+                #             result.append(export)
+                #     else:
+                #         result.append(export)
             serializer = self.get_serializer(result, many=True)
             return Response(serializer.data)
         else:

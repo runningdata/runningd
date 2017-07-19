@@ -115,7 +115,7 @@ status_dic[2] = u'失败'
 
 @register.simple_tag
 def readable_status(status):
-    return status_dic[status]
+    return status_dic.get(status, u'未知')
 
 
 schedule_dic = dict()

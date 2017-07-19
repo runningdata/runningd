@@ -3,16 +3,16 @@ import logging
 
 import re
 import traceback
+import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponse
+from django.utils import timezone
 
 from metamap.models import TblBlood, ETL, WillDependencyTask, ExecObj, ExecBlood, \
-    SqoopMysql2Hive, AnaETL, SqoopHive2Mysql, JarApp, NULLETL
+    SqoopMysql2Hive, AnaETL, SqoopHive2Mysql, JarApp, NULLETL, Exports, ExecutionsV2
 from will_common.models import PeriodicTask
-
-from will_common.utils import hivecli
 
 logger = logging.getLogger('django')
 
@@ -372,3 +372,27 @@ def clean_group(request):
         print '\n'.join(nullobj)
     return HttpResponse('<br/>'.join(result))
 
+
+def clean_exports(request):
+    now = timezone.now()
+    days = now - datetime.timedelta(days=7)
+    objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
+    result = list()
+    err_list = list()
+    with transaction.atomic():
+        for obj in objs:
+            try:
+                task = WillDependencyTask.objects.get(pk=obj.task_id)
+                if task.type == 2:
+                    exec_obj = ExecObj.objects.get(type=2, rel_id=task.rel_id)
+                elif task.type == 100:
+                    exec_obj = ExecObj.objects.get(id=task.rel_id)
+                ExecutionsV2.objects.get_or_create(log_location=obj.file_loc, start_time=obj.start_time,
+                                                   end_time=obj.end_time, job=exec_obj, status=1)
+                result.append(obj.file_loc)
+            except Exception, e:
+                traceback.print_exc(e)
+                err_list.append(obj.file_loc)
+        for er in err_list:
+            print er
+    return HttpResponse('<br/>'.join(result))
