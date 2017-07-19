@@ -651,7 +651,7 @@ class ExecutionsV2(models.Model):
     cmd_shot = models.TextField()
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)
-    status = models.IntegerField(default=-1)
+    status = models.IntegerField(default=0)
 
 class SqoopHive2MysqlExecutions(models.Model):
     '''
