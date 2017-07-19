@@ -199,6 +199,7 @@ def get_exec_log(request, execid):
         return HttpResponse('')
     return HttpResponse(content)
 
+
 class StatusListView(generic.ListView):
     template_name = 'components/common_executions_list.html'
     context_object_name = 'executions'
@@ -206,7 +207,12 @@ class StatusListView(generic.ListView):
 
     def get(self, request, status):
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        self.object_list = ExecutionsV2.objects.filter(status=status).exclude(job__type=2).order_by('-start_time')
+        if request.user.username != 'admin':
+            self.object_list = ExecutionsV2.objects.filter(status=status).exclude(job__type=2).order_by('-start_time')
+        else:
+            self.object_list = ExecutionsV2.objects.filter(status=status,
+                                                           job__cgroup=request.user.userprofile.org_group) \
+                .exclude(job__type=2).order_by('-start_time')
         allow_empty = self.get_allow_empty()
 
         if not allow_empty:
@@ -220,6 +226,7 @@ class StatusListView(generic.ListView):
         context = self.get_context_data()
         context['url_base'] = self.url_base
         return self.render_to_response(context)
+
 
 def rerun(request):
     if request.method == 'POST':
