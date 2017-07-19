@@ -165,7 +165,7 @@ class AnaETL(ETLObjRelated):
         result = TMP_EXPORT_FILE_LOCATION + part
         result_dir = result + '_dir'
         pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
-        sql = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr + self.query
+        sql = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr + self.query + '\"'
         str_list.append(sql)
         command = 'cat %s/* | iconv -f utf-8 -c -t gb18030 >> %s' % (result_dir, result)
         str_list.append(command)
@@ -642,6 +642,7 @@ class Executions(models.Model):
     def __str__(self):
         return self.logLocation
 
+
 class ExecutionsV2(models.Model):
     log_location = models.CharField(max_length=120)
     job = models.ForeignKey(ExecObj, on_delete=models.CASCADE, null=False)
@@ -649,6 +650,7 @@ class ExecutionsV2(models.Model):
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)
     status = models.IntegerField(default=0)
+
 
 class SqoopHive2MysqlExecutions(models.Model):
     '''
