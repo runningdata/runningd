@@ -29,7 +29,7 @@ def find_parent_mermaid(blood, final_bloods, init=0, depth=0):
     :return:
     '''
     init.depth += 1
-    if init.depth > 100:
+    if init.depth > 10000:
         return
     bloods = TblBlood.objects.filter(tblName=blood.parentTbl)
     if init.depth != depth or depth < 0:
@@ -47,7 +47,7 @@ def find_child_mermaid(blood, final_bloods, init=0, depth=0):
     :return:
     '''
     init.depth += 1
-    if init.depth > 100:
+    if init.depth > 10000:
         return
     bloods = TblBlood.objects.filter(parentTbl=blood.tblName)
     if bloods.count() > 0:
@@ -95,7 +95,7 @@ def check_cycle(etlid):
     bloods = TblBlood.objects.filter(relatedEtlId=int(etlid), valid=1)
     dep_score = {}
     for blood in bloods:
-        blood.current = blood.id
+        print blood
         check_parent_mermaid(blood, dep_score)
         check_child_mermaid(blood, dep_score)
 

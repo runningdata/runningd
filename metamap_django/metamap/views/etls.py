@@ -123,7 +123,7 @@ def blood_dag(request, etlid):
             bloodhelper.find_child_mermaid(blood, final_bloods, init=c_init, depth=c_depth)
 
     health = 'healthy'
-    if p_init.depth > 99 or c_init.depth > 99:
+    if p_init.depth > 9999 or c_init.depth > 9999:
         health = 'unhealthy'
     return render(request, 'etl/blood.html', {'bloods': final_bloods, 'health': health})
 
