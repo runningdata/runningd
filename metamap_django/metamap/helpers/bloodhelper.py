@@ -21,7 +21,7 @@ def clean_blood(blood, current=0):
     return blood
 
 
-def find_parent_mermaid(blood, final_bloods, init=0, depth=0):
+def find_parent_mermaid(blood, final_bloods, dep_cnt=0, init=None, depth=0):
     '''
     # 循环遍历当前节点的父节点
     :param blood:
@@ -29,17 +29,18 @@ def find_parent_mermaid(blood, final_bloods, init=0, depth=0):
     :return:
     '''
     init.depth += 1
+    dep_cnt += 1
     if init.depth > 10000:
         return
     bloods = TblBlood.objects.filter(tblName=blood.parentTbl)
-    if init.depth != depth or depth < 0:
+    if dep_cnt != depth or depth < 0:
         if bloods.count() > 0:
             for bld in bloods:
                 final_bloods.add(bld)
-                find_parent_mermaid(bld, final_bloods, init=init, depth=depth)
+                find_parent_mermaid(bld, final_bloods, dep_cnt=dep_cnt, init=init, depth=depth)
 
 
-def find_child_mermaid(blood, final_bloods, init=0, depth=0):
+def find_child_mermaid(blood, final_bloods, dep_cnt=0, init=None, depth=0):
     '''
     循环遍历当前节点的子节点
     :param blood:
@@ -47,6 +48,7 @@ def find_child_mermaid(blood, final_bloods, init=0, depth=0):
     :return:
     '''
     init.depth += 1
+    dep_cnt += 1
     if init.depth > 10000:
         return
     bloods = TblBlood.objects.filter(parentTbl=blood.tblName)
@@ -55,8 +57,8 @@ def find_child_mermaid(blood, final_bloods, init=0, depth=0):
             # if bld in final_bloods:
             #     raise Exception('Already has %s ' % bld)
             final_bloods.add(bld)
-            if init.depth != depth or depth < 0:
-                find_child_mermaid(bld, final_bloods, init=init, depth=depth)
+            if dep_cnt != depth or depth < 0:
+                find_child_mermaid(bld, final_bloods, dep_cnt=dep_cnt, init=init, depth=depth)
 
 
 def check_parent_mermaid(blood, dep_score):
