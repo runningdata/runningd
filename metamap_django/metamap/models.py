@@ -177,7 +177,7 @@ class AnaETL(ETLObjRelated):
         sql = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr \
               + self.query.replace('"', '\\"') + '\"'
         # str_list.append('hive -f %s' % fillename)
-        str_list
+        str_list.append(sql)
         command = 'cat %s/* | iconv -f utf-8 -c -t gb18030 >> %s' % (result_dir, result)
         str_list.append(command)
         return str_list
