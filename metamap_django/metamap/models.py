@@ -170,12 +170,14 @@ class AnaETL(ETLObjRelated):
         result_dir = result + '_dir'
         pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
         pre_insertr = self.variables + sche_vars + pre_insertr
-        fillename = result + '.hql'
-        with open(fillename, 'w') as fil:
-            fil.write('set mapreduce.job.queuename=%s;' % settings.CLUTER_QUEUE)
-            fil.write(pre_insertr.encode('utf-8'))
-        # sql = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr + self.query + '\"'
-        str_list.append('hive -f %s' % fillename)
+        # fillename = result + '.hql'
+        # with open(fillename, 'w') as fil:
+        #     fil.write('set mapreduce.job.queuename=%s;' % settings.CLUTER_QUEUE)
+        #     fil.write(pre_insertr.encode('utf-8'))
+        sql = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr \
+              + self.query.replace('"', '\\"') + '\"'
+        # str_list.append('hive -f %s' % fillename)
+        str_list
         command = 'cat %s/* | iconv -f utf-8 -c -t gb18030 >> %s' % (result_dir, result)
         str_list.append(command)
         return str_list
