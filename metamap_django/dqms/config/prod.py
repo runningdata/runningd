@@ -40,9 +40,12 @@ HIVE_SERVER = {
     'password': '',
 }
 
-BROKER_URL = 'redis://10.2.19.97:6379'
-CELERY_REDIS_HOST = '10.2.19.97'
-CELERY_REDIS_PORT = '6379'
+BROKER_URL = 'redis://10.2.19.113:6480'
+CELERY_REDIS_HOST = '10.2.19.113'
+CELERY_REDIS_PORT = '6480'
+# BROKER_URL = 'redis://10.2.19.97:6379'
+# CELERY_REDIS_HOST = '10.2.19.97'
+# CELERY_REDIS_PORT = '6379'
 
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
