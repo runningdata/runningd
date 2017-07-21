@@ -19,7 +19,7 @@ from django.views import generic
 
 from metamap.helpers import bloodhelper, etlhelper
 from metamap.models import TblBlood, ETL, Executions, WillDependencyTask, ExecObj, ExecBlood, \
-    SqoopMysql2Hive
+    SqoopMysql2Hive, ExecutionsV2
 
 from will_common.utils import PushUtils
 from will_common.utils import encryptutils
@@ -374,12 +374,13 @@ class ExecLogView(generic.ListView):
     '''
     template_name = 'etl/executions.html'
     context_object_name = 'executions'
-    model = Executions
+    # model = Executions
+    model = ExecutionsV2
     paginate_by = DEFAULT_PAGE_SIEZE
 
     def get_queryset(self):
         jobid_ = self.kwargs['jobid']
-        return Executions.objects.filter(job_id=jobid_).order_by('-start_time')
+        return ExecutionsV2.objects.filter(job_id=jobid_).order_by('-start_time')
 
 
 def preview_job_dag(request):
