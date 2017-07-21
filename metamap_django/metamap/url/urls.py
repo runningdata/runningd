@@ -86,7 +86,7 @@ urlpatterns = [
         common.StatusListView.as_view(url_base='h2m', model=SqoopHive2MysqlExecutions), name='sqoop_status'),
 
     url(r'^executions/status/(?P<status>[0-9]+)/$',
-        ops.StatusListView.as_view(url_base='executions', model=ExecutionsV2), name='executions_status'),
+        common.StatusListView.as_view(url_base='executions', model=ExecutionsV2), name='executions_status'),
     url(r'^executions/execlog/(?P<execid>[0-9]+)/$', ops.exec_log, name='executions_execlog'),
     url(r'^executions/getexeclog/(?P<execid>[0-9]+)/$', ops.get_exec_log, name='executions_getexeclog'),
 
