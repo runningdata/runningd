@@ -11,6 +11,7 @@ def get_etl_sql(etl):
     '''
     str = list()
     str.append('{% load etlutils %}')
+    str.append(etl.setting)
     str.append(etl.variables)
     str.append(etl.query)
 
