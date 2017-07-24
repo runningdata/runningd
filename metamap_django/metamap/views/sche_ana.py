@@ -148,9 +148,9 @@ class ExportsViewSet(viewsets.ModelViewSet):
                 path = os.path.join(constants.TMP_EXPORT_FILE_LOCATION, f)
                 is_startswith = f.startswith(filename.encode('utf8'))
                 if not is_startswith:
-                    is_startswith = f.startswith(filename[0:-2])
+                    is_startswith = f.startswith(filename[0:-2].encode('utf8'))
                 if not is_startswith:
-                    is_startswith = f.startswith(filename[0:-4])
+                    is_startswith = f.startswith(filename[0:-4].encode('utf8'))
                 if not os.path.isdir(path) and is_startswith and not f.endswith('.error'):
                     full_file = path
                     break
