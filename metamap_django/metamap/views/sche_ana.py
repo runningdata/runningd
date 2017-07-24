@@ -134,12 +134,13 @@ class ExportsViewSet(viewsets.ModelViewSet):
         filename = request.query_params['filename']
         group = request.query_params['group']
         user = request.query_params['user']
-        if group == 'xiaov' or group == 'jlc-match':
-            result = 'success'
-        else:
-            sid = request.query_params['sid']
-            if group == 'jlc':
-                result = httputils.jlc_auth(user, sid)
+        result = 'success'
+        # if group == 'xiaov' or group == 'jlc-match':
+        #     result = 'success'
+        # else:
+        #     sid = request.query_params['sid']
+        #     if group == 'jlc':
+        #         result = httputils.jlc_auth(user, sid)
         final_filename = filename + '.csv'
         full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
         if not os.path.exists(full_file):
@@ -147,9 +148,9 @@ class ExportsViewSet(viewsets.ModelViewSet):
                 path = os.path.join(constants.TMP_EXPORT_FILE_LOCATION, f)
                 is_startswith = f.startswith(filename.encode('utf8'))
                 if not is_startswith:
-                    is_startswith = f.startswith(filename[0:-2].encode('utf8'))
+                    is_startswith = f.startswith(filename[0:-2])
                 if not is_startswith:
-                    is_startswith = f.startswith(filename[0:-4].encode('utf8'))
+                    is_startswith = f.startswith(filename[0:-4])
                 if not os.path.isdir(path) and is_startswith and not f.endswith('.error'):
                     full_file = path
                     break
