@@ -19,6 +19,7 @@ def getTbls_v2(etl):
         return result
     sql = djtemplates.get_etl_sql(etl)
     try:
+        setting_config = ''
         if 'insert' in sql.lower():
             setting_config = sql[0:sql.lower().index('insert')]
         sql = sql[sql.lower().index('select'):]
@@ -28,7 +29,7 @@ def getTbls_v2(etl):
         # f_sql = sql.replace('\\', '\\\\`').replace('`', '\`').encode('utf8')
         fillename = constants.TMP_SCRIPT_LOCATION + 'explan_' + etl.name
         with open(fillename, 'w') as fil:
-            if setting_config:
+            if len(setting_config) > 0:
                 fil.write(setting_config)
             fil.write('explain dependency ')
             fil.write(sql.encode('utf-8'))
