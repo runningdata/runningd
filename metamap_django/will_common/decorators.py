@@ -1,10 +1,6 @@
 import logging
-import traceback
 from functools import wraps
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404
-from django.shortcuts import render
 
 from metamap.models import SqoopHive2Mysql
 

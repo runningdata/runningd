@@ -50,6 +50,7 @@ CELERY_REDIS_PORT = '6480'
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYD_TASK_TIME_LIMIT = 3600
+# CELERYD_TASK_SOFT_TIME_LIMIT = 3600
 
 CELERY_ROUTES = {
     'dqms.tasks.exec_dqms': {
