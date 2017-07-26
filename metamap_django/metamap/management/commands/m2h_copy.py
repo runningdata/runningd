@@ -6,28 +6,28 @@ from metamap.models import SqoopMysql2Hive
 class Command(BaseCommand):
     help = 'Closes the specified poll for voting'
 
-    # def add_arguments(self, parser):
-    #     parser.add_argument(
-    #         '--old_name',
-    #         action='store',
-    #         dest='old_name',
-    #         default='noname',
-    #         help='Delete poll instead of closing it',
-    #     )
-    #     parser.add_argument(
-    #         '--new_name',
-    #         action='store',
-    #         dest='new_name',
-    #         default='noname',
-    #         help='Delete poll instead of closing it',
-    #     )
-    #     parser.add_argument(
-    #         '--group',
-    #         action='store',
-    #         dest='group',
-    #         default='noname',
-    #         help='Delete poll instead of closing it',
-    #     )
+    def add_arguments(self, parser):
+        # parser.add_argument(
+        #     '--old_name',
+        #     action='store',
+        #     dest='old_name',
+        #     default='noname',
+        #     help='Delete poll instead of closing it',
+        # )
+        # parser.add_argument(
+        #     '--new_name',
+        #     action='store',
+        #     dest='new_name',
+        #     default='noname',
+        #     help='Delete poll instead of closing it',
+        # )
+        parser.add_argument(
+            '--group',
+            action='store',
+            dest='group',
+            default='noname',
+            help='Delete poll instead of closing it',
+        )
         # parser.add_argument("--keyvalue", action='append',
         #                type=lambda kv: kv.split("="), dest='keyvalues')
 
