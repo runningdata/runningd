@@ -62,7 +62,7 @@ class ScheDepListView(generic.ListView):
                 logger.error(' sche error for tt id : %id,   %s ' % (tt.id, traceback.format_exc()))
                 objjs = objjs.exclude(id=tt.id)
                 continue
-            if eo.type != 2:
+            if eo.type != 2 or eo.cgroup_id != self.request.user.userprofile.org_group_id:
                 objjs = objjs.exclude(id=tt.id)
         print('after count is %d ' % objjs.count())
         return objjs

@@ -12,6 +12,8 @@ import subprocess
 import traceback
 
 import shutil
+
+from billiard import SoftTimeLimitExceeded
 from celery import shared_task, task
 from django.conf import settings
 from django.utils import timezone
@@ -28,6 +30,7 @@ from will_common.utils.constants import TMP_EXPORT_FILE_LOCATION, AZKABAN_SCRIPT
 
 logger = get_task_logger(__name__)
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/metamap/'
+
 
 # @shared_task
 # def exec_h2m(command, location, name=''):
@@ -300,31 +303,36 @@ def tail_hdfs(logLocation, command, name=''):
 
 @shared_task
 def exec_execobj(exec_id, schedule=-1, name=''):
-    obj = ExecObj.objects.get(pk=exec_id)
-
-    # TODO New execution version
-    tt = dateutils.now_datetime()
-    log_location = AZKABAN_SCRIPT_LOCATION + obj.name.replace('@', '__') + '-' + tt + '.error'
-    script_location = AZKABAN_SCRIPT_LOCATION + obj.name.replace('@', '__') + '-' + tt + '.rd'
-    execution = ExecutionsV2.objects.create(job=obj, log_location=log_location,
-                                            cmd_shot=obj.get_cmd(schedule=schedule, location=script_location))
-    execution.end_time = timezone.now()
-    command = execution.cmd_shot
     try:
-        p = subprocess.Popen([''.join(command)], stdout=open(log_location, 'a'), stderr=subprocess.STDOUT, shell=True,
-                             universal_newlines=True)
-        p.wait()
-        returncode = p.returncode
-        logger.info('%s return code is %d' % (command, returncode))
-        if returncode == 0:
-            execution.status = enums.EXECUTION_STATUS.DONE
-        else:
+        obj = ExecObj.objects.get(pk=exec_id)
+        tt = dateutils.now_datetime()
+        log_location = AZKABAN_SCRIPT_LOCATION + obj.name.replace('@', '__') + '-' + tt + '.error'
+        script_location = AZKABAN_SCRIPT_LOCATION + obj.name.replace('@', '__') + '-' + tt + '.rd'
+        execution = ExecutionsV2.objects.create(job=obj, log_location=log_location,
+                                                cmd_shot=obj.get_cmd(schedule=schedule, location=script_location))
+        execution.end_time = timezone.now()
+        command = execution.cmd_shot
+        try:
+            p = subprocess.Popen([''.join(command)], stdout=open(log_location, 'a'), stderr=subprocess.STDOUT,
+                                 shell=True,
+                                 universal_newlines=True)
+            p.wait()
+            returncode = p.returncode
+            logger.info('%s return code is %d' % (command, returncode))
+            if returncode == 0:
+                execution.status = enums.EXECUTION_STATUS.DONE
+            else:
+                execution.status = enums.EXECUTION_STATUS.FAILED
+        except Exception, e:
+            logger.error(e)
             execution.status = enums.EXECUTION_STATUS.FAILED
-    except Exception, e:
+        execution.end_time = timezone.now()
+        execution.save()
+    except SoftTimeLimitExceeded, e:
         logger.error(e)
         execution.status = enums.EXECUTION_STATUS.FAILED
-    execution.end_time = timezone.now()
-    execution.save()
+        execution.end_time = timezone.now()
+        execution.save()
 
 
 @shared_task
