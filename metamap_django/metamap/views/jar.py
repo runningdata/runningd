@@ -195,6 +195,7 @@ def edit(request, pk):
                         jar.jar_file.delete()
                     else:
                         inst.jar_file = jar.jar_file
+                    inst.exec_obj = jar.exec_obj
                     inst.save()
             else:
                 print form._errors
