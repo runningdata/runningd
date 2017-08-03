@@ -176,8 +176,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
         else:
             sid = request.query_params['sid']
             if group == 'jlc':
-                result = 'success'
-                # result = httputils.jlc_auth(user, sid)
+                result = httputils.jlc_auth(user, sid)
         if result == 'success':
             # objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
             objs = ExecutionsV2.objects.filter(start_time__gt=days, job__type=2).order_by('-start_time')
