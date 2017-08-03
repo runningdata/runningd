@@ -135,13 +135,16 @@ class ExportsViewSet(viewsets.ModelViewSet):
         group = request.query_params['group']
         user = request.query_params['user']
         result = 'success'
-        if group == 'xiaov' or group == 'jlc-match':
-            result = 'success'
+        # if group == 'xiaov' or group == 'jlc-match':
+        #     result = 'success'
+        # else:
+        #     sid = request.query_params['sid']
+        #     if group == 'jlc':
+        #         result = httputils.jlc_auth(user, sid)
+        if '.csv' in filename:
+            final_filename = filename
         else:
-            sid = request.query_params['sid']
-            if group == 'jlc':
-                result = httputils.jlc_auth(user, sid)
-        final_filename = filename + '.csv'
+            final_filename = filename + '.csv'
         full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
         if not os.path.exists(full_file):
             for f in os.listdir(constants.TMP_EXPORT_FILE_LOCATION):
