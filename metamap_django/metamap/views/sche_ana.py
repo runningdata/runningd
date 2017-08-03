@@ -135,12 +135,12 @@ class ExportsViewSet(viewsets.ModelViewSet):
         group = request.query_params['group']
         user = request.query_params['user']
         result = 'success'
-        # if group == 'xiaov' or group == 'jlc-match':
-        #     result = 'success'
-        # else:
-        #     sid = request.query_params['sid']
-        #     if group == 'jlc':
-        #         result = httputils.jlc_auth(user, sid)
+        if group == 'xiaov' or group == 'jlc-match':
+            result = 'success'
+        else:
+            sid = request.query_params['sid']
+            if group == 'jlc':
+                result = httputils.jlc_auth(user, sid)
         final_filename = filename + '.csv'
         full_file = constants.TMP_EXPORT_FILE_LOCATION + filename
         if not os.path.exists(full_file):
@@ -155,6 +155,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
                     full_file = path
                     break
         if result == 'success':
+            print('going to download file %s ' % full_file)
             response = FileResponse(open(full_file, 'rb'))
             response['Content-Disposition'] = 'attachment; filename=%s' % final_filename.encode('utf-8')
             return response
