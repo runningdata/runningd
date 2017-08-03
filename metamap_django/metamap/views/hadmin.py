@@ -42,7 +42,8 @@ def add(request):
                     if 'xstorm' in request.POST:
                         AuthUserUserPermissions.objects.get_or_create(permission=permission, user=auth_user)
                     else:
-                        AuthUserUserPermissions.objects.get(permission=permission, user=auth_user).delete()
+                        if AuthUserUserPermissions.objects.filter(permission=permission, user=auth_user).exists():
+                            AuthUserUserPermissions.objects.get(permission=permission, user=auth_user).delete()
                 else:
                     if User.objects.filter(username=username, email=email).exists():
                         user = User.objects.get(username=username, email=email)
