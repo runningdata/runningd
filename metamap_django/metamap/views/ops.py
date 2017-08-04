@@ -233,22 +233,13 @@ def rerun(request):
         str_list = list()
         file_date = request.POST['file_date']
         to_delete = request.POST['is_del']
-        for ex in Exports.objects.filter(file_loc__contains=file_date):
-            tt = ex.task
-            if tt.type == 100:
-                eo = ExecObj.objects.get(pk=tt.rel_id)
+        for ex in ExecutionsV2.objects.filter(log_location__contains=file_date):
+            eo = ex.job
+            if eo.type == 2:
                 if eo.cgroup == request.user.userprofile.org_group:
                     # TODO if this task is already in queue, then go pass
-                    str_list.append('task %s has been rescheduled ' % tt.name)
-                    tasks.exec_etl_cli2.delay(tt.id, name=tt.name)
-                    time.sleep(3)
-                    if int(to_delete) == 1:
-                        ex.delete()
-            elif tt.type == 2:
-                eo = AnaETL.objects.get(pk=tt.rel_id)
-                if eo.cgroup.name == request.user.userprofile.org_group:
-                    str_list.append('task %s has been rescheduled ' % tt.name)
-                    tasks.exec_etl_cli.delay(tt.id, name=tt.name)
+                    str_list.append('task %s has been rescheduled ' % eo.name)
+                    tasks.exec_etl_cli2.delay(eo.id, name=eo.name)
                     time.sleep(3)
                     if int(to_delete) == 1:
                         ex.delete()
