@@ -48,6 +48,10 @@ class ETLObjRelated(models.Model):
     def save(self, *args, **kwargs):
         if self.valid != 0:
             super(ETLObjRelated, self).save(*args, **kwargs)  # Call the "real" save() method.
+            # H2H与其他的ETL对象不同，其他的是在自身更新，应该以rel_id为主。而ETL以name为主，存在多版本
+            # TODO
+            # exe, created = ExecObj.objects.get_or_create(type=self.type, rel_id=self.id)
+            # exe.name = self.name
             exe, created = ExecObj.objects.get_or_create(type=self.type, name=self.name)
             exe.rel_id = self.id
             exe.creator = self.creator

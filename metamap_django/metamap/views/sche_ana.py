@@ -124,7 +124,6 @@ def add(request):
 class ExportsViewSet(viewsets.ModelViewSet):
     now = timezone.now()
     days = now - datetime.timedelta(days=7)
-    queryset = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
     # serializer_class = ExportsSerializer
     serializer_class = ExecutionsV2Serializer
 
@@ -157,6 +156,23 @@ class ExportsViewSet(viewsets.ModelViewSet):
                 if not os.path.isdir(path) and is_startswith and not f.endswith('.error'):
                     full_file = path
                     break
+        if not os.path.exists(full_file):
+            execution = ExecutionsV2.objects.get(log_location__contains=filename)
+            job = execution.job
+            ana = AnaETL.objects.get(id=job.rel_id)
+            full_file = full_file.replace(job.name, ana.name)
+            if not os.path.exists(full_file):
+                filename = filename.replace(job.name, ana.name)
+                for f in os.listdir(constants.TMP_EXPORT_FILE_LOCATION):
+                    path = os.path.join(constants.TMP_EXPORT_FILE_LOCATION, f)
+                    is_startswith = f.startswith(filename.encode('utf8'))
+                    if not is_startswith:
+                        is_startswith = f.startswith(filename[0:-2].encode('utf8'))
+                    if not is_startswith:
+                        is_startswith = f.startswith(filename[0:-4].encode('utf8'))
+                    if not os.path.isdir(path) and is_startswith and not f.endswith('.error'):
+                        full_file = path
+                        break
         if result == 'success':
             print('going to download file %s ' % full_file)
             response = FileResponse(open(full_file, 'rb'))

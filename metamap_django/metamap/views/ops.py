@@ -240,7 +240,7 @@ def rerun(request):
                     # TODO if this task is already in queue, then go pass
                     str_list.append('task %s has been rescheduled ' % eo.name)
                     tasks.exec_etl_cli2.delay(eo.id, name=eo.name)
-                    time.sleep(3)
+                    time.sleep(1)
                     if int(to_delete) == 1:
                         ex.delete()
 
