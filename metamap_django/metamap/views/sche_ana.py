@@ -124,6 +124,7 @@ def add(request):
 class ExportsViewSet(viewsets.ModelViewSet):
     now = timezone.now()
     days = now - datetime.timedelta(days=7)
+    queryset = ExecutionsV2.objects.all()
     # serializer_class = ExportsSerializer
     serializer_class = ExecutionsV2Serializer
 
