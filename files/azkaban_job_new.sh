@@ -82,22 +82,40 @@ function check_exec_status(){
 	status=RUNNING
 	until [ $status == '"SUCCEEDED"' ]
 	do
-    		curl -k --get --data "session.id=${session_id}&ajax=fetchexecflowupdate&execid=${execid}&lastUpdateTime=-1" http://${host}/executor > ${tmp_output}
-    		status=`cat ${tmp_output} | JSON.sh -b| grep status | grep -v node | awk '{print($2)}'`
-		if [ $status == '"KILLED"' ]; then
-			echo "${execid} has been killed."
-			curl -X GET http://${metamap_host}/metamap/ops/push_msg/?group=${group_name}\&status=${status}\&prjname=${project_name}
-			break
-		elif [ $status == '"FAILED"' ]; then
-                        echo "${execid} has been failed."
-			curl -X GET http://${metamap_host}/metamap/ops/push_msg/?group=${group_name}\&status=${status}\&prjname=${project_name}
+		echo execid is ${execid}
+                /server/xstorm/bin/python ${METAMAP_HOME}/files/azkaban_job_checker.py  --execid ${execid}  > ${tmp_output}
+                cat ${tmp_output}
+                status=`cat ${tmp_output} | grep r10r | awk '{print($2)}'`
+                if [ $status == 'KILLED' ]; then
+                        echo "${execid} has been killed."
+                        curl -X GET http://${metamap_host}/metamap/ops/push_msg/?group=${group_name}\&status=${status}\&prjname=${project_name}
                         break
-		elif [ $status == '"SUCCEEDED"' ]; then
+                elif [ $status == 'FAILED' ]; then
+                        echo "${execid} has been failed."
+                        curl -X GET http://${metamap_host}/metamap/ops/push_msg/?group=${group_name}\&status=${status}\&prjname=${project_name}
+                        break
+                elif [ $status == 'SUCCEEDED' ]; then
                         echo "${execid} has been SUCCEEDED."
                         break
-		fi
-		clock=`date +'%Y%m%d%H%M%S'`
-    		echo "Time: ${clock}  ${execid} not yet..."
+                fi
+                execid=`cat ${tmp_output} | grep i10d | awk '{print($2)}'`
+
+#    		curl -k --get --data "session.id=${session_id}&ajax=fetchexecflowupdate&execid=${execid}&lastUpdateTime=-1" http://${host}/executor > ${tmp_output}
+#    		status=`cat ${tmp_output} | JSON.sh -b| grep status | grep -v node | awk '{print($2)}'`
+#		if [ $status == '"KILLED"' ]; then
+#			echo "${execid} has been killed."
+#			curl -X GET http://${metamap_host}/metamap/ops/push_msg/?group=${group_name}\&status=${status}\&prjname=${project_name}
+#			break
+#		elif [ $status == '"FAILED"' ]; then
+#                        echo "${execid} has been failed."
+#			curl -X GET http://${metamap_host}/metamap/ops/push_msg/?group=${group_name}\&status=${status}\&prjname=${project_name}
+#                        break
+#		elif [ $status == '"SUCCEEDED"' ]; then
+#                        echo "${execid} has been SUCCEEDED."
+#                        break
+#		fi
+#		clock=`date +'%Y%m%d%H%M%S'`
+#    		echo "Time: ${clock}  ${execid} not yet..."
 		sleep 10m	
 	done
 }
