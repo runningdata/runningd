@@ -67,6 +67,8 @@ def get_flow_info(exec_id, job_status_dict):
 	do_kill()
 	time.sleep(60)
         resume_flow(result['project'], result['flow'])	
+    else:
+        print('i10d %s \n' % args.execid)
     print('r10r %s \n' % result['status'])
 
 

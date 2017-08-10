@@ -9,6 +9,7 @@ fi
 # 0 天 1 2 3
 num=$1
 prefix=$1
+METAMAP_HOME=/server/metamap
 # Based on urls, etc. etls, m2h, h2m
 job_type=$2
 group_name=$3
