@@ -22,7 +22,7 @@ from django.views import generic
 import metamap
 from metamap import tasks
 from metamap.models import Exports, ExecObj, AnaETL, Executions, ExecutionsV2
-from will_common.models import OrgGroup, UserProfile
+from will_common.models import OrgGroup, UserProfile, WillDependencyTask
 from will_common.utils import PushUtils
 from will_common.utils import constants
 from will_common.utils import dateutils
@@ -239,7 +239,8 @@ def rerun(request):
                 if eo.cgroup == request.user.userprofile.org_group:
                     # TODO if this task is already in queue, then go pass
                     str_list.append('task %s has been rescheduled ' % eo.name)
-                    tasks.exec_etl_cli2.delay(eo.id, name=eo.name)
+                    task = WillDependencyTask.objects.get(rel_id=eo.id, type=100)
+                    tasks.exec_etl_cli2.delay(task.id, name=eo.name)
                     time.sleep(1)
                     if int(to_delete) == 1:
                         ex.delete()
