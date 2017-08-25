@@ -299,6 +299,7 @@ def edit(request, pk):
         v1_task.variables = task.variables
         v1_task.rel_id = etl.rel_id
         v1_task.valid = task.valid
+        v1_task.schedule = task.schedule
         v1_task.save()
 
         if int(task.schedule) == 4:
