@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^files/', include('metamap.url.mlurls')),
     url(r'^meta/', include('metamap.url.meta')),
     url(r'^hadmin/', include('metamap.url.hadmin')),
+    url(r'^hooks/', include('metamap.url.hooks')),
     url(r'^metamap/', include('metamap.url.urls', namespace='metamap')),
     url(r'^admin/', admin.site.urls),
 
