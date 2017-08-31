@@ -413,14 +413,18 @@ def restart_job(request):
                     bloodhelper.find_child_mermaid(blood, final_bloods, init=c_init)
 
             for blood in final_bloods:
-                child_name = blood.tblName
-                c_etl = ETL.objects.get(name=child_name, valid=1)
-                if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=1).exists():
-                    dependencies.setdefault(child_name, set())
-                    parent_name = blood.parentTbl
-                    p_etl = ETL.objects.get(name=parent_name, valid=1)
-                    if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=1).exists():
-                        dependencies.get(child_name).add(parent_name)
+                try:
+                    child_name = blood.tblName
+                    c_etl = ETL.objects.get(name=child_name, valid=1)
+                    if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=1).exists():
+                        dependencies.setdefault(child_name, set())
+                        parent_name = blood.parentTbl
+                        p_etl = ETL.objects.get(name=parent_name, valid=1)
+                        if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=1).exists():
+                            dependencies.get(child_name).add(parent_name)
+                except ObjectDoesNotExist, e:
+                    print('not exist for %s ' % child_name)
+                    raise e
 
             folder = 'h2h-' + dateutils.now_datetime() + '-restart'
             os.mkdir(AZKABAN_BASE_LOCATION + folder)

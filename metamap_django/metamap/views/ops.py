@@ -228,6 +228,14 @@ class StatusListView(generic.ListView):
         return self.render_to_response(context)
 
 
+def alert_for_prome(request):
+    if request.method == 'POST':
+        print(request.POST)
+        return HttpResponse('Done')
+    else:
+        return HttpResponse('use POST please')
+
+
 def rerun(request):
     if request.method == 'POST':
         str_list = list()
