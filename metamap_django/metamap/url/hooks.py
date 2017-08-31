@@ -5,5 +5,5 @@ from metamap.views import ops
 app_name = 'hooks'
 
 urlpatterns = [
-    url(r'/alert/$', ops.alert_for_prome, name='alert')
+    url(r'^alert/$', ops.alert_for_prome, name='alert')
 ]
