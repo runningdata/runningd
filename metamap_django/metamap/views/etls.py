@@ -31,6 +31,8 @@ from will_common.views.common import GroupListView
 
 logger = logging.getLogger('django')
 
+edit_locks = set()
+
 
 @method_decorator(login_required, name='dispatch')
 class IndexView(GroupListView):
@@ -238,6 +240,10 @@ def edit(request, pk):
                 privious_etl = ETL.objects.get(pk=int(pk))
                 if privious_etl.valid != 1:
                     raise RDException(u'版本问题', u'编辑的etl并不是最新版本')
+                if privious_etl.name in edit_locks:
+                    raise RDException(u'编辑冲突', u'请等待上次提交流程结束')
+                else:
+                    edit_locks.add(privious_etl.name)
                 privious_etl.valid = 0
                 privious_etl.save()
                 previous_query = privious_etl.query
@@ -290,8 +296,7 @@ def edit(request, pk):
                 #         [str(leaf) for leaf in ss]))
                 # else:
                 #     logger.info('cycle check passed for %s' % etl.name)
-                if ETL.objects.filter(name=etl.name, valid=1).count() > 1:
-                    raise RDException(u'版本问题', u'编辑的etl并不是最新版本')
+                edit_locks.remove(etl.name)
                 return HttpResponseRedirect(reverse('metamap:index'))
         except RDException, e:
             print(traceback.format_exc())
