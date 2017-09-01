@@ -243,6 +243,7 @@ def edit(request, pk):
                 if privious_etl.name in edit_locks:
                     raise RDException(u'编辑冲突', u'请等待上次提交流程结束')
                 else:
+                    print('add lock for %s ' % privious_etl.name)
                     edit_locks.add(privious_etl.name)
                 privious_etl.valid = 0
                 privious_etl.save()
@@ -297,6 +298,10 @@ def edit(request, pk):
                 # else:
                 #     logger.info('cycle check passed for %s' % etl.name)
                 edit_locks.remove(etl.name)
+                print('lock removed for %s ' % etl.name)
+                if len(edit_locks) > 0:
+                    for lock in edit_locks:
+                        print('current lock: %s' % lock)
                 return HttpResponseRedirect(reverse('metamap:index'))
         except RDException, e:
             print(traceback.format_exc())
