@@ -297,11 +297,7 @@ def edit(request, pk):
                 #         [str(leaf) for leaf in ss]))
                 # else:
                 #     logger.info('cycle check passed for %s' % etl.name)
-                edit_locks.remove(etl.name)
-                print('lock removed for %s ' % etl.name)
-                if len(edit_locks) > 0:
-                    for lock in edit_locks:
-                        print('current lock: %s' % lock)
+
                 return HttpResponseRedirect(reverse('metamap:index'))
         except RDException, e:
             print(traceback.format_exc())
@@ -309,6 +305,12 @@ def edit(request, pk):
         except Exception, e:
             print(traceback.format_exc())
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': traceback.format_exc()})
+        finally:
+            edit_locks.remove(etl.name)
+            print('lock removed for %s ' % etl.name)
+            if len(edit_locks) > 0:
+                for lock in edit_locks:
+                    print('current lock: %s' % lock)
     else:
         etl = ETL.objects.get(pk=pk)
         return render(request, 'etl/edit.html', {'etl': etl})
