@@ -230,9 +230,9 @@ class StatusListView(generic.ListView):
 
 def alert_for_prome(request):
     if request.method == 'POST':
-        print(request.POST)
-        print(request.GET)
-        print(request.body)
+        # print(request.POST)
+        # print(request.GET)
+        # print(request.body)
         return HttpResponse('Done')
     else:
         return HttpResponse('use POST please')
