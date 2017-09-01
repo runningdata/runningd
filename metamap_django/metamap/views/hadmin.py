@@ -5,7 +5,9 @@ import traceback
 from django.conf import settings
 import json
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import transaction
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -78,7 +80,7 @@ def add(request):
                         user.save()
                 PushUtils.push_both(UserProfile.objects.filter(user_id=1), '%s auth changed by %s, to %s ' % (
                     username, request.user.username, json.dumps(request.POST)))
-                return render(request, 'hadmin/edit.html')
+                return HttpResponseRedirect(reverse('hadmin:hadmin_add'))
         except RDException, e:
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': e.err_stack})
         except Exception, e:
