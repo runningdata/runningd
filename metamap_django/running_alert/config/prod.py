@@ -79,7 +79,7 @@ EMAIL_USE_TLS = True
 # Application definition
 INSTALLED_APPS = [
     'will_common',
-    '/var',
+    'running_alert',
     'cas',
     'django.contrib.admin',
     'django.contrib.auth',
