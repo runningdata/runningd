@@ -10,7 +10,7 @@ print('gunicorn config is running....')
 
 bind = "0.0.0.0:9099"
 worker_class = "eventlet"
-workers = 4
+workers = 2
 # workers = multiprocessing.cpu_count() * 2 + 1
 pidfile = '/tmp/dqms_gunicorn.pid'
 # accesslog = '/tmp/gunicorn_access.log'
