@@ -1,0 +1,62 @@
+{% if is_paginated %}
+    <nav>
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li>
+                    <a href="?page=1" aria-label="Next">
+                        <span aria-hidden="true">首页</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="disabled">
+                    <span aria-hidden="true">首页</span>
+                </li>
+            {% endif %}
+
+            {% if page_obj.number > 4 %}
+                <li>
+                    <a href="?page={{ page_obj.number|add:-3 }}"><span>&laquo; <span
+                            class="sr-only">(current)</span></span></a>
+                </li>
+            {% endif %}
+
+            {% for num in  page_obj.paginator.page_range %}
+                {% if page_obj.number|add:3 > num and num|add:3 > page_obj.number %}
+                    {% ifequal num page_obj.number %}
+                        <li class="active">
+                            <span>{{ num }} <span class="sr-only">(current)</span></span>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="?page={{ num }}"><span>{{ num }} <span class="sr-only">(current)</span></span></a>
+                        </li>
+                    {% endifequal %}
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.number|add:3 < page_obj.paginator.num_pages %}
+                <li>
+                    <a href="?page={{ page_obj.number|add:3 }}"><span>&raquo; <span
+                            class="sr-only">(current)</span></span></a>
+                </li>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <li>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" aria-label="Next">
+                        <span aria-hidden="true">尾页</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="disabled">
+                    <a href="#" aria-label="Next">
+                        <span aria-hidden="true">尾页</span>
+                    </a>
+                </li>
+            {% endif %}
+            <li  class="disabled">
+                <span aria-hidden="true"> 共 {{ page_obj.paginator.count }} 条</span>
+            </li>
+        </ul>
+    </nav>
+{% endif %}

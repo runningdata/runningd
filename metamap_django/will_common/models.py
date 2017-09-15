@@ -16,6 +16,7 @@ class OrgGroup(models.Model):
     name = models.CharField(max_length=200, verbose_name=u"组织名称")
     owners = models.CharField(max_length=100, verbose_name=u"负责人", blank=True, default='')
     hdfs_path = models.CharField(max_length=100, verbose_name=u"HDFS临时路径", blank=True, default='')
+
     # need_auth = models.IntegerField(default=1, verbose_name=u"是否需要验证", choices=(
     #     (1, '是'),
     #     (0, '否'),
@@ -23,6 +24,23 @@ class OrgGroup(models.Model):
     # auth_uri = models.CharField(max_length=300, verbose_name=u"验证uri", blank=True, default='')
     def __str__(self):
         return self.name
+
+
+class CommmonTimes(models.Model):
+    ctime = models.DateTimeField(default=timezone.now, verbose_name=u'创建时间')
+    utime = models.DateTimeField(default=timezone.now, verbose_name=u'最近更新时间')
+
+    class Meta:
+        abstract = True
+
+
+class CommmonCreators(models.Model):
+    creator = models.ForeignKey('UserProfile', on_delete=models.DO_NOTHING, null=True, verbose_name=u'创建人')
+    cgroup = models.ForeignKey('OrgGroup', on_delete=models.DO_NOTHING, null=True, verbose_name=u'所属组织')
+
+    class Meta:
+        abstract = True
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -32,11 +50,13 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
+
 class CeleryTask():
     def __init__(self, queue, command, name):
         self.queue = queue
         self.command = command
         self.name = name
+
 
 class WillDependencyTask(models.Model):
     name = models.CharField(unique=True, max_length=200)

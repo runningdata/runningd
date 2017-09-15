@@ -1,0 +1,23 @@
+{% extends 'source/post_edit.html' %}
+
+{% block scripts %}
+    <script>
+        $(document).on("change", "select", function () {
+            $("option[value=" + this.value + "]", this)
+                    .attr("selected", true).siblings()
+                    .removeAttr("selected")
+        });
+        $(document).ready(function () {
+            $('#id_service_type').change(
+                    function () {
+                        val = $(this).children('option:selected').val();
+                        if (val == 'spark_streaming_app') {
+                            $('#id_host_and_port').text = '';
+                            $('#id_host_and_port').attr('readonly', 'readonly');
+                            $('#id_host_and_port').attr('placeholder', 'no target for automatic spark');
+                        }
+                    }
+            );
+        })
+    </script>
+{% endblock %}

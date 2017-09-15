@@ -1,0 +1,22 @@
+<script type="application/javascript">
+        $.ajax({
+                    type: "get",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    url: "/common/rest/groups/?format=json",
+                    success: function (result) {
+                        $.each(result, function (index, obj) {
+                            if (cgroupid == obj.id) {
+                                $("#cgroup_id").append("<option selected='selected' value='" + obj.id + "'>" + obj.name + "</option>");
+                            } else {
+                                $("#cgroup_id").append("<option value='" + obj.id + "'>" + obj.name + "</option>");
+                            }
+                        })
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(errorThrown);
+                    },
+                    async: false             //false表示同步
+                }
+        );
+    </script>

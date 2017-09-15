@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <form method="POST" class="post-form" enctype="multipart/form-data">{% csrf_token %}
+        <h1>{{ summary }}</h1>
+        {{ form.as_p }}
+        <div class="form-group text-center">
+
+            <button type="submit" class="btn btn-primary">提交</button>
+
+            <a id="cancel" class="btn btn-warning" onclick="javascript:history.go(-1);">取消</a>
+        </div>
+    </form>
+{% endblock %}

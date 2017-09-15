@@ -27,41 +27,35 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ENV_PRD = True
+
+START_PORT = 10000
+END_PORT = 60000
+PROMETHEUS_HOST = '10.2.19.112'
 
 SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
+ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83']
 
-# email settings
-EMAIL_HOST = 'smtp.exmail.qq.com'
-EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
-EMAIL_HOST_PASSWORD = 'YYxx24680'
-EMAIL_USE_TLS = True
+BROKER_URL = 'redis://10.2.19.113:6480'
+CELERY_REDIS_HOST = '10.2.19.113'
+CELERY_REDIS_PORT = '6480'
+# BROKER_URL = 'redis://10.2.19.97:6379'
+# CELERY_REDIS_HOST = '10.2.19.97'
+# CELERY_REDIS_PORT = '6379'
 
-# use root to execute....
-USE_ROOT = True
+# Celery Beat 设置
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+# CELERYD_TASK_TIME_LIMIT = 3600
+CELERYD_TASK_SOFT_TIME_LIMIT = 3600
+# CELERYD_MAX_TASKS_PER_CHILD = 100
 
-
-# push url
-PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
-PUSH_KEY = '&OKY%~!$^G*JRRF^'
-ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
-ADMIN_EMAIL = 'chenxin@yinker.com'
-PROC_USER = 'metamap'
-
-ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.1.5.190']
-CLUTER_QUEUE = 'xstorm'
-
-NN_HOSTS = ['namenode01.yinker.com', 'datanode17.yinker.com']
-DEFAULT_PASSWD = 'qwer1234'
-DB_HUE = 'hue'
-
-
-HIVE_SERVER = {
-    'host': 'servicenode07.yinker.com',
-    'port': 10000,
-    'user': 'hdfs',
-    'password': '',
+CELERY_ROUTES = {
+    'running_alert.tasks.exec_running_alert': {
+        'queue': 'running_alert',
+    },
+    'running_alert.tasks.run_case': {
+        'queue': 'running_alert',
+    },
 }
 
 # 设置cas服务器地址
@@ -70,46 +64,23 @@ CAS_SERVER_URL = "http://10.1.5.83:7000/sso/"
 CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
 
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'cas.backends.CASBackend',
-)
+# push url
+PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
+PUSH_KEY = '&OKY%~!$^G*JRRF^'
+ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
+ADMIN_EMAIL = 'chenxin@yinker.com'
 
-import djcelery
-
-djcelery.setup_loader()
-
-# Celery Beat 设置
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-CELERYD_TASK_SOFT_TIME_LIMIT = 3600
-# BROKER_URL = 'redis://datanode08.yinker.com:6379'
-BROKER_URL = 'redis://10.2.19.113:6480'
-
-CELERY_ROUTES = {
-    'metamap.tasks.exec_jar': {
-        'queue': 'running_jar',
-    },
-}
-
-CELERY_REDIS_HOST = '10.2.19.113'
-CELERY_REDIS_PORT = '6480'
-#CELERY_REDIS_HOST = 'datanode08.yinker.com'
-# CELERY_REDIS_PORT = '6379'
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'Asia/Shanghai'
-# CELERY_TIMEZONE = 'UTC'
-# CELERY_ENABLE_UTC = True
-# CELERY_IMPORTS = ("metamap.taske",)
+# email settings
+EMAIL_HOST = 'smtp.exmail.qq.com'
+EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
+EMAIL_HOST_PASSWORD = 'YYxx24680'
+EMAIL_USE_TLS = True
 
 # Application definition
-
 INSTALLED_APPS = [
     'will_common',
+    'running_alert',
     'cas',
-    'metamap',
-    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -128,11 +99,9 @@ REST_FRAMEWORK = {
     ]
 }
 
-PATH_AUTH_DICT = {
-    'auth.access_etl': '/metamap',
-    'auth.access_clean': '/clean',
-    'auth.access_hadmin': '/hadmin',
-}
+import djcelery
+
+djcelery.setup_loader()
 
 MIDDLEWARE_CLASSES = [
     'will_common.middleware.viewexception.ViewException',
@@ -147,10 +116,17 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'will_common.middleware.accesstracer.AccessTracer',
-    'will_common.middleware.accesstracer.AuthTracer',
 ]
 
-ROOT_URLCONF = 'metamap_django.metamap_urls'
+ROOT_URLCONF = 'metamap_django.alert_urls'
+# ROOT_URLCONF = 'metamap_django.metamap_urls'
+
+### Add authentication backends for cas
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'cas.backends.CASBackend',
+)
 
 TEMPLATES = [
     {
@@ -179,25 +155,17 @@ DATABASES = {
         'NAME': 'metamap1',
         'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'zjy',
-        'HOST': 'prd-mysql01.data.com',
+        'HOST': '10.2.19.73',
         'PORT': '3306',
     },
-    'hivemeta': {
+    'running_alert_check': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hive1',
+        'NAME': 'YKX_DW',
         'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'zjy',
-        'HOST': 'prd-mysql01.data.com',
+        'HOST': '10.2.19.74',
         'PORT': '3306',
-    },
-    DB_HUE: {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hue',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': 'prd-mysql01.data.com',
-        'PORT': '3306',
-    },
+    }
 }
 
 # Password validation
@@ -236,6 +204,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = "/usr/local/metamap/static"
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -253,9 +223,9 @@ LOGGING = {
             'include_html': True,
         },
         'default': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/metamap_all.log',  # 日志输出文件
+            'filename': 'running_alert/log/running_alert_all.log',  # 日志输出文件
             'maxBytes': 1024 * 1024 * 5,  # 文件大小
             'backupCount': 5,  # 备份份数
             'formatter': 'standard',  # 使用哪种formatters日志格式
@@ -263,20 +233,20 @@ LOGGING = {
         'error_handler': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/metamap_error.log',
+            'filename': 'running_alert/log/running_alert_error.log',
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
         },
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'standard'
         },
         'scprits_handler': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/metamap_script.log',
+            'filename': 'running_alert/log/running_alert_script.log',
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
@@ -285,12 +255,12 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['default', 'console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False
         },
         'info': {
             'handlers': ['default'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
         'scripts': {
@@ -303,7 +273,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True
         },
-        'will_common.utils': {
+        'running_alert.utils': {
             'handlers': ['error_handler'],
             'level': 'ERROR',
             'propagate': True

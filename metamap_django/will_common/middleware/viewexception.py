@@ -23,18 +23,20 @@ class ViewException():
         if hasattr(exception, 'err_stack'):
             return render(request, 'common/message.html',
                           {'message': exception.message, 'err_stack': exception.err_stack})
-        return render(request, 'common/message.html', {'message': exception.message, 'err_stack': traceback.format_exc()})
+        return render(request, 'common/message.html',
+                      {'message': exception.message, 'err_stack': traceback.format_exc()})
 
 
 class LoginRequire():
     def process_view(self, request, view_func, view_args, view_kwargs):
         resolved_login_url = decorators.resolve_url('/accounts/login/')
         is_dqms = request.path.startswith('/dqms') and '/rest/' not in request.path
+        is_alert = request.path.startswith('/alert') and '/rest/' not in request.path
         is_gene = request.path.startswith(
             '/metamap') and '/rest/' not in request.path and '/generate_job_dag/' not in request.path
         is_export = request.path.startswith('/export')
         is_test = request.path.endswith('test/') or 'push_msg' in request.path
 
         if not is_test:
-            if (is_dqms or is_gene or is_export) and not request.user.is_authenticated():
+            if (is_dqms or is_gene or is_export or is_alert) and not request.user.is_authenticated():
                 return HttpResponseRedirect('/accounts/login/?next' + resolved_login_url)

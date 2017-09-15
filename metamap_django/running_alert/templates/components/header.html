@@ -1,0 +1,50 @@
+<div role="navigation" class="navbar navbar-inverse">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" data-toggle="collapse" data-target=".navbar-collapse" class="navbar-toggle collapsed">
+                <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span
+                    class="icon-bar"></span><span class="icon-bar"></span></button>
+            <a href="/alert" class="navbar-brand"><span class="glyphicon glyphicon-home"></span></a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
+                                        aria-expanded="false"
+                                        class="dropdown-toggle">JMX监控实例<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/alert/add">添加</a></li>
+                        <li><a href="/alert/">列表</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
+                                        aria-expanded="false"
+                                        class="dropdown-toggle">Spark监控实例<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/alert/spark/add">添加</a></li>
+                        <li><a href="/alert/spark/">列表</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true"
+                                        aria-expanded="false"
+                                        class="dropdown-toggle">告警规则管理<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="/alert/rules" role="button">Spark规则</a>
+                        </li>
+                        <li>
+                            <a href="/alert/rules" role="button">JMX规则</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#">
+                        群组：{{ user.userprofile.org_group.name }} &nbsp;&nbsp; 用户： {{ user.username }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>

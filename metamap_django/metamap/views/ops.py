@@ -230,9 +230,6 @@ class StatusListView(generic.ListView):
 
 def alert_for_prome(request):
     if request.method == 'POST':
-        # print(request.POST)
-        # print(request.GET)
-        # print(request.body)
         message = json.loads(request.body)
         summary = message['commonAnnotations']['summary']
         description = message['commonAnnotations']['description']
