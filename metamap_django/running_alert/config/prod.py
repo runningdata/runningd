@@ -50,11 +50,11 @@ CELERYD_TASK_SOFT_TIME_LIMIT = 3600
 # CELERYD_MAX_TASKS_PER_CHILD = 100
 
 CELERY_ROUTES = {
-    'running_alert.tasks.exec_running_alert': {
-        'queue': 'running_alert',
+    '/var.tasks.exec_/var': {
+        'queue': '/var',
     },
-    'running_alert.tasks.run_case': {
-        'queue': 'running_alert',
+    '/var.tasks.run_case': {
+        'queue': '/var',
     },
 }
 
@@ -79,7 +79,7 @@ EMAIL_USE_TLS = True
 # Application definition
 INSTALLED_APPS = [
     'will_common',
-    'running_alert',
+    '/var',
     'cas',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -158,7 +158,7 @@ DATABASES = {
         'HOST': '10.2.19.73',
         'PORT': '3306',
     },
-    'running_alert_check': {
+    '/var_check': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'YKX_DW',
         'PASSWORD': 'Zjy@yinker20150309',
@@ -225,7 +225,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'running_alert/log/running_alert_all.log',  # 日志输出文件
+            'filename': '/var/log//var_all.log',  # 日志输出文件
             'maxBytes': 1024 * 1024 * 5,  # 文件大小
             'backupCount': 5,  # 备份份数
             'formatter': 'standard',  # 使用哪种formatters日志格式
@@ -233,7 +233,7 @@ LOGGING = {
         'error_handler': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'running_alert/log/running_alert_error.log',
+            'filename': '/var/log//var_error.log',
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
@@ -246,7 +246,7 @@ LOGGING = {
         'scprits_handler': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'running_alert/log/running_alert_script.log',
+            'filename': '/var/log//var_script.log',
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
@@ -273,7 +273,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True
         },
-        'running_alert.utils': {
+        '/var.utils': {
             'handlers': ['error_handler'],
             'level': 'ERROR',
             'propagate': True
