@@ -16,9 +16,12 @@ def get_keys():
     r = redis.StrictRedis(connection_pool=pool)
     return [key for key in r.keys() if '_' not in key and 'unack' not in key]
 
-def get_val(k):
+def get_val(k, defaut='2000-01-01 12:12:12'):
     r = redis.StrictRedis(connection_pool=pool)
-    return r.get(k)
+    v = r.get(k)
+    if not v:
+        v = defaut
+    return v
 
 def set_val(k, v):
     r = redis.StrictRedis(connection_pool=pool)

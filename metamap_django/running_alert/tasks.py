@@ -24,6 +24,7 @@ from marathon.models.container import MarathonContainer, MarathonDockerContainer
 
 from running_alert.models import MonitorInstance, SparkMonitorInstance
 from running_alert.utils import prometheusutils
+from running_alert.utils.consts import *
 from will_common.utils import PushUtils
 from will_common.utils import redisutils
 
@@ -38,13 +39,11 @@ metric_files['kafka'] = '/kafka_sample.yaml'
 metric_files['zookeeper'] = '/zookeeper_sample.yaml'
 CONTAINER_PORT = 1234
 prometheus_container = 'my-prometheus'
-REDIS_KEY_JMX_CHECK_LAST_TIME = 'jmx_check_last_time'
-REDIS_KEY_SPARK_CHECK_LAST_TIME = 'spark_check_last_time'
 
 
 def get_avaliable_port():
-    rxe = prometheus_remote_cmd(
-        'netstat -lntu | awk \'{print($4)}\' | grep : | awk -F \':\' \'{print $NF}\' | sort -nru ')
+    rxe = remote_cmd(
+        'netstat -lntu | awk \'{print($4)}\' | grep : | awk -F \':\' \'{print $NF}\' | sort -nru ', settings.MARATHON_HOST)
     used_ports = [int(i) for i in rxe.split('\r\n')]
     min_port = used_ports[-1]
     start_port = min_port if min_port > settings.START_PORT else settings.START_PORT
@@ -57,9 +56,13 @@ def get_avaliable_port():
 @shared_task
 def check_new_inst(name='check_new_inst'):
     try:
-        last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_TIME)
+        last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_ADD_TIME)
         insts = MonitorInstance.objects.filter(utime__gt=last_run, valid=1)
-        running_ids = [app.id for app in c.list_apps()]
+        reset_last_run_time(REDIS_KEY_JMX_CHECK_LAST_ADD_TIME)
+        if len(insts) > 0:
+            running_ids = [app.id for app in c.list_apps()]
+        else:
+            return
         for inst in insts:
             tmp_id = get_jmx_app_id(inst)
             host_port = get_avaliable_port()
@@ -109,7 +112,7 @@ def check_new_inst(name='check_new_inst'):
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
                     tmp_id, inst.host_and_port, inst.service_type, tmp_id)
                 restart_command = ' && docker restart %s' % prometheus_container
-                prometheus_remote_cmd(
+                remote_cmd(
                     echo_command
                     + target_command +
                     + rule_command + restart_command
@@ -121,6 +124,7 @@ def check_new_inst(name='check_new_inst'):
                 c.scale_app(id, delta=1)
             inst.exporter_uri = host_port
             inst.save()
+
     except Exception, e:
         logger.error('ERROR: %s' % traceback.format_exc())
 
@@ -133,9 +137,13 @@ def get_jmx_app_id(inst):
 
 @shared_task
 def check_new_spark(name='check_new_spark'):
-    last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_TIME)
+    last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME)
     insts = SparkMonitorInstance.objects.filter(utime__gt=last_run, valid=1)
-    running_ids = prometheusutils.get_spark_app()
+    reset_last_run_time(REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME)
+    if len(insts) > 0:
+        running_ids = prometheusutils.get_spark_app()
+    else:
+        return
     for inst in insts:
         if inst.instance_name not in running_ids:
             '''
@@ -145,7 +153,7 @@ def check_new_spark(name='check_new_spark'):
             rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' /tmp/prometheus/rules/simple_spark.rule_template > /tmp/prometheus/rules/%s.rules ' % (
                 inst.instance_name, inst.host_and_port, inst.instance_name)
             restart_command = ' && docker restart %s' % prometheus_container
-            prometheus_remote_cmd(
+            remote_cmd(
                 echo_command + rule_command + restart_command
             )
             logger.info('spark streaming %s has been registered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
@@ -157,34 +165,36 @@ def reset_last_run_time(k):
 
 @shared_task
 def check_disabled_spark(name='check_disabled_spark'):
-    last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_TIME)
+    last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_MINUS_TIME)
     insts = SparkMonitorInstance.objects.filter(utime__gt=last_run, valid=0)
+    reset_last_run_time(REDIS_KEY_SPARK_CHECK_LAST_MINUS_TIME)
     for inst in insts:
         '''
         delete alert rule file to prometheus
         '''
-        prometheus_remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules && docker restart %s '
-                              % (inst.instance_name, prometheus_container))
+        remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules && docker restart %s '
+                   % (inst.instance_name, prometheus_container))
         logger.info('spark streaming %s has been unregistered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
 
 
 @shared_task
 def check_disabled_jmx(name='check_disabled_jmx'):
-    last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_TIME)
+    last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_MINUS_TIME)
     insts = MonitorInstance.objects.filter(utime__gt=last_run, valid=0)
+    reset_last_run_time(REDIS_KEY_JMX_CHECK_LAST_MINUS_TIME)
     for inst in insts:
         try:
             '''
             delete target file to prometheus
             '''
             remote_cmd = 'rm -vf /tmp/prometheus/sds/%s_online.json' % inst.instance_name
-            prometheus_remote_cmd(remote_cmd)
+            remote_cmd(remote_cmd)
             logger.info('jmx %s has been unregistered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
 
             '''
             delete alert rule file to prometheus
             '''
-            prometheus_remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules && docker restart %s ')
+            remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules && docker restart %s ')
             logger.info('jmx {inst_name} alert has been unregistered to {host}'.format(inst_name=inst.instance_name,
                                                                                        host=settings.PROMETHEUS_HOST))
 
@@ -199,7 +209,7 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             PushUtils.push_to_admin('msg is {message}'.format(message=e.message))
 
 
-def prometheus_remote_cmd(remote_cmd):
+def remote_cmd(remote_cmd, target_host=settings.PROMETHEUS_HOST):
     '''
     run command on the prometheus remote host useing fabric
     :param remote_cmd:
@@ -207,7 +217,7 @@ def prometheus_remote_cmd(remote_cmd):
     '''
     from fabric.api import run
     from fabric.api import env
-    env.host_string = settings.PROMETHEUS_HOST
+    env.host_string = target_host
     result = run(remote_cmd)
     env.host_string = ''
     return result

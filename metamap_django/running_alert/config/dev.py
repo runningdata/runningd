@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 START_PORT = 10000
 END_PORT = 60000
+MARATHON_HOST = '10.1.5.190'
 PROMETHEUS_HOST = '10.2.19.112'
 SPARK_EXPORTER_HOST = 'http://10.1.5.190:880/metrics'
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
@@ -249,7 +250,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False
         },
-        'django': {
+        'running_alert': {
             'handlers': ['default', 'console'],
             'level': 'DEBUG',
             'propagate': False

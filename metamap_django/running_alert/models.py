@@ -36,8 +36,7 @@ class SparkMonitorInstance(CommmonTimes, CommmonCreators):
     For spark_streaming_app which use dynamic app discovery, host_and_port is not necessary, we can ignore it.
     '''
     instance_name = models.CharField(max_length=300, blank=False, null=False, verbose_name=u'监控名称')
-    exporter_uri = models.CharField(max_length=50, blank=False, null=False, verbose_name=u'监控指标地址',
-                                    default=settings.SPARK_EXPORTER_HOST)
+    exporter_uri = models.CharField(max_length=50, blank=False, null=False, verbose_name=u'监控指标地址', default=settings.SPARK_EXPORTER_HOST)
     valid = models.IntegerField(default=1, verbose_name=u'是否有效', choices=(
         (1, '是'),
         (0, '否'),

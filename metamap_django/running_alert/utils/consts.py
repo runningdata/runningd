@@ -1,0 +1,5 @@
+
+REDIS_KEY_JMX_CHECK_LAST_ADD_TIME = 'jmx_check_last_add_time'
+REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME = 'spark_check_last_add_time'
+REDIS_KEY_JMX_CHECK_LAST_MINUS_TIME = 'jmx_check_last_minus_time'
+REDIS_KEY_SPARK_CHECK_LAST_MINUS_TIME = 'spark_check_last_minus_time'

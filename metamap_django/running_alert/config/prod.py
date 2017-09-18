@@ -30,6 +30,7 @@ DEBUG = False
 
 START_PORT = 10000
 END_PORT = 60000
+MARATHON_HOST = '10.1.5.190'
 PROMETHEUS_HOST = '10.2.19.112'
 SPARK_EXPORTER_HOST = 'http://10.1.5.190:880/metrics'
 
@@ -243,6 +244,14 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'standard'
+        },
+        'debug_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/running_alert_script.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'standard',
         }
     },
     'loggers': {
@@ -255,6 +264,6 @@ LOGGING = {
             'handlers': ['default', 'console', 'error_handler'],
             'level': 'DEBUG',
             'propagate': False
-        }
+        },
     }
 }
