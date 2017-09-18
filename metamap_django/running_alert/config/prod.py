@@ -31,6 +31,7 @@ DEBUG = False
 START_PORT = 10000
 END_PORT = 60000
 PROMETHEUS_HOST = '10.2.19.112'
+SPARK_EXPORTER_HOST = 'http://10.1.5.190:880/metrics'
 
 SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
@@ -225,7 +226,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log//var_all.log',  # 日志输出文件
+            'filename': '/var/log/running_alert_all.log',  # 日志输出文件
             'maxBytes': 1024 * 1024 * 5,  # 文件大小
             'backupCount': 5,  # 备份份数
             'formatter': 'standard',  # 使用哪种formatters日志格式
@@ -233,7 +234,7 @@ LOGGING = {
         'error_handler': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log//var_error.log',
+            'filename': '/var/log/running_alert_error.log',
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
@@ -242,41 +243,18 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'standard'
-        },
-        'scprits_handler': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log//var_script.log',
-            'maxBytes': 1024 * 1024 * 5,
-            'backupCount': 5,
-            'formatter': 'standard',
         }
     },
     'loggers': {
-        'django': {
+        'marathon': {
             'handlers': ['default', 'console'],
             'level': 'DEBUG',
             'propagate': False
         },
-        'info': {
-            'handlers': ['default'],
+        'running_alert': {
+            'handlers': ['default', 'console', 'error_handler'],
             'level': 'DEBUG',
-            'propagate': False,
-        },
-        'scripts': {
-            'handlers': ['scprits_handler'],
-            'level': 'INFO',
             'propagate': False
-        },
-        'error': {
-            'handlers': ['default', 'error_handler'],
-            'level': 'ERROR',
-            'propagate': True
-        },
-        '/var.utils': {
-            'handlers': ['error_handler'],
-            'level': 'ERROR',
-            'propagate': True
         }
     }
 }

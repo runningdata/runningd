@@ -9,6 +9,7 @@ from django.core.mail import EmailMessage
 from django.core.mail import send_mail
 from django.http import HttpResponse
 
+from will_common.models import UserProfile
 from will_common.utils import regxutils
 from will_common.utils.encryptutils import encrpt_msg
 
@@ -23,6 +24,13 @@ def push_msg(user_profiles, msg):
         return 'push success'
     except Exception, e:
         return 'push error : %s' % str(e)
+
+
+def push_to_admin(msg):
+    user_profiles = [UserProfile.objects.get(user__username='admin')]
+    push_msg(user_profiles, msg)
+    push_email([user_p.user for user_p in user_profiles], msg)
+    return 'push both to admin success'
 
 
 def push_msg_tophone(phone, msg):

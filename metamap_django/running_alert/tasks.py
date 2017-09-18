@@ -6,11 +6,14 @@ created by will
 
 from __future__ import absolute_import
 
+import json
 import os
 import random
 import traceback
 
 import time
+
+import django
 from celery import shared_task
 #
 from celery.utils.log import get_task_logger
@@ -19,9 +22,12 @@ from marathon import MarathonApp
 from marathon import MarathonClient
 from marathon.models.container import MarathonContainer, MarathonDockerContainer, MarathonContainerPortMapping
 
-from running_alert.models import MonitorInstance
+from running_alert.models import MonitorInstance, SparkMonitorInstance
+from running_alert.utils import prometheusutils
+from will_common.utils import PushUtils
+from will_common.utils import redisutils
 
-logger = get_task_logger(__name__)
+logger = get_task_logger('running_alert')
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/running_alert/'
 
 c = MarathonClient('http://10.1.5.190:8080')
@@ -32,13 +38,13 @@ metric_files['kafka'] = '/kafka_sample.yaml'
 metric_files['zookeeper'] = '/zookeeper_sample.yaml'
 CONTAINER_PORT = 1234
 prometheus_container = 'my-prometheus'
+REDIS_KEY_JMX_CHECK_LAST_TIME = 'jmx_check_last_time'
+REDIS_KEY_SPARK_CHECK_LAST_TIME = 'spark_check_last_time'
 
 
 def get_avaliable_port():
-    from fabric.api import run
-    from fabric.api import env
-    env.host_string = settings.PROMETHEUS_HOST
-    rxe = run('netstat -lntu | awk \'{print($4)}\' | grep : | awk -F \':\' \'{print $NF}\' | sort -nru ')
+    rxe = prometheus_remote_cmd(
+        'netstat -lntu | awk \'{print($4)}\' | grep : | awk -F \':\' \'{print $NF}\' | sort -nru ')
     used_ports = [int(i) for i in rxe.split('\r\n')]
     min_port = used_ports[-1]
     start_port = min_port if min_port > settings.START_PORT else settings.START_PORT
@@ -51,12 +57,11 @@ def get_avaliable_port():
 @shared_task
 def check_new_inst(name='check_new_inst'):
     try:
-        last_run = 'get from db or local file'
-        insts = MonitorInstance.objects.filter(utime__gt=last_run)
+        last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_TIME)
+        insts = MonitorInstance.objects.filter(utime__gt=last_run, valid=1)
+        running_ids = [app.id for app in c.list_apps()]
         for inst in insts:
-            running_ids = [app.id for app in c.list_apps()]
-            hp_inst = inst.host_and_port.replace('.', '_').replace(':', '_')
-            tmp_id = '/' + inst.service_type + '__' + hp_inst
+            tmp_id = get_jmx_app_id(inst)
             host_port = get_avaliable_port()
             service_port = 0
             if tmp_id not in running_ids:
@@ -104,17 +109,12 @@ def check_new_inst(name='check_new_inst'):
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
                     tmp_id, inst.host_and_port, inst.service_type, tmp_id)
                 restart_command = ' && docker restart %s' % prometheus_container
-                from fabric.api import run
-                from fabric.api import env
-
-                env.host_string = settings.PROMETHEUS_HOST
-                print run(
+                prometheus_remote_cmd(
                     echo_command
                     + target_command +
                     + rule_command + restart_command
                 )
                 logger.info('domain %s has been registered to %' % (tmp_id, settings.PROMETHEUS_HOST))
-                env.host_string = ''
             else:
                 c.scale_app(id, delta=-1)
                 time.sleep(10)
@@ -123,3 +123,91 @@ def check_new_inst(name='check_new_inst'):
             inst.save()
     except Exception, e:
         logger.error('ERROR: %s' % traceback.format_exc())
+
+
+def get_jmx_app_id(inst):
+    hp_inst = inst.host_and_port.replace('.', '_').replace(':', '_')
+    tmp_id = '/' + inst.service_type + '__' + hp_inst
+    return tmp_id
+
+
+@shared_task
+def check_new_spark(name='check_new_spark'):
+    last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_TIME)
+    insts = SparkMonitorInstance.objects.filter(utime__gt=last_run, valid=1)
+    running_ids = prometheusutils.get_spark_app()
+    for inst in insts:
+        if inst.instance_name not in running_ids:
+            '''
+            add new alert rule file to prometheus
+            '''
+            echo_command = ' echo ------------------------'
+            rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' /tmp/prometheus/rules/simple_spark.rule_template > /tmp/prometheus/rules/%s.rules ' % (
+                inst.instance_name, inst.host_and_port, inst.instance_name)
+            restart_command = ' && docker restart %s' % prometheus_container
+            prometheus_remote_cmd(
+                echo_command + rule_command + restart_command
+            )
+            logger.info('spark streaming %s has been registered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
+
+
+def reset_last_run_time(k):
+    redisutils.set_val(k, django.utils.timezone.now())
+
+
+@shared_task
+def check_disabled_spark(name='check_disabled_spark'):
+    last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_TIME)
+    insts = SparkMonitorInstance.objects.filter(utime__gt=last_run, valid=0)
+    for inst in insts:
+        '''
+        delete alert rule file to prometheus
+        '''
+        prometheus_remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules && docker restart %s '
+                              % (inst.instance_name, prometheus_container))
+        logger.info('spark streaming %s has been unregistered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
+
+
+@shared_task
+def check_disabled_jmx(name='check_disabled_jmx'):
+    last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_TIME)
+    insts = MonitorInstance.objects.filter(utime__gt=last_run, valid=0)
+    for inst in insts:
+        try:
+            '''
+            delete target file to prometheus
+            '''
+            remote_cmd = 'rm -vf /tmp/prometheus/sds/%s_online.json' % inst.instance_name
+            prometheus_remote_cmd(remote_cmd)
+            logger.info('jmx %s has been unregistered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
+
+            '''
+            delete alert rule file to prometheus
+            '''
+            prometheus_remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules && docker restart %s ')
+            logger.info('jmx {inst_name} alert has been unregistered to {host}'.format(inst_name=inst.instance_name,
+                                                                                       host=settings.PROMETHEUS_HOST))
+
+            '''
+            delete marathon app
+            '''
+            app_id = get_jmx_app_id(inst)
+            resp = json.loads(c.delete_app(app_id=app_id))
+            logger.info('del %s response message: %s' % (app_id, json.dumps(resp)))
+        except Exception, e:
+            print traceback.format_exc()
+            PushUtils.push_to_admin('msg is {message}'.format(message=e.message))
+
+
+def prometheus_remote_cmd(remote_cmd):
+    '''
+    run command on the prometheus remote host useing fabric
+    :param remote_cmd:
+    :return:
+    '''
+    from fabric.api import run
+    from fabric.api import env
+    env.host_string = settings.PROMETHEUS_HOST
+    result = run(remote_cmd)
+    env.host_string = ''
+    return result

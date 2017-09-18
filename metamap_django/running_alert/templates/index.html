@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% load etlutils %}
 {% block title %}应用监控列表{% endblock %}
 {% block content %}
     <div class="container">
@@ -28,6 +29,7 @@
                 <tr>
                     <th>ID</th>
                     <th>名称</th>
+                    <th>是否在线</th>
                     <th>所属组</th>
                     <th>创建时间</th>
                     <th>创建人</th>
@@ -39,6 +41,7 @@
                     <tr>
                         <td>{{ obj.id }}</td>
                         <td>{{ obj.instance_name }}</td>
+                        <td>{{ obj.valid|is_valid }}</td>
                         <td>{{ obj.cgroup }}</td>
                         <td>{{ obj.ctime|date:"Y年m月d日 H时i分" }}</td>
                         <td>{{ obj.creator.user.username }}</td>

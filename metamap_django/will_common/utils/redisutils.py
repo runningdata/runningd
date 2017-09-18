@@ -16,6 +16,14 @@ def get_keys():
     r = redis.StrictRedis(connection_pool=pool)
     return [key for key in r.keys() if '_' not in key and 'unack' not in key]
 
+def get_val(k):
+    r = redis.StrictRedis(connection_pool=pool)
+    return r.get(k)
+
+def set_val(k, v):
+    r = redis.StrictRedis(connection_pool=pool)
+    return r.set(k, v)
+
 def get_dict(key):
     messages = dict()
     r = redis.StrictRedis(connection_pool=pool)
