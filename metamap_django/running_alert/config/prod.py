@@ -52,11 +52,8 @@ CELERYD_TASK_SOFT_TIME_LIMIT = 3600
 # CELERYD_MAX_TASKS_PER_CHILD = 100
 
 CELERY_ROUTES = {
-    '/var.tasks.exec_/var': {
-        'queue': '/var',
-    },
-    '/var.tasks.run_case': {
-        'queue': '/var',
+    'running_alert.tasks.*': {
+        'queue': 'running_alert',
     },
 }
 
