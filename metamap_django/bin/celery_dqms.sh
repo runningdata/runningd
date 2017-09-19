@@ -69,6 +69,7 @@ export C_FORCE_ROOT=true
   --pidfile="/var/run/celery/%n.pid" \
   --logfile="/var/log/celery/%n.log" \
   --settings=dqms.config.prod \
+  --concurrency=2 \
   --loglevel=info
 
 tail -20 /var/log/celery/will_dqms.log

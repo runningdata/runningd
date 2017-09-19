@@ -65,6 +65,7 @@ stop worker
 export C_FORCE_ROOT=true
 
 /server/xstorm/bin/python manage.py celery multi start will_alert -A running_alert \
+  -Q running_alert \
   --pidfile="/var/run/celery/%n.pid" \
   --logfile="/var/log/celery/%n.log" \
   --settings=running_alert.config.prod \
