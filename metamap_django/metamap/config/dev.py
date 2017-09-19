@@ -71,7 +71,7 @@ AUTHENTICATION_BACKENDS = (
 import djcelery
 
 djcelery.setup_loader()
-
+DB_HUE = 'hue'
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
@@ -149,6 +149,9 @@ DATABASES = {
         'USER': 'root',
         'HOST': '127.0.0.1',
         'PORT': '3306',
+        'TEST': {
+            'NAME': 'metamap1',
+        },
     },
     'hivemeta': {
         'ENGINE': 'django.db.backends.mysql',
@@ -157,7 +160,15 @@ DATABASES = {
         'USER': 'ambari',
         'HOST': '10.1.5.225',
         'PORT': '3306',
-    }
+    },
+    DB_HUE: {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'hue',
+        'PASSWORD': 'Zjy@yinker20150309',
+        'USER': 'root',
+        'HOST': '10.1.5.225',
+        'PORT': '3306',
+    },
 }
 
 # Password validation
