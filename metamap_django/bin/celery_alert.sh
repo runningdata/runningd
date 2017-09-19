@@ -68,7 +68,7 @@ export C_FORCE_ROOT=true
   --pidfile="/var/run/celery/%n.pid" \
   --logfile="/var/log/celery/%n.log" \
   --settings=running_alert.config.prod \
-  --concurrency=4 \
+  --concurrency=2 \
   --loglevel=info
 
 tail -20 /var/log/celery/will_alert.log

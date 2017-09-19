@@ -51,8 +51,11 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYD_TASK_SOFT_TIME_LIMIT = 3600
 # CELERYD_MAX_TASKS_PER_CHILD = 100
 
+import djcelery
+
+djcelery.setup_loader()
 CELERY_ROUTES = {
-    'running_alert.tasks.*': {
+    'running_alert.tasks.check_new_spark': {
         'queue': 'running_alert',
     },
 }
@@ -98,9 +101,6 @@ REST_FRAMEWORK = {
     ]
 }
 
-import djcelery
-
-djcelery.setup_loader()
 
 MIDDLEWARE_CLASSES = [
     'will_common.middleware.viewexception.ViewException',
