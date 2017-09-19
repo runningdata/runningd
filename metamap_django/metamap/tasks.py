@@ -6,27 +6,19 @@ created by will
 
 from __future__ import absolute_import
 
-import logging
 import os
 import subprocess
-import traceback
-
-import shutil
 
 from billiard import SoftTimeLimitExceeded
-from celery import shared_task, task
-from django.conf import settings
+from celery import shared_task
 from django.utils import timezone
 
-from metamap.helpers import etlhelper
-from metamap.models import ETL, Executions, WillDependencyTask, AnaETL, Exports, SqoopHive2MysqlExecutions, \
-    SqoopHive2Mysql, SqoopMysql2Hive, SqoopMysql2HiveExecutions, SourceApp, SourceAppExecutions, JarApp, \
-    JarAppExecutions, ExecObj, ExecutionsV2
+from metamap.models import WillDependencyTask, ExecObj, ExecutionsV2
 from will_common.utils import enums, dateutils
 
 from celery.utils.log import get_task_logger
 
-from will_common.utils.constants import TMP_EXPORT_FILE_LOCATION, AZKABAN_SCRIPT_LOCATION
+from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION
 
 logger = get_task_logger(__name__)
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/metamap/'
