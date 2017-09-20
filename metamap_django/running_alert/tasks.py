@@ -139,6 +139,7 @@ def get_jmx_app_id(inst):
 @shared_task
 def check_new_spark(name='check_new_spark'):
     last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME)
+    print('last run is {ll}'.format(ll=last_run))
     insts = SparkMonitorInstance.objects.filter(utime__gt=last_run, valid=1)
     reset_last_run_time(REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME)
     for inst in insts:
