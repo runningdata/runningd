@@ -14,7 +14,7 @@ CELERY_ROUTES = {
         'queue': 'running_jar',
     },
 }
-
+CELERY_TIMEZONE = "Asia/Shanghai"
 CELERY_REDIS_HOST = '10.2.19.113'
 CELERY_REDIS_PORT = '6480'
 #CELERY_REDIS_HOST = 'datanode08.yinker.com'

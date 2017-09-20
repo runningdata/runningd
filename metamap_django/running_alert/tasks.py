@@ -53,7 +53,7 @@ def get_avaliable_port():
     return start_port
 
 
-@shared_task
+@shared_task(queue='running_alert')
 def check_new_inst(name='check_new_inst'):
     try:
         last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_ADD_TIME)

@@ -8,7 +8,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYD_TASK_SOFT_TIME_LIMIT = 3600
 # BROKER_URL = 'redis://datanode08.yinker.com:6379'
 BROKER_URL = 'redis://10.2.19.113:6480'
-
+CELERY_TIMEZONE = "Asia/Shanghai"
 CELERY_ROUTES = {
     'running_alert.tasks.check_new_spark': {
         'queue': 'running_alert',
