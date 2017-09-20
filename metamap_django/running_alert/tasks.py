@@ -58,6 +58,7 @@ def get_avaliable_port():
 def check_new_jmx(name='check_new_jmx'):
     try:
         last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_ADD_TIME)
+        print('last run is {ll} for {redis_key}'.format(ll=last_run, redis_key=REDIS_KEY_JMX_CHECK_LAST_ADD_TIME))
         insts = MonitorInstance.objects.filter(utime__gt=last_run, valid=1)
         reset_last_run_time(REDIS_KEY_JMX_CHECK_LAST_ADD_TIME)
         if len(insts) > 0:
@@ -69,6 +70,7 @@ def check_new_jmx(name='check_new_jmx'):
             tmp_id = get_jmx_app_id(inst)
             host_port = get_avaliable_port()
             service_port = 0
+            logger.info('handling jmx {tmp_id}, and got host_port {host_port}'.format(tmp_id=tmp_id, host_port=host_port))
             if tmp_id not in running_ids:
                 '''
                 run the docker container in marathon
@@ -103,7 +105,7 @@ def check_new_jmx(name='check_new_jmx'):
                 new_app = MarathonApp(cmd=cmd, mem=32, cpus=0.25, instances=1, container=container, labels=labels)
 
                 new_result = c.create_app(tmp_id, new_app)
-                logger.info('new app %s has been created' % new_result.id)
+                logger.info('new marathon app %s has been created' % new_result.id)
 
                 '''
                 add new target and alert rule file to prometheus
@@ -114,7 +116,7 @@ def check_new_jmx(name='check_new_jmx'):
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
                     tmp_id, inst.host_and_port, inst.service_type, tmp_id)
                 remote_cmd(echo_command + target_command + rule_command)
-                logger.info('domain %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
+                logger.info('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
                 need_restart = True
             else:
                 c.scale_app(id, delta=-1)
