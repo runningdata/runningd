@@ -87,8 +87,7 @@ def check_new_jmx(name='check_new_jmx'):
                 docker = MarathonDockerContainer(image='ruoyuchen/jmxexporters', network='BRIDGE',
                                                  port_mappings=port_maps, force_pull_image=True, parameters=parameters)
                 container = MarathonContainer(docker=docker)
-                cmd = 'sh /entrypoint.sh ' + inst.host_and_port + CONTAINER_PORT + ' ' + metric_files[
-                    inst.service_type] + tmp_id
+                cmd = 'sh /entrypoint.sh ' + inst.host_and_port + CONTAINER_PORT + ' ' + metric_files[inst.service_type] + tmp_id
                 # domain_name = hp_inst + '.' + inst.service_type + '.moniter.com'
                 # labels = {'HAPROXY_GROUP': 'external',
                 #           'HAPROXY_0_VHOST': domain_name}
