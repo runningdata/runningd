@@ -38,29 +38,6 @@ SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
 ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83']
 
-BROKER_URL = 'redis://10.2.19.113:6480'
-CELERY_REDIS_HOST = '10.2.19.113'
-CELERY_REDIS_PORT = '6480'
-# BROKER_URL = 'redis://10.2.19.97:6379'
-# CELERY_REDIS_HOST = '10.2.19.97'
-# CELERY_REDIS_PORT = '6379'
-
-# Celery Beat 设置
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-# CELERYD_TASK_TIME_LIMIT = 3600
-CELERYD_TASK_SOFT_TIME_LIMIT = 3600
-# CELERYD_MAX_TASKS_PER_CHILD = 100
-
-CELERY_ROUTES = {
-    'running_alert.tasks.check_new_spark': {
-        'queue': 'running_alert',
-    },
-}
-
-import djcelery
-
-djcelery.setup_loader()
-
 # 设置cas服务器地址
 CAS_SERVER_URL = "http://10.1.5.83:7000/sso/"
 # CAS_LOGOUT_COMPLETELY = True
@@ -78,6 +55,8 @@ EMAIL_HOST = 'smtp.exmail.qq.com'
 EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
 EMAIL_HOST_PASSWORD = 'YYxx24680'
 EMAIL_USE_TLS = True
+
+from celery_conf import *
 
 # Application definition
 INSTALLED_APPS = [
