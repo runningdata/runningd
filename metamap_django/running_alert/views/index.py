@@ -57,7 +57,7 @@ class MonitorInstanceForm(ModelForm):
 def add(request):
     if request.method == 'POST':
         try:
-            form = MonitorInstanceForm(-1, request.POST, request.FILES)
+            form = MonitorInstanceForm(-1, request.POST)
             if form.is_valid():
                 form.save()
                 logger.info('MonitorInstance for %s has been added successfully')
@@ -76,7 +76,7 @@ def add(request):
 def edit(request, pk):
     if request.method == 'POST':
         try:
-            form = MonitorInstanceForm(-1, request.POST, request.FILES)
+            form = MonitorInstanceForm(-1, request.POST, instance=MonitorInstance.objects.get(pk=pk))
             if form.is_valid():
                 form.save()
             else:

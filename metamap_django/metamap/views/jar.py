@@ -182,7 +182,7 @@ def delete(request, pk):
 def edit(request, pk):
     if request.method == 'POST':
         try:
-            form = JarForm(-1, request.POST, request.FILES)
+            form = JarForm(-1, request.POST, request.FILES, instance=JarApp.objects.get(pk=pk))
             if form.is_valid():
                 with transaction.atomic():
                     inst = form.save(commit=False)

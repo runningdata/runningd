@@ -40,6 +40,7 @@ class SparkMonitorInstanceForm(ModelForm):
         exclude = ['ctime', 'utime', 'exporter_uri']
         widgets = {
             'creator': HiddenInput(),
+            'id': HiddenInput(),
         }
 
     field_order = ['cgroup', 'instance_name']
@@ -57,14 +58,14 @@ class SparkMonitorInstanceForm(ModelForm):
 def add(request):
     if request.method == 'POST':
         try:
-            form = SparkMonitorInstanceForm(-1, request.POST, request.FILES)
+            form = SparkMonitorInstanceForm(-1, request.POST)
             if form.is_valid():
                 form.save()
                 logger.info('SparkMonitorInstance for %s has been added successfully')
             else:
                 form = SparkMonitorInstanceForm(request.user.userprofile.id)
                 return render(request, 'instance/edit.html', {'form': form, 'summary': SPARK_ADD_SUMMARY})
-            return HttpResponseRedirect(reverse('alert:index'))
+            return HttpResponseRedirect(reverse('alert:spark_index'))
         except Exception, e:
             logger.error(traceback.format_exc())
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
@@ -76,7 +77,7 @@ def add(request):
 def edit(request, pk):
     if request.method == 'POST':
         try:
-            form = SparkMonitorInstanceForm(-1, request.POST, request.FILES)
+            form = SparkMonitorInstanceForm(-1, request.POST, instance=SparkMonitorInstance.objects.get(pk=pk))
             if form.is_valid():
                 form.save()
             else:
@@ -85,7 +86,7 @@ def edit(request, pk):
                                                 instance=SparkMonitorInstance.objects.get(pk=pk))
                 return render(request, 'source/post_edit.html', {'form': form})
             logger.info('SparkMonitorInstance for %s has been modified successfully' % pk)
-            return HttpResponseRedirect(reverse('alert:index'))
+            return HttpResponseRedirect(reverse('alert:spark_index'))
         except Exception, e:
             print(traceback.format_exc())
             return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
