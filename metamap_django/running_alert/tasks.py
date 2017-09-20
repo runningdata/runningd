@@ -209,7 +209,7 @@ def check_disabled_jmx(name='check_disabled_jmx'):
 def is_spark_rule_exist(app_name):
     result = remote_cmd(
         'if [ -f /tmp/prometheus/rules/{app_name}.rules ]; then echo exist; fi'.format(app_name=app_name))
-    if result == 'exist'
+    if result == 'exist':
         return True
     return False
 
