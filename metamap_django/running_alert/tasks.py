@@ -178,7 +178,7 @@ def check_disabled_spark(name='check_disabled_spark'):
         remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules'
                    % (inst.instance_name))
         need_restart = True
-        logger.info('spark streaming %s has been unregistered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
+        logger.info('spark streaming %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
     if need_restart:
         restart_command = 'docker restart %s' % prometheus_container
         remote_cmd(restart_command)
@@ -198,7 +198,7 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             '''
             remote_cmd = 'rm -vf /tmp/prometheus/sds/%s_online.json' % inst.instance_name
             remote_cmd(remote_cmd)
-            logger.info('jmx %s has been unregistered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
+            logger.info('jmx %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
 
             to_del.add(inst.instance_name)
             logger.info('jmx {inst_name} alert has been unregistered to {host}'.format(inst_name=inst.instance_name,
