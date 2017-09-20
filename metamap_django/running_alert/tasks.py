@@ -123,9 +123,11 @@ def check_new_jmx(name='check_new_jmx'):
                 print('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
                 need_restart = True
             else:
-                c.scale_app(id, delta=-1)
+                logger.info('{tmp_id} is in running ids'.format(tmp_id=tmp_id))
+                c.scale_app(tmp_id, delta=-1)
                 time.sleep(10)
-                c.scale_app(id, delta=1)
+                c.scale_app(tmp_id, delta=1)
+                logger.info('{tmp_id} has been restarted'.format(tmp_id=tmp_id))
             inst.exporter_uri = host_port
             inst.save()
 
