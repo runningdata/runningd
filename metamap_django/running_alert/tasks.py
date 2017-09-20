@@ -55,7 +55,7 @@ def get_avaliable_port():
 
 
 @shared_task(queue='running_alert')
-def check_new_inst(name='check_new_inst'):
+def check_new_jmx(name='check_new_jmx'):
     try:
         last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_ADD_TIME)
         insts = MonitorInstance.objects.filter(utime__gt=last_run, valid=1)
@@ -108,7 +108,7 @@ def check_new_inst(name='check_new_inst'):
                 '''
                 add new target and alert rule file to prometheus
                 '''
-                echo_command = ' echo ccc'
+                echo_command = ' echo -------------------\n'
                 target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /tmp/prometheus/sds/%s_online.json ' % (
                     inst.host_and_port, tmp_id)
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
