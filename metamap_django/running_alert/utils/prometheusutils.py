@@ -8,9 +8,9 @@ def get_spark_app():
     # res = requests.get('http://10.1.5.190:880/metrics')
     if res.status_code == 200:
         for line in res.content.split('\n'):
-            if 'app_name' in line:
-                ee = line.index(',')
-                kv = line[0:ee].replace('json_val{', '').replace('"', '')
+            if 'spark_up' in line:
+                ee = line.index('\s')
+                kv = line[0:ee].replace('spark_up{', '').replace('"', '').replace('}', '')
                 apps.add(kv.split('=')[1])
 
     return apps
