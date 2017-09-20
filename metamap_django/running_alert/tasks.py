@@ -49,8 +49,10 @@ def get_avaliable_port():
     min_port = used_ports[-1]
     start_port = min_port if min_port > settings.START_PORT else settings.START_PORT
     start_port = start_port + random.randint(1, 30000)
+    print('start select port %d' % start_port)
     while start_port in used_ports:
         start_port = start_port + 1
+    print('got port %d' % start_port)
     return start_port
 
 
