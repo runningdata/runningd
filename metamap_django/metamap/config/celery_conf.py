@@ -13,7 +13,16 @@ CELERY_ROUTES = {
     'metamap.tasks.exec_jar': {
         'queue': 'running_jar',
     },
-    'running_alert.tasks.*': {
+    'running_alert.tasks.check_new_spark': {
+        'queue': 'running_alert',
+    },
+    'running_alert.tasks.check_disabled_spark': {
+        'queue': 'running_alert',
+    },
+    'running_alert.tasks.check_disabled_jmx': {
+        'queue': 'running_alert',
+    },
+    'running_alert.tasks.check_disabled_jmx': {
         'queue': 'running_alert',
     },
 }
