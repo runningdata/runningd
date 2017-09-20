@@ -1,5 +1,8 @@
 #! /bin/bash
 
+target_app=metamap
+worker_identifier=will_spark
+concurrency=2
 
 if [ -z $METAMAP_HOME ];then
     echo "Please set env $METAMAP_HOME first."
@@ -10,10 +13,10 @@ fi
 
 ## 检查当前进程中是否还有celery进程活着
 function check() {
-    lines=`ps -ef |grep celery | grep will_spark | wc -l`
+    lines=`ps -ef |grep celery | grep ${worker_identifier} | wc -l`
     if [[ $lines > 0 ]]; then
         echo "${lines}: celery ${1} still running..."
-        ps -ef |grep celery | grep will_spark | grep ${1}
+        ps -ef |grep celery | grep ${worker_identifier} | grep ${1}
         return ${lines}
     else
         echo "metamap celery ${1} has been killed"
@@ -23,7 +26,7 @@ function check() {
 
 ###  停止所有celery指定进程
 function stop() {
-    pid=`ps -ef | grep celery |  grep will_spark | awk '{if($3 == '1') print $2}'`
+    pid=`ps -ef | grep celery |  grep ${worker_identifier} | awk '{if($3 == '1') print $2}'`
     if [[ $pid > 0 ]]; then
         echo "Got ${1} master pid : ${pid}"
         kill $pid
@@ -64,13 +67,13 @@ stop worker
 #################################
 export C_FORCE_ROOT=true
 
-/server/xstorm/bin/python manage.py celery multi start will_spark -A metamap \
+/server/xstorm/bin/python manage.py celery multi start ${worker_identifier} -A ${target_app} \
   -Q cron_spark \
   --pidfile="/var/run/celery/%n.pid" \
   --logfile="/var/log/celery/%n.log" \
-  --settings=metamap.config.prod \
-  --concurrency=4 \
+  --settings=${target_app}.config.prod \
+  --concurrency=${concurrency} \
   --loglevel=info
 
-tail -20 /var/log/celery/will_spark.log
+tail -20 /var/log/celery/${worker_identifier}.log
 

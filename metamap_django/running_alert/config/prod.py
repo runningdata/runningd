@@ -51,14 +51,15 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYD_TASK_SOFT_TIME_LIMIT = 3600
 # CELERYD_MAX_TASKS_PER_CHILD = 100
 
-import djcelery
-
-djcelery.setup_loader()
 CELERY_ROUTES = {
     'running_alert.tasks.check_new_spark': {
         'queue': 'running_alert',
     },
 }
+
+import djcelery
+
+djcelery.setup_loader()
 
 # 设置cas服务器地址
 CAS_SERVER_URL = "http://10.1.5.83:7000/sso/"
@@ -101,7 +102,6 @@ REST_FRAMEWORK = {
     ]
 }
 
-
 MIDDLEWARE_CLASSES = [
     'will_common.middleware.viewexception.ViewException',
     'django.middleware.security.SecurityMiddleware',
@@ -118,7 +118,6 @@ MIDDLEWARE_CLASSES = [
 ]
 
 ROOT_URLCONF = 'metamap_django.alert_urls'
-# ROOT_URLCONF = 'metamap_django.metamap_urls'
 
 ### Add authentication backends for cas
 
