@@ -43,7 +43,8 @@ prometheus_container = 'my-prometheus'
 
 def get_avaliable_port():
     rxe = remote_cmd(
-        'netstat -lntu | awk \'{print($4)}\' | grep : | awk -F \':\' \'{print $NF}\' | sort -nru ', settings.MARATHON_HOST)
+        'netstat -lntu | awk \'{print($4)}\' | grep : | awk -F \':\' \'{print $NF}\' | sort -nru ',
+        settings.MARATHON_HOST)
     used_ports = [int(i) for i in rxe.split('\r\n')]
     min_port = used_ports[-1]
     start_port = min_port if min_port > settings.START_PORT else settings.START_PORT
@@ -140,12 +141,8 @@ def check_new_spark(name='check_new_spark'):
     last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME)
     insts = SparkMonitorInstance.objects.filter(utime__gt=last_run, valid=1)
     reset_last_run_time(REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME)
-    if len(insts) > 0:
-        running_ids = prometheusutils.get_spark_app()
-    else:
-        return
     for inst in insts:
-        if inst.instance_name not in running_ids:
+        if not is_spark_rule_exist(inst.instance_name):
             '''
             add new alert rule file to prometheus
             '''
@@ -207,6 +204,14 @@ def check_disabled_jmx(name='check_disabled_jmx'):
         except Exception, e:
             print traceback.format_exc()
             PushUtils.push_to_admin('msg is {message}'.format(message=e.message))
+
+
+def is_spark_rule_exist(app_name):
+    result = remote_cmd(
+        'if [ -f /tmp/prometheus/rules/{app_name}.rules ]; then echo exist; fi'.format(app_name=app_name))
+    if result == 'exist'
+        return True
+    return False
 
 
 def remote_cmd(remote_cmd, target_host=settings.PROMETHEUS_HOST):
