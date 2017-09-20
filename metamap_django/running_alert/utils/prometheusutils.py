@@ -11,6 +11,5 @@ def get_spark_app():
             if 'spark_up' in line:
                 ee = line.split(' ')[0]
                 kv = ee.replace('spark_up{app_name="', '').replace('"}', '')
-                apps.add(kv.split('=')[1])
 
     return apps
