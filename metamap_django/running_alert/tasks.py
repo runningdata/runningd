@@ -64,6 +64,7 @@ def check_new_inst(name='check_new_inst'):
             running_ids = [app.id for app in c.list_apps()]
         else:
             return
+        need_restart = False
         for inst in insts:
             tmp_id = get_jmx_app_id(inst)
             host_port = get_avaliable_port()
@@ -112,13 +113,9 @@ def check_new_inst(name='check_new_inst'):
                     inst.host_and_port, tmp_id)
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
                     tmp_id, inst.host_and_port, inst.service_type, tmp_id)
-                restart_command = ' && docker restart %s' % prometheus_container
-                remote_cmd(
-                    echo_command
-                    + target_command +
-                    + rule_command + restart_command
-                )
-                logger.info('domain %s has been registered to %' % (tmp_id, settings.PROMETHEUS_HOST))
+                remote_cmd(echo_command + target_command + rule_command)
+                logger.info('domain %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
+                need_restart = True
             else:
                 c.scale_app(id, delta=-1)
                 time.sleep(10)
@@ -126,6 +123,10 @@ def check_new_inst(name='check_new_inst'):
             inst.exporter_uri = host_port
             inst.save()
 
+        if need_restart:
+            restart_command = 'docker restart %s' % prometheus_container
+            remote_cmd(restart_command)
+            logger.info('prometheus has been restarted')
     except Exception, e:
         logger.error('ERROR: %s' % traceback.format_exc())
 
@@ -142,6 +143,7 @@ def check_new_spark(name='check_new_spark'):
     print('last run is {ll}'.format(ll=last_run))
     insts = SparkMonitorInstance.objects.filter(utime__gt=last_run, valid=1)
     reset_last_run_time(REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME)
+    need_restart = False
     for inst in insts:
         if not is_spark_rule_exist(inst.instance_name):
             '''
@@ -150,11 +152,13 @@ def check_new_spark(name='check_new_spark'):
             echo_command = ' echo ------------------------'
             rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' /tmp/prometheus/rules/simple_spark.rule_template > /tmp/prometheus/rules/%s.rules ' % (
                 inst.instance_name, inst.instance_name, inst.instance_name)
-            restart_command = ' && docker restart %s' % prometheus_container
-            remote_cmd(
-                echo_command + rule_command + restart_command
-            )
-            logger.info('spark streaming %s has been registered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
+            remote_cmd(echo_command + rule_command)
+            need_restart = True
+            logger.info('spark streaming %s has been registered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
+    if need_restart:
+        restart_command = 'docker restart %s' % prometheus_container
+        remote_cmd(restart_command)
+        logger.info('prometheus has been restarted')
 
 
 def reset_last_run_time(k):
@@ -166,13 +170,19 @@ def check_disabled_spark(name='check_disabled_spark'):
     last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_MINUS_TIME)
     insts = SparkMonitorInstance.objects.filter(utime__gt=last_run, valid=0)
     reset_last_run_time(REDIS_KEY_SPARK_CHECK_LAST_MINUS_TIME)
+    need_restart = False
     for inst in insts:
         '''
         delete alert rule file to prometheus
         '''
-        remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules && docker restart %s '
-                   % (inst.instance_name, prometheus_container))
+        remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules'
+                   % (inst.instance_name))
+        need_restart = True
         logger.info('spark streaming %s has been unregistered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
+    if need_restart:
+        restart_command = 'docker restart %s' % prometheus_container
+        remote_cmd(restart_command)
+        logger.info('prometheus has been restarted')
 
 
 @shared_task
@@ -180,6 +190,7 @@ def check_disabled_jmx(name='check_disabled_jmx'):
     last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_MINUS_TIME)
     insts = MonitorInstance.objects.filter(utime__gt=last_run, valid=0)
     reset_last_run_time(REDIS_KEY_JMX_CHECK_LAST_MINUS_TIME)
+    to_del = set()
     for inst in insts:
         try:
             '''
@@ -189,13 +200,9 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             remote_cmd(remote_cmd)
             logger.info('jmx %s has been unregistered to %' % (inst.instance_name, settings.PROMETHEUS_HOST))
 
-            '''
-            delete alert rule file to prometheus
-            '''
-            remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules && docker restart %s ')
+            to_del.add(inst.instance_name)
             logger.info('jmx {inst_name} alert has been unregistered to {host}'.format(inst_name=inst.instance_name,
                                                                                        host=settings.PROMETHEUS_HOST))
-
             '''
             delete marathon app
             '''
@@ -205,6 +212,15 @@ def check_disabled_jmx(name='check_disabled_jmx'):
         except Exception, e:
             print traceback.format_exc()
             PushUtils.push_to_admin('msg is {message}'.format(message=e.message))
+    if len(to_del) > 0:
+        '''
+        delete alert rule file to prometheus
+        '''
+        restart_command = 'docker restart %s' % prometheus_container
+        to_del.add(restart_command)
+        cmd = (' && ').join(['rm -vf /tmp/prometheus/rules/%s.rules' % ii for ii in to_del])
+        logger.info(remote_cmd(cmd))
+        logger.info('prometheus has been restarted')
 
 
 def is_spark_rule_exist(app_name):
