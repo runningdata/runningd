@@ -95,7 +95,7 @@ def check_new_jmx(name='check_new_jmx'):
                 # new_app = MarathonApp(cmd=cmd, mem=32, cpus=0.25, instances=1, container=container, labels=labels)
                 #
                 # new_result = c.create_app(tmp_id, new_app)
-                # logger.info('new app %s has been created' % new_result.id)
+                # print('new app %s has been created' % new_result.id)
                 #
                 # '''
                 # add new target and alert rule file to prometheus
@@ -123,18 +123,18 @@ def check_new_jmx(name='check_new_jmx'):
                 print('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
                 need_restart = True
             else:
-                logger.info('{tmp_id} is in running ids'.format(tmp_id=tmp_id))
+                print('{tmp_id} is in running ids'.format(tmp_id=tmp_id))
                 c.scale_app(tmp_id, delta=-1)
                 time.sleep(10)
                 c.scale_app(tmp_id, delta=1)
-                logger.info('{tmp_id} has been restarted'.format(tmp_id=tmp_id))
+                print('{tmp_id} has been restarted'.format(tmp_id=tmp_id))
             inst.exporter_uri = host_port
             inst.save()
 
         if need_restart:
             restart_command = 'docker restart %s' % prometheus_container
             remote_cmd(restart_command)
-            logger.info('prometheus has been restarted')
+            print('prometheus has been restarted')
     except Exception, e:
         logger.error('ERROR: %s' % traceback.format_exc())
 
@@ -162,11 +162,11 @@ def check_new_spark(name='check_new_spark'):
                 inst.instance_name, inst.instance_name, inst.instance_name)
             remote_cmd(echo_command + rule_command)
             need_restart = True
-            logger.info('spark streaming %s has been registered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
+            print('spark streaming %s has been registered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
     if need_restart:
         restart_command = 'docker restart %s' % prometheus_container
         remote_cmd(restart_command)
-        logger.info('prometheus has been restarted')
+        print('prometheus has been restarted')
 
 
 def reset_last_run_time(k):
@@ -186,11 +186,11 @@ def check_disabled_spark(name='check_disabled_spark'):
         remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules'
                    % (inst.instance_name))
         need_restart = True
-        logger.info('spark streaming %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
+        print('spark streaming %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
     if need_restart:
         restart_command = 'docker restart %s' % prometheus_container
         remote_cmd(restart_command)
-        logger.info('prometheus has been restarted')
+        print('prometheus has been restarted')
 
 
 @shared_task
@@ -206,17 +206,17 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             '''
             remote_cmd = 'rm -vf /tmp/prometheus/sds/%s_online.json' % inst.instance_name
             remote_cmd(remote_cmd)
-            logger.info('jmx %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
+            print('jmx %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
 
             to_del.add(inst.instance_name)
-            logger.info('jmx {inst_name} alert has been unregistered to {host}'.format(inst_name=inst.instance_name,
+            print('jmx {inst_name} alert has been unregistered to {host}'.format(inst_name=inst.instance_name,
                                                                                        host=settings.PROMETHEUS_HOST))
             '''
             delete marathon app
             '''
             app_id = get_jmx_app_id(inst)
             resp = json.loads(c.delete_app(app_id=app_id))
-            logger.info('del %s response message: %s' % (app_id, json.dumps(resp)))
+            print('del %s response message: %s' % (app_id, json.dumps(resp)))
         except Exception, e:
             print traceback.format_exc()
             PushUtils.push_to_admin('msg is {message}'.format(message=e.message))
@@ -227,8 +227,8 @@ def check_disabled_jmx(name='check_disabled_jmx'):
         restart_command = 'docker restart %s' % prometheus_container
         to_del.add(restart_command)
         cmd = (' && ').join(['rm -vf /tmp/prometheus/rules/%s.rules' % ii for ii in to_del])
-        logger.info(remote_cmd(cmd))
-        logger.info('prometheus has been restarted')
+        print(remote_cmd(cmd))
+        print('prometheus has been restarted')
 
 
 def is_spark_rule_exist(app_name):
