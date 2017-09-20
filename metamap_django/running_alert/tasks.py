@@ -51,7 +51,7 @@ def get_avaliable_port():
     start_port = start_port + random.randint(1, 30000)
     print('start select port %d' % start_port)
     while start_port in used_ports:
-        start_port = start_port + 1
+        start_port += 1
     print('got port %d' % start_port)
     return start_port
 
@@ -74,7 +74,7 @@ def check_new_jmx(name='check_new_jmx'):
             tmp_id = get_jmx_app_id(inst)
             host_port = get_avaliable_port()
             service_port = 0
-            logger.info('handling jmx {tmp_id}, and got host_port {host_port}'.format(tmp_id=tmp_id, host_port=host_port))
+            print('handling jmx {tmp_id}, and got host_port {host_port}'.format(tmp_id=tmp_id, host_port=host_port))
             if tmp_id not in running_ids:
                 '''
                 run the docker container in marathon
@@ -109,7 +109,7 @@ def check_new_jmx(name='check_new_jmx'):
                 new_app = MarathonApp(cmd=cmd, mem=32, cpus=0.25, instances=1, container=container, labels=labels)
 
                 new_result = c.create_app(tmp_id, new_app)
-                logger.info('new marathon app %s has been created' % new_result.id)
+                print('new marathon app %s has been created' % new_result.id)
 
                 '''
                 add new target and alert rule file to prometheus
@@ -120,7 +120,7 @@ def check_new_jmx(name='check_new_jmx'):
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
                     tmp_id, inst.host_and_port, inst.service_type, tmp_id)
                 remote_cmd(echo_command + target_command + rule_command)
-                logger.info('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
+                print('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
                 need_restart = True
             else:
                 c.scale_app(id, delta=-1)
