@@ -66,6 +66,8 @@ def check_new_jmx(name='check_new_jmx'):
         else:
             return
         need_restart = False
+        print insts
+        print running_ids
         for inst in insts:
             tmp_id = get_jmx_app_id(inst)
             host_port = get_avaliable_port()
