@@ -29,6 +29,7 @@
                 <tr>
                     <th>ID</th>
                     <th>名称</th>
+                    <th>目标</th>
                     <th>是否在线</th>
                     <th>所属组</th>
                     <th>创建时间</th>
@@ -41,6 +42,7 @@
                     <tr>
                         <td>{{ obj.id }}</td>
                         <td>{{ obj.instance_name }}</td>
+                        <td>{{ obj.host_and_port }}</td>
                         <td>{{ obj.valid|is_valid }}</td>
                         <td>{{ obj.cgroup }}</td>
                         <td>{{ obj.ctime|date:"Y年m月d日 H时i分" }}</td>
