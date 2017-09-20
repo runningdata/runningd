@@ -9,8 +9,8 @@ def get_spark_app():
     if res.status_code == 200:
         for line in res.content.split('\n'):
             if 'spark_up' in line:
-                ee = line.index('\s')
-                kv = line[0:ee].replace('spark_up{', '').replace('"', '').replace('}', '')
+                ee = line.split(' ')[0]
+                kv = ee.replace('spark_up{app_name="', '').replace('"}', '')
                 apps.add(kv.split('=')[1])
 
     return apps
