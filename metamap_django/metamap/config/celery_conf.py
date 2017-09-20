@@ -19,7 +19,7 @@ CELERY_ROUTES = {
     'running_alert.tasks.check_disabled_spark': {
         'queue': 'running_alert',
     },
-    'running_alert.tasks.check_disabled_jmx': {
+    'running_alert.tasks.check_new_jmx': {
         'queue': 'running_alert',
     },
     'running_alert.tasks.check_disabled_jmx': {
