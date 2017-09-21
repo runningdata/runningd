@@ -139,8 +139,8 @@ def check_new_jmx(name='check_new_jmx'):
 
 
 def get_jmx_app_id(inst):
-    hp_inst = inst.host_and_port.replace('.', '-').replace(':', '--')
-    tmp_id = '/' + inst.service_type + '---' + hp_inst
+    hp_inst = inst.host_and_port.replace('.', '').replace(':', '')
+    tmp_id = '/' + inst.service_type + '' + hp_inst
     return tmp_id
 
 
