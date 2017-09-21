@@ -217,7 +217,7 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             remote_cmd(cmd)
             print('jmx %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
 
-            to_del.add(inst.instance_name)
+            to_del.add(get_clean_jmx_app_id(get_jmx_app_id(inst)))
             print('jmx {inst_name} alert has been unregistered to {host}'.format(inst_name=inst.instance_name,
                                                                                  host=settings.PROMETHEUS_HOST))
             '''
