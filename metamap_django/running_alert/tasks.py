@@ -118,7 +118,7 @@ def check_new_jmx(name='check_new_jmx'):
                 '''
                 echo_command = ' echo -------------------'
                 target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /tmp/prometheus/sds/%s_online.json ' % (
-                     '10.1.5.190:' + str(host_port), tmp_id)
+                    '10.1.5.190:' + str(host_port), tmp_id)
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
                     tmp_id, inst.host_and_port, inst.service_type, tmp_id)
                 remote_cmd(echo_command + target_command + rule_command)
@@ -145,6 +145,10 @@ def get_jmx_app_id(inst):
     hp_inst = inst.host_and_port.replace('.', '').replace(':', '')
     tmp_id = '/' + inst.service_type + '' + hp_inst
     return tmp_id
+
+
+def get_clean_jmx_app_id(app_id):
+    return app_id.replace('/', '')
 
 
 @shared_task
