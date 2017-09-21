@@ -106,7 +106,7 @@ def check_new_jmx(name='check_new_jmx'):
                 #     tmp_id, domain_name, inst.service_type, domain_name)
                 # restart_command = ' && docker restart %s' % prometheus_container
                 labels = {}
-                new_app = MarathonApp(cmd=cmd, mem=32, cpus=0.25, instances=0, container=container, labels=labels)
+                new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels)
 
                 new_result = c.create_app(tmp_id, new_app)
                 time.sleep(3)
@@ -117,10 +117,12 @@ def check_new_jmx(name='check_new_jmx'):
                 add new target and alert rule file to prometheus
                 '''
                 echo_command = ' echo -------------------'
-                target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /tmp/prometheus/sds/%s_online.json ' % (
-                    '10.1.5.190:' + str(host_port), tmp_id)
+                target_command = ' && echo \'[ {"targets": [ "{marathon_host}:{host_port}"] }]\' > /tmp/prometheus/{srv_type}/{instance_name}_online.json ' \
+                    .format(marathon_host='10.1.5.190', host_port=str(host_port), srv_type=inst.service_type,
+                            instance_name=inst.instance_name)
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
-                    get_clean_jmx_app_id(tmp_id), inst.host_and_port, inst.service_type, get_clean_jmx_app_id(tmp_id))
+                    get_clean_jmx_app_id(tmp_id), '10.1.5.190:' + str(host_port), inst.service_type,
+                    get_clean_jmx_app_id(tmp_id))
                 remote_cmd(echo_command + target_command + rule_command)
                 print('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
                 need_restart = True
@@ -210,8 +212,9 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             '''
             delete target file to prometheus
             '''
-            remote_cmd = 'rm -vf /tmp/prometheus/sds/%s_online.json' % inst.instance_name
-            remote_cmd(remote_cmd)
+            cmd = 'rm -vf /tmp/prometheus/{service_type}/{instance_name}_online.json'.format(
+                service_type=inst.service_type, instance_name=inst.instance_name)
+            remote_cmd(cmd)
             print('jmx %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
 
             to_del.add(inst.instance_name)
