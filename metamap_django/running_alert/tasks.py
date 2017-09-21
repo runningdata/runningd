@@ -20,6 +20,7 @@ from celery.utils.log import get_task_logger
 from django.conf import settings
 from marathon import MarathonApp
 from marathon import MarathonClient
+from marathon import MarathonHttpError
 from marathon.models.container import MarathonContainer, MarathonDockerContainer, MarathonContainerPortMapping
 
 from running_alert.models import MonitorInstance, SparkMonitorInstance
@@ -223,7 +224,10 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             delete marathon app
             '''
             app_id = get_jmx_app_id(inst)
-            print('del %s response message: %s' % (app_id, c.delete_app(app_id)))
+            try:
+                print('del %s response message: %s' % (app_id, c.delete_app(app_id)))
+            except MarathonHttpError, e:
+                print traceback.format_exc()
         except Exception, e:
             print traceback.format_exc()
             PushUtils.push_to_admin('msg is {message}'.format(message=e.message))
