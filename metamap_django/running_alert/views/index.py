@@ -5,12 +5,14 @@ import traceback
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.forms import ModelForm, HiddenInput
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
 
 from running_alert.models import MonitorInstance
 from running_alert.pagenames import *
+from will_common.models import UserProfile
 
 logger = logging.getLogger('django')
 
@@ -71,6 +73,19 @@ def add(request):
     else:
         form = MonitorInstanceForm(request.user.userprofile.id)
         return render(request, 'instance/edit.html', {'form': form, 'summary': JMX_ADD_SUMMARY})
+
+
+def subscribe(request):
+    if 'obj_id' in request.POST:
+        obj_id = long(request.POST['obj_id'])
+        obj = MonitorInstance.objects.get(pk=obj_id)
+        user = UserProfile.objects.get(user=request.user)
+        msg = obj.change_subscribe_status(user)
+        # obj.managers = managers
+        obj.save()
+        return HttpResponse('success' + msg)
+    else:
+        return HttpResponse('error')
 
 
 def edit(request, pk):

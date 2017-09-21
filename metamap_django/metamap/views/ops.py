@@ -228,20 +228,6 @@ class StatusListView(generic.ListView):
         return self.render_to_response(context)
 
 
-def alert_for_prome(request):
-    if request.method == 'POST':
-        message = json.loads(request.body)
-        summary = message['commonAnnotations']['summary']
-        description = message['commonAnnotations']['description']
-        alertname = message['commonLabels']['alertname']
-        app_name = message['commonLabels']['app_name']
-
-        p_msg = 'Alert for %s.%s. summary is : %s. description is : %s' % (app_name, alertname, summary, description)
-        PushUtils.push_msg_tophone('15210976096', p_msg)
-        return HttpResponse('Done')
-    else:
-        return HttpResponse('use POST please')
-
 
 def rerun(request):
     if request.method == 'POST':

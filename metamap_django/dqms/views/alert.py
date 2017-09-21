@@ -1,11 +1,6 @@
-from django.shortcuts import render
 from django.views import generic
-from rest_framework import viewsets
-from rest_framework.decorators import list_route
-from rest_framework.response import Response
 
-from dqms.models import DqmsRule, DqmsAlert
-from dqms.serializers import DqmsRuleSerializer
+from dqms.models import DqmsAlert
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
 
 

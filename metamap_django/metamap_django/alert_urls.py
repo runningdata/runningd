@@ -19,6 +19,7 @@ from django.conf.urls import include, url
 urlpatterns = [
     url(r'^common/', include('will_common.urls')),
     url(r'^alert/', include('running_alert.urls', namespace='alert')),
+    url(r'^hooks/', include('running_alert.hooks', namespace='hooks')),
 
     # CAS
     url(r'^accounts/login/$', views.login, name='login'),

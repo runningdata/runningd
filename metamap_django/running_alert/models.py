@@ -19,6 +19,7 @@ class MonitorInstance(CommmonTimes, CommmonCreators):
     host_and_port = models.CharField(max_length=50, blank=False, null=False, verbose_name=u'目标主机:端口号[10.2.16.81:4545]', unique=True)
     instance_name = models.CharField(max_length=255, blank=False, null=False, verbose_name=u'监控名称', unique=True)
     exporter_uri = models.CharField(max_length=50, blank=False, null=False, verbose_name=u'监控指标地址')
+    managers = models.CharField(max_length=300, blank=False, null=False, default='', verbose_name=u'告警接收人[逗号隔开]')
     service_type = models.CharField(max_length=50, blank=False, null=False, verbose_name=u'实例类型', choices=(
         ('kafka', 'kafka'), ('zookeeper', 'zookeeper'), ('flume', 'flume'),
         # ('spark_streaming_app', 'spark_streaming_app')
@@ -36,6 +37,7 @@ class SparkMonitorInstance(CommmonTimes, CommmonCreators):
     For spark_streaming_app which use dynamic app discovery, host_and_port is not necessary, we can ignore it.
     '''
     instance_name = models.CharField(max_length=255, blank=False, null=False, verbose_name=u'监控名称')
+    managers = models.CharField(max_length=300, blank=False, null=False, default='', verbose_name=u'告警接收人[逗号隔开]')
     exporter_uri = models.CharField(max_length=50, blank=False, null=False, verbose_name=u'监控指标地址', default=settings.SPARK_EXPORTER_HOST)
     valid = models.IntegerField(default=1, verbose_name=u'是否有效', choices=(
         (1, '是'),
