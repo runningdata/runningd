@@ -106,9 +106,11 @@ def check_new_jmx(name='check_new_jmx'):
                 #     tmp_id, domain_name, inst.service_type, domain_name)
                 # restart_command = ' && docker restart %s' % prometheus_container
                 labels = {}
-                new_app = MarathonApp(cmd=cmd, mem=32, cpus=0.25, instances=1, container=container, labels=labels)
+                new_app = MarathonApp(cmd=cmd, mem=32, cpus=0.25, instances=0, container=container, labels=labels)
 
                 new_result = c.create_app(tmp_id, new_app)
+                time.sleep(3)
+                c.scale_app(tmp_id, delta=1)
                 print('new marathon app %s has been created' % new_result.id)
 
                 '''
