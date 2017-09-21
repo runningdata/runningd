@@ -139,7 +139,7 @@ def check_new_jmx(name='check_new_jmx'):
             remote_cmd(restart_command)
             print('prometheus has been restarted')
     except Exception, e:
-        logger.error('ERROR: %s' % traceback.format_exc())
+        print('ERROR: %s' % traceback.format_exc())
 
 
 def get_jmx_app_id(inst):
@@ -223,7 +223,7 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             delete marathon app
             '''
             app_id = get_jmx_app_id(inst)
-            resp = json.loads(c.delete_app(app_id=app_id))
+            resp = json.loads(c.delete_app(app_id))
             print('del %s response message: %s' % (app_id, json.dumps(resp)))
         except Exception, e:
             print traceback.format_exc()
