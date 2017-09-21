@@ -117,9 +117,8 @@ def check_new_jmx(name='check_new_jmx'):
                 add new target and alert rule file to prometheus
                 '''
                 echo_command = ' echo -------------------'
-                target_command = ' && echo \'[ {"targets": [ "{marathon_host}:{host_port}"] }]\' > /tmp/prometheus/{srv_type}/{instance_name}_online.json ' \
-                    .format(marathon_host='10.1.5.190', host_port=str(host_port), srv_type=inst.service_type,
-                            instance_name=inst.instance_name)
+                target_command = ' && echo \'[ {"targets": [ "%s:%d"] }]\' > /tmp/prometheus/%s/%s_online.json ' \
+                    % ('10.1.5.190', host_port, inst.service_type, inst.instance_name)
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
                     get_clean_jmx_app_id(tmp_id), '10.1.5.190:' + str(host_port), inst.service_type,
                     get_clean_jmx_app_id(tmp_id))
