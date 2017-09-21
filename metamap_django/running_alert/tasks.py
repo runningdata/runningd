@@ -236,9 +236,8 @@ def check_disabled_jmx(name='check_disabled_jmx'):
         delete alert rule file to prometheus
         '''
         restart_command = 'docker restart %s' % prometheus_container
-        to_del.add(restart_command)
         cmd = (' && ').join(['rm -vf /tmp/prometheus/rules/%s.rules' % ii for ii in to_del])
-        print(remote_cmd(cmd))
+        print(remote_cmd(cmd + ' && ' + restart_command))
         print('prometheus has been restarted')
 
 
