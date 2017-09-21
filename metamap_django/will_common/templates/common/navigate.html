@@ -26,6 +26,17 @@
                 </div>
             </a>
         </div>
+        {% if request.user.userprofile.org_group.name == 'jlc' %}
+            <div class="col-sm-6 col-md-3">
+                <a href="{{ base_host }}10099/alert" class="thumbnail">
+                    <img src="{% static 'images/ETL.jpg' %}"
+                         alt="通用的占位符缩略图">
+                    <div class="caption">
+                        <h3 class="text-center">实时告警</h3>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
         {% if perms.auth.access_etl %}
             <div class="col-sm-6 col-md-3">
                 <a href="{{ base_host }}8000/metamap" class="thumbnail">
