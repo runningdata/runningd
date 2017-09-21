@@ -118,7 +118,7 @@ def check_new_jmx(name='check_new_jmx'):
                 '''
                 echo_command = ' echo -------------------'
                 target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /tmp/prometheus/sds/%s_online.json ' % (
-                    inst.host_and_port, tmp_id)
+                     '10.1.5.190:' + host_port, tmp_id)
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
                     tmp_id, inst.host_and_port, inst.service_type, tmp_id)
                 remote_cmd(echo_command + target_command + rule_command)
