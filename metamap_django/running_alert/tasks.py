@@ -223,8 +223,7 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             delete marathon app
             '''
             app_id = get_jmx_app_id(inst)
-            resp = json.loads(c.delete_app(app_id))
-            print('del %s response message: %s' % (app_id, json.dumps(resp)))
+            print('del %s response message: %s' % (app_id, c.delete_app(app_id)))
         except Exception, e:
             print traceback.format_exc()
             PushUtils.push_to_admin('msg is {message}'.format(message=e.message))
