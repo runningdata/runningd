@@ -79,7 +79,9 @@ def edit(request, pk):
         try:
             form = SparkMonitorInstanceForm(-1, request.POST, instance=SparkMonitorInstance.objects.get(pk=pk))
             if form.is_valid():
-                form.save()
+                obj = form.save(commit=False)
+                obj.utime = timezone.now()
+                obj.save()
             else:
                 print form._errors
                 form = SparkMonitorInstanceForm(request.user.userprofile.id,

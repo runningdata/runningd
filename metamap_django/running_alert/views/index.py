@@ -8,6 +8,7 @@ from django.forms import ModelForm, HiddenInput
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils import timezone
 from django.views import generic
 
 from running_alert.models import MonitorInstance
@@ -61,7 +62,7 @@ def add(request):
         try:
             form = MonitorInstanceForm(-1, request.POST)
             if form.is_valid():
-                form.save()
+                form.save(commit=False)
                 logger.info('MonitorInstance for %s has been added successfully')
             else:
                 form = MonitorInstanceForm(request.user.userprofile.id)
@@ -93,7 +94,9 @@ def edit(request, pk):
         try:
             form = MonitorInstanceForm(-1, request.POST, instance=MonitorInstance.objects.get(pk=pk))
             if form.is_valid():
-                form.save()
+                obj = form.save(commit=False)
+                obj.utime = timezone.now()
+                obj.save()
             else:
                 print form._errors
                 form = MonitorInstanceForm(request.user.userprofile.id, instance=MonitorInstance.objects.get(pk=pk))

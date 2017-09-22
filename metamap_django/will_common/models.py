@@ -28,7 +28,7 @@ class OrgGroup(models.Model):
 
 class CommmonTimes(models.Model):
     ctime = models.DateTimeField(verbose_name=u'创建时间', auto_now_add=True)
-    utime = models.DateTimeField(verbose_name=u'最近更新时间', auto_now=True)
+    utime = models.DateTimeField(verbose_name=u'最近更新时间', default=timezone.now)
 
     class Meta:
         abstract = True
