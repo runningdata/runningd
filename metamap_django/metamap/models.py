@@ -287,7 +287,6 @@ class JarApp(ETLObjRelated):
         strip = '{% load etlutils %} \n' + sche_vars + '\n' + strip
         return {strip, }
 
-
 class ETL(ETLObjRelated):
     type = 1
     query = models.TextField()

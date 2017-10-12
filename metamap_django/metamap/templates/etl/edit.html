@@ -3,6 +3,70 @@
 
 {% block title %}编辑ETL{% endblock %}
 
+{% block scripts %}
+
+    <link rel="stylesheet"
+          href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/styles/default.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/highlight.min.js"></script>
+
+
+    {#    <link rel="stylesheet"#}
+    {#          href="https://raw.githubusercontent.com/lonekorean/highlight-within-textarea/master/jquery.highlight-within-textarea.js">#}
+    {##}
+    {#    <script src="https://raw.githubusercontent.com/lonekorean/highlight-within-textarea/master/jquery.highlight-within-textarea.js"></script>#}
+    <style type="text/css">
+        pre {
+            padding: 10px 16px;
+            border-radius: 2px;
+            border-top: 4px solid #00aeef;
+            -moz-box-shadow: inset 0 0 10px #000;
+            box-shadow: inset 0 0 10px #000;
+            counter-reset: line;
+        }
+
+        span .tt {
+            display: block;
+            line-height: 1.5rem;
+        }
+
+        span .tt:before {
+            counter-increment: line;
+            content: counter(line);
+            display: inline-block;
+            border-right: 1px solid #ddd;
+            padding: 0 .5em;
+            margin-right: .5em;
+            color: #888;
+            width: 50px;
+        }
+    </style>
+    <script>
+
+
+        function myFunction(event) {
+            var target_id = event.id.replace("fake_", "");
+            $('#' + target_id).val(event.innerText);
+        }
+
+        $(document).ready(function () {
+            $('.fake').each(function (i, block) {
+                hljs.highlightBlock(block);
+            });
+
+
+{#            String.prototype.replaceAll = function (reallyDo, replaceWith, ignoreCase) {#}
+{#                if (!RegExp.prototype.isPrototypeOf(reallyDo)) {#}
+{#                    return this.replace(new RegExp(reallyDo, (ignoreCase ? "gi" : "g")), replaceWith);#}
+{#                } else {#}
+{#                    return this.replace(reallyDo, replaceWith);#}
+{#                }#}
+{#            };#}
+{#            var vals = "<span class=\"tt\">" + hljs.highlight("sql", $('#query').val()).value.replaceAll("\n", "<span class=\"tt\">");#}
+{#            $('#fake_query').html(vals);#}
+        });
+    </script>
+
+{% endblock %}
 {% block content %}
     {% csrf_token %}
     {% has_def 'etl' as has_etl %}
@@ -16,30 +80,36 @@
                     <option class="bs-title-option" value="">选择....</option>
                 </select>
                 <label>ETL名称</label>
-                <input name="name" value="{{ etl.name }}" type="text" class="form-control"  readonly="readonly"  required>
+                <input name="name" value="{{ etl.name }}" type="text" class="form-control" readonly="readonly" required>
                 <label>查询SQL</label>
-                <textarea name="query" rows="13" class="form-control">{{ etl.query }}</textarea>
+                                <textarea id="query" name="query" rows="13" class="form-control">{{ etl.query }}</textarea>
+{#                <pre>#}
+{#                    <div id='fake_query' class="sql fake" contenteditable onfocusout="myFunction(this)">#}
+{#                        {{ etl.query }}#}
+{#                    </div>#}
+{#                </pre>#}
+                <input type='hidden' id='query' name='query' value="{{ etl.query }}"/>
                 <label>预设变量[仅供测试]</label>
                 <textarea name="variables" rows="5" class="form-control">{{ etl.variables }}</textarea>
                 <label>配置</label>
                 <textarea name="setting" rows="5" class="form-control">{{ etl.setting }}</textarea>
                 <label>先行SQL（针对target）</label>
                 <textarea name="preSql" rows="13" class="form-control">{{ etl.preSql }}</textarea>
-{#                <label>是否生效</label>#}
-{#                <div class="radio-inline">#}
-{#                    <input id="optionsRadios1" type="radio" name="valid"#}
-{#                            {% if etl.valid != 0 %}#}
-{#                           checked="checked"#}
-{#                            {% endif %}#}
-{#                           value="1">是#}
-{#                </div>#}
-{#                <div class="radio-inline">#}
-{#                    <input id="optionsRadios3" type="radio" name="valid"#}
-{#                            {% if etl.valid == 0 %}#}
-{#                           checked="checked"#}
-{#                            {% endif %}#}
-{#                           value="0">否#}
-{#                </div>#}
+                {#                <label>是否生效</label>#}
+                {#                <div class="radio-inline">#}
+                {#                    <input id="optionsRadios1" type="radio" name="valid"#}
+                {#                            {% if etl.valid != 0 %}#}
+                {#                           checked="checked"#}
+                {#                            {% endif %}#}
+                {#                           value="1">是#}
+                {#                </div>#}
+                {#                <div class="radio-inline">#}
+                {#                    <input id="optionsRadios3" type="radio" name="valid"#}
+                {#                            {% if etl.valid == 0 %}#}
+                {#                           checked="checked"#}
+                {#                            {% endif %}#}
+                {#                           value="0">否#}
+                {#                </div>#}
                 <br/>
                 <div class="form-group text-center">
 
@@ -62,22 +132,22 @@
                 <input name="name" value="" type="text" class="form-control" required>
 
                 <label>查询SQL</label>
-                <textarea name="query" rows="13" class="form-control"></textarea>
+                <textarea id="query" name="query" rows="13" class="form-control"></textarea>
                 <label>预设变量[仅供测试]</label>
                 <textarea name="variables" rows="5" class="form-control"></textarea>
                 <label>配置</label>
                 <textarea name="setting" rows="5" class="form-control"></textarea>
                 <label>先行SQL（针对target）</label>
                 <textarea name="preSql" rows="13" class="form-control"></textarea>
-{#                <label>是否生效</label>#}
-{#                <div class="radio-inline">#}
-{#                    <input id="optionsRadios1" type="radio" name="valid"#}
-{#                           checked="checked"#}
-{#                           value="1">是#}
-{#                </div>#}
-{#                <div class="radio-inline">#}
-{#                    <input id="optionsRadios3" type="radio" name="valid" value="0">否#}
-{#                </div>#}
+                {#                <label>是否生效</label>#}
+                {#                <div class="radio-inline">#}
+                {#                    <input id="optionsRadios1" type="radio" name="valid"#}
+                {#                           checked="checked"#}
+                {#                           value="1">是#}
+                {#                </div>#}
+                {#                <div class="radio-inline">#}
+                {#                    <input id="optionsRadios3" type="radio" name="valid" value="0">否#}
+                {#                </div>#}
                 <br/>
                 <div class="form-group text-center">
 

@@ -72,7 +72,7 @@ def check_parent_mermaid(blood, dep_score):
     if bloods.count() > 0:
         for bld in bloods:
             dep_score[bld] = dep_score.get(bld, 0) + 1
-            if dep_score[bld] > 50:
+            if dep_score[bld] > 200:
                 break
             check_parent_mermaid(bld, dep_score)
 
@@ -88,7 +88,7 @@ def check_child_mermaid(blood, dep_score):
     if bloods.count() > 0:
         for bld in bloods:
             dep_score[bld] = dep_score.get(bld, 0) + 1
-            if dep_score[bld] > 50:
+            if dep_score[bld] > 200:
                 break
             check_child_mermaid(bld, dep_score)
 
@@ -102,7 +102,7 @@ def check_cycle(etlid):
         check_child_mermaid(blood, dep_score)
 
     dep_score = sorted(dep_score.items(), lambda x, y: cmp(x[1], y[1]), reverse=True)
-    large_score = [blood for blood, v in dep_score if v > 45]
-    if any(v > 45 for blood, v in dep_score):
+    large_score = [blood for blood, v in dep_score if v > 50]
+    if any(v > 199 for blood, v in dep_score):
         return large_score, True
     return large_score, False
