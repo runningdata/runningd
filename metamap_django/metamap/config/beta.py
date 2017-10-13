@@ -37,7 +37,7 @@ PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
 PUSH_KEY = '&OKY%~!$^G*JRRF^'
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 
-ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83', '10.1.5.190', '10.0.1.106']
+ALLOWED_HOSTS = ['127.0.0.1', '10.0.1.62', '10.1.5.83', '10.2.19.124', '10.0.1.106']
 CLUTER_QUEUE = 'default'
 
 HIVE_SERVER = {

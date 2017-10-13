@@ -32,7 +32,7 @@ from will_common.utils import redisutils
 logger = get_task_logger('running_alert')
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/running_alert/'
 
-c = MarathonClient('http://10.1.5.190:8080')
+c = MarathonClient('http://10.2.19.124:8080')
 
 metric_files = dict()
 metric_files['flume'] = '/flume_sample.yaml'
@@ -119,9 +119,9 @@ def check_new_jmx(name='check_new_jmx'):
                 '''
                 echo_command = ' echo -------------------'
                 target_command = ' && echo \'[ {"targets": [ "%s:%d"] }]\' > /tmp/prometheus/%s/%s_online.json ' \
-                                 % ('10.1.5.190', host_port, inst.service_type, inst.instance_name)
+                                 % ('10.2.19.124', host_port, inst.service_type, inst.instance_name)
                 rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' -e \'s/${host_and_port}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
-                    get_clean_name(inst), '10.1.5.190:' + str(host_port), inst.service_type,
+                    get_clean_name(inst), '10.2.19.124:' + str(host_port), inst.service_type,
                     inst.host_and_port, get_clean_jmx_app_id(tmp_id))
                 remote_cmd(echo_command + target_command + rule_command)
                 print('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))

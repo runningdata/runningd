@@ -48,7 +48,7 @@ ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 ADMIN_EMAIL = 'chenxin@yinker.com'
 PROC_USER = 'metamap'
 
-ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.1.5.190']
+ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.2.19.124']
 CLUTER_QUEUE = 'xstorm'
 
 NN_HOSTS = ['namenode01.yinker.com', 'datanode17.yinker.com']
