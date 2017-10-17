@@ -72,7 +72,7 @@ def check_new_jmx(name='check_new_jmx'):
             try:
                 tmp_id = get_jmx_app_id(inst)
                 service_port = 0
-                print('handling jmx {tmp_id}, and got host_port {host_port}'.format(tmp_id=tmp_id, host_port=host_port))
+                print('handling jmx {tmp_id}'.format(tmp_id=tmp_id))
                 if tmp_id not in running_ids:
                     '''
                     run the docker container in marathon
