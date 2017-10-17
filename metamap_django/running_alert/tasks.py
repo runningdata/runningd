@@ -39,19 +39,19 @@ CONTAINER_PORT = 1234
 prometheus_container = 'my-prometheus'
 
 
-def get_avaliable_port():
-    rxe = remote_cmd(
-        'netstat -lntu | awk \'{print($4)}\' | grep : | awk -F \':\' \'{print $NF}\' | sort -nru ',
-        settings.MARATHON_HOST)
-    used_ports = [int(i) for i in rxe.split('\r\n')]
-    min_port = used_ports[-1]
-    start_port = min_port if min_port > settings.START_PORT else settings.START_PORT
-    start_port = start_port + random.randint(1, 30000)
-    print('start select port %d' % start_port)
-    while start_port in used_ports:
-        start_port += 1
-    print('got port %d' % start_port)
-    return start_port
+# def get_avaliable_port():
+#     rxe = remote_cmd(
+#         'netstat -lntu | awk \'{print($4)}\' | grep : | awk -F \':\' \'{print $NF}\' | sort -nru ',
+#         settings.MARATHON_HOST)
+#     used_ports = [int(i) for i in rxe.split('\r\n')]
+#     min_port = used_ports[-1]
+#     start_port = min_port if min_port > settings.START_PORT else settings.START_PORT
+#     start_port = start_port + random.randint(1, 30000)
+#     print('start select port %d' % start_port)
+#     while start_port in used_ports:
+#         start_port += 1
+#     print('got port %d' % start_port)
+#     return start_port
 
 
 @shared_task(queue='running_alert')
@@ -71,7 +71,6 @@ def check_new_jmx(name='check_new_jmx'):
         for inst in insts:
             try:
                 tmp_id = get_jmx_app_id(inst)
-                host_port = get_avaliable_port()
                 service_port = 0
                 print('handling jmx {tmp_id}, and got host_port {host_port}'.format(tmp_id=tmp_id, host_port=host_port))
                 if tmp_id not in running_ids:
@@ -79,12 +78,13 @@ def check_new_jmx(name='check_new_jmx'):
                     run the docker container in marathon
                     '''
                     port_maps = [
-                        MarathonContainerPortMapping(container_port=CONTAINER_PORT, host_port=host_port,
+                        MarathonContainerPortMapping(container_port=CONTAINER_PORT, host_port=0,
                                                      service_port=service_port)
                     ]
                     parameters = [{"key": "add-host", "value": "datanode02.yinker.com:10.2.19.83"}, ]
                     docker = MarathonDockerContainer(image='ruoyuchen/jmxexporters', network='BRIDGE',
-                                                     port_mappings=port_maps, force_pull_image=True, parameters=parameters)
+                                                     port_mappings=port_maps, force_pull_image=True,
+                                                     parameters=parameters)
                     container = MarathonContainer(docker=docker)
                     cmd = 'sh /entrypoint.sh ' + inst.host_and_port + ' ' + str(CONTAINER_PORT) + ' ' + \
                           inst.service_type + ' ' + tmp_id
@@ -106,9 +106,8 @@ def check_new_jmx(name='check_new_jmx'):
                     # restart_command = ' && docker restart %s' % prometheus_container
                     labels = {}
 
-
-
-                    new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels, constraints=[MarathonConstraint('owner', 'LIKE', 'owner')])
+                    new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels,
+                                          constraints=[MarathonConstraint('owner', 'LIKE', 'owner')])
 
                     new_result = c.create_app(tmp_id, new_app)
                     time.sleep(3)
@@ -119,6 +118,8 @@ def check_new_jmx(name='check_new_jmx'):
                     add new target and alert rule file to prometheus
                     '''
                     echo_command = ' echo -------------------'
+                    new_app = c.get_app(tmp_id)
+                    host_port = new_app.tasks[0].ports[0]
                     target_command = ' && echo \'[ {"targets": [ "%s:%d"] }]\' > /tmp/prometheus/%s/%s_online.json ' \
                                      % ('10.2.19.124', host_port, inst.service_type, inst.instance_name)
                     rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' -e \'s/${host_and_port}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
@@ -156,8 +157,10 @@ def get_jmx_app_id(inst):
 def get_clean_jmx_app_id(app_id):
     return app_id.replace('/', '')
 
+
 def get_clean_name(inst):
     return inst.instance_name.replace('-', '_')
+
 
 @shared_task
 def check_new_spark(name='check_new_spark'):
