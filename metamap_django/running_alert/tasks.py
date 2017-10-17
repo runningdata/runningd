@@ -126,7 +126,7 @@ def check_new_jmx(name='check_new_jmx'):
                     task = new_app.tasks[0]
                     port = task.ports[0]
                     host = task.host
-                    host_port = host + ':' + port
+                    host_port = host + ':' + str(port)
                     target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /tmp/prometheus/%s/%s_online.json ' \
                                      % (host_port, inst.service_type, inst.instance_name)
                     rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' -e \'s/${host_and_port}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
