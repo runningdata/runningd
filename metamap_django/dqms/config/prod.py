@@ -172,7 +172,7 @@ DATABASES = {
         'NAME': 'YKX_DW',
         'PASSWORD': 'Zjy@yinker20150309',
         'USER': 'zjy',
-        'HOST': '10.2.19.74',
+        'HOST': '10.2.19.90',
         'PORT': '3306',
     }
 }
