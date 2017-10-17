@@ -121,6 +121,7 @@ def check_new_jmx(name='check_new_jmx'):
                     while len(new_app.tasks) != 1:
                         time.sleep(1)
                         print('No task for {name} yet'.format(name=tmp_id))
+                        print(new_app.to_json())
                     task = new_app.tasks[0]
                     port = task.ports[0]
                     host = task.host
