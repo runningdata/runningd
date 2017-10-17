@@ -59,7 +59,6 @@ def check_new_jmx(name='check_new_jmx'):
         last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_ADD_TIME)
         print('last run is {ll} for {redis_key}'.format(ll=last_run, redis_key=REDIS_KEY_JMX_CHECK_LAST_ADD_TIME))
         insts = MonitorInstance.objects.filter(utime__gt=last_run, valid=1)
-        reset_last_run_time(REDIS_KEY_JMX_CHECK_LAST_ADD_TIME)
         if len(insts) > 0:
             running_ids = [app.id for app in c.list_apps()]
         else:
@@ -135,6 +134,7 @@ def check_new_jmx(name='check_new_jmx'):
             restart_command = 'docker restart %s' % prometheus_container
             remote_cmd(restart_command)
             print('prometheus has been restarted')
+        reset_last_run_time(REDIS_KEY_JMX_CHECK_LAST_ADD_TIME)
     except Exception, e:
         print('ERROR: %s' % traceback.format_exc())
 
@@ -148,15 +148,16 @@ def get_jmx_app_id(inst):
 def get_clean_jmx_app_id(app_id):
     return app_id.replace('/', '')
 
+
 def get_clean_name(inst):
     return inst.instance_name.replace('-', '_')
+
 
 @shared_task
 def check_new_spark(name='check_new_spark'):
     last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME)
     print('last run is {ll}'.format(ll=last_run))
     insts = SparkMonitorInstance.objects.filter(utime__gt=last_run, valid=1)
-    reset_last_run_time(REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME)
     need_restart = False
     for inst in insts:
         if not is_spark_rule_exist(inst.instance_name):
@@ -174,6 +175,8 @@ def check_new_spark(name='check_new_spark'):
         remote_cmd(restart_command)
         print('prometheus has been restarted')
 
+    reset_last_run_time(REDIS_KEY_SPARK_CHECK_LAST_ADD_TIME)
+
 
 def reset_last_run_time(k):
     redisutils.set_val(k, django.utils.timezone.now())
@@ -183,7 +186,6 @@ def reset_last_run_time(k):
 def check_disabled_spark(name='check_disabled_spark'):
     last_run = redisutils.get_val(REDIS_KEY_SPARK_CHECK_LAST_MINUS_TIME)
     insts = SparkMonitorInstance.objects.filter(utime__gt=last_run, valid=0)
-    reset_last_run_time(REDIS_KEY_SPARK_CHECK_LAST_MINUS_TIME)
     need_restart = False
     for inst in insts:
         '''
@@ -198,12 +200,13 @@ def check_disabled_spark(name='check_disabled_spark'):
         remote_cmd(restart_command)
         print('prometheus has been restarted')
 
+    reset_last_run_time(REDIS_KEY_SPARK_CHECK_LAST_MINUS_TIME)
+
 
 @shared_task
 def check_disabled_jmx(name='check_disabled_jmx'):
     last_run = redisutils.get_val(REDIS_KEY_JMX_CHECK_LAST_MINUS_TIME)
     insts = MonitorInstance.objects.filter(utime__gt=last_run, valid=0)
-    reset_last_run_time(REDIS_KEY_JMX_CHECK_LAST_MINUS_TIME)
     to_del = set()
     for inst in insts:
         try:
@@ -237,6 +240,8 @@ def check_disabled_jmx(name='check_disabled_jmx'):
         cmd = (' && ').join(['rm -vf /tmp/prometheus/rules/%s.rules' % ii for ii in to_del])
         print(remote_cmd(cmd + ' && ' + restart_command))
         print('prometheus has been restarted')
+
+    reset_last_run_time(REDIS_KEY_JMX_CHECK_LAST_MINUS_TIME)
 
 
 def is_spark_rule_exist(app_name):
