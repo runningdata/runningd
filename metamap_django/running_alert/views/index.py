@@ -62,7 +62,7 @@ def add(request):
         try:
             form = MonitorInstanceForm(-1, request.POST)
             if form.is_valid():
-                form.save(commit=False)
+                form.save()
                 logger.info('MonitorInstance for %s has been added successfully')
             else:
                 form = MonitorInstanceForm(request.user.userprofile.id)
