@@ -34,10 +34,6 @@ ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/running_alert/'
 
 c = MarathonClient('http://10.2.19.124:8080')
 
-metric_files = dict()
-metric_files['flume'] = '/flume_sample.yaml'
-metric_files['kafka'] = '/kafka_sample.yaml'
-metric_files['zookeeper'] = '/zookeeper_sample.yaml'
 CONTAINER_PORT = 1234
 prometheus_container = 'my-prometheus'
 
@@ -88,8 +84,8 @@ def check_new_jmx(name='check_new_jmx'):
                 docker = MarathonDockerContainer(image='ruoyuchen/jmxexporters', network='BRIDGE',
                                                  port_mappings=port_maps, force_pull_image=True, parameters=parameters)
                 container = MarathonContainer(docker=docker)
-                cmd = 'sh /entrypoint.sh ' + inst.host_and_port + ' ' + str(CONTAINER_PORT) + ' ' + metric_files[
-                    inst.service_type] + ' ' + tmp_id
+                cmd = 'sh /entrypoint.sh ' + inst.host_and_port + ' ' + str(CONTAINER_PORT) + ' ' + \
+                      inst.service_type + ' ' + tmp_id
                 # domain_name = hp_inst + '.' + inst.service_type + '.moniter.com'
                 # labels = {'HAPROXY_GROUP': 'external',
                 #           'HAPROXY_0_VHOST': domain_name}
