@@ -118,7 +118,7 @@ def check_new_jmx(name='check_new_jmx'):
                     '''
                     echo_command = ' echo -------------------'
                     new_app = c.get_app(tmp_id)
-                    while new_app.tasksRunning != 1:
+                    while new_app.tasks_running != 1:
                         time.sleep(1)
                         new_app = c.get_app(tmp_id)
                         print('No task for {name} yet'.format(name=tmp_id))
