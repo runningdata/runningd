@@ -20,6 +20,7 @@ from celery.utils.log import get_task_logger
 from django.conf import settings
 from marathon import MarathonApp
 from marathon import MarathonClient
+from marathon import MarathonConstraint
 from marathon import MarathonHttpError
 from marathon.models.container import MarathonContainer, MarathonDockerContainer, MarathonContainerPortMapping
 
@@ -104,7 +105,10 @@ def check_new_jmx(name='check_new_jmx'):
                     #     tmp_id, domain_name, inst.service_type, domain_name)
                     # restart_command = ' && docker restart %s' % prometheus_container
                     labels = {}
-                    new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels)
+
+
+
+                    new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels, constraints=[MarathonConstraint('owner', 'LIKE', 'owner')])
 
                     new_result = c.create_app(tmp_id, new_app)
                     time.sleep(3)
