@@ -106,11 +106,10 @@ def check_new_jmx(name='check_new_jmx'):
                     # restart_command = ' && docker restart %s' % prometheus_container
                     labels = {}
 
-                    new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels,
-                                          constraints=[MarathonConstraint('owner', 'LIKE', 'owner')])
+                    new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels)
 
                     new_result = c.create_app(tmp_id, new_app)
-                    time.sleep(3)
+                    time.sleep(20)
                     c.scale_app(tmp_id, delta=1)
                     print('new marathon app %s has been created' % new_result.id)
 
@@ -119,11 +118,13 @@ def check_new_jmx(name='check_new_jmx'):
                     '''
                     echo_command = ' echo -------------------'
                     new_app = c.get_app(tmp_id)
-                    host_port = new_app.tasks[0].ports[0]
-                    target_command = ' && echo \'[ {"targets": [ "%s:%d"] }]\' > /tmp/prometheus/%s/%s_online.json ' \
-                                     % ('10.2.19.124', host_port, inst.service_type, inst.instance_name)
+                    port = new_app.tasks[0].ports[0]
+                    host = new_app.tasks[0].host
+                    host_port = host + ':' + port
+                    target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /tmp/prometheus/%s/%s_online.json ' \
+                                     % (host_port, inst.service_type, inst.instance_name)
                     rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' -e \'s/${host_and_port}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
-                        get_clean_name(inst), '10.2.19.124:' + str(host_port), inst.service_type,
+                        get_clean_name(inst), host_port, inst.service_type,
                         inst.host_and_port, get_clean_jmx_app_id(tmp_id))
                     remote_cmd(echo_command + target_command + rule_command)
                     print('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
