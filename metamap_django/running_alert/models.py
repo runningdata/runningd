@@ -21,7 +21,7 @@ class MonitorInstance(CommmonTimes, CommmonCreators):
     exporter_uri = models.CharField(max_length=50, blank=False, null=False, verbose_name=u'监控指标地址')
     managers = models.CharField(max_length=300, blank=False, null=False, default='', verbose_name=u'告警接收人[逗号隔开]')
     service_type = models.CharField(max_length=50, blank=False, null=False, verbose_name=u'实例类型', choices=(
-        ('kafka', 'kafka'), ('zookeeper', 'zookeeper'), ('flume', 'flume'),
+        ('kafka', 'kafka'), ('zookeeper', 'zookeeper'), ('flume', 'flume'), ('tomcat', 'tomcat'), ('azkaban', 'azkaban'),
         # ('spark_streaming_app', 'spark_streaming_app')
     ))
     valid = models.IntegerField(default=1, verbose_name=u'是否有效', choices=(
@@ -55,7 +55,7 @@ class ServiceRules(CommmonTimes):
     Alert rules for each service
     '''
     service_name = models.CharField(max_length=50, blank=False, null=False, verbose_name=u'服务类型', choices=(
-        ('kafka', 'kafka'), ('zookeeper', 'zookeeper'), ('flume', 'flume'),
+        ('kafka', 'kafka'), ('zookeeper', 'zookeeper'), ('flume', 'flume'), ('tomcat', 'tomcat'), ('azkaban', 'azkaban'),
         # ('spark_streaming_app', 'spark_streaming_app')
     ))
     rules = models.TextField(verbose_name=u'告警规则')

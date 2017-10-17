@@ -168,8 +168,8 @@ def check_new_spark(name='check_new_spark'):
             add new alert rule file to prometheus
             '''
             echo_command = ' echo ------------------------'
-            rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' /tmp/prometheus/rules/simple_spark.rule_template > /tmp/prometheus/rules/%s.rules ' % (
-                inst.instance_name, inst.instance_name, inst.instance_name)
+            rule_command = ' && sed -e \'s/${alert_name}/%s/g\' /tmp/prometheus/rules/simple_spark.rule_template > /tmp/prometheus/rules/%s.rules ' % (
+                inst.instance_name, inst.instance_name)
             remote_cmd(echo_command + rule_command)
             need_restart = True
             print('spark streaming %s has been registered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
