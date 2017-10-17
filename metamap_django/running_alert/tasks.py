@@ -119,9 +119,9 @@ def check_new_jmx(name='check_new_jmx'):
                     echo_command = ' echo -------------------'
                     new_app = c.get_app(tmp_id)
                     while len(new_app.tasks) != 1:
-                        task = new_app.tasks[0]
-                        print('No task for {name} yet'.format(name=tmp_id))
                         time.sleep(1)
+                        print('No task for {name} yet'.format(name=tmp_id))
+                    task = new_app.tasks[0]
                     port = task.ports[0]
                     host = task.host
                     host_port = host + ':' + port
