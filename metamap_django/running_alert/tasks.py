@@ -109,7 +109,7 @@ def check_new_jmx(name='check_new_jmx'):
                     new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels)
 
                     new_result = c.create_app(tmp_id, new_app)
-                    time.sleep(20)
+                    time.sleep(3)
                     c.scale_app(tmp_id, delta=1)
                     print('new marathon app %s has been created' % new_result.id)
 
@@ -118,8 +118,12 @@ def check_new_jmx(name='check_new_jmx'):
                     '''
                     echo_command = ' echo -------------------'
                     new_app = c.get_app(tmp_id)
-                    port = new_app.tasks[0].ports[0]
-                    host = new_app.tasks[0].host
+                    while len(new_app.tasks) != 1:
+                        task = new_app.tasks[0]
+                        print('No task for {name} yet'.format(name=tmp_id))
+                        time.sleep(1)
+                    port = task.ports[0]
+                    host = task.host
                     host_port = host + ':' + port
                     target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /tmp/prometheus/%s/%s_online.json ' \
                                      % (host_port, inst.service_type, inst.instance_name)
