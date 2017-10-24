@@ -3,7 +3,6 @@ import logging
 import traceback
 
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.forms import ModelForm, HiddenInput
 from django.http import HttpResponseRedirect
 from django.shortcuts import render

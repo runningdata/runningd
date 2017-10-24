@@ -5,11 +5,13 @@ created by will
 '''
 import os
 
+import re
 from django.conf import settings
 from django.template import Context, Template
 
 from metamap.db_views import ColMeta, DB
 from metamap.models import TblBlood, ETL, WillDependencyTask, SqoopMysql2Hive, SqoopHive2Mysql, ExecBlood, ExecObj
+from will_common.templatetags import etlutils
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import *
@@ -264,7 +266,23 @@ def generate_sqoop_hive2mysql(task, schedule=-1):
     return strip
 
 
-def generate_etl_sql(etl, schedule=-1):
+def get_delta_variables(variables, delta):
+    lines = variables.split('\n')
+    new_lines = set()
+    for line in lines:
+        result = re.split(r'\s', line)
+        for i in result:
+            if re.match(r'^[a-zA-Z_]{1,}$', i):
+                if hasattr(etlutils, i):
+                    method = getattr(etlutils, i)
+                    if getattr(method, 'func_name') == 'day_change':
+                        num = int(result[result.index(i) + 1]) - delta
+                        result[result.index(i) + 1] = str(num)
+        new_lines.add(' '.join(result))
+    return '\n'.join(new_lines)
+
+
+def generate_etl_sql(etl, schedule=-1, delta=0):
     '''
     预览HSQL内容
     :param etl:
@@ -275,8 +293,12 @@ def generate_etl_sql(etl, schedule=-1):
     if schedule == -1:
         str.append(etl.variables)
     else:
+
         task = WillDependencyTask.objects.get(rel_id=etl.id, schedule=schedule, type=1)
-        str.append(task.variables)
+        if delta != 0:
+            str.append(get_delta_variables(task.variables, delta))
+        else:
+            str.append(task.variables)
     str.append('set mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ';')
     str.append("-- job for " + etl.name)
     if etl.creator:
@@ -299,14 +321,14 @@ def generate_etl_sql(etl, schedule=-1):
     return template.render(Context()).strip()
 
 
-def generate_etl_file(etl, location, schedule=-1):
+def generate_etl_file(etl, location, schedule=-1, delta=0):
     '''
     生成hql文件
     :param etl:
     :param location:
     :return:
     '''
-    final_result = generate_etl_sql(etl, schedule)
+    final_result = generate_etl_sql(etl, schedule, delta)
     if final_result != MSG_NO_DATA:
         with open(location, 'w') as f:
             f.write(final_result.encode('utf-8'))
@@ -329,13 +351,13 @@ def generate_job_file(*args, **kwargs):
 
     job_name = blood.tblName
     if not job_name.startswith('etl_done_') and not is_check:
-            # 生成hql文件
-            etl = ETL.objects.get(id=blood.relatedEtlId, valid=1)
-            location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
-            generate_etl_file(etl, location, schedule)
-            command = "hive -f " + location
-            if not settings.USE_ROOT:
-                command = 'runuser -l ' + etl.cgroup.name + ' -c "' + command + '"'
+        # 生成hql文件
+        etl = ETL.objects.get(id=blood.relatedEtlId, valid=1)
+        location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
+        generate_etl_file(etl, location, schedule)
+        command = "hive -f " + location
+        if not settings.USE_ROOT:
+            command = 'runuser -l ' + etl.cgroup.name + ' -c "' + command + '"'
             # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     else:
         command = "echo " + job_name
@@ -400,7 +422,7 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     print('generating.....for jobdone %s ' % etlobj.name)
 
 
-def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1):
+def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1, delta=0):
     '''
     生成azkaban job文件
     :param blood:
@@ -412,7 +434,7 @@ def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1)
         # 生成hql文件
         etl = ETL.objects.get(name=job_name, valid=1)
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
-        generate_etl_file(etl, location, schedule)
+        generate_etl_file(etl, location, schedule, delta)
         command = "hive -f " + location
         # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     else:
@@ -536,6 +558,7 @@ def load_nodes(*args, **kwargs):
                 # load_nodes(parent_node, folder, done_blood, done_leaf, schedule, group_name)
                 load_nodes(leafs=parent_node, folder=folder, done_blood=done_blood, done_leaf=done_leaf,
                            schedule=schedule, group_name=group_name, is_check=is_check)
+
 
 def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
     '''

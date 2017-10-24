@@ -5,7 +5,7 @@
 
 {% block content %}
     <form action="." method="POST">
-    <div class="form-group">
+        <div class="form-group">
             <label>调度方式</label>
             <div class="radio-inline">
                 <input id="optionsRadios1" type="radio" name="schedule"
@@ -30,6 +30,10 @@
                            value="4">reload[尚未支持]
                 </div>
             </div>
+        </div>
+        <div class="form-group">
+            <label>前移天数</label>
+            <input name="delta" value="" type="text" class="form-control">
         </div>
         <div class="form-group">
             <label>ETL名称</label>

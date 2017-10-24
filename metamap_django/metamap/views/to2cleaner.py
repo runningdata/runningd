@@ -13,6 +13,7 @@ from django.utils import timezone
 from metamap.models import TblBlood, ETL, WillDependencyTask, ExecObj, ExecBlood, \
     SqoopMysql2Hive, AnaETL, SqoopHive2Mysql, JarApp, NULLETL, Exports, ExecutionsV2
 from will_common.models import PeriodicTask
+from will_common.templatetags import etlutils
 
 logger = logging.getLogger('django')
 

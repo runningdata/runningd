@@ -418,6 +418,8 @@ def restart_job(request):
             dependencies = {}
             schedule = int(request.POST.get('schedule'))
 
+            delta = int(request.POST.get('delta'))
+
             for name in request.POST.get('names').split(','):
                 dependencies[name] = set()
                 for blood in TblBlood.objects.filter(tblName=name):
@@ -443,8 +445,8 @@ def restart_job(request):
             os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
             for job_name, parent_names in dependencies.items():
-                etlhelper.generate_job_file_for_partition(job_name, parent_names, folder, schedule)
-            etlhelper.generate_job_file_for_partition('etl_done_' + folder, dependencies.keys(), folder)
+                etlhelper.generate_job_file_for_partition(job_name, parent_names, folder, schedule, delta)
+            etlhelper.generate_job_file_for_partition('etl_done_' + folder, dependencies.keys(), folder, delta)
             task_zipfile = AZKABAN_BASE_LOCATION + folder
             ziputils.zip_dir(task_zipfile)
             command = 'sh $METAMAP_HOME/files/azkaban_job_restart.sh %s ' % folder

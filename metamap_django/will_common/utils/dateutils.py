@@ -7,7 +7,6 @@ import datetime, time
 from django.utils.timezone import utc
 from django.utils.timezone import localtime
 
-
 def now_datetime():
     return time.strftime("%Y%m%d%H%M%S")
 

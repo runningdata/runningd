@@ -9,6 +9,14 @@ from django import template
 register = template.Library()
 
 
+def loggerr(func):
+    def day_change(*args, **kwargs):  # 1
+        print "Arguments were: %s, %s" % (args, kwargs)
+        return func(*args, **kwargs)  # 2
+
+    return day_change
+
+
 @register.simple_tag
 def var(var):
     return var
@@ -40,12 +48,14 @@ def datekey2date(datekey):
 
 
 @register.simple_tag
+@loggerr
 def now_datekey_add(num):
     d = datetime.datetime.now() + datetime.timedelta(days=num)
     return d.strftime('%Y%m%d')
 
 
 @register.simple_tag
+@loggerr
 def now_date_add(num):
     d = datetime.datetime.now() + datetime.timedelta(days=num)
     return d.strftime('%Y-%m-%d')
@@ -167,7 +177,6 @@ def is_valid(value):
     return '否'
 
 
-
 AUTH_DICT = dict()
 AUTH_DICT['auth.access_etl'] = u'修改ETL'
 AUTH_DICT['auth.access_hadmin'] = u'人员管理'
@@ -180,6 +189,7 @@ def readable_auth(lis):
     for l in lis:
         result += u',' + AUTH_DICT.get(l, u'其他')
     return result
+
 # @register.filter
 # def clean_blood(value):
 #     return value.replace('@', '__');
