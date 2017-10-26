@@ -47,15 +47,15 @@ def datekey2date(datekey):
     return datetime.datetime.strptime(datekey, '%Y%m%d').strftime('%Y-%m-%d')
 
 
-@register.simple_tag
 @loggerr
+@register.simple_tag
 def now_datekey_add(num):
     d = datetime.datetime.now() + datetime.timedelta(days=num)
     return d.strftime('%Y%m%d')
 
 
-@register.simple_tag
 @loggerr
+@register.simple_tag
 def now_date_add(num):
     d = datetime.datetime.now() + datetime.timedelta(days=num)
     return d.strftime('%Y-%m-%d')

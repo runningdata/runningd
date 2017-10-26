@@ -270,13 +270,18 @@ def get_delta_variables(variables, delta):
     lines = variables.split('\n')
     new_lines = set()
     for line in lines:
-        result = re.split(r'\s', line)
+        result = re.split(r'\s+', line)
         for i in result:
             if re.match(r'^[a-zA-Z_]{1,}$', i):
                 if hasattr(etlutils, i):
                     method = getattr(etlutils, i)
                     if getattr(method, 'func_name') == 'day_change':
-                        num = int(result[result.index(i) + 1]) - delta
+                        try:
+                            num = int(result[result.index(i) + 1]) - delta
+                        except Exception, e:
+                            print result[result.index(i) + 1]
+                            print result
+                            raise e
                         result[result.index(i) + 1] = str(num)
         new_lines.add(' '.join(result))
     return '\n'.join(new_lines)

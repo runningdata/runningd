@@ -440,7 +440,7 @@ def restart_job(request):
                     print('not exist for %s ' % child_name)
                     raise e
 
-            folder = 'h2h-' + dateutils.now_datetime() + '-restart'
+            folder = 'h2h-' + dateutils.now_datetime() + '-restart-delta-' + str(delta)
             os.mkdir(AZKABAN_BASE_LOCATION + folder)
             os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
@@ -465,7 +465,7 @@ def restart_job(request):
         return render(request, 'etl/restart.html')
 
 
-def generate_job_dag(request, schedule, group_name='xiaov'):
+def generate_job_dag(request, schedule, group_name='xiaov', delta=0):
     '''
     抽取所有有效的ETL,生成azkaban调度文件
     :param request:
