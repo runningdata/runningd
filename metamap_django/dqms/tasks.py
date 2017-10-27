@@ -116,7 +116,7 @@ def runcase(case, check, user):
         case_inst.result_mes = 'success'
     except Exception, e:
         logger.error(e.message)
-        print('msg : %s ' % traceback.format_exc())
+        print('msg : %s when processing %s' % (traceback.format_exc(), case.case_name))
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), traceback.format_exc())
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, traceback.format_exc())
         case_inst.status = enums.EXECUTION_STATUS.FAILED
