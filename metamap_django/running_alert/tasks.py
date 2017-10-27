@@ -87,7 +87,7 @@ def check_new_jmx(name='check_new_jmx'):
                                                      parameters=parameters)
                     container = MarathonContainer(docker=docker)
                     cmd = 'sh /entrypoint.sh ' + inst.host_and_port + ' ' + str(CONTAINER_PORT) + ' ' + \
-                          inst.service_type + ' ' + tmp_id
+                          inst.service_type + ' ' + inst.instance_name
                     # domain_name = hp_inst + '.' + inst.service_type + '.moniter.com'
                     # labels = {'HAPROXY_GROUP': 'external',
                     #           'HAPROXY_0_VHOST': domain_name}
@@ -129,8 +129,8 @@ def check_new_jmx(name='check_new_jmx'):
                     host_port = host + ':' + str(port)
                     target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /tmp/prometheus/%s/%s_online.json ' \
                                      % (host_port, inst.service_type, inst.instance_name)
-                    rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' -e \'s/${host_and_port}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
-                        get_clean_name(inst), host_port, inst.service_type,
+                    rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${inst_name}/%s/g\' -e \'s/${srv_type}/%s/g\' -e \'s/${host_and_port}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
+                        get_clean_name(inst), inst.instance_name, inst.service_type,
                         inst.host_and_port, get_clean_jmx_app_id(tmp_id))
                     remote_cmd(echo_command + target_command + rule_command)
                     print('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
