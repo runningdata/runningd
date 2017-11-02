@@ -18,6 +18,9 @@ def now_date():
 def now_datekey():
     return time.strftime("%Y%m%d")
 
+def days_before_now(date):
+    result = datetime.datetime.now() - datetime.datetime.strptime(date, "%Y%m%d")
+    return result.days
 
 def days_ago(days):
     dat = datetime.datetime.now() + datetime.timedelta(days=days)

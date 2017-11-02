@@ -266,7 +266,7 @@ def edit(request, pk):
                     task.rel_id = etl.id
                     task.save()
 
-                logger.info('WillDependencyTask for %s has been deleted successfully' % (pk))
+                logger.info('WillDependencyTask for %s has been changed to %d successfully' % (pk, etl.id))
 
                 if etl.query != previous_query:
                     deleted, rows = TblBlood.objects.filter(relatedEtlId=pk).delete()
@@ -417,8 +417,14 @@ def restart_job(request):
             final_bloods = set()
             dependencies = {}
             schedule = int(request.POST.get('schedule'))
+            if schedule == 4:
+                delta = dateutils.days_before_now(request.POST.get('target_day'))
+                folder = 'h2h-' + dateutils.now_datetime() + '-restart-delta-' + request.POST.get('target_day')
+                schedule = 0
+            else:
+                delta = 0
+                folder = 'h2h-' + dateutils.now_datetime() + '-restart'
 
-            delta = int(request.POST.get('delta'))
 
             for name in request.POST.get('names').split(','):
                 dependencies[name] = set()
@@ -440,7 +446,6 @@ def restart_job(request):
                     print('not exist for %s ' % child_name)
                     raise e
 
-            folder = 'h2h-' + dateutils.now_datetime() + '-restart-delta-' + str(delta)
             os.mkdir(AZKABAN_BASE_LOCATION + folder)
             os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 

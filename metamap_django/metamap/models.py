@@ -6,7 +6,7 @@ import os
 import re
 from django.conf import settings
 from django.contrib.auth.models import Group
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import models
 
 from django.template import Context
@@ -19,6 +19,7 @@ from will_common.models import PeriodicTask, WillDependencyTask, UserProfile, Or
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
+from will_common.utils.customexceptions import RDException
 
 logger = logging.getLogger('django')
 from will_common.utils import hivecli
@@ -287,6 +288,7 @@ class JarApp(ETLObjRelated):
         strip = '{% load etlutils %} \n' + sche_vars + '\n' + strip
         return {strip, }
 
+
 class ETL(ETLObjRelated):
     type = 1
     query = models.TextField()
@@ -314,7 +316,9 @@ class ETL(ETLObjRelated):
                         try:
                             etl = NULLETL.objects.get(name=dep, valid=1)
                         except ObjectDoesNotExist, e:
-                            raise Exception('Exception for parent %s, message: %s ' % (dep, e.message))
+                            raise RDException(u'依赖{dep}尚未录入系统'.format(dep=dep))
+                    except MultipleObjectsReturned:
+                        raise RDException(u'发现多个M2H对象:{dep}, M2H只能有一个目标表为{dep}, 请酌情处理'.format(dep=dep))
                 if self.exec_obj.id != etl.exec_obj.id:
                     new_deps.append(ExecBlood(child_id=self.exec_obj.id, parent_id=etl.exec_obj.id))
 
@@ -327,7 +331,7 @@ class ETL(ETLObjRelated):
                     n_dep.save()
 
     def __str__(self):
-        return self.query
+        return self.name + '_' + str(self.id)
 
     def get_script(self, str_list, sche_vars=''):
         str_list.append(self.variables)
