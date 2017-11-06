@@ -40,6 +40,7 @@ urlpatterns = [
     url(r'^ops/dfs_usage_his/$', ops.dfs_usage_his, name='dfs_usage_his'),
     url(r'^ops/dfs_usage/$', ops.dfs_usage, name='dfs_usage'),
     url(r'^ops/push_msg/$', ops.push_msg, name='push_msg'),
+    url(r'^ops/push_single_msg/$', ops.push_single_msg, name='push_single_msg'),
     url(r'^ops/hdfs_files/$', ops.hdfs_files, name='hdfs_files'),
     url(r'^ops/hdfs_del/(?P<filename>.*)/$', ops.hdfs_del, name='hdfs_del'),
     url(r'^ops/up_hdfs/$', ops.upload_hdfs_file, name='up_hdfs'),

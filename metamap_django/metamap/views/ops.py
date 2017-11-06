@@ -142,6 +142,14 @@ def push_msg(request):
     return HttpResponse('done')
 
 
+def push_single_msg(request):
+    if request.method == 'POST':
+        phone = request.POST['phone']
+        msg = request.POST['msg']
+        PushUtils.push_msg_tophone(phone, msg)
+        return HttpResponse('done')
+
+
 def hdfs_files(request):
     path = '/user/%s' % request.user.username
     command = 'hdfs dfs -ls %s | grep ^[^d] | grep user | awk \'{print substr($8, length("%s") + 1)}\'' % (path, path)
