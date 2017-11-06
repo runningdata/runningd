@@ -31,7 +31,7 @@ DEBUG = False
 SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
 EEE = 'default_DEV'
-ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83']
+ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.103.27.171']
 
 HIVE_SERVER = {
     'host': '10.2.19.126',
