@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'^common/', include('will_common.urls')),
     url(r'^export/', include('metamap.url.xcurls')),
     url(r'^clean/', include('metamap.url.clean_urls')),
-    url(r'^files/', include('metamap.url.mlurls')),
+    url(r'^nosecure/', include('metamap.url.nosecure')),
     url(r'^meta/', include('metamap.url.meta')),
     url(r'^hadmin/', include('metamap.url.hadmin')),
     url(r'^hooks/', include('metamap.url.hooks')),
