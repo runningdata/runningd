@@ -477,7 +477,7 @@ class Meta(models.Model):
     meta = models.CharField(max_length=30, unique=True)
     db = models.CharField(max_length=30)
     settings = models.CharField(max_length=300, null=True)
-    type = valid = models.IntegerField(default=1)
+    type = models.IntegerField(default=1)
     ctime = models.DateTimeField(default=timezone.now)
     valid = models.IntegerField(default=1)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='meta_creator', null=True)

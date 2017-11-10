@@ -7,7 +7,7 @@
         请等一下哦.......{{ filename }}正在生成中......
     </div>
     <div id="file_link" class="hidden">
-        <a href="http://10.1.5.83:8000/metamap/rest/exports/get_file?filename={{ filename }}&user={{ username }}&group={{ groupname }}&sid=sid">{{ filename }}点击下载</a>
+        <a href="http://10.103.27.171:8000/metamap/rest/exports/get_file?filename={{ filename }}&user={{ username }}&group={{ groupname }}&sid=sid">{{ filename }}点击下载</a>
     </div>
 {% endblock %}
 
@@ -18,7 +18,7 @@
             if (status != 1) {
                 console.log('beginning....');
                 $.ajax({
-                    url: "http://10.1.5.83:8000/metamap/hdfs/check_file?filename={{ filename }}",
+                    url: "http://10.103.27.171:8000/metamap/hdfs/check_file?filename={{ filename }}",
                     success: function (data) {
                         console.log('data is ' + data);
                         if (data == "success") {
