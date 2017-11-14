@@ -336,7 +336,8 @@ def exec_execobj(exec_id, schedule=-1, name=''):
 @shared_task
 def exec_will(task_id, **kwargs):
     willtask = WillTaskV2.objects.get(pk=task_id)
-    if len(willtask.tasks) > 1:
+    tasks = willtask.tasks.all()
+    if len(tasks) > 1:
         # batch, generate execution plan or generate azkaban job files
         # maybe the dependency relations are not as same as its blood dag, for a->b->c, maybe we just want b->c,
         # excluding a. Then a temporary dependency dag for just the few execobjs should be supplied by user.
@@ -346,7 +347,6 @@ def exec_will(task_id, **kwargs):
         folder = 'schedule_flow_' + willtask.name + '_' + dateutils.now_datetime()
         task_ids = [execobj.id for execobj in willtask.tasks]
         task_names = set()
-        tasks = willtask.tasks.all()
         for execobj in tasks:
             bloods = ExecBlood.objects.filter(child_id=execobj, parent_id__in=task_ids)
             parent_names = [etlhelper.get_name(blood) for blood in bloods]
