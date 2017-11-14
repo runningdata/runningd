@@ -345,7 +345,7 @@ def exec_will(task_id, **kwargs):
         # executions parallel.
         # jobs run parallel
         folder = 'schedule_flow_' + willtask.name + '_' + dateutils.now_datetime()
-        task_ids = [execobj.id for execobj in willtask.tasks]
+        task_ids = [execobj.id for execobj in tasks]
         task_names = set()
         for execobj in tasks:
             bloods = ExecBlood.objects.filter(child_id=execobj, parent_id__in=task_ids)
