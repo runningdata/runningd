@@ -602,7 +602,7 @@ def get_name(etlobj):
         print('parent is SqoopHive2Mysql %s ' % etlobj.name)
         etlobj = SqoopHive2Mysql.objects.get(pk=etlobj.rel_id)
         tbl_name = etlobj.hive_meta.meta + '@' + etlobj.hive_tbl
-        return 'export' + tbl_name
+        return 'export_' + tbl_name
     elif etlobj.type == 4:
         print('parent is SqoopMysql2Hive %s ' % etlobj.name)
         etlobj = SqoopMysql2Hive.objects.get(pk=etlobj.rel_id)
