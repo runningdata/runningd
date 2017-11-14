@@ -335,7 +335,7 @@ def exec_execobj(exec_id, schedule=-1, name=''):
 
 @shared_task
 def exec_will(task_id, **kwargs):
-    willtask = WillTaskV2.objects.get(task_id)
+    willtask = WillTaskV2.objects.get(pk=task_id)
     if len(willtask.tasks) > 1:
         # batch, generate execution plan or generate azkaban job files
         # maybe the dependency relations are not as same as its blood dag, for a->b->c, maybe we just want b->c,
