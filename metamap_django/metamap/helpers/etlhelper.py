@@ -17,6 +17,8 @@ from will_common.utils import ziputils
 from will_common.utils.constants import *
 import logging
 
+from will_common.utils.customexceptions import RDException
+
 logger = logging.getLogger('info')
 
 
@@ -389,42 +391,20 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     :param folder:
     :return:
     '''
-    # m2h 和 h2m的名字不能直接取parent的name，需要拼meta和tblname
-    print('generating.....for job %s ' % etlobj.name)
-    if etlobj.type == 1:
-        job_name = etlobj.name
-    elif etlobj.type == 3:
-        # H2M的名字不能是hive表了，这样就跟H2H的重复了
-        etl = SqoopHive2Mysql.objects.get(pk=etlobj.rel_id)
-        tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
-        job_name = 'export_' + tbl_name
-    elif etlobj.type == 4:
-        etl = SqoopMysql2Hive.objects.get(pk=etlobj.rel_id)
-        tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
-        job_name = 'import_' + tbl_name
-    else:
-        print('xxxxxxxxxxxxxxx parent found..........%s ' % etlobj.name)
-        raise Exception('xxxxxxxxxxxxxxx parent found..........%s ')
+    job_name = get_name(etlobj)
     if not job_name.startswith('etl_v2_done_'):
         # 生成hql文件
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         # TODO 针对不同类型，生成不同文件
-        # generate_etl_file(etl, location, schedule)
-    command = ' echo command for ' + job_name
-
-    # 生成job文件
-    job_type = ' command\nretries=5\nretry.backoff=60000\n'
-    dependencies = set()
-    for p in parent_names:
-        dependencies.add(p)
-    content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
-    if len(dependencies) > 0:
-        job_depencied = ','.join(dependencies)
-        content += "dependencies=" + job_depencied + "\n"
-    job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
-    with open(job_file, 'w') as f:
-        f.write(content)
-    print('generating.....for jobdone %s ' % etlobj.name)
+        if etlobj.type == 1:
+            etl = ETL.objects.get(pk=etlobj.rel_id)
+            generate_job_file(etl, location, schedule)
+        elif etlobj.type == 3:
+            etl = SqoopHive2Mysql.objects.get(pk=etlobj.rel_id)
+            generate_h2m_script(folder, job_name, schedule, etl)
+        elif etlobj.type == 4:
+            etl = SqoopMysql2Hive.objects.get(pk=etlobj.rel_id)
+            generate_m2h_script(folder, job_name, schedule, etl)
 
 
 def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1, delta=0):
@@ -482,20 +462,24 @@ def generate_job_file_h2m(objs, folder, group_name):
         job_name = obj.name
         task = SqoopHive2Mysql.objects.get(pk=obj.rel_id)
         if task.cgroup.name == group_name:
-            h2m = generate_sqoop_hive2mysql(task, schedule=obj.schedule)
-            sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".h2m"
-            with open(sqoop_file, 'w') as f:
-                f.write(h2m)
-            command = 'sh ' + sqoop_file
-            if not settings.USE_ROOT:
-                command = 'runuser -l ' + task.cgroup.name + ' -c "' + command + '"'
-            # 生成job文件
-            # job_type = 'command\nretries=12\nretry.backoff=300000\n'
-            job_type = ' command\nretries=5\nretry.backoff=300000\n'
-            content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command =  ' + command + '\n'
-            job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
-            with open(job_file, 'w') as f:
-                f.write(content)
+            generate_h2m_script(folder, job_name, obj.schedule, task)
+
+
+def generate_h2m_script(folder, job_name, schedule, task):
+    h2m = generate_sqoop_hive2mysql(task, schedule=schedule)
+    sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "/" + job_name + ".h2m"
+    with open(sqoop_file, 'w') as f:
+        f.write(h2m)
+    command = 'sh ' + sqoop_file
+    if not settings.USE_ROOT:
+        command = 'runuser -l ' + task.cgroup.name + ' -c "' + command + '"'
+    # 生成job文件
+    # job_type = 'command\nretries=12\nretry.backoff=300000\n'
+    job_type = ' command\nretries=5\nretry.backoff=300000\n'
+    content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command =  ' + command + '\n'
+    job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+    with open(job_file, 'w') as f:
+        f.write(content)
 
 
 def generate_job_file_m2h(objs, folder, group_name):
@@ -510,20 +494,24 @@ def generate_job_file_m2h(objs, folder, group_name):
         task = SqoopMysql2Hive.objects.get(pk=obj.rel_id)
         job_name = task.name
         if task.cgroup.name == group_name:
-            m2h = generate_sqoop_mysql2hive(task, schedule=obj.schedule)
-            sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "-" + job_name + ".m2h"
-            with open(sqoop_file, 'w') as f:
-                f.write(m2h)
-            command = 'sh ' + sqoop_file
-            if not settings.USE_ROOT:
-                command = 'runuser -l ' + task.cgroup.name + ' -c "' + command + '"'
-            # 生成job文件
-            # job_type = ' command \nretries=12\nretry.backoff=300000\n'
-            job_type = ' command\nretries=12\nretry.backoff=300000\n'
-            content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
-            job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
-            with open(job_file, 'w') as f:
-                f.write(content)
+            generate_m2h_script(folder, job_name, obj.schedule, task)
+
+
+def generate_m2h_script(folder, job_name, schedule, task):
+    m2h = generate_sqoop_mysql2hive(task, schedule=schedule)
+    sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "/" + job_name + ".m2h"
+    with open(sqoop_file, 'w') as f:
+        f.write(m2h)
+    command = 'sh ' + sqoop_file
+    if not settings.USE_ROOT:
+        command = 'runuser -l ' + task.cgroup.name + ' -c "' + command + '"'
+    # 生成job文件
+    # job_type = ' command \nretries=12\nretry.backoff=300000\n'
+    job_type = ' command\nretries=12\nretry.backoff=300000\n'
+    content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
+    job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+    with open(job_file, 'w') as f:
+        f.write(content)
 
 
 def load_nodes(*args, **kwargs):
@@ -584,22 +572,7 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
                 tasks = WillDependencyTask.objects.filter(schedule=schedule, rel_id=parent.id, valid=1, type=100)
                 if tasks.count() == 1:
                     parent_ids.add(parent.id)
-                    # TODO m2h 和 h2m的名字不能直接取parent的name，需要拼meta和tblname
-                    if parent.type == 1:
-                        print('parent is ETL %s ' % parent.name)
-                        leaf_dependencies.add(parent.name)
-                    elif parent.type == 3:
-                        print('parent is SqoopHive2Mysql %s ' % parent.name)
-                        etl = SqoopHive2Mysql.objects.get(pk=parent.rel_id)
-                        tbl_name = etl.hive_meta.meta + '@' + etl.hive_tbl
-                        leaf_dependencies.add('export' + tbl_name)
-                    elif parent.type == 4:
-                        print('parent is SqoopMysql2Hive %s ' % parent.name)
-                        etl = SqoopMysql2Hive.objects.get(pk=parent.rel_id)
-                        tbl_name = etl.hive_meta.meta + '@' + etl.mysql_tbl
-                        leaf_dependencies.add('import_' + tbl_name)
-                    else:
-                        print('xxxxxxxxxxxxxxx parent found..........%s' % parent.name)
+                    leaf_dependencies.add(get_name(parent))
 
             # 这里只会给给child生成job文件，而不会给他的parent生成 —— 新版本中应该生成！！！
             # 或者： 外面单独为最顶层的parent任务生成job列表
@@ -608,3 +581,26 @@ def load_nodes_v2(leafs, folder, done_blood, done_leaf, schedule):
                                  schedule=schedule)
             done_leaf.add(leaf)
             load_nodes_v2(parent_ids, folder, done_blood, done_leaf, schedule)
+
+
+def get_name(etlobj):
+    '''
+    m2h 和 h2m的名字不能直接取parent的name，需要拼meta和tblname
+    :param etlobj:
+    :return:
+    '''
+    if etlobj.type == 1:
+        print('parent is ETL %s ' % etlobj.name)
+        return etlobj.name
+    elif etlobj.type == 3:
+        print('parent is SqoopHive2Mysql %s ' % etlobj.name)
+        etlobj = SqoopHive2Mysql.objects.get(pk=etlobj.rel_id)
+        tbl_name = etlobj.hive_meta.meta + '@' + etlobj.hive_tbl
+        return 'export' + tbl_name
+    elif etlobj.type == 4:
+        print('parent is SqoopMysql2Hive %s ' % etlobj.name)
+        etlobj = SqoopMysql2Hive.objects.get(pk=etlobj.rel_id)
+        tbl_name = etlobj.hive_meta.meta + '@' + etlobj.mysql_tbl
+        return 'import_' + tbl_name
+    else:
+        raise RDException('cannot find parent name for parent %s' % etlobj.name)

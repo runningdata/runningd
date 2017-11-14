@@ -19,6 +19,7 @@ def post2obj(obj, post, *excludes):
         if k not in excludes:
             if hasattr(obj, k):
                 v = ''.join(v).strip()
+                print k ,v
                 setattr(obj, k, v)
     logging.info("post params has been copied to  obj -> %s" % obj)
 

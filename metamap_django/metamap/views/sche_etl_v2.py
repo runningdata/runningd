@@ -19,7 +19,8 @@ from django.views import generic
 from djcelery.models import IntervalSchedule
 
 from metamap import tasks
-from metamap.models import ETL, PeriodicTask, WillDependencyTask, SqoopHive2Mysql, SqoopMysql2Hive, JarApp, ExecObj
+from metamap.models import ETL, PeriodicTask, WillDependencyTask, SqoopHive2Mysql, SqoopMysql2Hive, JarApp, ExecObj, \
+    WillTaskV2
 from will_common.djcelery_models import DjceleryPeriodictasks, DjceleryCrontabschedule
 from will_common.helpers import cronhelper
 from will_common.utils import PushUtils

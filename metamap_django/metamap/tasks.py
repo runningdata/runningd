@@ -11,14 +11,20 @@ import subprocess
 
 from billiard import SoftTimeLimitExceeded
 from celery import shared_task
+from django.conf import settings
 from django.utils import timezone
 
-from metamap.models import WillDependencyTask, ExecObj, ExecutionsV2
+from metamap.helpers import etlhelper
+from metamap.models import WillDependencyTask, ExecObj, ExecutionsV2, WillTaskV2, ExecBlood, ETL, TblBlood
+from will_common.utils import PushUtils
+from will_common.utils import encryptutils
 from will_common.utils import enums, dateutils
 
 from celery.utils.log import get_task_logger
 
-from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION
+from will_common.utils import ziputils
+from azkaban_client.azkaban import *
+from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, AZKABAN_BASE_LOCATION
 
 logger = get_task_logger(__name__)
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/metamap/'
@@ -325,6 +331,46 @@ def exec_execobj(exec_id, schedule=-1, name=''):
         execution.status = enums.EXECUTION_STATUS.FAILED
         execution.end_time = timezone.now()
         execution.save()
+
+
+@shared_task
+def exec_will(task_id, name=''):
+    willtask = WillTaskV2.objects.get(task_id)
+    if len(willtask.tasks) > 1:
+        # batch, generate execution plan or generate azkaban job files
+        # maybe the dependency relations are not as same as its blood dag, for a->b->c, maybe we just want b->c,
+        # excluding a. Then a temporary dependency dag for just the few execobjs should be supplied by user.
+        # The easiest way is an ordered list, but the task executions will be sequential. We could make the
+        # executions parallel.
+        # jobs run parallel
+        folder = 'schedule_flow_' + willtask.name + '_' + dateutils.now_datetime()
+        task_ids = [execobj.id for execobj in willtask.tasks]
+        task_names = set()
+
+        for execobj in willtask.tasks:
+            bloods = ExecBlood.objects.filter(child_id=execobj, parent_id__in=task_ids)
+            parent_names = [etlhelper.get_name(blood) for blood in bloods]
+            etlhelper.generate_job_file_v2(execobj, parent_names, folder)
+            task_names.add(etlhelper.get_name(execobj))
+        # etlhelper.generate_job_file(tbl, final_leaves2, folder)
+        tbl = TblBlood(tblName='etl_done_' + folder)
+        etlhelper.generate_job_file(blood=tbl, parent_node=task_names, folder=folder, schedule=-1,
+                                    is_check=False)
+
+        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
+                                   '%s generated for group %s ' % (len(willtask.tasks), folder))
+        PushUtils.push_exact_email('%s generated for group %s ' % (len(willtask.tasks), folder))
+        ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
+        fetcher = CookiesFetcher(os.getenv('AZKABAN_USER'), os.getenv('AZKABAN_PWD'))
+        project = Project(folder, 'first test', fetcher)
+        project.create_prj()
+        project.upload_zip(AZKABAN_BASE_LOCATION + folder + '.zip')
+        for flow in project.fetch_flow():
+            execution = flow.execute()
+            print('%s %s has been started ....' % (execution.prj_name, flow.flowId))
+    else:
+        # single
+        exec_execobj(willtask.tasks[0].id, schedule=4, name=name)
 
 
 @shared_task

@@ -16,7 +16,7 @@ from django.views import generic
 from djcelery.models import IntervalSchedule
 
 from metamap import tasks
-from metamap.models import ETL, PeriodicTask, WillDependencyTask, SqoopHive2Mysql, SqoopMysql2Hive, JarApp
+from metamap.models import ETL, PeriodicTask, WillDependencyTask, SqoopHive2Mysql, SqoopMysql2Hive, JarApp, WillTaskV2
 from will_common.djcelery_models import DjceleryPeriodictasks, DjceleryCrontabschedule
 from will_common.helpers import cronhelper
 from will_common.utils import PushUtils
@@ -213,6 +213,7 @@ def add(request):
         return redirect('metamap:sche_list')
     else:
         return render(request, 'sche/edit.html')
+
 
 
 @transaction.atomic

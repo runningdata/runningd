@@ -1,4 +1,4 @@
-{% extends 'export/layout.html' %}
+{% extends 'layout.html' %}
 {% load ifdef %}
 {% load staticfiles %}
 {% block title %}调度任务{% endblock %}
@@ -6,37 +6,83 @@
 {% block scripts %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-select.min.css' %}"/>
     <script src="{% static 'js/bootstrap-select.min.js' %}"></script>
+    <script>
+        function show_tbl() {
+            var result = $('#dep_selector').val();
+            var final_result = '';
+
+            if (result != null && result.length > 0) {
+                $.each(result, function (index, data) {
+                    var cls = "info";
+                    if (index % 2 == 0) {
+                        cls = "success";
+                    }
+                    var txt = $('#dep_selector option[value=' + data + ']').text();
+                    final_result += '<tr class="' + cls + '"><td>' + txt + '</td></tr>';
+                });
+            }
+            $('#preview_tbl').html(final_result);
+            $('#preview_tbl').scrollTop(-$('#preview_tbl').height);
+        }
+
+        function get_type_name(task_type) {
+            if (task_type == 1) {
+                return "H2H";
+            } else if (task_type == 2) {
+                return "Email";
+            } else if (task_type == 3) {
+                return "H2M";
+            } else if (task_type == 4) {
+                return "M2H";
+            } else if (task_type == 5) {
+                return "sourceapp";
+            } else if (task_type == 6) {
+                return "Jar";
+            } else if (task_type == 66) {
+                return "NULL";
+            }
+        }
+    </script>
 {% endblock %}
 
 {% block content %}
+    {% csrf_token %}
+    {% has_def 'task' as has_task %}
 
     <div class="alert alert-info">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <i class="fa fa-exclamation-circle fa-lg"></i> 每晚11点35分开始扫描yarn进程，kill一切不是以'_online'结尾的程序
     </div>
-
-    {% csrf_token %}
-    {% has_def 'task' as has_task %}
-
     {% if has_task %}
         <form action="." method="POST">
             <div class="form-group">
                 <input name="id" value="" type="hidden" class="form-control">
                 <label>调度名称</label>
-                <input name="name" value="{{ task.name }}" type="text" class="form-control">
+                <input name="name" value="{{ task.name }}" type="text" class="form-control" required>
             </div>
-            <div class="form-group">
 
-                <label>关联ETL</label>
+            <div class="panel-footer">
+                <input type="hidden" name="exec_id" value="{{ obj.id }}"/>
 
-                <select id="lunch" name="rel_id" class="selectpicker form-control" data-live-search="true" required
-                        data-size="8">
-                    <option class="bs-title-option" value="">选择....</option>
+                <select id="dep_selector" name="tasks" class="selectpicker form-control" multiple data-size=8
+                        title="Choose one of the following..."
+                        data-live-search="true"
+                        onchange="show_tbl()">
                 </select>
+                <p/>
+            </div>
+            <div class="panel panel-primary" style="height: 450px">
+                <div class="panel-body" style="height: inherit; overflow-y: scroll">
+                    <table class="table table-bordered table-hover" id="tableAddRow">
+                        <tbody id="preview_tbl">
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
             <div class="form-group">
                 <label>预设变量</label>
-                <textarea name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
+                <textarea id="variables" name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
             </div>
             <div class="form-group">
                 <label>是否生效</label>
@@ -56,11 +102,9 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>调度方式</label>
+                <label>cron调度</label>
                 <div class="radio-inline">
                     <div class="input-group">
-                        <input type="hidden" name="schedule"
-                               value="4">
                         <input type="text" class="inline" name="cronexp" value="{{ task.get_schedule }}">
                     </div>
                 </div>
@@ -77,29 +121,36 @@
                 <a id="cancel" class="btn btn-warning" onclick="javascript:history.go(-1);">取消</a>
             </div>
         </form>
-        <script type="application/javascript">
-            var id =
-            {{ task.rel_id }}
-        </script>
     {% else %}
         <form action="." method="POST">
             <div class="form-group">
                 <input name="id" value="" type="hidden" class="form-control">
                 <label>调度名称</label>
-                <input name="name" value="" type="text" class="form-control" required>
+                <input name="name" value="{{ task.name }}" type="text" class="form-control">
             </div>
-            <div class="form-group">
 
-                <label>关联ETL</label>
+            <div class="panel-footer">
+                <input type="hidden" name="exec_id" value="{{ obj.id }}"/>
 
-                <select id="lunch" name="rel_id" class="selectpicker form-control" data-live-search="true" required
-                        data-size="8">
-                    <option class="bs-title-option" value="">选择....</option>
+                <select id="dep_selector" name="tasks" class="selectpicker form-control" multiple data-size=8
+                        title="Choose one of the following..."
+                        data-live-search="true"
+                        onchange="show_tbl()">
                 </select>
+                <p/>
+            </div>
+            <div class="panel panel-primary" style="height: 450px">
+                <div class="panel-body" style="height: inherit; overflow-y: scroll">
+                    <table class="table table-bordered table-hover" id="tableAddRow">
+                        <tbody id="preview_tbl">
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
             <div class="form-group">
                 <label>预设变量</label>
-                <textarea name="variables" rows="5" class="form-control"></textarea>
+                <textarea id="variables" name="variables" rows="5" class="form-control">{{ task.variables }}</textarea>
             </div>
             <div class="form-group">
                 <label>是否生效</label>
@@ -109,16 +160,15 @@
                            value="1">是
                 </div>
                 <div class="radio-inline">
-                    <input id="optionsRadios3" type="radio" name="valid" value="0">否
+                    <input id="optionsRadios3" type="radio" name="valid"
+                           value="0">否
                 </div>
             </div>
             <div class="form-group">
-                <label>调度方式</label>
+                <label>cron调度</label>
                 <div class="radio-inline">
                     <div class="input-group">
-                        <input type="hidden" name="schedule"
-                               value="4">
-                        <input type="text" class="inline" name="cronexp">
+                        <input type="text" class="inline" name="cronexp" value="" placeholder="分 时 天 月 周">
                     </div>
                 </div>
             </div>
@@ -134,26 +184,29 @@
                 <a id="cancel" class="btn btn-warning" onclick="javascript:history.go(-1);">取消</a>
             </div>
         </form>
-
-        <script type="application/javascript">
-            var id = -1
-        </script>
     {% endif %}
 
     <script type="application/javascript">
+        var ids = [];
+        {% for dep in task.tasks.all %}
+            ids.push({{ dep.id }});
+        {% endfor %}
+        console.log(ids);
         $.ajax({
                     type: "get",
                     dataType: "json",
                     contentType: "application/json;charset=utf-8",
-                    url: "/export/rest/emails/?format=json",
+                    url: "/metamap/rest/execobjs/?format=json",
                     success: function (result) {
-                        $.each(result, function (index, etl) {
-                            if (id == etl.id) {
-                                $("#lunch").append("<option selected='selected' value='" + etl.id + "'>" + etl.name + "</option>");
+                        $.each(result, function (index, obj) {
+                            if ($.inArray(obj.id, ids) > -1) {
+                                $("#dep_selector").append("<option selected='selected' value='" + obj.id + "'>" + obj.name + "</option>");
+
                             } else {
-                                $("#lunch").append("<option value='" + etl.id + "'>" + etl.name + "</option>");
+                                $("#dep_selector").append("<option value='" + obj.id + "'>" + obj.name + "</option>");
                             }
-                        })
+                        });
+                        show_tbl();
                     },
                     error: function (XMLHttpRequest, textStatus, errorThrown) {
                         alert(errorThrown);

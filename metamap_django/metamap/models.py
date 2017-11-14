@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from metamap.db_views import ColMeta, DB
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
-from will_common.models import PeriodicTask, WillDependencyTask, UserProfile, OrgGroup
+from will_common.models import PeriodicTask, WillDependencyTask, UserProfile, OrgGroup, CommmonCreators, CommmonTimes
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
@@ -726,6 +726,19 @@ class SqoopMysql2HiveExecutions(models.Model):
 
     def __str__(self):
         return self.logLocation
+
+
+class WillTaskV2(CommmonCreators, CommmonTimes):
+    name = models.CharField(unique=True, max_length=200)
+    valid = models.IntegerField(default=1)
+    variables = models.TextField()
+    desc = models.TextField()
+    tasks = models.ManyToManyField(ExecObj)
+
+    def get_schedule(self):
+        task = PeriodicTask.objects.get(name=self.name)
+        cron = task.crontab
+        return cron.minute + ' ' + cron.hour + ' ' + cron.day_of_month + ' ' + cron.month_of_year + ' ' + cron.day_of_week
 
 # class WillDepTask_v2(models.Model):
 #     name = models.CharField(unique=True, max_length=200)

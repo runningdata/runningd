@@ -9,6 +9,7 @@ from metamap.views import jar
 from metamap.views import ops
 from metamap.views import sche_etl
 from metamap.views import sche_etl_v2
+from metamap.views import sche_multi
 from metamap.views import source
 from metamap.views import sqoop
 from metamap.views import sqoop2
@@ -110,6 +111,10 @@ urlpatterns = [
     url(r'^schecron/$', sche_etl_v2.sche_cron_list, name='sche_cron_list'),
     url(r'^sche/add/$', sche_etl_v2.add, name='sche_add'),
     url(r'^sche/migrate/$', sche_etl_v2.migrate_jobs, name='migrate'),
+
+    url(r'^sche_multi/add/$', sche_multi.add, name='add_multi'),
+    url(r'^sche_multi/(?P<pk>[0-9]+)/$', sche_multi.edit, name='sche_multi_edit'),
+    url(r'^sche_multi/$', sche_multi.ScheMultiListView.as_view(), name='sche_multi_list'),
 
     url(r'^source/$', source.IndexView.as_view(), name='source_index'),
     url(r'^source/add/$', source.add, name='source_add'),
