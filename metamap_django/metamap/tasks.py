@@ -334,7 +334,7 @@ def exec_execobj(exec_id, schedule=-1, name=''):
 
 
 @shared_task
-def exec_will(task_id, name=''):
+def exec_will(task_id, **kwargs):
     willtask = WillTaskV2.objects.get(task_id)
     if len(willtask.tasks) > 1:
         # batch, generate execution plan or generate azkaban job files
@@ -370,7 +370,7 @@ def exec_will(task_id, name=''):
             print('%s %s has been started ....' % (execution.prj_name, flow.flowId))
     else:
         # single
-        exec_execobj(willtask.tasks[0].id, schedule=4, name=name)
+        exec_execobj(willtask.tasks[0].id, schedule=4, name=kwargs['name'])
 
 
 @shared_task
