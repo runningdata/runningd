@@ -360,7 +360,7 @@ def exec_will(task_id, **kwargs):
 
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%s generated for group %s ' % (len(tasks), folder))
-        PushUtils.push_exact_email('%s generated for group %s ' % (len(tasks), folder))
+        PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%s generated for group %s ' % (len(tasks), folder))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         fetcher = CookiesFetcher(os.getenv('AZKABAN_USER'), os.getenv('AZKABAN_PWD'))
         project = Project(folder, 'first test', fetcher)
