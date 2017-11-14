@@ -362,6 +362,7 @@ def exec_will(task_id, **kwargs):
                                    '%s generated for group %s ' % (len(tasks), folder))
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%s generated for group %s ' % (len(tasks), folder))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
+        print('user: %s password: %s' % (os.getenv('AZKABAN_USER'), os.getenv('AZKABAN_PWD')))
         fetcher = CookiesFetcher(os.getenv('AZKABAN_USER'), os.getenv('AZKABAN_PWD'))
         project = Project(folder, 'first test', fetcher)
         project.create_prj()
