@@ -346,8 +346,8 @@ def exec_will(task_id, **kwargs):
         folder = 'schedule_flow_' + willtask.name + '_' + dateutils.now_datetime()
         task_ids = [execobj.id for execobj in willtask.tasks]
         task_names = set()
-
-        for execobj in willtask.tasks:
+        tasks = willtask.tasks.all()
+        for execobj in tasks:
             bloods = ExecBlood.objects.filter(child_id=execobj, parent_id__in=task_ids)
             parent_names = [etlhelper.get_name(blood) for blood in bloods]
             etlhelper.generate_job_file_v2(execobj, parent_names, folder)
@@ -358,8 +358,8 @@ def exec_will(task_id, **kwargs):
                                     is_check=False)
 
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
-                                   '%s generated for group %s ' % (len(willtask.tasks), folder))
-        PushUtils.push_exact_email('%s generated for group %s ' % (len(willtask.tasks), folder))
+                                   '%s generated for group %s ' % (len(tasks), folder))
+        PushUtils.push_exact_email('%s generated for group %s ' % (len(tasks), folder))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         fetcher = CookiesFetcher(os.getenv('AZKABAN_USER'), os.getenv('AZKABAN_PWD'))
         project = Project(folder, 'first test', fetcher)
