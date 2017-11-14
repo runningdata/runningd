@@ -396,18 +396,21 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     if not job_name.startswith('etl_v2_done_'):
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         cmd = etlobj.get_cmd(schedule, location)
-        # 生成job文件
-        job_type = ' command\nretries=5\nretry.backoff=60000\n'
-        dependencies = set()
-        for p in parent_names:
-            dependencies.add(p)
-        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + cmd + '\n'
-        if len(dependencies) > 0:
-            job_depencied = ','.join(dependencies)
-            content += "dependencies=" + job_depencied + "\n"
-        job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
-        with open(job_file, 'w') as f:
-            f.write(content)
+    else:
+        cmd = "echo " + job_name
+    # 生成job文件
+    job_type = ' command\nretries=5\nretry.backoff=60000\n'
+    dependencies = set()
+    for p in parent_names:
+        dependencies.add(p)
+    content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + cmd + '\n'
+    if len(dependencies) > 0:
+        job_depencied = ','.join(dependencies)
+        content += "dependencies=" + job_depencied + "\n"
+    job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+    with open(job_file, 'w') as f:
+        f.write(content)
+
 
 
 def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1, delta=0):
