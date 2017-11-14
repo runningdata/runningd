@@ -383,6 +383,7 @@ def generate_job_file(*args, **kwargs):
         f.write(content)
 
 
+
 def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     '''
     生成azkaban job文件
@@ -393,18 +394,20 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     '''
     job_name = get_name(etlobj)
     if not job_name.startswith('etl_v2_done_'):
-        # 生成hql文件
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
-        # TODO 针对不同类型，生成不同文件
-        if etlobj.type == 1:
-            etl = ETL.objects.get(pk=etlobj.rel_id)
-            generate_job_file(etl, location, schedule)
-        elif etlobj.type == 3:
-            etl = SqoopHive2Mysql.objects.get(pk=etlobj.rel_id)
-            generate_h2m_script(folder, job_name, schedule, etl)
-        elif etlobj.type == 4:
-            etl = SqoopMysql2Hive.objects.get(pk=etlobj.rel_id)
-            generate_m2h_script(folder, job_name, schedule, etl)
+        cmd = etlobj.get_cmd(schedule, location)
+        # 生成job文件
+        job_type = ' command\nretries=5\nretry.backoff=60000\n'
+        dependencies = set()
+        for p in parent_names:
+            dependencies.add(p)
+        content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + cmd + '\n'
+        if len(dependencies) > 0:
+            job_depencied = ','.join(dependencies)
+            content += "dependencies=" + job_depencied + "\n"
+        job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+        with open(job_file, 'w') as f:
+            f.write(content)
 
 
 def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1, delta=0):
