@@ -346,6 +346,7 @@ def exec_will(task_id, **kwargs):
         # jobs run parallel
         folder = 'schedule_flow_' + willtask.name + '_' + dateutils.now_datetime()
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
+        os.mkdir(AZKABAN_BASE_LOCATION + folder)
         task_ids = [execobj.id for execobj in tasks]
         task_names = set()
         for execobj in tasks:
