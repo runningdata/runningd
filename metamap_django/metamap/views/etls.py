@@ -289,14 +289,17 @@ def edit(request, pk):
                         'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (
                             pk, etl.id))
 
-                # TODO release
-                # ss, has_cycle = bloodhelper.check_cycle(etl.id)
-                # if has_cycle:
-                #     logger.error('etl has_cycle : %s' % etl.name)
-                #     raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
-                #         [str(leaf) for leaf in ss]))
-                # else:
-                #     logger.info('cycle check passed for %s' % etl.name)
+                ss, has_cycle = bloodhelper.check_cycle(etl.id)
+                if has_cycle:
+                    logger.error('etl has_cycle : %s' % etl.name)
+                    msg = 'etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
+                        [str(leaf) for leaf in ss])
+                    PushUtils.push_to_admin(msg)
+                    PushUtils.push_msg_tophone(request.user.userprofile.phone, msg)
+                    # raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
+                    #     [str(leaf) for leaf in ss]))
+                else:
+                    logger.info('cycle check passed for %s' % etl.name)
 
                 return HttpResponseRedirect(reverse('metamap:index'))
         except RDException, e:
@@ -424,7 +427,6 @@ def restart_job(request):
             else:
                 delta = 0
                 folder = 'h2h-' + dateutils.now_datetime() + '-restart'
-
 
             for name in request.POST.get('names').split(','):
                 dependencies[name] = set()
