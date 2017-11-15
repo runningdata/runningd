@@ -212,15 +212,16 @@ def add(request):
                         tblBlood.save()
                         logger.info('Tblblood has been created successfully : %s' % tblBlood)
 
-                # TODO release
-                # ss, has_cycle = bloodhelper.check_cycle(etl.id)
-                # if has_cycle:
-                #     logger.error('etl has_cycle : %s' % etl.name)
-                #     raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name),
-                #                       '<br/>'.join(
-                #                           [str(leaf) for leaf in ss]))
-                # else:
-                #     logger.info('cycle check passed for %s' % etl.name)
+                ss, has_cycle = bloodhelper.check_cycle(etl.id)
+                if has_cycle:
+                    logger.error('etl has_cycle : %s' % etl.name)
+                    msg = u'etl %s 有环，快去改，不然明儿你就惨了啊！下班别走，上床别睡觉！' % etl.name
+                    PushUtils.push_to_admin(msg)
+                    PushUtils.push_msg_tophone(request.user.userprofile.phone, msg)
+                    # raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
+                    #     [str(leaf) for leaf in ss]))
+                else:
+                    logger.info('cycle check passed for %s' % etl.name)
                 if ETL.objects.filter(name=etl.name, valid=1).count() > 1:
                     raise RDException(u'命名冲突', u'已经存在同名ETL')
                 return HttpResponseRedirect(reverse('metamap:index'))
@@ -292,8 +293,7 @@ def edit(request, pk):
                 ss, has_cycle = bloodhelper.check_cycle(etl.id)
                 if has_cycle:
                     logger.error('etl has_cycle : %s' % etl.name)
-                    msg = 'etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
-                        [str(leaf) for leaf in ss])
+                    msg = u'etl %s 有环，快去改，不然明儿你就惨了啊！下班别走，上床别睡觉！' % etl.name
                     PushUtils.push_to_admin(msg)
                     PushUtils.push_msg_tophone(request.user.userprofile.phone, msg)
                     # raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
