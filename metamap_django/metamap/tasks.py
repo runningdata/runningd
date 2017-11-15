@@ -348,13 +348,17 @@ def exec_will(task_id, **kwargs):
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         task_ids = [execobj.id for execobj in tasks]
-        task_names = set()
+        leaf_names = set()
         for execobj in tasks:
             bloods = ExecBlood.objects.filter(child_id=execobj, parent_id__in=task_ids)
             parent_names = [etlhelper.get_name(blood.parent) for blood in bloods]
             etlhelper.generate_job_file_v2(execobj, parent_names, folder)
-            task_names.add(etlhelper.get_name(execobj))
+            if len(parent_names) == 0:
+                leaf_names.add(etlhelper.get_name(execobj))
         # etlhelper.generate_job_file(tbl, final_leaves2, folder)
+        execobj = ExecObj(name='etl_v2_done_' + folder)
+        etlhelper.generate_job_file_v2(execobj, leaf_names, folder)
+
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%s generated for group %s ' % (len(tasks), folder))
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%s generated for group %s ' % (len(tasks), folder))
