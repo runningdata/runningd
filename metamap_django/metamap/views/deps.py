@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
+from metamap.helpers import bloodhelper
 from metamap.models import ExecBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive, NULLETL, ETL, TblBlood
 from will_common.utils.Cycle import Graph
 from will_common.models import WillDependencyTask, UserProfile
@@ -60,19 +61,15 @@ def edit_deps(request, pk):
                     n_dep.save()
 
             if eo.type == 1:
-                etl = ETL.objects.get(pk=eo.rel_id)
-
-                g = Graph(ExecObj.objects.count())
                 bloods = ExecBlood.objects.all()
-                for execobj in ExecBlood.objects.all():
+                g = Graph(len(bloods))
+                for execobj in bloods:
                     g.addEdge(execobj.parent_id, execobj.child_id)
-                (is_cy, colors) = g.isCyclic()
-                if is_cy:
-                    print g.back_edge
-                    print [k for k,v in colors.items() if v == 'GRAY']
-                    raise RDException('mm', 'sd')
+                is_cycle, kep_path, related = bloodhelper.check_tree_cycle()
+                if is_cycle:
+                    raise RDException(u'提交失败，检测到环', u'关键路径：%s <br/> 相关ETL：%s' % (kep_path, '<br/>'.join(related)))
                 else:
-                    logger.info('cycle check passed for %s' % etl.name)
+                    logger.info('cycle check passed for %s' % eo.name)
 
             # users = [User.objects.get(username='admin'), eo.creator.user, ]
             # for owner in eo.cgroup.owners.split(','):

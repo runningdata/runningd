@@ -25,6 +25,7 @@ from will_common.utils import PushUtils
 from will_common.utils import encryptutils
 from will_common.utils import hivecli, httputils, dateutils, ziputils
 from will_common.utils import userutils
+from will_common.utils.Cycle import Graph
 from will_common.utils.constants import *
 from will_common.utils.customexceptions import RDException
 from will_common.views.common import GroupListView
@@ -212,16 +213,11 @@ def add(request):
                         tblBlood.save()
                         logger.info('Tblblood has been created successfully : %s' % tblBlood)
 
-                ss, has_cycle = bloodhelper.check_cycle(etl.id)
-                if has_cycle:
-                    logger.error('etl has_cycle : %s' % etl.name)
-                    msg = u'你写的etl %s 有环，快去改，不然明儿你就惨了啊！下班别走！ 上床别睡觉！' % etl.name
-                    PushUtils.push_to_admin(msg)
+                is_cycle, kep_path, related = bloodhelper.check_tree_cycle()
+                if is_cycle:
+                    msg = u'etl %s 有环，快去改，不然明儿你就惨了啊！下班别走，上床别睡觉！关键路径：%s <br/> 相关ETL：%s' % (
+                        etl.name, kep_path, '<br/>'.join(related))
                     PushUtils.push_msg_tophone(request.user.userprofile.phone, msg)
-                    # raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
-                    #     [str(leaf) for leaf in ss]))
-                else:
-                    logger.info('cycle check passed for %s' % etl.name)
                 if ETL.objects.filter(name=etl.name, valid=1).count() > 1:
                     raise RDException(u'命名冲突', u'已经存在同名ETL')
                 return HttpResponseRedirect(reverse('metamap:index'))
@@ -290,17 +286,21 @@ def edit(request, pk):
                         'Tblblood for %s has not been changed, but blood rel_id has been changed to %d' % (
                             pk, etl.id))
 
-                ss, has_cycle = bloodhelper.check_cycle(etl.id)
-                if has_cycle:
-                    logger.error('etl has_cycle : %s' % etl.name)
-                    msg = u'etl %s 有环，快去改，不然明儿你就惨了啊！下班别走，上床别睡觉！' % etl.name
-                    PushUtils.push_to_admin(msg)
+                # ss, has_cycle = bloodhelper.check_cycle(etl.id)
+                # if has_cycle:
+                #     logger.error('etl has_cycle : %s' % etl.name)
+                #     msg = u'etl %s 有环，快去改，不然明儿你就惨了啊！下班别走，上床别睡觉！' % etl.name
+                #     PushUtils.push_to_admin(msg)
+                #     PushUtils.push_msg_tophone(request.user.userprofile.phone, msg)
+                #     # raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
+                #     #     [str(leaf) for leaf in ss]))
+                # else:
+                #     logger.info('cycle check passed for %s' % etl.name)
+                is_cycle, kep_path, related = bloodhelper.check_tree_cycle()
+                if is_cycle:
+                    msg = u'etl %s 有环，快去改，不然明儿你就惨了啊！下班别走，上床别睡觉！关键路径：%s <br/> 相关ETL：%s' % (
+                        etl.name, kep_path, '<br/>'.join(related))
                     PushUtils.push_msg_tophone(request.user.userprofile.phone, msg)
-                    # raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(
-                    #     [str(leaf) for leaf in ss]))
-                else:
-                    logger.info('cycle check passed for %s' % etl.name)
-
                 return HttpResponseRedirect(reverse('metamap:index'))
         except RDException, e:
             print(traceback.format_exc())

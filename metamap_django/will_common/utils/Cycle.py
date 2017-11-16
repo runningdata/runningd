@@ -56,7 +56,7 @@ class Graph():
                 '''
                 u -> v这就是back edge了
                 '''
-                self.back_edge = '%s -> %s' % (u, v)
+                self.back_edge = (u, v)
                 return True
 
             if color.get(v, 'WHITE') == "WHITE" and self.DFSUtil(v, color) == True:

@@ -4,7 +4,8 @@
 created by will 
 '''
 
-from metamap.models import TblBlood
+from metamap.models import TblBlood, ExecBlood, ExecObj
+from will_common.utils.Cycle import Graph
 
 
 def clean_blood(blood, current=0):
@@ -61,6 +62,25 @@ def find_child_mermaid(blood, final_bloods, dep_cnt=0, init=None, depth=0):
                 find_child_mermaid(bld, final_bloods, dep_cnt=dep_cnt, init=init, depth=depth)
 
 
+def check_tree_cycle():
+    bloods = ExecBlood.objects.all()
+    g = Graph(len(bloods))
+    for execobj in bloods:
+        g.addEdge(execobj.parent_id, execobj.child_id)
+    (is_cy, colors) = g.isCyclic()
+    if is_cy:
+        print g.back_edge
+        start = ExecObj.objects.get(pk=g.back_edge[0]).name
+        end = ExecObj.objects.get(pk=g.back_edge[1]).name
+        key_path = start + ' -> ' + end
+        related = list()
+        for k, v in colors.items():
+            if v == 'GRAY':
+                related.append(ExecObj.objects.get(pk=k).name)
+        return True, key_path, related
+    return False, None, None
+
+
 def check_parent_mermaid(blood, dep_score):
     '''
     # 循环遍历当前节点的父节点
@@ -97,7 +117,6 @@ def check_cycle(etlid):
     bloods = TblBlood.objects.filter(relatedEtlId=int(etlid), valid=1)
     dep_score = {}
     for blood in bloods:
-        print blood
         check_parent_mermaid(blood, dep_score)
         check_child_mermaid(blood, dep_score)
 
