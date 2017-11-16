@@ -239,7 +239,6 @@ class StatusListView(generic.ListView):
         return self.render_to_response(context)
 
 
-
 def rerun(request):
     if request.method == 'POST':
         str_list = list()
@@ -308,6 +307,6 @@ def dfs_usage(request):
                     if len(db) < 1:
                         continue
                     result[db] = ssize
-            except, e:
+            except Exception, e:
                 raise RDException(line, traceback.format_exc())
     return render(request, 'ops/dfs_now.html', {"result": result, })
