@@ -74,9 +74,10 @@ def save(request):
             with transaction.atomic():
                 if request.POST['id'] == '-1':
                     check = DqmsCheck()
+                    origin_name = request.POST['chk_name']
                 else:
                     check = DqmsCheck.objects.get(pk=request.POST['id'])
-                origin_name = check.chk_name
+                    origin_name = check.chk_name
                 httputils.post2obj(check, request.POST, 'id')
                 if not check.editor_id:
                     check.creator = request.user.userprofile

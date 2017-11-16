@@ -57,14 +57,14 @@ class Graph():
                 u -> v这就是back edge了
                 '''
                 self.back_edge = '%s -> %s' % (u, v)
-                return True, color
+                return True
 
             if color.get(v, 'WHITE') == "WHITE" and self.DFSUtil(v, color) == True:
-                return True, color
+                return True
 
         # 黑色代表，都顺利遍历完了
         color[u] = "BLACK"
-        return False, color
+        return False
 
     def isCyclic(self):
         # 初始的时候是都没有遍历的

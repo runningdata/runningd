@@ -11,7 +11,6 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from metamap.helpers import bloodhelper
 from metamap.models import ExecBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive, NULLETL, ETL, TblBlood
 from will_common.utils.Cycle import Graph
 from will_common.models import WillDependencyTask, UserProfile
@@ -70,6 +69,7 @@ def edit_deps(request, pk):
                 (is_cy, colors) = g.isCyclic()
                 if is_cy:
                     print g.back_edge
+                    print [k for k,v in colors.items() if v == 'GRAY']
                     raise RDException('mm', 'sd')
                 else:
                     logger.info('cycle check passed for %s' % etl.name)
