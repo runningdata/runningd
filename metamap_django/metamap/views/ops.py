@@ -308,5 +308,7 @@ def dfs_usage(request):
                         continue
                     result[db] = ssize
             except Exception, e:
+                print dateutils.now_datekey()
+                print line
                 raise RDException(line, traceback.format_exc())
     return render(request, 'ops/dfs_now.html', {"result": result, })
