@@ -296,7 +296,7 @@ def dfs_usage(request):
     with open('/tmp/dfs-usage-snapshot_bb.log') as dfs_log:
         for line in dfs_log.readlines():
             try:
-                if line.endswith(dateutils.now_datekey()):
+                if line.strip().endswith(dateutils.now_datekey()):
                     datee = line.split(' ')[2].replace('\n', '')
                 else:
                     size = pattern.split(line)[0]
