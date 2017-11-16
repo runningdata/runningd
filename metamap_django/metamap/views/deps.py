@@ -13,7 +13,7 @@ from django.shortcuts import render
 
 from metamap.helpers import bloodhelper
 from metamap.models import ExecBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive, NULLETL, ETL, TblBlood
-from metamap.tt import Graph
+from will_common.utils.Cycle import Graph
 from will_common.models import WillDependencyTask, UserProfile
 from will_common.utils import PushUtils
 from will_common.utils import dateutils
