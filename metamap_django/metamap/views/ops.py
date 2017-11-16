@@ -294,11 +294,15 @@ def dfs_usage(request):
     pattern = re.compile(r'\s+')
     result = dict()
     with open('/tmp/dfs-usage-snapshot_bb.log') as dfs_log:
+        got_today = False
         for line in dfs_log.readlines():
             try:
                 if line.strip().endswith(dateutils.now_datekey()):
                     datee = line.split(' ')[2].replace('\n', '')
+                    got_today = True
                 else:
+                    if not got_today:
+                        continue
                     size = pattern.split(line)[0]
                     ssize = float(size.split(' ')[0])
                     if pattern.split(line)[1] == 'G':
