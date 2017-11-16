@@ -336,6 +336,9 @@ def exec_execobj(exec_id, schedule=-1, name=''):
 @shared_task
 def exec_will(task_id, **kwargs):
     willtask = WillTaskV2.objects.get(pk=task_id)
+    if willtask.valid == 0:
+        print('{task} is invalid, so passed'.format(task=willtask.name))
+        return
     tasks = willtask.tasks.all()
     if len(tasks) > 1:
         # batch, generate execution plan or generate azkaban job files
