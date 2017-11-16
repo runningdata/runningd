@@ -12,7 +12,7 @@ from collections import defaultdict
 #        that all descendants (ind DFS tree) of this vertex
 #        are not processed yet (or this vertex is in function
 #        call stack)
-#       这个端点的DFS已经启动，但是还没有结束。也就是说这个端点的所有的后代节点还没有执行完
+#       这个端点的DFS[深度优先遍历]已经启动，但是还没有结束。也就是说这个端点的所有的后代节点还没有执行完
 #
 # BLACK : Vertex and all its descendants are
 #         processed
@@ -39,9 +39,9 @@ class Graph():
 
     def DFSUtil(self, u, color):
         '''
-
-        :param u:
-        :param color:
+        开始深度遍历，并标记各种状态的节点
+        :param u:           当前节点
+        :param color:       节点状态集合
         :return:
         '''
         # GRAY :  This vertex is being processed (DFS

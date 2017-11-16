@@ -294,7 +294,7 @@ def dfs_usage(request):
     with open('/tmp/dfs-usage-snapshot_bb.log') as dfs_log:
         current_datee = ''
         for line in dfs_log.readlines():
-            if line.startswith('new'):
+            if line.startswith('new one ' + dateutils.now_datekey()):
                 datee = line.split(' ')[2].replace('\n', '')
                 if datee == dateutils.now_datekey():
                     current_datee = datee
