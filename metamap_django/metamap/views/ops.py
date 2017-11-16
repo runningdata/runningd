@@ -6,6 +6,8 @@ import subprocess
 import re
 
 import time
+import traceback
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import Group
@@ -28,6 +30,7 @@ from will_common.utils import constants
 from will_common.utils import dateutils
 from will_common.utils import redisutils
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION, DEFAULT_PAGE_SIEZE
+from will_common.utils.customexceptions import RDException
 
 logger = logging.getLogger('django')
 
@@ -292,19 +295,19 @@ def dfs_usage(request):
     pattern = re.compile(r'\s+')
     result = dict()
     with open('/tmp/dfs-usage-snapshot_bb.log') as dfs_log:
-        current_datee = ''
         for line in dfs_log.readlines():
-            if line.startswith('new one ' + dateutils.now_datekey()):
-                datee = line.split(' ')[2].replace('\n', '')
-                if datee == dateutils.now_datekey():
-                    current_datee = datee
-            else:
-                size = pattern.split(line)[0]
-                ssize = float(size.split(' ')[0])
-                if pattern.split(line)[1] == 'G':
-                    ssize = ssize * 1024
-                db = pattern.split(line)[2].replace('/', '_').replace('\n', '').replace('_apps_hive_warehouse_', '')
-                if len(db) < 1:
-                    continue
-                result[db] = ssize
+            try:
+                if line.startswith('new one ' + dateutils.now_datekey()):
+                    datee = line.split(' ')[2].replace('\n', '')
+                else:
+                    size = pattern.split(line)[0]
+                    ssize = float(size.split(' ')[0])
+                    if pattern.split(line)[1] == 'G':
+                        ssize = ssize * 1024
+                    db = pattern.split(line)[2].replace('/', '_').replace('\n', '').replace('_apps_hive_warehouse_', '')
+                    if len(db) < 1:
+                        continue
+                    result[db] = ssize
+            except, e:
+                raise RDException(line, traceback.format_exc())
     return render(request, 'ops/dfs_now.html', {"result": result, })
