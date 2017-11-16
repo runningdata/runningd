@@ -215,7 +215,7 @@ def add(request):
                 ss, has_cycle = bloodhelper.check_cycle(etl.id)
                 if has_cycle:
                     logger.error('etl has_cycle : %s' % etl.name)
-                    msg = u'etl %s 有环，快去改，不然明儿你就惨了啊！下班别走，上床别睡觉！' % etl.name
+                    msg = u'你写的etl %s 有环，快去改，不然明儿你就惨了啊！下班别走！ 上床别睡觉！' % etl.name
                     PushUtils.push_to_admin(msg)
                     PushUtils.push_msg_tophone(request.user.userprofile.phone, msg)
                     # raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name), '<br/>'.join(

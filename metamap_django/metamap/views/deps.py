@@ -13,6 +13,7 @@ from django.shortcuts import render
 
 from metamap.helpers import bloodhelper
 from metamap.models import ExecBlood, ExecObj, SqoopHive2Mysql, SqoopMysql2Hive, NULLETL, ETL, TblBlood
+from metamap.tt import Graph
 from will_common.models import WillDependencyTask, UserProfile
 from will_common.utils import PushUtils
 from will_common.utils import dateutils
@@ -61,12 +62,15 @@ def edit_deps(request, pk):
 
             if eo.type == 1:
                 etl = ETL.objects.get(pk=eo.rel_id)
-                ss, has_cycle = bloodhelper.check_cycle(etl.id)
-                if has_cycle:
-                    logger.error('etl has_cycle : %s' % etl.name)
-                    raise RDException('etl %s add failed, it will lead to a cylce problem: \n' % (etl.name),
-                                      '<br/>'.join(
-                                          [str(leaf) for leaf in ss]))
+
+                g = Graph(ExecObj.objects.count())
+                bloods = ExecBlood.objects.all()
+                for execobj in ExecBlood.objects.all():
+                    g.addEdge(execobj.parent_id, execobj.child_id)
+                (is_cy, colors) = g.isCyclic()
+                if is_cy:
+                    print g.back_edge
+                    raise RDException('mm', 'sd')
                 else:
                     logger.info('cycle check passed for %s' % etl.name)
 
