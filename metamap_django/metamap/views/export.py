@@ -61,8 +61,8 @@ def add(request):
         return render(request, 'export/edit.html')
 
 
-def exec_job(request, sqoopid):
-    sqoop = AnaETL.objects.get(id=sqoopid)
+def exec_job(request, pk):
+    sqoop = AnaETL.objects.get(id=pk)
     from metamap import tasks
     tasks.exec_execobj.delay(sqoop.exec_obj_id, name=sqoop.name)
     return redirect('/metamap/executions/status/0/')

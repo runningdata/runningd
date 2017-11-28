@@ -66,6 +66,7 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li><a href="{% url 'export:edit' obj.id %}">编辑</a></li>
+                                    <li><a href="{% url 'export:exec' obj.id %}">单次执行</a></li>
                                     <li><a href="#" data-toggle="modal" data-target="#previewsql"
                                            onclick="preview({{ obj.id }})">预览SQL</a></li>
                                 </ul>

@@ -78,8 +78,6 @@ urlpatterns = [
     url(r'^h2m/add/$', sqoop.add, name='h2m_sqoop_add'),
     url(r'^h2m/review/(?P<sqoop_id>[0-9]+)/$', sqoop.review, name='h2m_ssqoop_review'),
 
-    url(r'^ana/exec/(?P<sqoopid>[0-9]+)/$', export.exec_job, name='export_exec'),
-
     url(r'^h2m/exec/(?P<sqoopid>[0-9]+)/$', sqoop.exec_job, name='sqoop_exec'),
     url(r'^h2m/execlog/(?P<execid>[0-9]+)/$', sqoop.exec_log, name='sqoop_execlog'),
     url(r'^h2m/getexeclog/(?P<execid>[0-9]+)/$', sqoop.get_exec_log, name='sqoop_getexeclog'),

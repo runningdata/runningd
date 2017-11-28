@@ -11,6 +11,7 @@ router.register(r'emails', AnaETLViewSet)
 urlpatterns = [
     url(r'^$', export.IndexView.as_view(), name='index'),
     url(r'^add/$', export.add, name='add'),
+    url(r'^exec/(?P<pk>[0-9]+)/$', export.exec_job, name='exec'),
     url(r'^edit/(?P<pk>[0-9]+)/$', export.edit, name='edit'),
     url(r'^review_sql/(?P<pk>[0-9]+)/$', export.review_sql, name='review_sql'),
     url(r'^error_log/(?P<log>.*)/$', export.get_exec_log, name='error_log'),

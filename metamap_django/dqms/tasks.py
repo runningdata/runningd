@@ -93,7 +93,7 @@ def runcase(case, check, user):
                         dateutils.format_dbday(timezone.now()), chk_name, case.case_name, rule.measure_name, rule.min,
                         rule.max, re)
                     if check:
-                        PushUtils.push_both([case.editor,], msg)
+                        PushUtils.push_both([case.editor, ], msg)
                         resp = PushUtils.push_both(check.managers.all(), msg)
                         phones = ''
                         for user in check.managers.all():
