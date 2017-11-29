@@ -99,9 +99,9 @@ def check_new_jmx(name='check_new_jmx'):
                     # '''
                     # add new target and alert rule file to prometheus
                     # '''
-                    # echo_command = 'echo "10.1.5.190 %s">> /tmp/prometheus/hosts  ' % domain_name
-                    # target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /tmp/prometheus/sds/%s_online.json ' % (domain_name, domain_name)
-                    # rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
+                    # echo_command = 'echo "10.1.5.190 %s">> /root/prometheus/hosts  ' % domain_name
+                    # target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /root/prometheus/sds/%s_online.json ' % (domain_name, domain_name)
+                    # rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /root/prometheus/rules/simple_jmx.rule_template > /root/prometheus/rules/%s.rules ' % (
                     #     tmp_id, domain_name, inst.service_type, domain_name)
                     # restart_command = ' && docker restart %s' % prometheus_container
                     labels = {}
@@ -127,9 +127,9 @@ def check_new_jmx(name='check_new_jmx'):
                     port = task.ports[0]
                     host = task.host
                     host_port = host + ':' + str(port)
-                    target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /tmp/prometheus/%s/%s_online.json ' \
+                    target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /root/prometheus/%s/%s_online.json ' \
                                      % (host_port, inst.service_type, inst.instance_name)
-                    rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${inst_name}/%s/g\' -e \'s/${srv_type}/%s/g\' -e \'s/${host_and_port}/%s/g\' /tmp/prometheus/rules/simple_jmx.rule_template > /tmp/prometheus/rules/%s.rules ' % (
+                    rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${inst_name}/%s/g\' -e \'s/${srv_type}/%s/g\' -e \'s/${host_and_port}/%s/g\' /root/prometheus/rules/simple_jmx.rule_template > /root/prometheus/rules/%s.rules ' % (
                         get_clean_name(inst), inst.instance_name, inst.service_type,
                         inst.host_and_port, get_clean_jmx_app_id(tmp_id))
                     remote_cmd(echo_command + target_command + rule_command)
@@ -183,7 +183,7 @@ def check_new_spark(name='check_new_spark'):
                 add new alert rule file to prometheus
                 '''
                 echo_command = ' echo ------------------------'
-                rule_command = ' && sed -e \'s/${alert_name}/%s/g\' /tmp/prometheus/rules/simple_spark.rule_template > /tmp/prometheus/rules/%s.rules ' % (
+                rule_command = ' && sed -e \'s/${alert_name}/%s/g\' /root/prometheus/rules/simple_spark.rule_template > /root/prometheus/rules/%s.rules ' % (
                     inst.instance_name, inst.instance_name)
                 remote_cmd(echo_command + rule_command)
                 need_restart = True
@@ -212,7 +212,7 @@ def check_disabled_spark(name='check_disabled_spark'):
             '''
                     delete alert rule file to prometheus
                     '''
-            remote_cmd('rm -vf /tmp/prometheus/rules/%s.rules'
+            remote_cmd('rm -vf /root/prometheus/rules/%s.rules'
                        % (inst.instance_name))
             need_restart = True
             print('spark streaming %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
@@ -236,7 +236,7 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             '''
             delete target file to prometheus
             '''
-            cmd = 'rm -vf /tmp/prometheus/{service_type}/{instance_name}_online.json'.format(
+            cmd = 'rm -vf /root/prometheus/{service_type}/{instance_name}_online.json'.format(
                 service_type=inst.service_type, instance_name=inst.instance_name)
             remote_cmd(cmd)
             print('jmx %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
@@ -260,14 +260,14 @@ def check_disabled_jmx(name='check_disabled_jmx'):
         delete alert rule file to prometheus
         '''
         restart_command = 'docker restart %s' % prometheus_container
-        cmd = (' && ').join(['rm -vf /tmp/prometheus/rules/%s.rules' % ii for ii in to_del])
+        cmd = (' && ').join(['rm -vf /root/prometheus/rules/%s.rules' % ii for ii in to_del])
         print(remote_cmd(cmd + ' && ' + restart_command))
         print('prometheus has been restarted')
 
 
 def is_spark_rule_exist(app_name):
     result = remote_cmd(
-        'if [ -f /tmp/prometheus/rules/{app_name}.rules ]; then echo exist; fi'.format(app_name=app_name))
+        'if [ -f /root/prometheus/rules/{app_name}.rules ]; then echo exist; fi'.format(app_name=app_name))
     if result == 'exist':
         return True
     return False
