@@ -5,12 +5,13 @@ import os
 import traceback
 
 from django.conf import settings
+from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 from metamap.helpers import etlhelper
-from metamap.models import SqoopHive2Mysql, SqoopHive2MysqlExecutions
+from metamap.models import SqoopHive2Mysql, SqoopHive2MysqlExecutions, ExecObj
 from will_common.decorators import my_decorator, exeception_printer
 from will_common.models import WillDependencyTask
 from will_common.utils import PushUtils
@@ -42,6 +43,7 @@ class Hive2MysqlListView(GroupListView):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             context['search'] = self.request.GET['search']
         return context
+
 
 # @exeception_printer
 def add(request):
@@ -162,3 +164,35 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
         logger.error('error : %s , id is %d' % (e, current_id))
         logger.error('traceback is : %s ' % traceback.format_exc())
         return HttpResponse('error')
+
+
+@permission_required('auth.admin_etl')
+def restart_job(request):
+    if request.method == 'POST':
+        try:
+            final_bloods = set()
+            schedule = int(request.POST.get('schedule'))
+            if schedule == 4:
+                delta = dateutils.days_before_now(request.POST.get('target_day'))
+                folder = 'h2m-' + dateutils.now_datetime() + '-restart-delta-' + request.POST.get('target_day')
+                schedule = 0
+            else:
+                delta = 0
+                folder = 'h2m-' + dateutils.now_datetime() + '-restart'
+
+            os.mkdir(AZKABAN_BASE_LOCATION + folder)
+            os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
+
+            h2ms = ExecObj.objects.filter(type=3, creator__org_group__name='jlc')
+            h2ms = [h2m for h2m in h2ms if WillDependencyTask.objects.filter(name=h2m.name, schedule=0).count() > 0]
+            etlhelper.generate_job_file_h2m_restart(h2ms, folder, 0, delta=delta)
+            etlhelper.generate_job_file_for_partition('etl_done_' + folder, [h2m.name for h2m in h2ms], folder, delta)
+            task_zipfile = AZKABAN_BASE_LOCATION + folder
+            ziputils.zip_dir(task_zipfile)
+            return HttpResponse(folder)
+        except Exception, e:
+            logger.error('error : %s ' % e)
+            logger.error('traceback is : %s ' % traceback.format_exc())
+            return HttpResponse('error')
+    else:
+        return render(request, 'etl/restart.html')

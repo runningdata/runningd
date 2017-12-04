@@ -77,6 +77,7 @@ urlpatterns = [
     url(r'^h2m/(?P<pk>[0-9]+)/$', sqoop.edit, name='h2m_sqoop_edit'),
     url(r'^h2m/add/$', sqoop.add, name='h2m_sqoop_add'),
     url(r'^h2m/review/(?P<sqoop_id>[0-9]+)/$', sqoop.review, name='h2m_ssqoop_review'),
+    url(r'^h2m/restart_job/', sqoop.restart_job, name='h2m_restart_job'),
 
     url(r'^h2m/exec/(?P<sqoopid>[0-9]+)/$', sqoop.exec_job, name='sqoop_exec'),
     url(r'^h2m/execlog/(?P<execid>[0-9]+)/$', sqoop.exec_log, name='sqoop_execlog'),

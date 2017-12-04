@@ -199,7 +199,7 @@ def get_hive_inmi_tbl(tbl):
     return tbl + '_inmi'
 
 
-def generate_sqoop_hive2mysql(task, schedule=-1):
+def generate_sqoop_hive2mysql(task, schedule=-1, delta=0):
     str = list()
 
     # sqoop --options-file/server/app/sqoop/export_hive_ykw_dw.txt --table
@@ -234,7 +234,10 @@ def generate_sqoop_hive2mysql(task, schedule=-1):
             str.append(task.settings)
     else:
         tt = WillDependencyTask.objects.get(rel_id=task.id, schedule=schedule, type=3)
-        str.append(tt.variables)
+        if delta != 0:
+            str.append(get_delta_variables(tt.variables, delta))
+        else:
+            str.append(tt.variables)
     str.append(' sqoop export ')
     str.append('-Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE)
     str.append(task.mysql_meta.settings)
@@ -383,7 +386,6 @@ def generate_job_file(*args, **kwargs):
         f.write(content)
 
 
-
 def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     '''
     生成azkaban job文件
@@ -410,7 +412,6 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
     job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
     with open(job_file, 'w') as f:
         f.write(content)
-
 
 
 def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1, delta=0):
@@ -456,7 +457,7 @@ def generate_end_job_file(job_name, command, folder, deps):
         f.write(content)
 
 
-def generate_job_file_h2m(objs, folder, group_name):
+def generate_job_file_h2m(objs, folder, group_name, delta=0):
     '''
     生成azkaban job文件
     :param blood:
@@ -468,11 +469,25 @@ def generate_job_file_h2m(objs, folder, group_name):
         job_name = obj.name
         task = SqoopHive2Mysql.objects.get(pk=obj.rel_id)
         if task.cgroup.name == group_name:
-            generate_h2m_script(folder, job_name, obj.schedule, task)
+            generate_h2m_script(folder, job_name, obj.schedule, task, delta)
 
 
-def generate_h2m_script(folder, job_name, schedule, task):
-    h2m = generate_sqoop_hive2mysql(task, schedule=schedule)
+def generate_job_file_h2m_restart(objs, folder, schedule, delta=0):
+    '''
+    生成azkaban job文件
+    :param blood:
+    :param parent_node:
+    :param folder:
+    :return:
+    '''
+    for obj in objs:
+        job_name = obj.name
+        task = SqoopHive2Mysql.objects.get(pk=obj.rel_id)
+        generate_h2m_script(folder, job_name, schedule, task, delta)
+
+
+def generate_h2m_script(folder, job_name, schedule, task, delta=0):
+    h2m = generate_sqoop_hive2mysql(task, schedule, delta)
     sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "/" + job_name + ".h2m"
     with open(sqoop_file, 'w') as f:
         f.write(h2m)

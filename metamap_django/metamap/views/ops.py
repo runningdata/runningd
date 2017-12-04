@@ -153,6 +153,14 @@ def push_single_msg(request):
         return HttpResponse('done')
 
 
+def push_single_email(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        msg = request.POST['msg']
+        PushUtils.push_exact_email(email, msg)
+        return HttpResponse('done')
+
+
 def hdfs_files(request):
     path = '/user/%s' % request.user.username
     command = 'hdfs dfs -ls %s | grep ^[^d] | grep user | awk \'{print substr($8, length("%s") + 1)}\'' % (path, path)

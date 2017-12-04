@@ -89,9 +89,8 @@ def check_new_jmx(name='check_new_jmx'):
                     cmd = 'sh /entrypoint.sh ' + inst.host_and_port + ' ' + str(CONTAINER_PORT) + ' ' + \
                           inst.service_type + ' ' + inst.instance_name
                     # domain_name = hp_inst + '.' + inst.service_type + '.moniter.com'
-                    # labels = {'HAPROXY_GROUP': 'external',
-                    #           'HAPROXY_0_VHOST': domain_name}
-                    # new_app = MarathonApp(cmd=cmd, mem=32, cpus=0.25, instances=1, container=container, labels=labels)
+                    labels = {'HAPROXY_GROUP': 'will'}
+                    new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels)
                     #
                     # new_result = c.create_app(tmp_id, new_app)
                     # print('new app %s has been created' % new_result.id)
@@ -104,9 +103,9 @@ def check_new_jmx(name='check_new_jmx'):
                     # rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${target}/%s/g\' -e \'s/${srv_type}/%s/g\' /root/prometheus/rules/simple_jmx.rule_template > /root/prometheus/rules/%s.rules ' % (
                     #     tmp_id, domain_name, inst.service_type, domain_name)
                     # restart_command = ' && docker restart %s' % prometheus_container
-                    labels = {}
-
-                    new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels)
+                    # labels = {}
+                    #
+                    # new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels)
 
                     new_result = c.create_app(tmp_id, new_app)
                     time.sleep(3)
@@ -124,7 +123,7 @@ def check_new_jmx(name='check_new_jmx'):
                         print('No task for {name} yet'.format(name=tmp_id))
                         print(new_app.to_json())
                     task = new_app.tasks[0]
-                    port = task.ports[0]
+                    port = new_app.ports[0]
                     host = task.host
                     host_port = host + ':' + str(port)
                     target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /root/prometheus/%s/%s_online.json ' \
