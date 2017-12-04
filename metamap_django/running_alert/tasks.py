@@ -124,7 +124,7 @@ def check_new_jmx(name='check_new_jmx'):
                         print(new_app.to_json())
                     task = new_app.tasks[0]
                     port = new_app.ports[0]
-                    host = task.host
+                    host = '10.2.19.124'
                     host_port = host + ':' + str(port)
                     target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /root/prometheus/%s/%s_online.json ' \
                                      % (host_port, inst.service_type, inst.instance_name)
