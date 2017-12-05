@@ -309,7 +309,7 @@ def edit(request, pk):
             print(traceback.format_exc())
             return render(request, 'common/message.html', {'message': e.message, 'err_stack': traceback.format_exc()})
         finally:
-            edit_locks.remove(etl.name)
+            edit_locks.remove(privious_etl.name)
             print('lock removed for %s ' % etl.name)
             if len(edit_locks) > 0:
                 for lock in edit_locks:
