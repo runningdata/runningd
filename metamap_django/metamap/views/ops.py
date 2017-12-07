@@ -149,16 +149,17 @@ def push_single_msg(request):
     if request.method == 'POST':
         phone = request.POST['phone']
         msg = request.POST['msg']
-        PushUtils.push_msg_tophone(phone, msg)
-        return HttpResponse('done')
+        tt = PushUtils.push_msg_tophone(phone, msg)
+        return HttpResponse(tt)
 
 
 def push_single_email(request):
     if request.method == 'POST':
         email = request.POST['email']
         msg = request.POST['msg']
-        PushUtils.push_exact_email(email, msg)
-        return HttpResponse('done')
+        subject = request.POST['subject']
+        tt = PushUtils.push_exact_html_email(email, subject, msg)
+        return HttpResponse(tt)
 
 
 def hdfs_files(request):

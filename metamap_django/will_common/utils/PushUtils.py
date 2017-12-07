@@ -44,11 +44,12 @@ def push_msg_tophone(phone, msg):
         opener = urllib2.build_opener(httpHandler, httpsHandler)
         urllib2.install_opener(opener)
         resp = urllib2.urlopen(req)
-        if resp.getcode() == 200:
-            logger.info(resp.read())
-            return 'push phone success'
+        content = resp.read()
+        if resp.getcode() == 200 and content != '"ERROR"':
+            logger.info(content)
+            return 'success'
         else:
-            return 'error', resp.read()
+            return 'error', content
     except Exception, e:
         logger.error('error : %s ' % e)
         logger.error('traceback is : %s ' % traceback.format_exc())
@@ -77,6 +78,19 @@ def push_email(users, msg):
     except Exception as e:
         logger.error('error : %s ' % e)
         logger.error('traceback is : %s ' % traceback.format_exc())
+
+
+def push_exact_html_email(email, subject, msg):
+    try:
+        from_email = settings.EMAIL_HOST_USER
+        msg = EmailMessage(subject, msg, from_email, [email, ])
+        msg.content_subtype = 'html'
+        msg.send()
+        return 'success'
+    except Exception as e:
+        logger.error('error : %s ' % e)
+        logger.error('traceback is : %s ' % traceback.format_exc())
+        return 'error : %s ' % e
 
 
 def push_exact_email(email, msg):
