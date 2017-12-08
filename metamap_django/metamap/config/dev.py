@@ -34,12 +34,10 @@ SESSION_COOKIE_NAME = 'xsid'
 CSRF_COOKIE_NAME = 'xcsrftoken'
 # email settings
 EMAIL_HOST = 'smtp.exmail.qq.com'
-EMAIL_HOST_USER = 'auto@jianlc.com'
-EMAIL_HOST_PASSWORD = 'pLQxoJjcr9NGH7UD'
 EMAIL_USE_TLS = True
 
 PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
-PUSH_KEY = '&OKY%~!$^G*JRRF^'
+PUSH_KEY = os.getenv('SMS_PUSH_KEY')
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 ADMIN_EMAIL = 'chenxin@yinker.com'
 ALLOWED_HOSTS = []

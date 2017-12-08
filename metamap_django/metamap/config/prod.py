@@ -35,7 +35,7 @@ CSRF_COOKIE_NAME = 'runningdata_csrftoken'
 # email settings
 EMAIL_HOST = 'smtp.exmail.qq.com'
 EMAIL_HOST_USER = 'auto@jianlc.com'
-EMAIL_HOST_PASSWORD = '2X6bZdU5shJ4jacy'
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PWD')
 EMAIL_USE_TLS = True
 
 # use root to execute....
@@ -43,7 +43,7 @@ USE_ROOT = True
 
 # push url
 PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
-PUSH_KEY = '&OKY%~!$^G*JRRF^'
+PUSH_KEY = os.getenv('SMS_PUSH_KEY')
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 ADMIN_EMAIL = 'chenxin@yinker.com'
 PROC_USER = 'metamap'
