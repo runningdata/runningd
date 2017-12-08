@@ -34,8 +34,8 @@ CSRF_COOKIE_NAME = 'runningdata_csrftoken'
 
 # email settings
 EMAIL_HOST = 'smtp.exmail.qq.com'
-EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
-EMAIL_HOST_PASSWORD = 'YYxx24680'
+EMAIL_HOST_USER = 'auto@jianlc.com'
+EMAIL_HOST_PASSWORD = '2X6bZdU5shJ4jacy'
 EMAIL_USE_TLS = True
 
 # use root to execute....
