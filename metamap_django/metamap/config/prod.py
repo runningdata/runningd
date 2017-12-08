@@ -43,7 +43,7 @@ USE_ROOT = True
 
 # push url
 PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
-PUSH_KEY = os.getenv('SMS_PUSH_KEY')
+PUSH_KEY = '&OKY%~!$^G*JRRF^'
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 ADMIN_EMAIL = 'chenxin@yinker.com'
 PROC_USER = 'metamap'
