@@ -27,6 +27,9 @@ SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+from init_config import result
+from celery_conf import *
+
 
 SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
@@ -34,57 +37,35 @@ EEE = 'default_DEV'
 ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.103.27.171', '10.103.70.27']
 
 HIVE_SERVER = {
-    'host': '10.2.19.126',
-    'port': 10000,
-    'user': 'hdfs',
-    'password': '',
-}
-
-BROKER_URL = 'redis://10.2.19.113:6480'
-CELERY_REDIS_HOST = '10.2.19.113'
-CELERY_REDIS_PORT = '6480'
-# BROKER_URL = 'redis://10.2.19.97:6379'
-# CELERY_REDIS_HOST = '10.2.19.97'
-# CELERY_REDIS_PORT = '6379'
-
-# Celery Beat 设置
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-# CELERYD_TASK_TIME_LIMIT = 3600
-CELERYD_TASK_SOFT_TIME_LIMIT = 3600
-# CELERYD_MAX_TASKS_PER_CHILD = 100
-
-CELERY_ROUTES = {
-    'dqms.tasks.exec_dqms': {
-        'queue': 'dqms',
-    },
-    'dqms.tasks.run_case': {
-        'queue': 'dqms',
-    },
+    'host': result['HIVE_SERVER_HOST'],
+    'port': result['HIVE_PORT'],
+    'user': result['HIVE_USER'],
+    'password': result['HIVE_PWD'],
 }
 
 # 设置cas服务器地址
-CAS_SERVER_URL = "http://10.103.27.171:7000/sso/"
+CAS_SERVER_URL = "http://{server_name}/sso/".format(server_name=result['CAS_SERVER_URL'])
 CAS_IDC_SERVER_URL = "http://10.2.19.113:8181/sso/"
 # CAS_LOGOUT_COMPLETELY = True
 CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
 
 # push url
-PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
-PUSH_KEY = '&OKY%~!$^G*JRRF^'
+PUSH_URL = result['PUSH_URL']
+PUSH_KEY = result['PUSH_KEY']
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
-ADMIN_EMAIL = 'chenxin@yinker.com'
+ADMIN_EMAIL = result['ADMIN_EMAIL']
 
 # kylin
-KYLIN_REST_URI = 'http://10.2.19.94:7070/kylin/api/query'
-KYLIN_ADMIN_USER = 'ADMIN'
-KYLIN_ADMIN_PWD = 'KYLIN'
+KYLIN_REST_URI = result['KYLIN_REST_URI']
+KYLIN_ADMIN_USER = result['KYLIN_ADMIN_USER']
+KYLIN_ADMIN_PWD = result['KYLIN_ADMIN_PWD']
 
 # email settings
-EMAIL_HOST = 'smtp.exmail.qq.com'
-EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
-EMAIL_HOST_PASSWORD = 'Yanjiu123'
-EMAIL_USE_TLS = True
+EMAIL_HOST = result['EMAIL_HOST']
+EMAIL_HOST_USER = result['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = result['EMAIL_HOST_PASSWORD']
+EMAIL_USE_TLS = result['EMAIL_USE_TLS']
 
 # Application definition
 INSTALLED_APPS = [
@@ -162,19 +143,22 @@ WSGI_APPLICATION = 'metamap_django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'metamap1',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': '10.2.19.73',
-        'PORT': '3306',
+        'NAME': result['MAIN_DB_NAME'],
+        'PASSWORD': result['MAIN_DB_PWD'],
+        'USER': result['MAIN_DB_USER'],
+        'HOST': result['MAIN_DB_HOST'],
+        'PORT': result['MAIN_DB_PORT'],
+        'TEST': {
+            'NAME': 'metamap1',
+        },
     },
     'dqms_check': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'YKX_DW',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': '10.2.19.90',
-        'PORT': '3306',
+        'NAME': result['DQMS_DB_NAME'],
+        'PASSWORD': result['DQMS_DB_PWD'],
+        'USER': result['DQMS_DB_USER'],
+        'HOST': result['DQMS_DB_HOST'],
+        'PORT': result['DQMS_DB_PORT'],
     }
 }
 

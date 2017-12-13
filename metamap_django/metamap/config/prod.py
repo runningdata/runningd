@@ -33,6 +33,8 @@ SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
 
 from init_config import result
+from celery_conf import *
+
 
 # email settings
 EMAIL_HOST = result['EMAIL_HOST']
@@ -65,7 +67,7 @@ HIVE_SERVER = {
 }
 
 # 设置cas服务器地址
-CAS_SERVER_URL = "http://10.103.27.171:7000/sso/"
+CAS_SERVER_URL = "http://{server_name}/sso/".format(server_name=result['CAS_SERVER_URL'])
 CAS_IDC_SERVER_URL = "http://10.2.19.113:8181/sso/"
 # CAS_LOGOUT_COMPLETELY = True
 CAS_PROVIDE_URL_TO_LOGOUT = True
@@ -76,7 +78,6 @@ AUTHENTICATION_BACKENDS = (
     'cas.backends.CASBackend',
 )
 
-from celery_conf import *
 
 # Application definition
 

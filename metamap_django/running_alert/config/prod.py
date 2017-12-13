@@ -12,9 +12,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
-import logging
-import django.utils.log
-import logging.handlers
+from init_config import result
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,23 +37,23 @@ CSRF_COOKIE_NAME = 'runningdata_csrftoken'
 ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.103.27.171', '10.103.70.27']
 
 # 设置cas服务器地址
-CAS_SERVER_URL = "http://10.103.27.171:7000/sso/"
+CAS_SERVER_URL = "http://{server_name}/sso/".format(server_name=result['CAS_SERVER_URL'])
 CAS_IDC_SERVER_URL = "http://10.2.19.113:8181/sso/"
 # CAS_LOGOUT_COMPLETELY = True
 CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
 
 # push url
-PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
-PUSH_KEY = '&OKY%~!$^G*JRRF^'
+PUSH_URL = result['PUSH_URL']
+PUSH_KEY = result['PUSH_KEY']
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
-ADMIN_EMAIL = 'chenxin@yinker.com'
+ADMIN_EMAIL = result['ADMIN_EMAIL']
 
 # email settings
-EMAIL_HOST = 'smtp.exmail.qq.com'
-EMAIL_HOST_USER = 'yinkerconfluence@yinker.com'
-EMAIL_HOST_PASSWORD = 'YYxx24680'
-EMAIL_USE_TLS = True
+EMAIL_HOST = result['EMAIL_HOST']
+EMAIL_HOST_USER = result['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = result['EMAIL_HOST_PASSWORD']
+EMAIL_USE_TLS = result['EMAIL_USE_TLS']
 
 from celery_conf import *
 
@@ -130,19 +128,11 @@ WSGI_APPLICATION = 'metamap_django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'metamap1',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': '10.2.19.73',
-        'PORT': '3306',
-    },
-    '/var_check': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'YKX_DW',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': '10.2.19.74',
-        'PORT': '3306',
+        'NAME': result['MAIN_DB_NAME'],
+        'PASSWORD': result['MAIN_DB_PWD'],
+        'USER': result['MAIN_DB_USER'],
+        'HOST': result['MAIN_DB_HOST'],
+        'PORT': result['MAIN_DB_PORT'],
     }
 }
 
@@ -203,7 +193,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/running_alert_all.log',  # 日志输出文件
+            'filename': result['ALL_LOG'],  # 日志输出文件
             'maxBytes': 1024 * 1024 * 5,  # 文件大小
             'backupCount': 5,  # 备份份数
             'formatter': 'standard',  # 使用哪种formatters日志格式
@@ -211,7 +201,7 @@ LOGGING = {
         'error_handler': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/running_alert_error.log',
+            'filename': result['ERROR_LOG'],
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
