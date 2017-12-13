@@ -61,6 +61,7 @@ def run_case(case_id, user_id, name='dqms'):
 
 
 def runcase(case, check, user):
+    print('runcase now ')
     chk_name = 'test'
     if check:
         chk_name = check.chk_name
