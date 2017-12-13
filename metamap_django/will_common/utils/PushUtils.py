@@ -107,28 +107,3 @@ def push_exact_email(email, msg):
     except Exception, e:
         logger.error('error : %s ' % e)
         logger.error('traceback is : %s ' % traceback.format_exc())
-
-
-def push_email2(request):
-    subject = request.POST.get('subject', 'willtest')
-    message = request.POST.get('message', 'willtest')
-    from_email = request.POST.get('from_email', 'yinkerconfluence@yinker.com')
-    if subject and message and from_email:
-        try:
-            email = EmailMessage(
-                u'中文题目',
-                u'中文内容',
-                'yinkerconfluence@yinker.com',
-                ['chenxin@yinker.com'],
-                ['xuexu@yinker.com'],
-            )
-            email.attach_file(u'/root/月度目标数据-20170210095000')
-
-            email.send()
-        except BadHeaderError:
-            return HttpResponse('Invalid header found.')
-        return HttpResponse('Ok header found.')
-    else:
-        # In reality we'd use a form class
-        # to get proper validation errors.
-        return HttpResponse('Make sure all fields are entered and valid.')

@@ -221,7 +221,6 @@ def generate_sqoop_hive2mysql(task, schedule=-1, delta=0):
     # --username
     # root
     # --password
-    # data @ yinker.com
     # --connection-manager
     # org.apache.sqoop.manager.MySQLManager
     # --outdir
