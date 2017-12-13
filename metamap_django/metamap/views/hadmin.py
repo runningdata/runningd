@@ -26,7 +26,7 @@ def add(request):
                 group = request.user.userprofile.org_group
                 # check all
                 email = request.POST['email'].strip()
-                username = email.replace('@yinker.com', '').strip()
+                username = email.replace(settings.result['ORG_EMAIL_SUFFIX'], '').strip()
                 if 'export' in request.POST or 'xstorm' in request.POST:
                     if not User.objects.filter(username=username, email=email).exists():
                         user = User.objects.create(username=username, email=email, last_login=timezone.now(),

@@ -38,22 +38,6 @@ c = MarathonClient('http://10.2.19.124:8080')
 CONTAINER_PORT = 1234
 prometheus_container = 'my-prometheus'
 
-
-# def get_avaliable_port():
-#     rxe = remote_cmd(
-#         'netstat -lntu | awk \'{print($4)}\' | grep : | awk -F \':\' \'{print $NF}\' | sort -nru ',
-#         settings.MARATHON_HOST)
-#     used_ports = [int(i) for i in rxe.split('\r\n')]
-#     min_port = used_ports[-1]
-#     start_port = min_port if min_port > settings.START_PORT else settings.START_PORT
-#     start_port = start_port + random.randint(1, 30000)
-#     print('start select port %d' % start_port)
-#     while start_port in used_ports:
-#         start_port += 1
-#     print('got port %d' % start_port)
-#     return start_port
-
-
 @shared_task(queue='running_alert')
 def check_new_jmx(name='check_new_jmx'):
     try:
