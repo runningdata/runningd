@@ -32,11 +32,7 @@ ENV_PRD = True
 SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
 
-with open('/etc/runningd.conf') as f:
-    cc = f.read()
-    print cc
-    import json
-    result = json.loads(cc)
+from init_config import result
 
 # email settings
 EMAIL_HOST = result['EMAIL_HOST']

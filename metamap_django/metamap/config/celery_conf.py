@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*
 import djcelery
-import json
 
 djcelery.setup_loader()
-with open('/etc/runningd.conf') as f:
-    result = json.loads(f.read())
+from init_config import result
 
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
