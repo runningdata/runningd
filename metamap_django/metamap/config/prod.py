@@ -16,6 +16,7 @@ import logging
 import django.utils.log
 import logging.handlers
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -32,20 +33,25 @@ ENV_PRD = True
 SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
 
+with open('/etc/runningd.conf') as f:
+    cc = f.read()
+    print cc
+    import json
+    result = json.loads(cc)
 # email settings
-EMAIL_HOST = 'smtp.exmail.qq.com'
-EMAIL_HOST_USER = 'auto@jianlc.com'
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PWD')
-EMAIL_USE_TLS = True
+EMAIL_HOST = result['EMAIL_HOST']
+EMAIL_HOST_USER = result['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = result['EMAIL_HOST_PASSWORD']
+EMAIL_USE_TLS = result['EMAIL_USE_TLS']
 
 # use root to execute....
 USE_ROOT = True
 
 # push url
-PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
-PUSH_KEY = '&OKY%~!$^G*JRRF^'
+PUSH_URL = result['PUSH_URL']
+PUSH_KEY = result['PUSH_KEY']
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
-ADMIN_EMAIL = 'chenxin@yinker.com'
+ADMIN_EMAIL = result['ADMIN_EMAIL']
 PROC_USER = 'metamap'
 
 ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.2.19.124', '10.103.27.171', '10.103.70.27']
@@ -56,10 +62,10 @@ DEFAULT_PASSWD = 'qwer1234'
 DB_HUE = 'hue'
 
 HIVE_SERVER = {
-    'host': 'servicenode07.yinker.com',
-    'port': 10000,
-    'user': 'hdfs',
-    'password': '',
+    'host': result['HIVE_SERVER_HOST'],
+    'port': result['HIVE_PORT'],
+    'user': result['HIVE_USER'],
+    'password': result['HIVE_PWD'],
 }
 
 # 设置cas服务器地址
@@ -149,30 +155,32 @@ WSGI_APPLICATION = 'metamap_django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'metamap1',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': 'prd-mysql01.data.com',
-        'PORT': '3306',
+        'NAME': result['MAIN_DB_NAME'],
+        'PASSWORD': result['MAIN_DB_PWD'],
+        'USER': result['MAIN_DB_USER'],
+        'HOST': result['MAIN_DB_HOST'],
+        'PORT': result['MAIN_DB_PORT'],
+        'TEST': {
+            'NAME': 'metamap1',
+        },
     },
     'hivemeta': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hive1',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': 'prd-mysql01.data.com',
-        'PORT': '3306',
+        'NAME': result['HIVEMETA_DB_NAME'],
+        'PASSWORD': result['HIVEMETA_DB_PWD'],
+        'USER': result['HIVEMETA_DB_USER'],
+        'HOST': result['HIVEMETA_DB_HOST'],
+        'PORT': result['HIVEMETA_DB_PORT'],
     },
     DB_HUE: {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hue',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'zjy',
-        'HOST': 'prd-mysql01.data.com',
-        'PORT': '3306',
+        'NAME': result['HUE_DB_NAME'],
+        'PASSWORD': result['HUE_DB_PWD'],
+        'USER': result['HUE_DB_USER'],
+        'HOST': result['HUE_DB_HOST'],
+        'PORT': result['HUE_DB_PORT'],
     },
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 

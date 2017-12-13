@@ -33,22 +33,31 @@ USE_ROOT = True
 SESSION_COOKIE_NAME = 'xsid'
 CSRF_COOKIE_NAME = 'xcsrftoken'
 # email settings
-EMAIL_HOST = 'smtp.exmail.qq.com'
-EMAIL_USE_TLS = True
+with open('/etc/runningd.conf') as f:
+    cc = f.read()
+    print cc
+    import json
 
-PUSH_URL = 'https://advert.jianlc.com/sendMessage.shtml?mobileNo=%s&content=%s'
-PUSH_KEY = os.getenv('SMS_PUSH_KEY')
+    result = json.loads(cc)
+
+EMAIL_HOST = result['EMAIL_HOST']
+EMAIL_HOST_USER = result['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = result['EMAIL_HOST_PASSWORD']
+EMAIL_USE_TLS = result['EMAIL_USE_TLS']
+
+PUSH_URL = result['PUSH_URL']
+PUSH_KEY = result['PUSH_KEY']
 ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
-ADMIN_EMAIL = 'chenxin@yinker.com'
+ADMIN_EMAIL = result['ADMIN_EMAIL']
 ALLOWED_HOSTS = []
 
 CLUTER_QUEUE = 'default'
 
 HIVE_SERVER = {
-    'host': '10.1.5.63',
-    'port': 10000,
-    'user': 'hdfs',
-    'password': '',
+    'host': result['HIVE_SERVER_HOST'],
+    'port': result['HIVE_PORT'],
+    'user': result['HIVE_USER'],
+    'password': result['HIVE_PWD'],
 }
 
 PATH_AUTH_DICT = {
@@ -56,7 +65,7 @@ PATH_AUTH_DICT = {
 }
 
 # 设置cas服务器地址
-CAS_SERVER_URL = "http://dev.will.com:8081/sso/"
+CAS_SERVER_URL = "http://{server_name}/sso/".format(server_name=result['CAS_SERVER_URL'])
 # CAS_LOGOUT_COMPLETELY = True
 CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
@@ -73,9 +82,10 @@ DB_HUE = 'hue'
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
-BROKER_URL = 'redis://localhost:6379'
-CELERY_REDIS_HOST = 'localhost'
-CELERY_REDIS_PORT = '6379'
+BROKER_URL = 'redis://{celery_host}:{celery_port}'.format(celery_host=result['CELERY_REDIS_HOST'],
+                                                          celery_port=result['CELERY_REDIS_PORT'])
+CELERY_REDIS_HOST = result['CELERY_REDIS_HOST']
+CELERY_REDIS_PORT = result['CELERY_REDIS_PORT']
 # CELERY_ROUTES = {
 #     'metamap.tasks.exec_etl_cli': {
 #         'queue': 'metamap',
@@ -142,30 +152,30 @@ WSGI_APPLICATION = 'metamap_django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'metamap1',
-        'PASSWORD': '',
-        'USER': 'root',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'NAME': result['MAIN_DB_NAME'],
+        'PASSWORD': result['MAIN_DB_PWD'],
+        'USER': result['MAIN_DB_USER'],
+        'HOST': result['MAIN_DB_HOST'],
+        'PORT': result['MAIN_DB_PORT'],
         'TEST': {
             'NAME': 'metamap1',
         },
     },
     'hivemeta': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hive',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'ambari',
-        'HOST': '10.1.5.225',
-        'PORT': '3306',
+        'NAME': result['HIVEMETA_DB_NAME'],
+        'PASSWORD': result['HIVEMETA_DB_PWD'],
+        'USER': result['HIVEMETA_DB_USER'],
+        'HOST': result['HIVEMETA_DB_HOST'],
+        'PORT': result['HIVEMETA_DB_PORT'],
     },
     DB_HUE: {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hue',
-        'PASSWORD': 'Zjy@yinker20150309',
-        'USER': 'root',
-        'HOST': '10.1.5.225',
-        'PORT': '3306',
+        'NAME': result['HUE_DB_NAME'],
+        'PASSWORD': result['HUE_DB_PWD'],
+        'USER': result['HUE_DB_USER'],
+        'HOST': result['HUE_DB_HOST'],
+        'PORT': result['HUE_DB_PORT'],
     },
 }
 
@@ -224,7 +234,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'metamap/log/metamap_all.log',  # 日志输出文件
+            'filename': result['ALL_LOG'],  # 日志输出文件
             'maxBytes': 1024 * 1024 * 5,  # 文件大小
             'backupCount': 5,  # 备份份数
             'formatter': 'standard',  # 使用哪种formatters日志格式
@@ -232,7 +242,7 @@ LOGGING = {
         'error_handler': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'metamap/log/metamap_error.log',
+            'filename': result['ERROR_LOG'],
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
