@@ -16,7 +16,6 @@ import logging
 import django.utils.log
 import logging.handlers
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -38,6 +37,7 @@ with open('/etc/runningd.conf') as f:
     print cc
     import json
     result = json.loads(cc)
+
 # email settings
 EMAIL_HOST = result['EMAIL_HOST']
 EMAIL_HOST_USER = result['EMAIL_HOST_USER']
