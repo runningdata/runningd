@@ -11,8 +11,6 @@ from django.contrib.auth import views
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from metamap_django import settings
-
 logger = logging.getLogger('error')
 
 
