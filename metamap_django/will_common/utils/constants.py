@@ -13,6 +13,7 @@ DATASRC_TYPE_HIVE = 'hive'
 DATASRC_TYPE_MYSQL = 'mysql'
 DATASRC_TYPE_KYLIN = 'kylin'
 ALERT_MSG = u'''
+        报警
         时间： %s
         质检任务： %s
         质检用例： %s
