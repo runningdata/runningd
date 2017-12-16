@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*
+import json
+with open('/etc/runningd_schedule.conf') as f:
+    conf = json.loads(f.read())
+    print conf
 
 
-user = 'azkaban'
-pwd = '15yinker@bj'
-host = 'http://10.2.19.62:8081'
-metamap_host='10.2.19.62:8888'
+user = conf['AZKABAN_USER']
+pwd = conf['AZKABAN_PWD']
+host = conf['AZKABAN_URL']
+metamap_host= conf['RUNNINGD_HOST']
 import urllib2,json, urllib
 
 from azkaban_client.azkaban import *
@@ -39,7 +43,7 @@ args = parser.parse_args()
 
 
 def generate_task_files(jobtype, schedule, group):
-    target = 'http://10.2.19.62:8088/metamap/{job_type}/generate_job_dag/{num}/{group_name}/'.format(job_type=jobtype, num=schedule, group_name=group)
+    target = 'http://{runningd_host}/metamap/{job_type}/generate_job_dag/{num}/{group_name}/'.format(runningd_host=metamap_host, job_type=jobtype, num=schedule, group_name=group)
     resp = requests.get(target)
     return resp.content
 
@@ -49,9 +53,9 @@ def get_file_name(proj):
     return zip_file
 
     
-def go_schedule(project, target_file):
+def go_schedule(proj_name, target_file):
     fetcher = CookiesFetcher(user, pwd)
-    project = Project('WillTest', 'first test', fetcher)
+    project = Project(proj_name, 'first test', fetcher)
     project.create_prj()
     project.upload_zip(target_file)
     for flow in project.fetch_flow():
@@ -60,6 +64,14 @@ def go_schedule(project, target_file):
     print('all end for %s ....' % project.name)
 
 print args
-prj_name = generate_task_files(args.jobtype, args.schedule, args.group)
-#prj_name = 'h2h-20170928161948'
-go_schedule(prj_name, get_file_name(prj_name))
+try:
+    prj_name = generate_task_files(args.jobtype, args.schedule, args.group)
+    #prj_name = 'h2h-20170928161948'
+    go_schedule(prj_name, get_file_name(prj_name))
+except Exception, e:
+    create_data = {
+            'msg': 'Error happened for daily schedule %s ' % e.message,
+            'phone': '15210976096'
+        }
+    r = requests.post('http://%s/nosecure/ops/push_single_msg/' % metamap_host, data=create_data)
+    print r.text
