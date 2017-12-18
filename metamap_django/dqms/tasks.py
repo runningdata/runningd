@@ -120,6 +120,12 @@ def runcase(case, check, user):
         print('msg : %s when processing %s' % (traceback.format_exc(), case.case_name))
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), traceback.format_exc())
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, traceback.format_exc())
+        msg = e.message
+        if check:
+            PushUtils.push_both([case.editor, ], msg)
+        elif user:
+            PushUtils.push_both([user, ], msg)
         case_inst.status = enums.EXECUTION_STATUS.FAILED
         case_inst.result_mes = e.message
-    case_inst.save()
+    finally:
+        case_inst.save()
