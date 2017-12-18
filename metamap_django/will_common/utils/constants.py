@@ -21,6 +21,16 @@ ALERT_MSG = u'''
         期望值域： %d - %d
         实际值 ： %d'''
 
+ERROR_ALERT_MASG =  u'''
+        报警
+
+        时间： {now_time}
+        质检任务： {check_name}
+        质检用例： {case_name}
+
+        错误信息：{msg}
+        '''
+
 DATASRC_TYPE_MYSQL_DB = 'dqms_check'
 DATASRC_TYPE_KYLIN_DB = ''
 

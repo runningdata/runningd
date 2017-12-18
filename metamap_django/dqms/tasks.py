@@ -120,11 +120,8 @@ def runcase(case, check, user):
         print('msg : %s when processing %s' % (traceback.format_exc(), case.case_name))
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), traceback.format_exc())
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, traceback.format_exc())
-        msg = u'''
-        报警
-
-        处理{case_name}的时候出现错误：{msg}
-        '''.format(case_name=case_inst.case.case_name, msg=e.message)
+        msg = constants.ERROR_ALERT_MASG.format(now_time=dateutils.now_datetime(), check_name=chk_name,
+                                                case_name=case_inst.case.case_name, msg=e.message)
         if check:
             PushUtils.push_both([case.editor, ], msg)
         elif user:
