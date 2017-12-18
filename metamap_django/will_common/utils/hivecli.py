@@ -149,6 +149,7 @@ def execute(sql):
                     return
                 row = fetchall[0]
                 cur.close()
+                print schema
                 for col in schema:
                     index = schema.index(col)
                     result[col['columnName']] = row[index]
