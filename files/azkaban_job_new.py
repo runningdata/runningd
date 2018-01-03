@@ -71,7 +71,7 @@ try:
 except Exception, e:
     create_data = {
             'msg': 'Error happened for daily schedule %s ' % e.message,
-            'phone': '15210976096'
+            'phone': conf['ADMIN_PHONE']
         }
     r = requests.post('http://%s/nosecure/ops/push_single_msg/' % metamap_host, data=create_data)
     print r.text
