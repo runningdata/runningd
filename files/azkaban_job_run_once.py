@@ -38,6 +38,6 @@ except Exception, e:
         'phone': conf['ADMIN_PHONE']
     }
     r = requests.post('http://%s/nosecure/ops/push_single_msg/' % metamap_host, data=create_data)
-    print t.text
+    print r.text
 
  
