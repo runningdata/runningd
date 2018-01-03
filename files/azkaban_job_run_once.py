@@ -33,6 +33,7 @@ try:
         execution.hanle_timeout()
     print('all end for %s....' % project.name)
 except Exception, e:
+    print e.message
     create_data = {
         'msg':'Error happended for daily schedule %s ' % e.message,
         'phone': conf['ADMIN_PHONE']
