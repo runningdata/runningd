@@ -30,7 +30,7 @@ try:
     project = Project(args.prjname, 'desc for once', fetcher)
     for flow in project.fetch_flow():
         execution = flow.execute()
-        execution.hanle_timeout()
+        execution.handle_timeout()
     print('all end for %s....' % project.name)
 except Exception, e:
     print e.message
