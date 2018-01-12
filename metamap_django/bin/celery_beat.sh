@@ -1,37 +1,42 @@
 #! /bin/bash
 
+target=beat
+command=$1
 ## 检查当前进程中是否还有celery进程活着
 function check() {
-    lines=`ps -ef |grep celery | grep ${1} | wc -l`
+    pid=$1
+    lines=`ps -ef |grep ${pid} | grep ${target} | wc -l`
     if [[ $lines > 0 ]]; then
         echo "${lines}: celery ${1} still running..."
-        ps -ef |grep celery | grep ${1}
+        ps -ef |grep celery | grep ${pid} | grep ${target}
         return ${lines}
     else
-        echo "All celery ${1} has been killed"
+        echo "metamap celery ${target} has been killed"
         return 0
     fi
 }
 
 ###  停止所有celery指定进程
 function stop() {
-    pid=`ps -ef | grep celery | grep ${1} | awk '{if($3 == '1') print $2}'`
+    pid=`cat /var/run/celery/${target}.pid`
+    echo $pid
     if [[ $pid > 0 ]]; then
-        echo "Got ${1} master pid : ${pid}"
+        echo "Got ${target} master pid : ${pid}"
         kill $pid
-        check $1
+        check ${pid}
         status=$?
         echo "got status....${status}"
         sleep 10s
         until [ $status -eq 0 ]
         do
-            check $1
+            check $pid
             status=$?
             sleep 5s
         done
     else
-        echo "Cannot find master pid for ${1}"
+        echo "Cannot find master pid for ${target}"
     fi
+
 }
 
 #################################
@@ -41,26 +46,28 @@ function stop() {
 cd ${METAMAP_HOME} \
     && git pull
 
-
 cd ${METAMAP_HOME}/metamap_django
-
-
-#################################
-###  2. 关闭正在运行的服务           ####
-#################################
-stop beat
 
 
 #################################
 ###  3. 启动新的服务           ####
 #################################
-export C_FORCE_ROOT=true
+function start(){
+    export C_FORCE_ROOT=true
 
-/server/xstorm/bin/python manage.py celery beat --loglevel=info --logfile="/var/log/celery/beat.log" \
- --pidfile="/var/run/celery/beat.pid" \
- --settings=metamap.config.prod \
- --detach
+    /server/xstorm/bin/python manage.py celery beat --loglevel=info --logfile="/var/log/celery/beat.log" \
+     --pidfile="/var/run/celery/beat.pid" \
+     --settings=metamap.config.prod \
+     --detach
+    tail -20 /var/log/celery/beat.log
+}
 
-
-tail -20 /var/log/celery/beat.log
+if [ $command == "stop" ];then
+    stop
+elif [ $command == "start" ];then
+    start
+elif [ $command == "restart" ];then
+    stop
+    start
+fi
 

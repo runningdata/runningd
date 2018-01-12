@@ -25,6 +25,9 @@ function handle_worker() {
     # 运行定时ETL调度的任务
     sh bin/celery_worker.sh will_cron metamap cron_tsk 4 ${command}
 
+    # 运行定时MUlti调度的任务
+    sh bin/celery_worker.sh will_multi metamap cron_multi 2 ${command}
+
     # 运行dqms调度的任务
     sh bin/celery_worker.sh will_dqms dqms dqms 2 ${command}
 
