@@ -35,8 +35,9 @@ function handle_worker() {
 
 function status(){
     for s in `ls /var/run/celery/`;
+    do
         echo $s is running
-    end for
+    done
 }
 
 if [ $1 == "status" ];then
