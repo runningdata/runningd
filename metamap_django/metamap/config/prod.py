@@ -52,8 +52,8 @@ ADMIN_PHONE = 'PWy9rKUlzFLGO8Ry6v368w=='
 ADMIN_EMAIL = result['ADMIN_EMAIL']
 PROC_USER = 'metamap'
 
-ALLOWED_HOSTS = ['dev.will.com']
-#['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.2.19.124', '10.103.27.171', '10.103.70.27']
+#ALLOWED_HOSTS = ['dev.will.com']
+ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.2.19.124', '10.103.27.171', '10.103.70.27']
 CLUTER_QUEUE = 'xstorm'
 
 NN_HOSTS = ['10.2.19.72', '10.2.19.116']
