@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# != 5 ];then
+if [ $# != 1 ];then
     echo "##########################################################"
     echo "Usage celery_start.sh {command}[start|stop|restart]"
     echo "##########################################################"
@@ -32,4 +32,15 @@ function handle_worker() {
     sh bin/celery_worker.sh will_alert running_alert running_alert 2 ${command}
 }
 
-handle_worker $1
+
+function status(){
+    for s in `ls /var/run/celery/`;
+        echo $s is running
+    end for
+}
+
+if [ $1 == "status" ];then
+    status
+else
+    handle_worker $1
+fi
