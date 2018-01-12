@@ -9,7 +9,6 @@
     <div class="container">
         {% has_def 'etl' as has_etl %}
         {% if has_etl %}
-            <h2>{{ etl.tblName }} の 调度列表</h2>
             <a href="{% url 'metamap:sche_add' %}" class="btn btn-info">添加</a>
         {% else %}
             {% include 'components/search.html' %}
