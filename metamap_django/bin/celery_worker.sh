@@ -10,7 +10,7 @@ fi
 target=$1
 app_name=$2
 queue_name=$3
-concurrency =
+concurrency=$4
 command=$5
 
 if [ -z $METAMAP_HOME ];then
