@@ -27,12 +27,6 @@ CELERY_ROUTES = {
         'queue': 'running_alert',
     },
 }
-# CELERY_ROUTES = ([
-#                      {'metamap.tasks.exec_jar': {
-#                          'queue': 'running_jar',
-#                      }},
-#                      {'web.tasks.*', {'queue': 'web'}},
-#                  ],)
 
 CELERY_TIMEZONE = "Asia/Shanghai"
 CELERY_REDIS_HOST = result['CELERY_REDIS_HOST']
