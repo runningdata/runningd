@@ -11,7 +11,9 @@ from will_common.models import WillDependencyTask
 
 pool = redis.ConnectionPool(host=settings.CELERY_REDIS_HOST, port=settings.CELERY_REDIS_PORT, max_connections=2)
 
+from will_common.decorators import jaeger_tracer
 
+@jaeger_tracer('redis')
 def get_keys():
     r = redis.StrictRedis(connection_pool=pool)
     return [key for key in r.keys() if '_' not in key and 'unack' not in key]

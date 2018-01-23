@@ -12,7 +12,7 @@ from django.shortcuts import render, redirect
 
 from metamap.helpers import etlhelper
 from metamap.models import SqoopHive2Mysql, SqoopHive2MysqlExecutions, ExecObj
-from will_common.decorators import my_decorator, exeception_printer
+from will_common.decorators import exeception_printer
 from will_common.models import WillDependencyTask
 from will_common.utils import PushUtils
 from will_common.utils import dateutils
@@ -60,7 +60,6 @@ def add(request):
         return render(request, 'sqoop/edit.html')
 
 
-@my_decorator('pk')
 def edit(request, pk):
     print('inner')
     if request.method == 'POST':

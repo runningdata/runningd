@@ -1,29 +1,45 @@
+import inspect
 import logging
+import os
 from functools import wraps
-
-
-from metamap.models import SqoopHive2Mysql
 
 logger = logging.getLogger('django')
 
 
-def my_decorator(key='s'):
-    def _my_decorator(view_func):
-        def _decorator(request, *args, **kwargs):
-            # maybe do something before the view_func call
-            print('I got args %s ' % len(args))
-            print('I got kwargs %s ' % kwargs)
-            i = kwargs[key]
-            print(SqoopHive2Mysql.objects.get(pk=i).name)
-            print('I got request %s ' % request)
-            response = view_func(request, *args, **kwargs)
-            # maybe do something after the view_func call
-            return response
+from utils.threadlocals import get_current_tracer, get_current_request
+from opentracing.ext import tags as ext_tags
 
-        return wraps(view_func)(_decorator)
+def jaeger_tracer_cls(cls):
+    def _decorator():
+        # with get_current_tracer()._tracer.start_span(
+        #                 os.path.basename(cls.__name__,
+        #                 child_of=get_current_tracer().get_span(
+        #                     get_current_request()))) as ttspan:
+        for x in inspect.getmembers(cls.objects):
+            if '__' not in x[0]:
+                print x
+                if hasattr(x[1], 'im_class'):
+                    print(x[0] + 'is a method')
+                else:
+                    print(x[0] + 'is a attr')
+        return cls
+    return _decorator()
 
+def jaeger_tracer(service='will'):
+    def _my_decorator(func):
+        def _decorator(*args, **kwargs):
+            with get_current_tracer()._tracer.start_span(os.path.basename(inspect.getsourcefile(func))[:-2] + func.func_name,
+                                                         child_of=get_current_tracer().get_span(
+                                                                 get_current_request())) as ttspan:
+                # ttspan.set_tag(ext_tags.SPAN_KIND, ext_tags.SPAN_KIND_RPC_CLIENT)
+                # ttspan.set_tag(ext_tags.PEER_SERVICE, service)
+                for k, v in kwargs.items():
+                    ttspan.set_tag(k, v)
+                ttspan.set_tag('args', args[1:])
+                ttspan.log_event('this is done by will')
+                return func(*args, **kwargs)
+        return _decorator
     return _my_decorator
-
 
 # def exeception_printer():
 #     def _exeception_printer(view_func):

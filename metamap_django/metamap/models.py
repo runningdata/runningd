@@ -14,6 +14,7 @@ from django.template import Template
 from django.utils import timezone
 
 from metamap.db_views import ColMeta, DB
+from will_common.decorators import jaeger_tracer_cls
 from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
 from will_common.models import PeriodicTask, WillDependencyTask, UserProfile, OrgGroup, CommmonCreators, CommmonTimes
 from will_common.utils import dateutils
@@ -660,7 +661,7 @@ class Executions(models.Model):
     def __str__(self):
         return self.logLocation
 
-
+@jaeger_tracer_cls
 class ExecutionsV2(models.Model):
     log_location = models.CharField(max_length=120)
     job = models.ForeignKey(ExecObj, on_delete=models.CASCADE, null=False)

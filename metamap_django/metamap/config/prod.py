@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ENV_PRD = True
 
 SESSION_COOKIE_NAME = 'runningdata_sid'
@@ -111,7 +111,12 @@ PATH_AUTH_DICT = {
     'auth.access_hadmin': '/hadmin',
 }
 
+from trace import *
+
 MIDDLEWARE_CLASSES = [
+    # 'django_opentracing.OpenTracingMiddleware',
+    # 'metamap.config.trace.LazyOpenTracingMiddleware',
+    'metamap.middleware.WillOpenTracingMiddleware',
     'will_common.middleware.viewexception.ViewException',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -152,7 +157,7 @@ WSGI_APPLICATION = 'metamap_django.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'metamap.will_backends',
         'NAME': result['MAIN_DB_NAME'],
         'PASSWORD': result['MAIN_DB_PWD'],
         'USER': result['MAIN_DB_USER'],
