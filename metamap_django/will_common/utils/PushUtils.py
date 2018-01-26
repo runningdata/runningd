@@ -82,18 +82,19 @@ def push_email(users, msg):
 
 def push_exact_html_email(email, subject, msg):
     error_msg = ''
-    # for k, v in settings.EMAIL_CANDIDATES.items():
-    try:
-        from_email = settings.EMAIL_HOST_USER
-        msg = EmailMessage(subject, msg, from_email, [email, ])
-        msg.content_subtype = 'html'
-        msg.send()
-        logger.info('email sent successful from ')
-        return 'success'
-    except Exception as e:
-        error_msg = 'error : %s' % (e)
-        logger.error(error_msg)
-        logger.error('traceback is : %s ' % traceback.format_exc())
+    for k, v in settings.EMAIL_CANDIDATES.items():
+        try:
+            from_email = k
+            msg = EmailMessage(subject, msg, from_email, [email, ],
+                               connection=get_connection(username=k, password=v))
+            msg.content_subtype = 'html'
+            msg.send()
+            logger.info('email sent successful from %s' % k)
+            return 'success'
+        except Exception as e:
+            error_msg = 'error : %s using %s' % (e, k)
+            logger.error(error_msg)
+            logger.error('traceback is : %s ' % traceback.format_exc())
     return error_msg
 
 
