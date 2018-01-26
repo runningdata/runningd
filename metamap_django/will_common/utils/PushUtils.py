@@ -82,7 +82,7 @@ def push_email(users, msg):
 
 def push_exact_html_email(email, subject, msg):
     error_msg = ''
-    for k, v in settings.EMAIL_CANDIDATES:
+    for k, v in settings.EMAIL_CANDIDATES.items():
         try:
             from_email = settings.EMAIL_HOST_USER
             msg = EmailMessage(subject, msg, from_email, [email, ],
