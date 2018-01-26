@@ -88,10 +88,10 @@ def push_exact_html_email(email, subject, msg):
         msg = EmailMessage(subject, msg, from_email, [email, ])
         msg.content_subtype = 'html'
         msg.send()
-        logger.info('email sent successful from %s' % k)
+        logger.info('email sent successful from ')
         return 'success'
     except Exception as e:
-        error_msg = 'error : %s using %s' % (e, k)
+        error_msg = 'error : %s' % (e)
         logger.error(error_msg)
         logger.error('traceback is : %s ' % traceback.format_exc())
     return error_msg
