@@ -4,7 +4,7 @@ import traceback
 import urllib2
 
 from django.conf import settings
-from django.core.mail import BadHeaderError
+from django.core.mail import BadHeaderError, get_connection
 from django.core.mail import EmailMessage
 from django.core.mail import send_mail
 from django.http import HttpResponse
@@ -81,16 +81,21 @@ def push_email(users, msg):
 
 
 def push_exact_html_email(email, subject, msg):
-    try:
-        from_email = settings.EMAIL_HOST_USER
-        msg = EmailMessage(subject, msg, from_email, [email, ])
-        msg.content_subtype = 'html'
-        msg.send()
-        return 'success'
-    except Exception as e:
-        logger.error('error : %s ' % e)
-        logger.error('traceback is : %s ' % traceback.format_exc())
-        return 'error : %s ' % e
+    error_msg = ''
+    for k, v in settings.EMAIL_CANDIDATES:
+        try:
+            from_email = settings.EMAIL_HOST_USER
+            msg = EmailMessage(subject, msg, from_email, [email, ],
+                               connection=get_connection(username=k, password=v))
+            msg.content_subtype = 'html'
+            msg.send()
+            logger.info('email sent successful from %s' % k)
+            return 'success'
+        except Exception as e:
+            error_msg = 'error : %s using %s' % (e, k)
+            logger.error(error_msg)
+            logger.error('traceback is : %s ' % traceback.format_exc())
+    return error_msg
 
 
 def push_exact_email(email, msg):

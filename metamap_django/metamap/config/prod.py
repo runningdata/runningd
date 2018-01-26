@@ -42,6 +42,8 @@ EMAIL_HOST_USER = result['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = result['EMAIL_HOST_PASSWORD']
 EMAIL_USE_TLS = result['EMAIL_USE_TLS']
 
+EMAIL_CANDIDATES = result['EMAIL_CANDIDATES']
+
 # use root to execute....
 USE_ROOT = True
 
