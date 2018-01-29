@@ -85,10 +85,10 @@ def push_exact_html_email(email, subject, msg):
     for k, v in settings.EMAIL_CANDIDATES.items():
         try:
             from_email = k
-            msg = EmailMessage(subject, msg, from_email, [email, ],
+            em = EmailMessage(subject=subject, body=msg, from_email=from_email, to=[email, ],
                                connection=get_connection(username=k, password=v))
-            msg.content_subtype = 'html'
-            msg.send()
+            em.content_subtype = 'html'
+            em.send()
             logger.info('email sent successful from %s' % k)
             return 'success'
         except Exception as e:
