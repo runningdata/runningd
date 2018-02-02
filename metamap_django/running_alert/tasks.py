@@ -113,7 +113,7 @@ def check_new_jmx(name='check_new_jmx'):
                     target_command = ' && echo \'[ {"targets": [ "%s"] }]\' > /root/prometheus/%s/%s_online.json ' \
                                      % (host_port, inst.service_type, inst.instance_name)
                     rule_command = ' && sed -e \'s/${alert_name}/%s/g\' -e \'s/${inst_name}/%s/g\' -e \'s/${srv_type}/%s/g\' -e \'s/${host_and_port}/%s/g\' /root/prometheus/rules/simple_jmx.rule_template > /root/prometheus/rules/%s.rules ' % (
-                        get_clean_name(inst), inst.instance_name, inst.service_type,
+                        inst.instance_name, inst.instance_name, inst.service_type,
                         inst.host_and_port, get_clean_jmx_app_id(tmp_id))
                     remote_cmd(echo_command + target_command + rule_command)
                     print('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))

@@ -2,6 +2,7 @@
 import logging
 import traceback
 import urllib2
+from smtplib import SMTPDataError, SMTPAuthenticationError
 
 from django.conf import settings
 from django.core.mail import BadHeaderError, get_connection
@@ -91,6 +92,10 @@ def push_exact_html_email(email, subject, msg):
             em.send()
             logger.info('email sent successful from %s' % k)
             return 'success'
+        except SMTPAuthenticationError, e:
+            error_msg = 'error : %s using %s' % (e, k)
+        except SMTPDataError, e:
+            error_msg = 'error : %s using %s' % (e, k)
         except Exception as e:
             error_msg = 'error : %s using %s' % (e, k)
             logger.error(error_msg)
