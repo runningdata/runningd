@@ -15,15 +15,32 @@ from will_common.utils import dateutils
 
 logger = logging.getLogger('error')
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 class AccessTracer():
     def process_request(self, request):
         if 'getexeclog' not in request.path:
-            print('%s []: user : %s -> url : %s . post params : %s , get params : %s' % (dateutils.now_datetime(), request.user.username, request.path, dict(request.POST), dict(request.GET)))
+            if request.method == 'GET':
+                print('[%s]: %s @ %s: %s -> url : %s . , get params : %s' % (
+                dateutils.now_datetime(), request.user.username, get_client_ip(request), request.method, request.path, dict(request.GET)))
+
+            elif request.method == 'POST':
+                print('[%s]: %s @ %s %s -> url : %s . post params : %s' % (
+                dateutils.now_datetime(), request.user.username, get_client_ip(request), request.method, request.path, dict(request.POST)))
+
+            else:
+                print('[%s]: %s @ %s %s -> url : %s . post params : %s , get params : %s' % (
+                dateutils.now_datetime(), request.user.username, get_client_ip(request), request.method, request.path, dict(request.POST), dict(request.GET)))
         return None
 
-class AuthTracer():
 
+class AuthTracer():
     def process_request(self, request):
         is_filelist = request.path.startswith(
             '/metamap/rest/exports')

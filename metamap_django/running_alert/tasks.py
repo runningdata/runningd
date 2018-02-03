@@ -74,7 +74,7 @@ def check_new_jmx(name='check_new_jmx'):
                           inst.service_type + ' ' + inst.instance_name
                     # domain_name = hp_inst + '.' + inst.service_type + '.moniter.com'
                     labels = {'HAPROXY_GROUP': 'will'}
-                    new_app = MarathonApp(cmd=cmd, mem=128, cpus=0.25, instances=0, container=container, labels=labels)
+                    new_app = MarathonApp(cmd=cmd, mem=256, cpus=0.25, instances=0, container=container, labels=labels)
                     #
                     # new_result = c.create_app(tmp_id, new_app)
                     # print('new app %s has been created' % new_result.id)
