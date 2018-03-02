@@ -15,6 +15,7 @@ from will_common.djcelery_models import AuthPermission, AuthUserUserPermissions,
 from will_common.models import UserProfile
 from will_common.utils import PushUtils
 from will_common.utils.customexceptions import RDException
+import re
 
 logger = logging.getLogger('django')
 
@@ -26,7 +27,10 @@ def add(request):
                 group = request.user.userprofile.org_group
                 # check all
                 email = request.POST['email'].strip()
-                username = email.replace(settings.result['ORG_EMAIL_SUFFIX'], '').strip()
+                gg = re.match(r'^([a-zA-Z0-9_-]+)@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$', email.strip()):
+                if not gg:
+                    raise RDException('email validation error')
+                username = gg.group(1)
                 if 'export' in request.POST or 'xstorm' in request.POST:
                     if not User.objects.filter(username=username, email=email).exists():
                         user = User.objects.create(username=username, email=email, last_login=timezone.now(),

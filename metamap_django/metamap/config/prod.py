@@ -26,7 +26,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'nyps=8t#p69#1a$be^m^)c$_3k^*7aldic%p(8jnzh=@wcbk1w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
 ENV_PRD = True
 
 SESSION_COOKIE_NAME = 'runningdata_sid'
@@ -35,7 +34,7 @@ CSRF_COOKIE_NAME = 'runningdata_csrftoken'
 from init_config import result
 from celery_conf import *
 
-
+DEBUG = result.get('DEBUG', False)
 # email settings
 EMAIL_HOST = result['EMAIL_HOST']
 EMAIL_HOST_USER = result['EMAIL_HOST_USER']
