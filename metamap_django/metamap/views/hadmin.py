@@ -29,7 +29,7 @@ def add(request):
                 email = request.POST['email'].strip()
                 gg = re.match(r'^([a-zA-Z0-9_-]+)@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$', email.strip())
                 if not gg:
-                    raise RDException('email validation error')
+                    raise RDException('email validation error', traceback.format_exc())
                 username = gg.group(1)
                 if 'export' in request.POST or 'xstorm' in request.POST:
                     if not User.objects.filter(username=username, email=email).exists():
