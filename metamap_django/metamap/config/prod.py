@@ -57,7 +57,7 @@ PROC_USER = 'metamap'
 ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.2.19.124', '10.103.27.171', '10.103.70.27']
 CLUTER_QUEUE = 'xstorm'
 
-NN_HOSTS = ['10.2.19.72', '10.2.19.116']
+NN_HOSTS = ['10.2.19.72', '10.2.19.106']
 DEFAULT_PASSWD = 'qwer1234'
 DB_HUE = 'hue'
 
