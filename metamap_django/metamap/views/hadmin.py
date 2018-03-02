@@ -27,7 +27,7 @@ def add(request):
                 group = request.user.userprofile.org_group
                 # check all
                 email = request.POST['email'].strip()
-                gg = re.match(r'^([a-zA-Z0-9_-]+)@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$', email.strip()):
+                gg = re.match(r'^([a-zA-Z0-9_-]+)@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$', email.strip())
                 if not gg:
                     raise RDException('email validation error')
                 username = gg.group(1)
