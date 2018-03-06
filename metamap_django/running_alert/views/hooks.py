@@ -1,10 +1,12 @@
 import json
 import traceback
 
+from django.conf import settings
 from django.http import HttpResponse
 from running_alert.models import MonitorInstance, SparkMonitorInstance
 from will_common.models import UserProfile
 from will_common.utils import PushUtils
+from will_common.utils.encryptutils import decrpt_msg
 
 
 def alert_for_prome(request):
@@ -23,11 +25,12 @@ def alert_for_prome(request):
             for manager in obj.managers.split(','):
                 target_users.append(UserProfile.objects.get(user__username=manager))
 
-            p_msg = 'Alert for %s.%s. summary is : %s. description is : %s' % (
+            p_msg = u'告警名称： %s.%s\n 标题: %s. 描述: %s' % (
                 app_name, alertname, summary, description)
-            PushUtils.push_msg(target_users, p_msg)
+            if 'absent' not in message['commonLabels']:
+                PushUtils.push_msg(target_users, p_msg)
 
-            PushUtils.push_msg_tophone('15210976096', p_msg)
+            PushUtils.push_msg_tophone(decrpt_msg(settings.ADMIN_PHONE), p_msg)
             return HttpResponse('Done')
         except Exception, e:
             print traceback.format_exc()
