@@ -8,6 +8,9 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.template import Context
+from django.template import Template
+
 from metamap.helpers import etlhelper
 from metamap.models import SqoopMysql2Hive, SqoopMysql2HiveExecutions
 from will_common.models import WillDependencyTask
@@ -119,9 +122,8 @@ def get_exec_log(request, execid):
 def review(request, sqoop_id):
     try:
         sqoop = SqoopMysql2Hive.objects.get(id=sqoop_id)
-        hql = etlhelper.generate_sqoop_mysql2hive(sqoop)
         # return render(request, 'etl/review_sql.html', {'obj': etl, 'hql': hql})
-        return HttpResponse(hql.replace('--', '<br>--'))
+        return HttpResponse(sqoop.get_cmd().replace('--', '<br>--'))
     except Exception, e:
         logger.error(e)
         return HttpResponse(e)

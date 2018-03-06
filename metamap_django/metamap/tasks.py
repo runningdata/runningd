@@ -70,7 +70,7 @@ ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/metamap/'
 #             inmi_tbl = etlhelper.get_hive_inmi_tbl(sqoop.mysql_tbl)
 #             hive_cmd = 'hive -e "use %s;set hive.exec.dynamic.partition.mode=nonstrict;insert overwrite table %s partition(%s) select * from %s; drop table %s;"' % \
 #                        (sqoop.hive_meta.meta, sqoop.mysql_tbl, sqoop.partition_key, inmi_tbl, inmi_tbl)
-#             # p = subprocess.Popen([''.join(hive_cmd)], stdout=open(execution.logLocation, 'a'), stderr=subprocess.STDOUT,
+#             # p = subprocess.Popen([''.join(hive_cmd)], stdout=open(execution.logLocatioln, 'a'), stderr=subprocess.STDOUT,
 #             #                      shell=True,
 #             #                      universal_newlines=True)
 #             # p.wait()

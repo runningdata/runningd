@@ -45,6 +45,26 @@ class ETLObjRelated(models.Model):
     class Meta:
         abstract = True
 
+    def get_cmd(self, schedule=-1, location=None):
+        str_list = list()
+        str_list.append('{% load etlutils %}')
+        sche_vars = ''
+        if schedule != -1:
+            tt = WillDependencyTask.objects.get(rel_id=self.id, schedule=schedule, type=100)
+            sche_vars = tt.variables
+        str_list = self.get_script(str_list, sche_vars)
+        template = Template(self.get_clean_str(str_list))
+        script = template.render(Context()).strip()
+        if location:
+            with open(location, 'w') as sc:
+                sc.write(script.encode('utf8'))
+            command = self.get_cmd_prefix() + location
+            if not settings.USE_ROOT:
+                command = 'runuser -l ' + self.cgroup.name + ' -c "' + command + '"'
+            return command
+        else:
+            return script
+
     # TODO release after clean
     def save(self, *args, **kwargs):
         if self.valid != 0:
@@ -377,23 +397,24 @@ class ExecObj(models.Model):
     def execute(self):
         self.get_rel_obj().execute()
 
-    def get_cmd(self, schedule, location):
+    def get_cmd(self, schedule=-1, location=None):
         obj = self.get_rel_obj()
-        str_list = list()
-        str_list.append('{% load etlutils %}')
-        sche_vars = ''
-        if schedule != -1:
-            tt = WillDependencyTask.objects.get(rel_id=self.id, schedule=schedule, type=100)
-            sche_vars = tt.variables
-        str_list = obj.get_script(str_list, sche_vars)
-        template = Template(obj.get_clean_str(str_list))
-        script = template.render(Context()).strip()
-        with open(location, 'w') as sc:
-            sc.write(script.encode('utf8'))
-        command = obj.get_cmd_prefix() + location
-        if not settings.USE_ROOT:
-            command = 'runuser -l ' + self.cgroup.name + ' -c "' + command + '"'
-        return command
+        return obj.get_cmd(schedule, location)
+        # str_list = list()
+        # str_list.append('{% load etlutils %}')
+        # sche_vars = ''
+        # if schedule != -1:
+        #     tt = WillDependencyTask.objects.get(rel_id=self.id, schedule=schedule, type=100)
+        #     sche_vars = tt.variables
+        # str_list = obj.get_script(str_list, sche_vars)
+        # template = Template(obj.get_clean_str(str_list))
+        # script = template.render(Context()).strip()
+        # with open(location, 'w') as sc:
+        #     sc.write(script.encode('utf8'))
+        # command = obj.get_cmd_prefix() + location
+        # if not settings.USE_ROOT:
+        #     command = 'runuser -l ' + self.cgroup.name + ' -c "' + command + '"'
+        # return command
 
     def get_deps(self):
         return ExecBlood.objects.filter(child=self)
@@ -519,7 +540,7 @@ class SqoopMysql2Hive(ETLObjRelated):
         super(SqoopMysql2Hive, self).save(*args, **kwargs)
 
     def get_clean_str(self, str_list):
-        return ' '.join(str_list).replace('\n', ' ').replace('&', '\&')
+        return ' '.join(str_list).replace('&', '\&')
 
     def get_hive_inmi_tbl(self, tbl):
         return tbl + '_inmi'
@@ -559,6 +580,14 @@ class SqoopMysql2Hive(ETLObjRelated):
         else:
             str_list.append(' --delete-target-dir ')
             str_list.append(self.option)
+
+        if is_partition:
+            str_list.append(
+                '\n  echo ".............immi table done.................."')
+            str_list.append('\n hive -e "use %s;set hive.exec.dynamic.partition.mode=nonstrict;'
+                'insert overwrite table %s partition(%s) select * from %s; drop table %s;"' % \
+                (self.hive_meta.meta, self.mysql_tbl, self.partition_key, self.get_hive_inmi_tbl(self.mysql_tbl),
+                 self.get_hive_inmi_tbl(self.mysql_tbl)))
 
         return str_list
 
