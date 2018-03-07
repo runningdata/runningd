@@ -12,7 +12,7 @@ from django.template import Context
 from django.template import Template
 
 from metamap.helpers import etlhelper
-from metamap.models import SqoopMysql2Hive, SqoopMysql2HiveExecutions
+from metamap.models import SqoopMysql2Hive, SqoopMysql2HiveExecutions, ExecObj
 from will_common.models import WillDependencyTask
 from will_common.utils import PushUtils
 from will_common.utils import dateutils
@@ -137,19 +137,20 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
     '''
     try:
         folder = 'm2h-' + dateutils.now_datetime()
-        leafs = WillDependencyTask.objects.filter(schedule=schedule, type=4, valid=1)
+        leafs = []
+        deps = set()
+        for leaf in WillDependencyTask.objects.filter(schedule=schedule, type=100, valid=1):
+            eo = ExecObj.objects.get(pk=leaf.rel_id)
+            if eo.type == SqoopMysql2Hive.type and eo.cgroup.name == group_name:
+                leafs.append(leaf)
+                deps.add(SqoopMysql2Hive.objects.get(pk=eo.rel_id).name)
         os.mkdir(AZKABAN_BASE_LOCATION + folder)
         os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
-        etlhelper.generate_job_file_m2h(leafs, folder, group_name)
+        etlhelper.generate_job_file_m2h(schedule, leafs, folder, group_name)
 
         job_name = 'm2h_done_' + group_name + '_' + dateutils.now_datetime()
         command = 'echo done for sqoop'
-        deps = set()
-        for leaf in leafs:
-            m2h = SqoopMysql2Hive.objects.get(pk=leaf.rel_id)
-            if m2h.cgroup.name == group_name:
-                deps.add(m2h.name)
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%d m2h generated for %s ' % (len(leafs), group_name))

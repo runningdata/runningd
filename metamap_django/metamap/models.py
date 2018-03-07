@@ -50,7 +50,7 @@ class ETLObjRelated(models.Model):
         str_list.append('{% load etlutils %}')
         sche_vars = ''
         if schedule != -1:
-            tt = WillDependencyTask.objects.get(rel_id=self.id, schedule=schedule, type=100)
+            tt = WillDependencyTask.objects.get(rel_id=self.exec_obj.id, schedule=schedule, type=100)
             sche_vars = tt.variables
         str_list = self.get_script(str_list, sche_vars)
         template = Template(self.get_clean_str(str_list))
@@ -547,7 +547,7 @@ class SqoopMysql2Hive(ETLObjRelated):
 
     def get_script(self, str_list, sche_vars=''):
         is_partition = True if len(self.partition_key) > 0 else False
-        str_list.append(self.settings)
+        # str_list.append(self.settings)
         str_list.append(sche_vars)
         str_list.append(' sqoop import ')
         str_list.append('-Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE)
@@ -583,8 +583,8 @@ class SqoopMysql2Hive(ETLObjRelated):
 
         if is_partition:
             str_list.append(
-                '\n  echo ".............immi table done.................."')
-            str_list.append('\n hive -e "use %s;set hive.exec.dynamic.partition.mode=nonstrict;'
+                '\necho ".............immi table done.................."')
+            str_list.append('\nhive -e "use %s;set hive.exec.dynamic.partition.mode=nonstrict;'
                 'insert overwrite table %s partition(%s) select * from %s; drop table %s;"' % \
                 (self.hive_meta.meta, self.mysql_tbl, self.partition_key, self.get_hive_inmi_tbl(self.mysql_tbl),
                  self.get_hive_inmi_tbl(self.mysql_tbl)))

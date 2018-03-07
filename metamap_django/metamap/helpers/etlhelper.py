@@ -502,7 +502,7 @@ def generate_h2m_script(folder, job_name, schedule, task, delta=0):
         f.write(content)
 
 
-def generate_job_file_m2h(objs, folder, group_name):
+def generate_job_file_m2h(schedule, objs, folder, group_name):
     '''
     生成azkaban job文件
     :param blood:
@@ -511,10 +511,17 @@ def generate_job_file_m2h(objs, folder, group_name):
     :return:
     '''
     for obj in objs:
-        task = SqoopMysql2Hive.objects.get(pk=obj.rel_id)
-        job_name = task.name
-        if task.cgroup.name == group_name:
-            generate_m2h_script(folder, job_name, obj.schedule, task)
+        oo = ExecObj.objects.get(pk=obj.rel_id)
+        if oo.cgroup.name == group_name:
+            job_name = oo.name
+            command = oo.get_cmd(schedule=schedule, location=AZKABAN_SCRIPT_LOCATION + folder + '/%s.m2h' % job_name )
+            # task = SqoopMysql2Hive.objects.get(pk=obj.rel_id)
+            # job_name = task.name
+            job_type = ' command\nretries=12\nretry.backoff=300000\n'
+            content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
+            job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+            with open(job_file, 'w') as f:
+                f.write(content)
 
 
 def generate_m2h_script(folder, job_name, schedule, task):
