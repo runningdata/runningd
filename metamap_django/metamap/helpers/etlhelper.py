@@ -7,6 +7,7 @@ import os
 
 import re
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.template import Context, Template
 
 from metamap.db_views import ColMeta, DB
@@ -303,7 +304,10 @@ def generate_etl_sql(etl, schedule=-1, delta=0):
         str.append(etl.variables)
     else:
 
-        task = WillDependencyTask.objects.get(rel_id=etl.id, schedule=schedule, type=1)
+        try:
+            task = WillDependencyTask.objects.get(rel_id=etl.id, schedule=schedule, type=1)
+        except ObjectDoesNotExist, e:
+            raise Exception(u'{name} does not exist for current schedule type'.format(name=etl.name))
         if delta != 0:
             str.append(get_delta_variables(task.variables, delta))
         else:
@@ -522,24 +526,6 @@ def generate_job_file_m2h(schedule, objs, folder, group_name):
             job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
             with open(job_file, 'w') as f:
                 f.write(content)
-
-
-def generate_m2h_script(folder, job_name, schedule, task):
-    m2h = generate_sqoop_mysql2hive(task, schedule=schedule)
-    sqoop_file = AZKABAN_SCRIPT_LOCATION + folder + "/" + job_name + ".m2h"
-    with open(sqoop_file, 'w') as f:
-        f.write(m2h)
-    command = 'sh ' + sqoop_file
-    if not settings.USE_ROOT:
-        command = 'runuser -l ' + task.cgroup.name + ' -c "' + command + '"'
-    # 生成job文件
-    # job_type = ' command \nretries=12\nretry.backoff=300000\n'
-    job_type = ' command\nretries=12\nretry.backoff=300000\n'
-    content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
-    job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
-    with open(job_file, 'w') as f:
-        f.write(content)
-
 
 def load_nodes(*args, **kwargs):
     # def load_nodes(leafs, folder, done_blood, done_leaf, schedule, group_name):

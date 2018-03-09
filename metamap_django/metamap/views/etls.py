@@ -467,7 +467,7 @@ def restart_job(request):
         except Exception, e:
             logger.error('error : %s ' % e)
             logger.error('traceback is : %s ' % traceback.format_exc())
-            return HttpResponse('error')
+            raise e
     else:
         return render(request, 'etl/restart.html')
 

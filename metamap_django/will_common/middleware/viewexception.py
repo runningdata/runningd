@@ -22,7 +22,7 @@ class ViewException():
             return render(request, 'common/message.html',
                           {'message': exception.message, 'err_stack': exception.err_stack})
         return render(request, 'common/message.html',
-                      {'message': exception.message, 'err_stack': traceback.format_exc()})
+                      {'message': exception.message, 'err_stack': traceback.format_exc().replace('\n', '<br/>')})
 
 
 class LoginRequire():
