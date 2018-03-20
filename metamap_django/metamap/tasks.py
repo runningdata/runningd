@@ -8,6 +8,7 @@ from __future__ import absolute_import
 
 import os
 import subprocess
+import traceback
 
 from billiard import SoftTimeLimitExceeded
 from celery import shared_task
@@ -375,8 +376,13 @@ def exec_will(task_id, **kwargs):
 
 @shared_task
 def exec_etl_cli2(task_id, name=''):
-    exec_task = WillDependencyTask.objects.get(pk=task_id, type=100)
-    exec_execobj(exec_task.rel_id, schedule=4, name=name)
+    try:
+        exec_task = WillDependencyTask.objects.get(pk=task_id, type=100)
+        exec_execobj(exec_task.rel_id, schedule=4, name=name)
+    except:
+        logger.error('Error happens for %s' % name)
+        logger.error(traceback.format_exc())
+
 
     # obj = ExecObj.objects.get(pk=exec_task.rel_id)
     # executors.get(obj.type)(obj.rel_id)
