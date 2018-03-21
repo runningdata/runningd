@@ -326,6 +326,7 @@ def exec_execobj(exec_id, schedule=-1, name=''):
     except SoftTimeLimitExceeded, e:
         try:
             if p:
+                logger.info('going to kill %d for SoftTimeLimitExceeded task %s' % (p.pid, log_location))
                 p.kill()
         except Exception, ee:
             logger.error(ee)
@@ -333,6 +334,7 @@ def exec_execobj(exec_id, schedule=-1, name=''):
         execution.status = enums.EXECUTION_STATUS.FAILED
         execution.end_time = timezone.now()
         execution.save()
+        raise e
 
 
 @shared_task
@@ -386,7 +388,6 @@ def exec_etl_cli2(self, task_id, name=''):
     except:
         logger.error('Error happens for %s' % name)
         logger.error(traceback.format_exc())
-
 
 
 @task(bind=True, max_retries=3, default_retry_delay=1 * 60, soft_time_limit=60)
