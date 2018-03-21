@@ -376,18 +376,17 @@ def exec_will(task_id, **kwargs):
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=30 * 60)
-def exec_etl_cli2(task_id, name=''):
+def exec_etl_cli2(self, task_id, name=''):
     logger.info('going to handle type 100 WillDependencyTask: %s', str(task_id))
     try:
         exec_task = WillDependencyTask.objects.get(pk=task_id, type=100)
         exec_execobj(exec_task.rel_id, schedule=4, name=name)
+    except SoftTimeLimitExceeded, e:
+        self.retry(exc=e)
     except:
         logger.error('Error happens for %s' % name)
         logger.error(traceback.format_exc())
 
-
-        # obj = ExecObj.objects.get(pk=exec_task.rel_id)
-        # executors.get(obj.type)(obj.rel_id)
 
 
 @task(bind=True, max_retries=3, default_retry_delay=1 * 60, soft_time_limit=60)
