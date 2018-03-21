@@ -394,7 +394,7 @@ def exec_etl_cli2(task_id, name=''):
         # executors.get(obj.type)(obj.rel_id)
 
 
-@shared_task(max_retries=3, default_retry_delay=1 * 60)
+@shared_task(max_retries=3, default_retry_delay=1 * 60, soft_time_limit=60)
 def xsum(numbers, name=''):
     try:
         command = 'sleep 5m'
