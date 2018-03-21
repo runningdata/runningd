@@ -405,8 +405,9 @@ def xsum(self, numbers, name=''):
         logger.info('got Exception SoftTimeLimitExceeded')
         try:
             if p:
+                logger.info('going to kill %d ' % p.pid)
                 p.kill()
         except Exception, ee:
             logger.error(ee)
         logger.error(e)
-        self.retry(numbers, name)
+        self.retry(exc=e)
