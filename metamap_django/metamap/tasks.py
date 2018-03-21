@@ -407,6 +407,7 @@ def xsum(self, numbers, name=''):
             returncode = p.returncode
             logger.info('%s return code is %d' % (command, returncode))
         except Exception, e:
+            logger.error('hello there?')
             logger.error(e)
     except SoftTimeLimitExceeded, e:
         logger.info('got Exception SoftTimeLimitExceeded')
