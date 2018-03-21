@@ -409,4 +409,4 @@ def xsum(self, numbers, name=''):
         except Exception, ee:
             logger.error(ee)
         logger.error(e)
-        self.retry(e, numbers, name)
+        self.retry(numbers, name)
