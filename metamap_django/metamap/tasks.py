@@ -311,19 +311,15 @@ def exec_execobj(exec_id, schedule=-1, name=''):
                                                 cmd_shot=obj.get_cmd(schedule=schedule, location=script_location))
         execution.end_time = timezone.now()
         command = execution.cmd_shot
-        try:
-            p = subprocess.Popen([''.join(command)], stdout=open(log_location, 'a'), stderr=subprocess.STDOUT,
-                                 shell=True,
-                                 universal_newlines=True)
-            p.wait()
-            returncode = p.returncode
-            logger.info('%s return code is %d' % (command, returncode))
-            if returncode == 0:
-                execution.status = enums.EXECUTION_STATUS.DONE
-            else:
-                execution.status = enums.EXECUTION_STATUS.FAILED
-        except Exception, e:
-            logger.error(e)
+        p = subprocess.Popen([''.join(command)], stdout=open(log_location, 'a'), stderr=subprocess.STDOUT,
+                             shell=True,
+                             universal_newlines=True)
+        p.wait()
+        returncode = p.returncode
+        logger.info('%s return code is %d' % (command, returncode))
+        if returncode == 0:
+            execution.status = enums.EXECUTION_STATUS.DONE
+        else:
             execution.status = enums.EXECUTION_STATUS.FAILED
         execution.end_time = timezone.now()
         execution.save()
@@ -379,7 +375,7 @@ def exec_will(task_id, **kwargs):
         exec_execobj(willtask.tasks[0].id, schedule=4, name=kwargs['name'])
 
 
-@shared_task(max_retries=3, default_retry_delay=30 * 60)
+@shared_task(bind=True, max_retries=3, default_retry_delay=30 * 60)
 def exec_etl_cli2(task_id, name=''):
     logger.info('going to handle type 100 WillDependencyTask: %s', str(task_id))
     try:
@@ -399,16 +395,12 @@ def xsum(self, numbers, name=''):
     logger.info('going to handle xsum')
     try:
         command = 'sleep 5m'
-        try:
-            p = subprocess.Popen([''.join(command)], stderr=subprocess.STDOUT,
-                                 shell=True,
-                                 universal_newlines=True)
-            p.wait()
-            returncode = p.returncode
-            logger.info('%s return code is %d' % (command, returncode))
-        except Exception, e:
-            logger.error('hello there?')
-            logger.error(e)
+        p = subprocess.Popen([''.join(command)], stderr=subprocess.STDOUT,
+                             shell=True,
+                             universal_newlines=True)
+        p.wait()
+        returncode = p.returncode
+        logger.info('%s return code is %d' % (command, returncode))
     except SoftTimeLimitExceeded, e:
         logger.info('got Exception SoftTimeLimitExceeded')
         try:
