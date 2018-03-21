@@ -394,8 +394,9 @@ def exec_etl_cli2(task_id, name=''):
         # executors.get(obj.type)(obj.rel_id)
 
 
-@shared_task(max_retries=3, default_retry_delay=1 * 60, soft_time_limit=60)
-def xsum(numbers, name=''):
+@shared_task(bind=True, max_retries=3, default_retry_delay=1 * 60, soft_time_limit=60)
+def xsum(self, numbers, name=''):
+    logger.info('going to handle xsum')
     try:
         command = 'sleep 5m'
         try:
@@ -408,9 +409,11 @@ def xsum(numbers, name=''):
         except Exception, e:
             logger.error(e)
     except SoftTimeLimitExceeded, e:
+        logger.info('got Exception SoftTimeLimitExceeded')
         try:
             if p:
                 p.kill()
         except Exception, ee:
             logger.error(ee)
         logger.error(e)
+        self.retry(e)
