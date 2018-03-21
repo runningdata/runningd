@@ -196,7 +196,7 @@ class ExportsViewSet(viewsets.ModelViewSet):
                 result = httputils.jlc_auth(user, sid)
         if result == 'success':
             # objs = Exports.objects.filter(start_time__gt=days).order_by('-start_time')
-            objs = ExecutionsV2.objects.filter(start_time__gt=days, job__type=2).order_by('-start_time')
+            objs = ExecutionsV2.objects.filter(start_time__gt=days, job__type=2, status=1).order_by('-start_time')
             result = list()
             for export in objs:
                 if ExecObj.objects.filter(pk=export.job_id).count() == 1:

@@ -11,7 +11,7 @@ import subprocess
 import traceback
 
 from billiard import SoftTimeLimitExceeded
-from celery import shared_task
+from celery import shared_task, task
 from django.conf import settings
 from django.utils import timezone
 
@@ -300,7 +300,7 @@ def tail_hdfs(logLocation, command, name=''):
 #     executors.get(will_task.type)(will_task.rel_id)
 
 
-@shared_task
+@shared_task(max_retries=3, default_retry_delay=30 * 60)
 def exec_execobj(exec_id, schedule=-1, name=''):
     try:
         obj = ExecObj.objects.get(pk=exec_id)
@@ -328,6 +328,11 @@ def exec_execobj(exec_id, schedule=-1, name=''):
         execution.end_time = timezone.now()
         execution.save()
     except SoftTimeLimitExceeded, e:
+        try:
+            if p:
+                p.kill()
+        except Exception, ee:
+            logger.error(ee)
         logger.error(e)
         execution.status = enums.EXECUTION_STATUS.FAILED
         execution.end_time = timezone.now()
@@ -374,8 +379,9 @@ def exec_will(task_id, **kwargs):
         exec_execobj(willtask.tasks[0].id, schedule=4, name=kwargs['name'])
 
 
-@shared_task
+@shared_task(max_retries=3, default_retry_delay=30 * 60)
 def exec_etl_cli2(task_id, name=''):
+    logger.info('going to handle type 100 WillDependencyTask: %s', str(task_id))
     try:
         exec_task = WillDependencyTask.objects.get(pk=task_id, type=100)
         exec_execobj(exec_task.rel_id, schedule=4, name=name)
@@ -384,10 +390,27 @@ def exec_etl_cli2(task_id, name=''):
         logger.error(traceback.format_exc())
 
 
-    # obj = ExecObj.objects.get(pk=exec_task.rel_id)
-    # executors.get(obj.type)(obj.rel_id)
+        # obj = ExecObj.objects.get(pk=exec_task.rel_id)
+        # executors.get(obj.type)(obj.rel_id)
 
 
-@shared_task
+@shared_task(max_retries=3, default_retry_delay=1 * 60)
 def xsum(numbers, name=''):
-    return sum(numbers)
+    try:
+        command = 'sleep 5m'
+        try:
+            p = subprocess.Popen([''.join(command)], stderr=subprocess.STDOUT,
+                                 shell=True,
+                                 universal_newlines=True)
+            p.wait()
+            returncode = p.returncode
+            logger.info('%s return code is %d' % (command, returncode))
+        except Exception, e:
+            logger.error(e)
+    except SoftTimeLimitExceeded, e:
+        try:
+            if p:
+                p.kill()
+        except Exception, ee:
+            logger.error(ee)
+        logger.error(e)
