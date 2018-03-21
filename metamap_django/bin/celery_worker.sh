@@ -79,7 +79,7 @@ export C_FORCE_ROOT=true
       --pidfile="/var/run/celery/%n.pid" \
       --logfile="/var/log/celery/%n.log" \
       --settings=${app_name}.config.prod \
-      --concurrency=2 \
+      --concurrency=${concurrency} \
       --loglevel=info
     
     tail -20 /var/log/celery/${target}.log
