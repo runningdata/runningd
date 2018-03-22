@@ -10,6 +10,7 @@ import os
 import subprocess
 import traceback
 
+import signal
 from billiard import SoftTimeLimitExceeded
 from celery import shared_task, task, app
 from django.conf import settings
@@ -300,7 +301,7 @@ def tail_hdfs(logLocation, command, name=''):
 #     executors.get(will_task.type)(will_task.rel_id)
 
 
-@shared_task(max_retries=3, default_retry_delay=30 * 60)
+@shared_task(max_retries=3, default_retry_delay=30 * 60, soft_time_limit=settings.CELERYD_TASK_SOFT_TIME_LIMIT)
 def exec_execobj(exec_id, schedule=-1, name=''):
     try:
         obj = ExecObj.objects.get(pk=exec_id)
@@ -327,7 +328,7 @@ def exec_execobj(exec_id, schedule=-1, name=''):
         try:
             if p:
                 logger.info('going to kill %d for SoftTimeLimitExceeded task %s' % (p.pid, log_location))
-                p.kill()
+                os.killpg(p.pid, signal.SIGTERM)
         except Exception, ee:
             logger.error(ee)
         logger.error(e)

@@ -6,7 +6,7 @@ from init_config import result
 
 # Celery Beat 设置
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-CELERYD_TASK_SOFT_TIME_LIMIT = 3600
+CELERYD_TASK_SOFT_TIME_LIMIT = result.get('CELERYD_TASK_SOFT_TIME_LIMIT', 1800)
 BROKER_URL = 'redis://{celery_host}:{celery_port}'.format(celery_host=result['CELERY_REDIS_HOST'],
                                                           celery_port=result['CELERY_REDIS_PORT'])
 
