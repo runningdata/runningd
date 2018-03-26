@@ -168,7 +168,7 @@ def check_new_spark(name='check_new_spark'):
                     '''
                     add new alert rule file to prometheus
                     '''
-                    with open('{phome}/rules/%s.rules'.format(phome=settings.PROMETHEUS_HOME)) as target:
+                    with open('{phome}/rules/%s.rules'.format(phome=settings.PROMETHEUS_HOME), 'w') as target:
                         target.write(temp.replace("${alert_name}", inst.instance_name))
                     need_restart = True
                     print(
