@@ -110,7 +110,7 @@ def check_new_jmx(name='check_new_jmx'):
                     with open('{phome}/rules/simple_jmx.rule_template'.format(phome=settings.PROMETHEUS_HOME)) as f:
                         temp = f.read()
                         with open('{phome}/rules/{app}.rules'.format(phome=settings.PROMETHEUS_HOME,
-                                                                     app=get_clean_jmx_app_id(tmp_id))) as target:
+                                                                     app=get_clean_jmx_app_id(tmp_id)), 'w') as target:
                             target.write(temp.replace("${alert_name}", inst.instance_name)
                                          .replace("${inst_name}", inst.instance_name)
                                          .replace("${srv_type}", inst.service_type)
