@@ -54,7 +54,6 @@ def get_url(url):
     else:
         return 'error'
 
-
 def jlc_auth(user, sid):
     url = 'http://xlightning.jianlc.com/valsession?username=%s&sessionid=%s' % (user, sid)
     return get_url(url)

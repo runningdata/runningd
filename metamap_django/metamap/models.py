@@ -698,6 +698,13 @@ class ExecutionsV2(models.Model):
     end_time = models.DateTimeField(null=True)
     status = models.IntegerField(default=0)
 
+    def as_dict(self):
+        return {'log_location': self.log_location,
+                'job_name': self.job.name,
+                'status': self.status,
+                'start_time': dateutils.format_dbday(self.start_time),
+                'end_time': dateutils.format_dbday(self.end_time)
+                }
 
 class SqoopHive2MysqlExecutions(models.Model):
     '''

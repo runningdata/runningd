@@ -18,6 +18,7 @@ from django.http import HttpResponse
 import logging
 
 from django.http import HttpResponseRedirect
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import generic
 
@@ -67,6 +68,25 @@ def check_file(request):
         return HttpResponse("success")
     return HttpResponse("not yet")
 
+def exec_history(request):
+    objs = ExecutionsV2.objects.filter(start_time__gt=dateutils.days_ago(-21), start_time__lt=dateutils.days_ago(-20))
+    s = [obj.as_dict() for obj in objs]
+    min_time = '2018-03-06'
+    max_time = '2018-03-05'
+    for obj in s:
+        if min_time > obj['start_time']:
+            min_time = obj['start_time']
+        if max_time < obj['start_time']:
+            max_time = obj['start_time']
+    rr = dict()
+    rr['data'] = s
+    rr['count'] = len(s)
+    rr['min_time'] = min_time
+    rr['max_time'] = max_time
+    return JsonResponse(rr)
+
+def exec_history_page(request):
+    return render(request, 'executions/finished_tasks.html')
 
 def task_queue(request):
     i = metamap.celery.app.control.inspect()
