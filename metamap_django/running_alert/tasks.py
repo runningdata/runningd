@@ -105,7 +105,7 @@ def check_new_jmx(name='check_new_jmx'):
                     host_port = host + ':' + str(port)
                     with open('{phome}/{service_type}/{app}_online.json'.format(phome=settings.PROMETHEUS_HOME,
                                                                                 service_type=inst.service_type,
-                                                                                app=inst.instance_name)) as target:
+                                                                                app=inst.instance_name), 'w') as target:
                         target.write('[ {"targets": [ "%s"] }]' % host_port)
                     with open('{phome}/rules/simple_jmx.rule_template'.format(phome=settings.PROMETHEUS_HOME)) as f:
                         temp = f.read()
