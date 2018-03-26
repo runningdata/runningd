@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% load etlutils %}
+
+{% block title %}执行干特{% endblock %}
+{% block content %}
+    <div id="container">
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var total_width = $("#container").width();
+            var tt = "<div class=\"progress\" style=\"background-color: bisque;\"><div class=\"progress\" style=\"width: will_widthpx;margin-left: will_marginpx;\">  <div class=\"progress-bar\" role=\"progressbar\" style=\"width: 100%;\">    <span>xxx</span>  </div></div></div>";
+            function getData() {
+                console.log('beginning....');
+                $.ajax({
+                    url: "/hadmin/jobs/finished",
+                    success: function (data) {
+                        var total_minutes = (new Date(data.max_time) - new Date(data.min_time)) / 1000 / 60;
+                        console.log('total minute is ' + total_minutes + ', max_time is ' + data.max_time + ', min_time is ' + data.min_time);
+                        var total_minutes = 1440;
+                        $.each(data.data, function (index, dd) {
+                            console.log(dd.end_time);
+                            console.log(dd.start_time);
+                            var timespent = (new Date(dd.end_time) - new Date(dd.start_time)) / 1000 / 60;
+                            var start_mode = (new Date(dd.start_time) - new Date('1991-01-01 00:00:00') ) / 1000 / 60 % 1440;
+                            console.log('start_mode is ' + start_mode);
+                            console.log('got spent : ' + timespent);
+                            var will_width = total_width * timespent / total_minutes;
+                            var will_margin = total_width * start_mode / total_minutes;
+                            $("#container").append(tt.replace("xxx", dd.job_name).replace("will_width", will_width).replace("will_margin", will_margin));
+                        });
+                    }
+                });
+            }
+
+            getData();
+        });
+    </script>
+{% endblock %}
