@@ -103,7 +103,7 @@ def check_new_jmx(name='check_new_jmx'):
                     port = new_app.ports[0]
                     host = '10.2.19.124'
                     host_port = host + ':' + str(port)
-                    with open('{phome}/{service_type}/{app}_online.json'.format(phome=settings.PROMETHEUS_HOST,
+                    with open('{phome}/{service_type}/{app}_online.json'.format(phome=settings.PROMETHEUS_HOME,
                                                                                 service_type=inst.service_type,
                                                                                 app=inst.instance_name)) as target:
                         target.write('[ {"targets": [ "%s"] }]' % host_port)
@@ -117,6 +117,7 @@ def check_new_jmx(name='check_new_jmx'):
                                          .replace("${host_and_port}", inst.host_and_port)
                                          )
                     print('target and rule for %s has been registered to %s' % (tmp_id, settings.PROMETHEUS_HOST))
+                    inst.exporter_uri = host_port
                     need_restart = True
                 else:
                     print('{tmp_id} is in running ids'.format(tmp_id=tmp_id))
@@ -124,7 +125,6 @@ def check_new_jmx(name='check_new_jmx'):
                     time.sleep(10)
                     c.scale_app(tmp_id, delta=1)
                     print('{tmp_id} has been restarted'.format(tmp_id=tmp_id))
-                inst.exporter_uri = host_port
                 inst.save()
             except Exception, e:
                 print('delete error happended for %s, message is %s' % (inst.instance_name, e.message))
@@ -195,7 +195,7 @@ def check_disabled_spark(name='check_disabled_spark'):
             '''
             delete alert rule file to prometheus
             '''
-            os.remove('{phome}/rules/{app}.rules'.format(phome=settings.PROMETHEUS_HOST, app=inst.instance_name))
+            os.remove('{phome}/rules/{app}.rules'.format(phome=settings.PROMETHEUS_HOME, app=inst.instance_name))
             need_restart = True
             print('spark streaming %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
         except Exception, e:
@@ -216,7 +216,7 @@ def check_disabled_jmx(name='check_disabled_jmx'):
             '''
             delete target file to prometheus
             '''
-            os.remove('{phome}/{service_type}/{instance_name}_online.json'.format(phome=settings.PROMETHEUS_HOST,
+            os.remove('{phome}/{service_type}/{instance_name}_online.json'.format(phome=settings.PROMETHEUS_HOME,
                                                                                   service_type=inst.service_type,
                                                                                   instance_name=inst.instance_name))
             print('jmx %s has been unregistered to %s' % (inst.instance_name, settings.PROMETHEUS_HOST))
@@ -240,7 +240,7 @@ def check_disabled_jmx(name='check_disabled_jmx'):
         delete alert rule file to prometheus
         '''
         for ii in to_del:
-            os.remove('{phome}/rules/{app}.rules'.format(phome=settings.PROMETHEUS_HOST, app=ii))
+            os.remove('{phome}/rules/{app}.rules'.format(phome=settings.PROMETHEUS_HOME, app=ii))
         # cmd = (' && ').join(['rm -vf {phome}/rules/%s.rules' % ii for ii in to_del])
         # local_cmd(cmd)
         ss = requests.post('http://{phost}:9090/-/reload'.format(phost=settings.PROMETHEUS_HOST))
