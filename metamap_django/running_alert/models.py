@@ -24,7 +24,7 @@ class MonitorInstance(CommmonTimes, CommmonCreators):
         ('kafka', 'kafka'), ('zookeeper', 'zookeeper'), ('flume', 'flume'), ('tomcat', 'tomcat'), ('azkaban', 'azkaban'),
         # ('spark_streaming_app', 'spark_streaming_app')
     ))
-    alert_rules = models.TextField(blank=False, verbose_name=u'告警规则', null=False)
+    # alert_rules = models.TextField(blank=False, verbose_name=u'告警规则', null=False)
     valid = models.IntegerField(default=1, verbose_name=u'是否有效', choices=(
         (1, '是'),
         (0, '否'),
