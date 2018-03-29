@@ -55,7 +55,7 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li><a href="/alert/{{ obj.id }}/">编辑</a></li>
-                                    <li><a href="http://10.1.5.190:{{ obj.exporter_uri }}">指标</a></li>
+                                    <li><a href="http://10.103.70.27:2257/redirect?port={{ obj.get_service_port }}">指标</a></li>
                                 </ul>
                             </div>
                         </td>

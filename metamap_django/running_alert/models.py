@@ -30,6 +30,12 @@ class MonitorInstance(CommmonTimes, CommmonCreators):
         (0, '否'),
     ))
 
+    def get_service_port(self):
+        if self.exporter_uri:
+            return self.exporter_uri.split(':')[1]
+        else:
+            return 'No port found'
+
 
 class SparkMonitorInstance(CommmonTimes, CommmonCreators):
     '''
