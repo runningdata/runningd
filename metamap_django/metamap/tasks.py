@@ -327,8 +327,8 @@ def exec_execobj(exec_id, schedule=-1, name=''):
     except SoftTimeLimitExceeded, e:
         try:
             if p:
+                p.terminate()
                 logger.info('going to kill %d for SoftTimeLimitExceeded task %s' % (p.pid, log_location))
-                os.killpg(p.pid, signal.SIGTERM)
         except Exception, ee:
             logger.error(ee)
         logger.error(e)
