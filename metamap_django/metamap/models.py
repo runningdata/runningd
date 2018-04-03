@@ -199,7 +199,7 @@ class AnaETL(ETLObjRelated):
         # with open(fillename, 'w') as fil:
         #     fil.write('set mapreduce.job.queuename=%s;' % settings.CLUTER_QUEUE)
         #     fil.write(pre_insertr.encode('utf-8'))
-        sql = 'hive --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr \
+        sql = 'hive --hiveconf mapreduce.job.priority=VERY_HIGH --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr \
               + self.query.replace('"', '\\"') + '\"'
         # str_list.append('hive -f %s' % fillename)
         str_list.append(sql)
