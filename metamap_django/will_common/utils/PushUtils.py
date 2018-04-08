@@ -94,8 +94,12 @@ def push_exact_html_email(email, subject, msg):
             return 'success'
         except SMTPAuthenticationError, e:
             error_msg = 'error : %s using %s' % (e, k)
+            logger.error(error_msg)
+            logger.error('traceback is : %s ' % traceback.format_exc())
         except SMTPDataError, e:
             error_msg = 'error : %s using %s' % (e, k)
+            logger.error(error_msg)
+            logger.error('traceback is : %s ' % traceback.format_exc())
         except Exception as e:
             error_msg = 'error : %s using %s' % (e, k)
             logger.error(error_msg)
