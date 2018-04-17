@@ -1,0 +1,85 @@
+{% extends 'layout.html' %}
+{% block title %}obj列表{% endblock %}
+{% block scripts %}
+    <script type="text/javascript">
+        function preview(sqoopid) {
+            var urlB = '/metamap/shell/review/' + sqoopid + '/';
+            $.ajax({
+                url: urlB,
+                success: function (data) {
+                    $("#modal-data").html(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    $("#modal-data").html(errorThrown);
+                }
+            });
+        }
+    </script>
+    <style>
+        .modal-body {
+            word-wrap: break-word;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <!-- Modal -->
+    <div class="modal fade" id="previewsql" tabindex="-1" role="dialog" aria-labelledby="sqllabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">x</span></button>
+                    <h4 class="modal-title" id="sqllabel">预览SQL</h4>
+                </div>
+                <div id="modal-data" class="modal-body">
+                    ...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% include 'components/search.html' %}
+        <table class="table table-striped">
+            <caption></caption>
+            <thead>
+            <tr>
+                <th>名称</th>
+                <th>所属组</th>
+                <th>mysql</th>
+                <th>创建时间</th>
+                <th>创建人</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if objs %}
+                {% for obj in objs %}
+                    <tr>
+                        <td>{{ obj.name }}</td>
+                        <td>{{ obj.cgroup }}</td>
+                        <td>{{ obj.ctime|date:"Y年m月d日 H时i分" }}</td>
+                        <td>{{ obj.creator.user.username }}</td>
+                        </td>
+                        <td>
+                            {#                            <a class="btn btn-primary btn-sm" href="/metamap/sqoop2/{{ obj.id }}/">编辑</a>#}
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    操作 <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/metamap/shell/{{ obj.id }}/">编辑</a></li>
+                                    <li><a href="#" data-toggle="modal" data-target="#previewsql"
+                                           onclick="preview({{ obj.id }})">预览SQL</a></li>
+                                    <li><a target="view_window" href="/metamap/shell/exec/{{ obj.id }}/">测试执行</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -10,6 +10,7 @@ from metamap.views import ops
 from metamap.views import sche_etl
 from metamap.views import sche_etl_v2
 from metamap.views import sche_multi
+from metamap.views import shell
 from metamap.views import source
 from metamap.views import sqoop
 from metamap.views import sqoop2
@@ -89,6 +90,16 @@ urlpatterns = [
         common.StatusListView.as_view(url_base='executions', model=ExecutionsV2), name='executions_status'),
     url(r'^executions/execlog/(?P<execid>[0-9]+)/$', ops.exec_log, name='executions_execlog'),
     url(r'^executions/getexeclog/(?P<execid>[0-9]+)/$', ops.get_exec_log, name='executions_getexeclog'),
+
+    url(r'^shell/$', shell.ShellListView.as_view(), name='h2m_shell_list'),
+    url(r'^shell/(?P<pk>[0-9]+)/$', shell.edit, name='h2m_shell_edit'),
+    url(r'^shell/add/$', shell.add, name='h2m_shell_add'),
+    url(r'^shell/review/(?P<shellid>[0-9]+)/$', shell.review, name='h2m_shell_review'),
+    url(r'^shell/exec/(?P<shellid>[0-9]+)/$', shell.exec_job, name='shell_exec'),
+    url(r'^shell/execlog/(?P<execid>[0-9]+)/$', shell.exec_log, name='shell_execlog'),
+    url(r'^shell/getexeclog/(?P<execid>[0-9]+)/$', shell.get_exec_log, name='shell_getexeclog'),
+    url(r'^shell/status/(?P<status>[0-9]+)/$',
+        common.StatusListView.as_view(url_base='shell', model=SqoopMysql2HiveExecutions), name='shell_status'),
 
 
     url(r'^m2h/$', sqoop2.Mysql2HiveListView.as_view(), name='h2m_sqoop2_list'),

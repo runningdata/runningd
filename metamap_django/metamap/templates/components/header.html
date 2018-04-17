@@ -20,6 +20,14 @@
                 {% endif %}
 
                 <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                                        class="dropdown-toggle">Shell<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/metamap/shell"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
+                        <li><a href="/metamap/shell/add"><span class="glyphicon glyphicon-plus"></span>新增</a></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown"><a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
                                         class="dropdown-toggle">M2H<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/metamap/m2h"><span class="glyphicon glyphicon-th-list"></span>列表</a></li>
@@ -116,9 +124,11 @@
                     <ul class="dropdown-menu">
                         <li><a href="{% url 'metamap:sche_list' %}"><span class="glyphicon glyphicon-th-list"></span>单任务调度</a>
                         </li>
-                        <li><a href="{% url 'metamap:sche_add' %}"><span class="glyphicon glyphicon-plus"></span>新增单任务</a>
+                        <li><a href="{% url 'metamap:sche_add' %}"><span
+                                class="glyphicon glyphicon-plus"></span>新增单任务</a>
                         </li>
-                        <li><a href="{% url 'metamap:sche_multi_list' %}"><span class="glyphicon glyphicon-th-list"></span>多任务调度</a>
+                        <li><a href="{% url 'metamap:sche_multi_list' %}"><span
+                                class="glyphicon glyphicon-th-list"></span>多任务调度</a>
                         </li>
                         <li><a href="{% url 'metamap:add_multi' %}"><span class="glyphicon glyphicon-plus"></span>新增多任务</a>
                         </li>

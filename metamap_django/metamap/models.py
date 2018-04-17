@@ -241,6 +241,19 @@ class SourceApp(ETLObjRelated):
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
 
+class ShellApp(ETLObjRelated):
+    type = 8
+    content = models.TextField(default='', verbose_name=u"shell内容", blank=True, null=True)
+
+    def get_script(self, str_list, sche_vars=''):
+        context = Context()
+        str_list.append('#! /bin/sh')
+        str_list.append(self.content)
+        template = Template('\n'.join(str_list))
+        strip = template.render(context).strip()
+        strip = '{% load etlutils %} \n' + sche_vars + '\n' + strip
+        return {strip, }
+
 
 class JarApp(ETLObjRelated):
     type = 6
@@ -432,6 +445,8 @@ class ExecObj(models.Model):
             return SourceApp.objects.get(pk=self.rel_id)
         elif self.type == 6:
             return JarApp.objects.get(pk=self.rel_id)
+        elif self.type == 8:
+            return ShellApp.objects.get(pk=self.rel_id)
         elif self.type == 66:
             return NULLETL.objects.get(pk=self.rel_id)
         else:
