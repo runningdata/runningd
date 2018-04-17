@@ -73,9 +73,10 @@ def add(request):
                         AuthUserGroups.objects.using(settings.DB_HUE).get_or_create(user=auth_user, group=auth_group)
                         from fabric.api import run
                         from fabric.api import env
+                        ggoups = request.POST['email'].strip()
                         for hhost in settings.NN_HOSTS:
                             env.host_string = hhost
-                            print run('useradd %s -G %s' % (username, group.name))
+                            print run('useradd %s -G %s || usermod %s -G %s' % (username, ggoups, username, ggoups))
                         env.host_string = ''
                 else:
                     if User.objects.using(settings.DB_HUE).filter(username=username, email=email).exists():
