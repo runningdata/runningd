@@ -39,6 +39,10 @@ def get_list(key):
         messages = r.lrange(key, 0, -1)
     return messages
 
+def del_from_list(list_key, target):
+    r = redis.StrictRedis(connection_pool=pool)
+    r.lrem(list_key,0, target)
+
 def get_queue_count(queue_name, count=-1):
     r = redis.StrictRedis(connection_pool=pool)
     if r.exists(queue_name):

@@ -301,7 +301,8 @@ def tail_hdfs(logLocation, command, name=''):
 #     executors.get(will_task.type)(will_task.rel_id)
 
 
-@shared_task(max_retries=3, default_retry_delay=30 * 60, soft_time_limit=settings.CELERYD_TASK_SOFT_TIME_LIMIT)
+@shared_task(max_retries=3, default_retry_delay=30 * 60, soft_time_limit=settings.CELERYD_TASK_SOFT_TIME_LIMIT,
+             property=5)
 def exec_execobj(exec_id, schedule=-1, name=''):
     try:
         obj = ExecObj.objects.get(pk=exec_id)

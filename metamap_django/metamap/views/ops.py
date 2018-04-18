@@ -19,7 +19,7 @@ import logging
 
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import generic
 
 import metamap
@@ -27,6 +27,7 @@ from metamap import tasks
 from metamap.models import Exports, ExecObj, AnaETL, Executions, ExecutionsV2
 from will_common.models import OrgGroup, UserProfile, WillDependencyTask
 from will_common.utils import PushUtils
+from will_common.utils import celeryutil
 from will_common.utils import constants
 from will_common.utils import dateutils
 from will_common.utils import redisutils
@@ -68,6 +69,7 @@ def check_file(request):
         return HttpResponse("success")
     return HttpResponse("not yet")
 
+
 def exec_history(request):
     objs = ExecutionsV2.objects.filter(start_time__gt=dateutils.days_ago(-21), start_time__lt=dateutils.days_ago(-20))
     s = [obj.as_dict() for obj in objs]
@@ -85,8 +87,10 @@ def exec_history(request):
     rr['max_time'] = max_time
     return JsonResponse(rr)
 
+
 def exec_history_page(request):
     return render(request, 'executions/finished_tasks.html')
+
 
 def task_queue(request):
     i = metamap.celery.app.control.inspect()
@@ -102,6 +106,18 @@ def task_queue(request):
     unacked = redisutils.get_dict('unacked')
     return render(request, 'ops/task_queue.html',
                   {"final_queue": final_queue, "str": result, "running": running, "unack": unacked})
+
+
+def del_from_task_queue(request):
+    iid = request.POST['iid']
+    queue_key = request.POST['queue']
+    user = request.user.username
+    for a in redisutils.get_list(queue_key):
+        if celeryutil.get_celery_taskname2(a)['id'] == iid:
+            logger.info('%s going to pop task %s' % (user, iid))
+            redisutils.del_from_list(queue_key, a)
+            break
+    return redirect('metamap:task_queue')
 
 
 def dfs_usage_his(request):

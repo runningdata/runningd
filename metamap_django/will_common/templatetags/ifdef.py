@@ -52,6 +52,7 @@ def get_celery_taskname2(msg):
     body = 'problem...'
     try:
         body = pickle.loads(m['body'].decode(body_encoding))
+        body['priority'] = m['properties']['delivery_info']['priority']
     except Exception, e:
         print('result is %s ' % m['body'])
     return body

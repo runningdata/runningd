@@ -39,6 +39,7 @@ urlpatterns = [
 
     url(r'^$', etls.IndexView.as_view(), name='index'),
     url(r'^ops/task_queue/$', ops.task_queue, name='task_queue'),
+    url(r'^ops/task_queue/del/$', ops.del_from_task_queue, name='task_del'),
     url(r'^ops/dfs_usage_his/$', ops.dfs_usage_his, name='dfs_usage_his'),
     url(r'^ops/dfs_usage/$', ops.dfs_usage, name='dfs_usage'),
     url(r'^ops/push_msg/$', ops.push_msg, name='push_msg'),
