@@ -78,6 +78,7 @@
                                     <li><a href="#" data-toggle="modal" data-target="#previewsql"
                                            onclick="preview({{ obj.id }})">预览SQL</a></li>
                                     <li><a target="view_window" href="/metamap/m2h/exec/{{ obj.id }}/">测试执行</a></li>
+                                    <li><a href="{% url 'metamap:bloodv2' obj.exec_obj_id %}">血统</a></li>
                                 </ul>
                             </div>
                         </td>

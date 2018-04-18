@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+
+{% block title %}血统{% endblock %}
+
+{% load staticfiles %}
+{% load etlutils %}
+
+
+{% block content %}
+    <div class="container text-center">
+        <script src="{% static 'js/mermaid.min.js' %}"></script>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/mermaid.css' %}"/>
+        <script type="text/jaascript">
+        mermaid.initialize({startOnLoad:true});
+
+
+
+
+        </script>
+        <h2>血统详情[{{ health }}]</h2>
+        <form role="search" class="navbar-form" method="get">
+            <div class="input-group add-on">
+                <label class="form-inline">父层级</label><input value="0" name="p_depth" type="text" class="form-inline" >
+                <label class="form-inline">子层级</label><input value="0" name="c_depth" type="text" class="form-inline">
+                <div class="input-group-btn">
+                    <button type="submit" class="btn btn-default">
+                        <i class="glyphicon glyphicon-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+        <div class="mermaid">
+            graph TD;
+            classDef orange fill:#f96,stroke:#333,stroke-width:4px;
+            {% for blood in bloods %}
+                {{ blood.get_clean }}
+            {% endfor %}
+            class {{ clean_exec_name }} orange
+        </div>
+        <div>
+            <table class="table table-condensed table-hover">
+                <caption>依赖关系表</caption>
+                <thead>
+                <tr>
+                    <th>父节点</th>
+                    <th>子节点</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for blood in bloods %}
+                    <tr>
+                        <td>{{ blood.parent.name }}</td>
+                        <td>{{ blood.child.name }}</td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+{% endblock %}

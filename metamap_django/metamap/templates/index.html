@@ -74,7 +74,7 @@
                                            onclick="preview({{ etl.id }})">预览SQL</a></li>
                                     <li><a target="view_window" href="/metamap/etls/exec/{{ etl.id }}/">测试执行</a></li>
                                     <li><a href="/metamap/etls/exec_list/{{ etl.exec_obj_id }}/">执行记录</a></li>
-                                    <li><a href="{% url 'metamap:blood' etl.id %}">血统</a></li>
+                                    <li><a href="{% url 'metamap:bloodv2' etl.exec_obj_id %}">血统</a></li>
                                     <li><a href="/metamap/etls/his/{{ etl.name }}/">历史版本</a></li>
                                     <li><a href="/metamap/sche/etl/{{ etl.id }}/">调度列表</a></li>
                                     <li><a href="/metamap/deps/deps/{{ etl.exec_obj_id }}/">依赖编辑</a></li>

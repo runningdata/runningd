@@ -22,7 +22,7 @@ def clean_blood(blood, current=0):
     return blood
 
 
-def find_parent_mermaid(blood, final_bloods, dep_cnt=0, init=None, depth=0):
+def find_parent_mermaid_v2(blood, final_bloods, dep_cnt=0, init=None, depth=0):
     '''
     # 循环遍历当前节点的父节点
     :param blood:
@@ -31,17 +31,17 @@ def find_parent_mermaid(blood, final_bloods, dep_cnt=0, init=None, depth=0):
     '''
     init.depth += 1
     dep_cnt += 1
-    if init.depth > 10000:
+    if init.depth > 1000:
         return
-    bloods = TblBlood.objects.filter(tblName=blood.parentTbl)
+    bloods = ExecBlood.objects.filter(child_id=blood.parent_id)
     if dep_cnt != depth or depth < 0:
         if bloods.count() > 0:
             for bld in bloods:
                 final_bloods.add(bld)
-                find_parent_mermaid(bld, final_bloods, dep_cnt=dep_cnt, init=init, depth=depth)
+                find_parent_mermaid_v2(bld, final_bloods, dep_cnt=dep_cnt, init=init, depth=depth)
 
 
-def find_child_mermaid(blood, final_bloods, dep_cnt=0, init=None, depth=0):
+def find_child_mermaid_v2(blood, final_bloods, dep_cnt=0, init=None, depth=0):
     '''
     循环遍历当前节点的子节点
     :param blood:
@@ -50,16 +50,14 @@ def find_child_mermaid(blood, final_bloods, dep_cnt=0, init=None, depth=0):
     '''
     init.depth += 1
     dep_cnt += 1
-    if init.depth > 10000:
+    if init.depth > 1000:
         return
-    bloods = TblBlood.objects.filter(parentTbl=blood.tblName)
+    bloods = ExecBlood.objects.filter(parent_id=blood.child_id)
     if bloods.count() > 0:
         for bld in bloods:
-            # if bld in final_bloods:
-            #     raise Exception('Already has %s ' % bld)
             final_bloods.add(bld)
             if dep_cnt != depth or depth < 0:
-                find_child_mermaid(bld, final_bloods, dep_cnt=dep_cnt, init=init, depth=depth)
+                find_child_mermaid_v2(bld, final_bloods, dep_cnt=dep_cnt, init=init, depth=depth)
 
 
 def check_tree_cycle():

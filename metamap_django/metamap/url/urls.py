@@ -58,9 +58,7 @@ urlpatterns = [
     url(r'^etls/status/(?P<status>[0-9]+)/$',
         common.StatusListView.as_view(url_base='etls', model=Executions), name='status'),
     url(r'^etls/his/(?P<tblName>.*)/$', etls.his, name='his'),
-    url(r'^etls/blood/$', etls.blood_by_name, name='blood_by_name'),
-    url(r'^etls/preview_dag/$', etls.preview_job_dag, name='preview_job_dag'),
-    url(r'^etls/blood/(?P<etlid>[0-9]+)/$', etls.blood_dag, name='blood'),
+    url(r'^etls/bloodv2/(?P<etlid>[0-9]+)/$', etls.blood_dag_v2, name='bloodv2'),
     url(r'^etls/restart_job/', etls.restart_job, name='restart_job'),
     url(r'^etls/check_dag/(?P<etlid>[0-9]+)/$', etls.check_dag, name='check_dag'),
 

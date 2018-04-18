@@ -241,6 +241,7 @@ class SourceApp(ETLObjRelated):
     engine_opts = models.TextField(default='', verbose_name=u"引擎运行参数", blank=True, null=True)
     main_func_opts = models.TextField(default='', verbose_name=u"入口类运行参数", blank=True, null=True)
 
+
 class ShellApp(ETLObjRelated):
     type = 8
     content = models.TextField(default='', verbose_name=u"shell内容", blank=True, null=True)
@@ -476,10 +477,15 @@ class ExecObj(models.Model):
             older_deps.delete()
 
 
+typ = {1: 'fa:fa-book', 2: 'fa:fa-twitter', 3: 'fa:fa-desktop', 4: 'fa:fa-money', 5: 'fa:fa-twitter',
+       6: 'fa:fa-twitter', 8: 'fa:fa-file-alt'}
+
+
 class ExecBlood(models.Model):
     child = models.ForeignKey(ExecObj, on_delete=models.DO_NOTHING, related_name='child')
     parent = models.ForeignKey(ExecObj, on_delete=models.DO_NOTHING, related_name='parent')
     ctime = models.DateTimeField(default=timezone.now)
+    current = 0
 
     def __eq__(self, other):
         return self.child.id == other.child.id and self.parent.id == other.parent.id
@@ -487,6 +493,11 @@ class ExecBlood(models.Model):
     def __str__(self):
         return self.parent.name + '-->' + self.child.name
 
+    def get_clean(self):
+        parentTbl = self.parent.name.replace('@', '__').replace('class', 'calss')
+        tblName = self.child.name.replace('@', '__').replace('class', 'calss')
+        mermaid_expr = parentTbl + "[" + typ[self.parent.type] + ' ' + parentTbl + "]" + '-->' + tblName + "[" + typ[self.child.type] + ' ' + tblName + "]"
+        return mermaid_expr
 
 class TblBlood(models.Model):
     class Meta:
@@ -600,9 +611,10 @@ class SqoopMysql2Hive(ETLObjRelated):
             str_list.append(
                 '\necho ".............immi table done.................."')
             str_list.append('\nhive -e "use %s;set hive.exec.dynamic.partition.mode=nonstrict;'
-                'insert overwrite table %s partition(%s) select * from %s; drop table %s;"' % \
-                (self.hive_meta.meta, self.mysql_tbl, self.partition_key, self.get_hive_inmi_tbl(self.mysql_tbl),
-                 self.get_hive_inmi_tbl(self.mysql_tbl)))
+                            'insert overwrite table %s partition(%s) select * from %s; drop table %s;"' % \
+                            (self.hive_meta.meta, self.mysql_tbl, self.partition_key,
+                             self.get_hive_inmi_tbl(self.mysql_tbl),
+                             self.get_hive_inmi_tbl(self.mysql_tbl)))
 
         return str_list
 
@@ -720,6 +732,7 @@ class ExecutionsV2(models.Model):
                 'start_time': dateutils.format_dbday(self.start_time),
                 'end_time': dateutils.format_dbday(self.end_time)
                 }
+
 
 class SqoopHive2MysqlExecutions(models.Model):
     '''
