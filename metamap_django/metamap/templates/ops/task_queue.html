@@ -82,7 +82,12 @@
                         <td>{{ k }}</td>
                         <td>{{ body.id }}</td>
                         <td>{{ body.kwargs.name }}</td>
-                        <td>删除</td>
+                        <td>
+                            <button class="btn btn-danger "
+                                    onclick="show_del_modal('{{ body.id }}', '{{ body.kwargs.name }}', '{{ k }}');">
+                                删除
+                            </button>
+                        </td>
                     </tr>
                 {% endfor %}
             </table>
@@ -94,7 +99,7 @@
                 <table class="table">
                     <tr>
                         <th>任务ID</th>
-{#                        <th>优先级</th>#}
+                        {#                        <th>优先级</th>#}
                         <th>任务名称</th>
                         <th>操作</th>
                     </tr>
@@ -102,17 +107,17 @@
                         {% get_celery_taskname2 msg as body %}
                         <tr>
                             <td>{{ body.id }}</td>
-{#                            <td>{{ body.priority }}</td>#}
+                            {#                            <td>{{ body.priority }}</td>#}
                             <td>{{ body.kwargs.name }}</td>
                             <td>
                                 <button class="btn btn-danger "
                                         onclick="show_del_modal('{{ body.id }}', '{{ body.kwargs.name }}', '{{ k }}');">
                                     删除
                                 </button>
-{#                                <button class="btn btn-danger "#}
-{#                                        onclick="up_priority('{{ body.id }}', '{{ body.kwargs.name }}', '{{ k }}');">#}
-{#                                    提升优先级#}
-{#                                </button>#}
+                                {#                                <button class="btn btn-danger "#}
+                                {#                                        onclick="up_priority('{{ body.id }}', '{{ body.kwargs.name }}', '{{ k }}');">#}
+                                {#                                    提升优先级#}
+                                {#                                </button>#}
                             </td>
                         </tr>
                     {% endfor %}
