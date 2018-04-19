@@ -112,6 +112,8 @@ def del_from_task_queue(request):
     iid = request.POST['iid']
     queue_key = request.POST['queue']
     user = request.user.username
+    # from metamap.celery import app
+    # app.control.revoke(iid)
     for a in redisutils.get_list(queue_key):
         if celeryutil.get_celery_taskname2(a)['id'] == iid:
             logger.info('%s going to pop task %s' % (user, iid))

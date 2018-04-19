@@ -10,9 +10,12 @@ from kombu.serialization import pickle
 from will_common.models import WillDependencyTask
 
 pool = redis.ConnectionPool(host=settings.CELERY_REDIS_HOST, port=settings.CELERY_REDIS_PORT, max_connections=2)
+
+
 def get_keys():
     r = redis.StrictRedis(connection_pool=pool)
     return [key for key in r.keys() if '_' not in key and 'unack' not in key]
+
 
 def get_val(k, defaut='2000-01-01 12:12:12'):
     r = redis.StrictRedis(connection_pool=pool)
@@ -21,9 +24,15 @@ def get_val(k, defaut='2000-01-01 12:12:12'):
         v = defaut
     return v
 
+
+def get_conn():
+    return redis.StrictRedis(connection_pool=pool)
+
+
 def set_val(k, v):
     r = redis.StrictRedis(connection_pool=pool)
     return r.set(k, v)
+
 
 def get_dict(key):
     messages = dict()
@@ -32,22 +41,29 @@ def get_dict(key):
         messages = r.hgetall(key)
     return messages
 
+
 def get_list(key):
     messages = list()
     r = redis.StrictRedis(connection_pool=pool)
     if r.exists(key):
+        if r.type(key) != 'list':
+            print('wrong type for %s' % key)
+            return ['error',]
         messages = r.lrange(key, 0, -1)
     return messages
 
+
 def del_from_list(list_key, target):
     r = redis.StrictRedis(connection_pool=pool)
-    r.lrem(list_key,0, target)
+    r.lrem(list_key, 0, target)
+
 
 def get_queue_count(queue_name, count=-1):
     r = redis.StrictRedis(connection_pool=pool)
     if r.exists(queue_name):
         messages = r.lrange(queue_name, 0, count)
     return len(messages)
+
 
 def get_queue_info(queue_name, count=-1):
     r = redis.StrictRedis(connection_pool=pool)

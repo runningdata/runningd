@@ -24,6 +24,7 @@ from will_common.utils import enums, dateutils
 
 from celery.utils.log import get_task_logger
 
+from will_common.utils import redisutils
 from will_common.utils import ziputils
 from azkaban_client.azkaban import *
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, AZKABAN_BASE_LOCATION
