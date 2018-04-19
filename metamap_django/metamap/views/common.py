@@ -24,4 +24,5 @@ class StatusListView(generic.ListView):
                 raise Exception("Empty list and '%(class_name)s.allow_empty' is False.")
         context = self.get_context_data()
         context['url_base'] = self.url_base
+        context['status'] = status
         return self.render_to_response(context)
