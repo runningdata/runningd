@@ -41,6 +41,19 @@ def find_parent_mermaid_v2(blood, final_bloods, dep_cnt=0, init=None, depth=0):
                 find_parent_mermaid_v2(bld, final_bloods, dep_cnt=dep_cnt, init=init, depth=depth)
 
 
+def find_child_mermaid(blood, final_bloods, dep_cnt=0, init=None, depth=0):
+    init.depth += 1
+    dep_cnt += 1
+    if init.depth > 10000:
+        return
+    bloods = TblBlood.objects.filter(parentTbl=blood.tblName)
+    if bloods.count() > 0:
+        for bld in bloods:
+            final_bloods.add(bld)
+            if dep_cnt != depth or depth < 0:
+                find_child_mermaid(bld, final_bloods, dep_cnt=dep_cnt, init=init, depth=depth)
+
+
 def find_child_mermaid_v2(blood, final_bloods, dep_cnt=0, init=None, depth=0):
     '''
     循环遍历当前节点的子节点
