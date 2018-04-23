@@ -422,17 +422,17 @@ def restart_job(request):
 
             for name in request.POST.get('names').split(','):
                 dependencies[name] = set()
-                for blood in TblBlood.objects.filter(tblName=name):
+                for blood in ExecBlood.objects.filter(Q(child_name=name) | Q(parent_name=name)):
                     c_init = Depth()
-                    bloodhelper.find_child_mermaid(blood, final_bloods, init=c_init)
+                    bloodhelper.find_child_mermaid_v2(blood, final_bloods, init=c_init)
 
             for blood in final_bloods:
                 try:
-                    child_name = blood.tblName
+                    child_name = blood.child.name
                     c_etl = ETL.objects.get(name=child_name, valid=1)
                     if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=1).exists():
                         dependencies.setdefault(child_name, set())
-                        parent_name = blood.parentTbl
+                        parent_name = blood.parent.name
                         p_etl = ETL.objects.get(name=parent_name, valid=1)
                         if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=1).exists():
                             dependencies.get(child_name).add(parent_name)
