@@ -5,6 +5,7 @@ import os
 
 import re
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import models
 
@@ -13,7 +14,9 @@ from django.template import Template
 from django.utils import timezone
 
 from metamap.db_views import ColMeta, DB
+from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
 from will_common.models import PeriodicTask, WillDependencyTask, UserProfile, OrgGroup, CommmonCreators, CommmonTimes
+from will_common.templatetags import etlutils
 from will_common.utils import dateutils
 from will_common.utils import ziputils
 from will_common.utils.constants import AZKABAN_SCRIPT_LOCATION, TMP_EXPORT_FILE_LOCATION
@@ -21,6 +24,27 @@ from will_common.utils.customexceptions import RDException
 
 logger = logging.getLogger('django')
 from will_common.utils import hivecli
+
+
+def get_delta_variables(variables, delta):
+    lines = variables.split('\n')
+    new_lines = set()
+    for line in lines:
+        result = re.split(r'\s+', line)
+        for i in result:
+            if re.match(r'^[a-zA-Z_]{1,}$', i):
+                if hasattr(etlutils, i):
+                    method = getattr(etlutils, i)
+                    if getattr(method, 'func_name') == 'day_change':
+                        try:
+                            num = int(result[result.index(i) + 1]) - delta
+                        except Exception, e:
+                            print result[result.index(i) + 1]
+                            print result
+                            raise e
+                        result[result.index(i) + 1] = str(num)
+        new_lines.add(' '.join(result))
+    return '\n'.join(new_lines)
 
 
 class ETLObjRelated(models.Model):
@@ -50,10 +74,10 @@ class ETLObjRelated(models.Model):
         if schedule != -1:
             tt = WillDependencyTask.objects.get(rel_id=self.exec_obj.id, schedule=schedule, type=100)
             sche_vars = tt.variables
-            # if delta != 0:
-            #     str.append(get_delta_variables(tt.variables, delta))
-            # else:
-            str.append(tt.variables)
+            if delta != 0:
+                str.append(get_delta_variables(tt.variables, delta))
+            else:
+                str.append(tt.variables)
         str_list = self.get_script(str_list, sche_vars)
         template = Template(self.get_clean_str(str_list))
         script = template.render(Context()).strip()

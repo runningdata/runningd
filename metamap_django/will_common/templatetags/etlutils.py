@@ -6,8 +6,6 @@ created by will
 import datetime
 from django import template
 
-from metamap.models import ExecObj
-
 register = template.Library()
 
 
