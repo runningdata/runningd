@@ -5,7 +5,6 @@ import os
 
 import re
 from django.conf import settings
-from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import models
 
@@ -14,8 +13,6 @@ from django.template import Template
 from django.utils import timezone
 
 from metamap.db_views import ColMeta, DB
-from metamap.helpers import etlhelper
-from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
 from will_common.models import PeriodicTask, WillDependencyTask, UserProfile, OrgGroup, CommmonCreators, CommmonTimes
 from will_common.utils import dateutils
 from will_common.utils import ziputils
@@ -53,10 +50,10 @@ class ETLObjRelated(models.Model):
         if schedule != -1:
             tt = WillDependencyTask.objects.get(rel_id=self.exec_obj.id, schedule=schedule, type=100)
             sche_vars = tt.variables
-            if delta != 0:
-                str.append(etlhelper.get_delta_variables(tt.variables, delta))
-            else:
-                str.append(tt.variables)
+            # if delta != 0:
+            #     str.append(get_delta_variables(tt.variables, delta))
+            # else:
+            str.append(tt.variables)
         str_list = self.get_script(str_list, sche_vars)
         template = Template(self.get_clean_str(str_list))
         script = template.render(Context()).strip()
@@ -501,8 +498,10 @@ class ExecBlood(models.Model):
     def get_clean(self):
         parentTbl = self.parent.name.replace('@', '__').replace('class', 'calss')
         tblName = self.child.name.replace('@', '__').replace('class', 'calss')
-        mermaid_expr = parentTbl + "[" + typ[self.parent.type] + ' ' + parentTbl + "]" + '-->' + tblName + "[" + typ[self.child.type] + ' ' + tblName + "]"
+        mermaid_expr = parentTbl + "[" + typ[self.parent.type] + ' ' + parentTbl + "]" + '-->' + tblName + "[" + typ[
+            self.child.type] + ' ' + tblName + "]"
         return mermaid_expr
+
 
 class TblBlood(models.Model):
     class Meta:
