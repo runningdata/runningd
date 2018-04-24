@@ -448,6 +448,36 @@ def generate_job_file_for_partition(job_name, parent_names, folder, schedule=-1,
     with open(job_file, 'w') as f:
         f.write(content)
 
+def generate_job_file_for_partition_v2(job_name, parent_names, folder, schedule=-1, delta=0):
+    '''
+    生成azkaban job文件
+    :param blood:
+    :param parent_names:
+    :param folder:
+    :return:
+    '''
+    if not job_name.startswith('etl_done_'):
+        # 生成hql文件
+        etl = ExecBlood.objects.get(name=job_name)
+        location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
+        # generate_etl_file(etl, location, schedule, delta)
+        command = etl.get_cmd()
+        # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
+    else:
+        command = "echo " + job_name
+
+    # 生成job文件
+    job_type = ' command\nretries=5\nretry.backoff=60000\n'
+    dependencies = set()
+    for p in parent_names:
+        dependencies.add(p)
+    content = '#' + job_name + '\n' + 'type=' + job_type + '\n' + 'command = ' + command + '\n'
+    if len(dependencies) > 0:
+        job_depencied = ','.join(dependencies)
+        content += "dependencies=" + job_depencied + "\n"
+    job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
+    with open(job_file, 'w') as f:
+        f.write(content)
 
 def generate_end_job_file(job_name, command, folder, deps):
     # 生成结束的job文件

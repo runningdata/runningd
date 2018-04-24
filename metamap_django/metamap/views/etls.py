@@ -422,19 +422,21 @@ def restart_job(request):
 
             for name in request.POST.get('names').split(','):
                 dependencies[name] = set()
-                for blood in TblBlood.objects.filter(tblName=name):
+                # for blood in TblBlood.objects.filter(tblName=name):
+                oo = ExecObj.objects.get(name=name)
+                for blood in ExecBlood.objects.filter(child_id=oo.id):
                     c_init = Depth()
-                    bloodhelper.find_child_mermaid(blood, final_bloods, init=c_init)
+                    bloodhelper.find_child_mermaid_v2(blood, final_bloods, init=c_init)
 
             for blood in final_bloods:
                 try:
-                    child_name = blood.tblName
-                    c_etl = ETL.objects.get(name=child_name, valid=1)
-                    if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=1).exists():
+                    child_name = blood.child.name
+                    c_etl = ExecObj.objects.get(name=child_name)
+                    if WillDependencyTask.objects.filter(rel_id=c_etl.id, schedule=schedule, type=100).exists():
                         dependencies.setdefault(child_name, set())
-                        parent_name = blood.parentTbl
-                        p_etl = ETL.objects.get(name=parent_name, valid=1)
-                        if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=1).exists():
+                        parent_name = blood.parent.name
+                        p_etl = ExecObj.objects.get(name=parent_name)
+                        if WillDependencyTask.objects.filter(rel_id=p_etl.id, schedule=schedule, type=100).exists():
                             dependencies.get(child_name).add(parent_name)
                 except ObjectDoesNotExist, e:
                     print('not exist for %s ' % child_name)
@@ -444,8 +446,8 @@ def restart_job(request):
             os.mkdir(AZKABAN_SCRIPT_LOCATION + folder)
 
             for job_name, parent_names in dependencies.items():
-                etlhelper.generate_job_file_for_partition(job_name, parent_names, folder, schedule, delta)
-            etlhelper.generate_job_file_for_partition('etl_done_' + folder, dependencies.keys(), folder, delta)
+                etlhelper.generate_job_file_for_partition_v2(job_name, parent_names, folder, schedule, delta)
+            etlhelper.generate_job_file_for_partition_v2('etl_done_' + folder, dependencies.keys(), folder, delta)
             task_zipfile = AZKABAN_BASE_LOCATION + folder
             ziputils.zip_dir(task_zipfile)
             command = 'sh $METAMAP_HOME/files/azkaban_job_restart.sh %s ' % folder
