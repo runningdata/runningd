@@ -114,11 +114,14 @@ def del_from_task_queue(request):
     user = request.user.username
     # from metamap.celery import app
     # app.control.revoke(iid)
-    for a in redisutils.get_list(queue_key):
-        if celeryutil.get_celery_taskname2(a)['id'] == iid:
-            logger.info('%s going to pop task %s' % (user, iid))
-            redisutils.del_from_list(queue_key, a)
-            break
+    if queue_key == 'unacked':
+        redisutils.get_conn().hdel('unacked', iid)
+    else:
+        for a in redisutils.get_list(queue_key):
+            if celeryutil.get_celery_taskname2(a)['id'] == iid:
+                logger.info('%s going to pop task %s' % (user, iid))
+                redisutils.del_from_list(queue_key, a)
+                break
     return redirect('metamap:task_queue')
 
 
