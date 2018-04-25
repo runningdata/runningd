@@ -75,9 +75,9 @@ class ETLObjRelated(models.Model):
             tt = WillDependencyTask.objects.get(rel_id=self.exec_obj.id, schedule=schedule, type=100)
             sche_vars = tt.variables
             if delta != 0:
-                str.append(get_delta_variables(tt.variables, delta))
+                str_list.append(get_delta_variables(tt.variables, delta))
             else:
-                str.append(tt.variables)
+                str_list.append(tt.variables)
         str_list = self.get_script(str_list, sche_vars)
         template = Template(self.get_clean_str(str_list))
         script = template.render(Context()).strip()
