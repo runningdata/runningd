@@ -98,6 +98,9 @@ def task_queue(request):
     final_queue = dict()
     str = list()
     for queue_key in redisutils.get_keys():
+        if queue_key not in ['will_cron', 'unacked', 'metamap', 'cron', 'jar', 'running_jar', 'dqms', 'running_alert',
+                             'metamap', 'cron_tsk', 'cron_multi', 'cron_spark', 'celery']:
+            continue
         print queue_key
         final_queue[queue_key] = redisutils.get_list(queue_key)
         str.append('<%s> : %d tasks waiting' % (queue_key, len(final_queue[queue_key])))
