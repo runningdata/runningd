@@ -437,9 +437,9 @@ class ExecObj(models.Model):
     def execute(self):
         self.get_rel_obj().execute()
 
-    def get_cmd(self, schedule=-1, location=None):
+    def get_cmd(self, schedule=-1, location=None, delta=0):
         obj = self.get_rel_obj()
-        return obj.get_cmd(schedule, location)
+        return obj.get_cmd(schedule, location, delta)
         # str_list = list()
         # str_list.append('{% load etlutils %}')
         # sche_vars = ''
