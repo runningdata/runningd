@@ -461,7 +461,7 @@ def generate_job_file_for_partition_v2(job_name, parent_names, folder, schedule=
         etl = ExecObj.objects.get(name=job_name)
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         # generate_etl_file(etl, location, schedule, delta)
-        command = etl.get_cmd()
+        command = etl.get_cmd(schedule=schedule, location=location, delta=delta)
         # command = 'runuser -l ' + settings.PROC_USER + ' -c "' + command + '"'
     else:
         command = "echo " + job_name
