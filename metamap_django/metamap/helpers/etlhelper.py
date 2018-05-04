@@ -458,7 +458,7 @@ def generate_job_file_for_partition_v2(job_name, parent_names, folder, schedule=
     '''
     if not job_name.startswith('etl_done_'):
         # 生成hql文件
-        etl = ExecBlood.objects.get(name=job_name)
+        etl = ExecObj.objects.get(name=job_name)
         location = AZKABAN_SCRIPT_LOCATION + folder + '/' + job_name + '.hql'
         # generate_etl_file(etl, location, schedule, delta)
         command = etl.get_cmd()
