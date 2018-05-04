@@ -424,7 +424,8 @@ def restart_job(request):
                 dependencies[name] = set()
                 # for blood in TblBlood.objects.filter(tblName=name):
                 oo = ExecObj.objects.get(name=name)
-                for blood in ExecBlood.objects.filter(child_id=oo.id):
+                for blood in ExecBlood.objects.filter(parent_id=oo.id):
+                    final_bloods.add(blood)
                     c_init = Depth()
                     bloodhelper.find_child_mermaid_v2(blood, final_bloods, init=c_init)
 

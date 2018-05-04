@@ -477,7 +477,7 @@ def generate_job_file_for_partition_v2(job_name, parent_names, folder, schedule=
         content += "dependencies=" + job_depencied + "\n"
     job_file = AZKABAN_BASE_LOCATION + folder + "/" + job_name + ".job"
     with open(job_file, 'w') as f:
-        f.write(content)
+        f.write(content.encode('utf-8'))
 
 def generate_end_job_file(job_name, command, folder, deps):
     # 生成结束的job文件
