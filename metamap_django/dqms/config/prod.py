@@ -34,8 +34,9 @@ from celery_conf import *
 SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
 EEE = 'default_DEV'
-ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.103.27.171', '10.103.70.27']
-
+ALLOWED_HOSTS = result.get('ALLOWD_HOSTS',
+                           ['127.0.0.1', '10.2.19.62',
+                            '10.1.5.83', '10.2.19.124', '10.103.27.171', '10.103.70.27'])
 HIVE_SERVER = {
     'host': result['HIVE_SERVER_HOST'],
     'port': result['HIVE_PORT'],

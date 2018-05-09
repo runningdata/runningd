@@ -35,7 +35,9 @@ SPARK_EXPORTER_HOST = result['SPARK_EXPORTER_HOST']
 
 SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
-ALLOWED_HOSTS = ['127.0.0.1', '10.2.19.62', '10.1.5.83', '10.103.27.171', '10.103.70.27']
+ALLOWED_HOSTS = result.get('ALLOWD_HOSTS',
+                           ['127.0.0.1', '10.2.19.62',
+                            '10.1.5.83', '10.2.19.124', '10.103.27.171', '10.103.70.27'])
 
 # 设置cas服务器地址
 CAS_SERVER_URL = "http://{server_name}/sso/".format(server_name=result['CAS_SERVER_URL'])
