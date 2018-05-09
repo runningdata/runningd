@@ -9,11 +9,7 @@ from kombu.serialization import pickle
 
 from will_common.models import WillDependencyTask
 
-if settings.CELERY_REDIS_PASSWORD:
-    pool = redis.ConnectionPool(host=settings.CELERY_REDIS_HOST, port=settings.CELERY_REDIS_PORT,
-                                password=settings.CELERY_REDIS_PASSWORD, max_connections=2)
-else:
-    pool = redis.ConnectionPool(host=settings.CELERY_REDIS_HOST, port=settings.CELERY_REDIS_PORT, max_connections=2)
+pool = redis.ConnectionPool(host=settings.CELERY_REDIS_HOST, port=settings.CELERY_REDIS_PORT, max_connections=2)
 
 
 def get_keys():
