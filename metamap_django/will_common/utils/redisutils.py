@@ -9,7 +9,8 @@ from kombu.serialization import pickle
 
 from will_common.models import WillDependencyTask
 
-pool = redis.ConnectionPool(host=settings.CELERY_REDIS_HOST, port=settings.CELERY_REDIS_PORT, max_connections=2)
+pool = redis.ConnectionPool(host=settings.CELERY_REDIS_HOST, port=settings.CELERY_REDIS_PORT,
+                            password=settings.CELERY_REDIS_PASSWORD, max_connections=2)
 
 
 def get_keys():
@@ -48,7 +49,7 @@ def get_list(key):
     if r.exists(key):
         if r.type(key) != 'list':
             print('wrong type for %s' % key)
-            return ['error',]
+            return ['error', ]
         messages = r.lrange(key, 0, -1)
     return messages
 
