@@ -72,7 +72,7 @@ HIVE_SERVER = {
 
 # 设置cas服务器地址
 CAS_SERVER_URL = "http://{server_name}/sso/".format(server_name=result['CAS_SERVER_URL'])
-CAS_IDC_SERVER_URL = "http://10.2.19.113:8181/sso/"
+CAS_IDC_SERVER_URL = result.get("CAS_IDC_SERVER_URL", "http://10.2.19.113:8181/sso/")
 # CAS_LOGOUT_COMPLETELY = True
 CAS_PROVIDE_URL_TO_LOGOUT = True
 # CAS_GATEWAY = True
