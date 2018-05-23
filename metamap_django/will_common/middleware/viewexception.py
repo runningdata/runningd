@@ -35,6 +35,9 @@ class LoginRequire():
         is_export = request.path.startswith('/export')
         is_test = request.path.endswith('test/') or 'push_msg' in request.path
 
+
         if not is_test:
-            if (is_dqms or is_gene or is_export or is_alert) and not request.user.is_authenticated():
+            # TODO export should be authed
+            # if (is_dqms or is_gene or is_export or is_alert) and not request.user.is_authenticated():
+            if (is_dqms or is_gene or is_alert) and not request.user.is_authenticated():
                 return HttpResponseRedirect('/accounts/login/?next' + resolved_login_url)
