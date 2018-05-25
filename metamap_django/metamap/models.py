@@ -58,6 +58,8 @@ class ETLObjRelated(models.Model):
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, null=True)
     cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, null=True, )
     priority = models.IntegerField(default=5, blank=True)
+    # setting = models.CharField(max_length=2000, default='', verbose_name=u"相关配置")
+    # variables = models.CharField(max_length=2000, default='', verbose_name=u"是否生效")
     valid = models.IntegerField(default=1, verbose_name=u"是否生效", choices=(
         (1, '是'),
         (0, '否'),
@@ -601,7 +603,7 @@ class SqoopMysql2Hive(ETLObjRelated):
 
     def get_script(self, str_list, sche_vars=''):
         is_partition = True if len(self.partition_key) > 0 else False
-        # str_list.append(self.settings)
+        str_list.append(self.settings)
         str_list.append(sche_vars)
         str_list.append(' sqoop import ')
         str_list.append('-Dmapreduce.job.queuename=' + settings.CLUTER_QUEUE)
