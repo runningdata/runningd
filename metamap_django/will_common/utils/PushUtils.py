@@ -21,7 +21,10 @@ logger = logging.getLogger('django')
 def push_msg(user_profiles, msg):
     try:
         for user_p in user_profiles:
-            push_msg_tophone(user_p.phone, msg)
+            if user_p.user.is_valid == 1:
+                push_msg_tophone(user_p.phone, msg)
+            else:
+                logger.info('no valid user for %s ' % user_p.user.username)
         return 'push success'
     except Exception, e:
         return 'push error : %s' % str(e)
