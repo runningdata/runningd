@@ -1,5 +1,7 @@
 #! /bin/bash
 
+export AZKABAN_USER=azkaban
+export AZKABAN_PWD=15yinker@bj
 
 if [ $# != 5 ];then
     echo "##########################################################"
@@ -7,6 +9,7 @@ if [ $# != 5 ];then
     echo "##########################################################"
     exit 1
 fi
+
 target=$1
 app_name=$2
 queue_name=$3
