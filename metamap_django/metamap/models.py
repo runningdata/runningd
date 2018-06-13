@@ -506,7 +506,7 @@ class ExecObj(models.Model):
 
 
 typ = {1: 'fa:fa-book', 2: 'fa:fa-twitter', 3: 'fa:fa-desktop', 4: 'fa:fa-money', 5: 'fa:fa-twitter',
-       6: 'fa:fa-twitter', 8: 'fa:fa-file-alt'}
+       6: 'fa:fa-twitter', 8: 'fa:fa-file-alt', 66: 'fa:fa-file-alt'}
 
 
 class ExecBlood(models.Model):
