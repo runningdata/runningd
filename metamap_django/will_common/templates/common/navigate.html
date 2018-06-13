@@ -8,7 +8,7 @@
             {% host_clean request.build_absolute_uri as base_host %}
         </div>
         <div class="col-sm-6 col-md-3">
-            <a href="{% replace request.build_absolute_uri xstorm dqms %}dqms" class="thumbnail">
+            <a href="{% replace request.build_absolute_uri 'xstorm' 'dqms' %}dqms" class="thumbnail">
                 <img src="{% static 'images/alert.jpg' %}"
                      alt="通用的占位符缩略图">
                 <div class="caption">
@@ -28,7 +28,7 @@
         </div>
         {% if request.user.userprofile.org_group.name == 'jlc' %}
             <div class="col-sm-6 col-md-3">
-                <a href="{% replace request.build_absolute_uri xstorm alert %}alert" class="thumbnail">
+                <a href="{% replace request.build_absolute_uri 'xstorm' 'alert' %}alert" class="thumbnail">
                     <img src="{% static 'images/ETL.jpg' %}"
                          alt="通用的占位符缩略图">
                     <div class="caption">
