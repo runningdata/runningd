@@ -364,7 +364,8 @@ def exec_will(task_id, **kwargs):
             parent_names = [etlhelper.get_name(blood.parent) for blood in bloods]
             etlhelper.generate_job_file_v2(execobj, parent_names, folder)
 
-        etlhelper.generate_job_file_for_partition_v2('etl_done_' + folder, [task.name for task in tasks], folder)
+        etlhelper.generate_job_file_for_partition_v2('etl_done_' + folder, [etlhelper.get_name(task) for task in tasks],
+                                                     folder)
 
         PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
                                    '%s generated for group %s ' % (len(tasks), folder))
