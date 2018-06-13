@@ -58,6 +58,11 @@ def get_celery_taskname2(msg):
     return body
 
 
+@register.simple_tag
+def replace(msg, src, dest):
+    return msg.replace(src, dest)
+
+
 @register.filter
 def extract_str_dict(value, key):
     return eval(value).get(key, "has no name yet")
