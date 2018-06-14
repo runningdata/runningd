@@ -3,8 +3,8 @@ project_name=$1
 project_zip_file=/tmp/${project_name}.zip
 
 tmp_output=/tmp/${project_name}_tmp_log
-host=10.2.19.62:8081
-metamap_host=10.2.19.62:8088
+host=ops01:8081
+metamap_host=ops01:8088
 project_desc=${project_name}_schedule
 
 
