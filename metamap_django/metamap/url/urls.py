@@ -46,7 +46,6 @@ urlpatterns = [
     url(r'^ops/hdfs_files/$', ops.hdfs_files, name='hdfs_files'),
     url(r'^ops/hdfs_del/(?P<filename>.*)/$', ops.hdfs_del, name='hdfs_del'),
     url(r'^ops/up_hdfs/$', ops.upload_hdfs_file, name='up_hdfs'),
-    url(r'^ops/up_hdfs/$', ops.upload_hdfs_file, name='up_hdfs'),
     # url(r'^users/add/$', usermanager.add_user, name='add_user'),
     # url(r'^users/$', usermanager.list_user, name='list_user'),
 
