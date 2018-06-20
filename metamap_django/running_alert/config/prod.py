@@ -57,6 +57,8 @@ EMAIL_HOST = result['EMAIL_HOST']
 EMAIL_HOST_USER = result['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = result['EMAIL_HOST_PASSWORD']
 EMAIL_USE_TLS = result['EMAIL_USE_TLS']
+EMAIL_PORT = result.get('EMAIL_PORT', 465)
+EMAIL_USE_SSL = result.get('EMAIL_USE_SSL', True)
 
 from celery_conf import *
 
