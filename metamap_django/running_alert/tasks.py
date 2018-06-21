@@ -37,7 +37,7 @@ from will_common.utils import redisutils
 logger = get_task_logger('running_alert')
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__)) + '/running_alert/'
 
-c = MarathonClient('http://10.2.19.124:8080')
+c = MarathonClient('http://%s:8080' % settings.MARATHON_HOST)
 
 CONTAINER_PORT = 1234
 prometheus_container = 'my-prometheus'
@@ -101,7 +101,7 @@ def check_new_jmx(name='check_new_jmx'):
                         print(new_app.to_json())
                     task = new_app.tasks[0]
                     port = new_app.ports[0]
-                    host = '10.2.19.124'
+                    host = settings.MARATHON_HOST
                     host_port = host + ':' + str(port)
                     with open('{phome}/{service_type}/{app}_online.json'.format(phome=settings.PROMETHEUS_HOME,
                                                                                 service_type=inst.service_type,

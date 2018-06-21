@@ -31,7 +31,6 @@ END_PORT = 60000
 MARATHON_HOST = result['MARATHON_HOST']
 PROMETHEUS_HOST = result['PROMETHEUS_HOST']
 PROMETHEUS_HOME = result.get('PROMETHEUS_HOME', '/server/share/prometheus/')
-SPARK_EXPORTER_HOST = result['SPARK_EXPORTER_HOST']
 
 SESSION_COOKIE_NAME = 'runningdata_sid'
 CSRF_COOKIE_NAME = 'runningdata_csrftoken'
@@ -56,7 +55,7 @@ ADMIN_EMAIL = result['ADMIN_EMAIL']
 EMAIL_HOST = result['EMAIL_HOST']
 EMAIL_HOST_USER = result['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = result['EMAIL_HOST_PASSWORD']
-EMAIL_USE_TLS = result['EMAIL_USE_TLS']
+EMAIL_USE_TLS = result.get('EMAIL_USE_TLS', False)
 EMAIL_PORT = result.get('EMAIL_PORT', 465)
 EMAIL_USE_SSL = result.get('EMAIL_USE_SSL', True)
 
