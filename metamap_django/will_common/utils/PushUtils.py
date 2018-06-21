@@ -93,8 +93,7 @@ def push_data_wechat(msg):
     '''
     try:
         payload = {'agentid': '1000009', 'totag': '9', 'text': msg}
-        uurl = settings.WECHAT_ALERT_URL if settings.WECHAT_ALERT_URL else 'http://10.11.31.2:5000/api/sendMessage'
-        r = requests.post(uurl, data=json.dumps(payload),
+        r = requests.post(settings.WECHAT_ALERT_URL, data=json.dumps(payload),
                           headers={'Content-Type': 'application/json'}, timeout=60)
         if r.status_code != 200:
             raise Exception(u'failed to send wechat {msg}'.format(msg=msg))

@@ -70,6 +70,8 @@ EMAIL_USE_TLS = result['EMAIL_USE_TLS']
 EMAIL_PORT = result.get('EMAIL_PORT', 465)
 EMAIL_USE_SSL = result.get('EMAIL_USE_SSL', True)
 
+WECHAT_ALERT_URL = result.get('WECHAT_ALERT_URL', 'http://10.11.31.2:5000/api/sendMessage')
+
 # Application definition
 INSTALLED_APPS = [
     'will_common',
