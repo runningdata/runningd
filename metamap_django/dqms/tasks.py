@@ -79,7 +79,7 @@ def runcase(case, check, user):
             logger.error('cannot recognize datasource type :', case.datasrc.src_type)
         if result:
             for rule in case.dqmsrule_set.all():
-                print('handleing %s ' % rule.measure_column)
+                print('handling %s ' % rule.measure_column)
                 if case.datasrc.src_type == constants.DATASRC_TYPE_KYLIN:
                     re = result[rule.measure_column.upper()]
                 else:
@@ -103,7 +103,9 @@ def runcase(case, check, user):
                         alert.target_phone = phones
                         alert.owners = check.managers.all()
                     elif user:
-                        resp = PushUtils.push_both([user, ], msg)
+                        PushUtils.push_email([case.editor, ], msg)
+                        PushUtils.push_email(check.managers.all(), msg)
+                        resp = PushUtils.push_data_wechat(msg)
                         alert.target_phone = user.phone
                         alert.owners = [user, ]
                     alert.push_msg = msg
