@@ -103,8 +103,7 @@ def runcase(case, check, user):
                         alert.target_phone = phones
                         alert.owners = check.managers.all()
                     elif user:
-                        PushUtils.push_email([case.editor, ], msg)
-                        PushUtils.push_email(check.managers.all(), msg)
+                        PushUtils.push_email([user, ], msg)
                         resp = PushUtils.push_data_wechat(msg)
                         alert.target_phone = user.phone
                         alert.owners = [user, ]
