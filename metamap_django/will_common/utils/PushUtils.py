@@ -31,6 +31,30 @@ def push_msg(user_profiles, msg):
     except Exception, e:
         return 'push error : %s' % str(e)
 
+
+def push_to_admin(msg):
+    user_profiles = [UserProfile.objects.get(user__username='admin')]
+    push_msg(user_profiles, msg)
+    push_email([user_p.user for user_p in user_profiles], msg)
+    return 'push both to admin success'
+
+
+def push_wechat(user_profiles, msg):
+    try:
+        users = [user.user.username for user in user_profiles]
+        payload = {'agentid': '1000009', 'touser': '|'.join(users), 'text': msg}
+        r = requests.post(settings.WECHAT_ALERT_URL, data=json.dumps(payload),
+                          headers={'Content-Type': 'application/json'}, timeout=60)
+        if r.status_code != 200:
+            raise Exception(u'failed to send wechat {msg}'.format(msg=msg))
+            return 'success'
+        else:
+            return 'error', r.text
+    except Exception as e:
+        logger.error('error : %s ' % e)
+        logger.error('traceback is : %s ' % traceback.format_exc())
+
+
 def push_to_admin(msg):
     user_profiles = [UserProfile.objects.get(user__username='admin')]
     push_msg(user_profiles, msg)
@@ -63,6 +87,7 @@ def push_msg_tophone(phone, msg):
 
 def push_both(user_profiles, msg):
     push_msg(user_profiles, msg)
+    push_wechat(user_profiles, msg)
     push_email([user_p.user for user_p in user_profiles], msg)
     return 'push both success'
 
