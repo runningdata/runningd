@@ -42,7 +42,7 @@ def push_to_admin(msg):
 def push_wechat(user_profiles, msg):
     try:
         users = [user.user.username for user in user_profiles]
-        payload = {'agentid': '1000009', 'touser': '|'.join(users), 'text': msg}
+        payload = {'agentid': '1000009', 'touser': '|'.join(users).replace('admin', 'chenxin'), 'text': msg}
         r = requests.post(settings.WECHAT_ALERT_URL, data=json.dumps(payload),
                           headers={'Content-Type': 'application/json'}, timeout=60)
         if r.status_code != 200:
