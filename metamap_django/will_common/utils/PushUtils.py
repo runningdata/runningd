@@ -47,9 +47,10 @@ def push_wechat(user_profiles, msg):
                           headers={'Content-Type': 'application/json'}, timeout=60)
         if r.status_code != 200:
             raise Exception(u'failed to send wechat {msg}'.format(msg=msg))
-            return 'success'
-        else:
             return 'error', r.text
+        else:
+            logger.info('pushed wechat done for %s ' % '|'.join(users))
+            return 'success'
     except Exception as e:
         logger.error('error : %s ' % e)
         logger.error('traceback is : %s ' % traceback.format_exc())
