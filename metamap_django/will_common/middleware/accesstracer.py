@@ -31,9 +31,13 @@ class AccessTracer():
                 dateutils.now_datetime(), request.user.username, get_client_ip(request), request.method, request.path, dict(request.GET)))
 
             elif request.method == 'POST':
-                print('[%s]: %s @ %s %s -> url : %s . post params : %s' % (
-                dateutils.now_datetime(), request.user.username, get_client_ip(request), request.method, request.path, dict(request.POST)))
-
+                if 'nosecure' not in request.path:
+                    print('[%s]: %s @ %s %s -> url : %s . post params : %s' % (
+                    dateutils.now_datetime(), request.user.username, get_client_ip(request), request.method, request.path, dict(request.POST)))
+                else:
+                    print('[%s]: %s @ %s %s -> url : %s . post params : %s' % (
+                        dateutils.now_datetime(), request.user.username, get_client_ip(request), request.method,
+                        request.path, 'push thing'))
             else:
                 print('[%s]: %s @ %s %s -> url : %s . post params : %s , get params : %s' % (
                 dateutils.now_datetime(), request.user.username, get_client_ip(request), request.method, request.path, dict(request.POST), dict(request.GET)))
