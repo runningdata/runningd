@@ -281,7 +281,7 @@ class ShellApp(ETLObjRelated):
         str_list.append(self.variables)
         str_list.append(sche_vars)
         str_list.append('#! /bin/sh')
-        str_list.append(self.content)
+        str_list.append(self.content.replace(r'\r', ''))
         template = Template('\n'.join(str_list))
         strip = template.render(context).strip()
         return {strip, }
