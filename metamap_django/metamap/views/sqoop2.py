@@ -152,8 +152,8 @@ def generate_job_dag(request, schedule, group_name='xiaov'):
         job_name = 'm2h_done_' + group_name + '_' + dateutils.now_datetime()
         command = 'echo done for sqoop'
         etlhelper.generate_end_job_file(job_name, command, folder, ','.join(deps))
-        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
-                                   '%d m2h generated for %s ' % (len(leafs), group_name))
+        PushUtils.push_wechat_touser('admin',
+                                     '%d m2h generated for %s ' % (len(leafs), group_name))
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d m2h generated ' % len(deps))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)

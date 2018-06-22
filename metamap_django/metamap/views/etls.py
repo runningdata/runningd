@@ -518,9 +518,8 @@ def generate_job_dag(request, schedule, group_name='xiaov', delta=0):
         # etlhelper.generate_job_file(tbl, final_leaves2, folder)
         etlhelper.generate_job_file(blood=tbl, parent_node=final_leaves2, folder=folder, schedule=schedule,
                                     is_check=is_check)
-
-        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
-                                   '%d etls generated for group %s ' % (len(done_blood), group_name))
+        PushUtils.push_wechat_touser('admin',
+                                     '%d etls generated for group %s ' % (len(done_blood), group_name))
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%d etls generated ' % len(done_blood))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         return HttpResponse(folder)

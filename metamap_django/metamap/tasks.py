@@ -18,6 +18,7 @@ from django.utils import timezone
 
 from metamap.helpers import etlhelper
 from metamap.models import WillDependencyTask, ExecObj, ExecutionsV2, WillTaskV2, ExecBlood, ETL, TblBlood
+from will_common.models import UserProfile
 from will_common.utils import PushUtils
 from will_common.utils import encryptutils
 from will_common.utils import enums, dateutils
@@ -366,9 +367,8 @@ def exec_will(task_id, **kwargs):
 
         etlhelper.generate_job_file_for_partition_v2('etl_done_' + folder, [etlhelper.get_name(task) for task in tasks],
                                                      folder)
-
-        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE),
-                                   '%s generated for group %s ' % (len(tasks), folder))
+        PushUtils.push_wechat_touser('admin',
+                                     '%s generated for group %s ' % (len(tasks), folder))
         PushUtils.push_exact_email(settings.ADMIN_EMAIL, '%s generated for group %s ' % (len(tasks), folder))
         ziputils.zip_dir(AZKABAN_BASE_LOCATION + folder)
         print('user: %s password: %s' % (os.getenv('AZKABAN_USER'), os.getenv('AZKABAN_PWD')))

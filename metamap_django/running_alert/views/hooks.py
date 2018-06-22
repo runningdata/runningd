@@ -33,6 +33,7 @@ def alert_for_prome(request):
                 PushUtils.push_msg(target_users, p_msg)
 
             PushUtils.push_msg_tophone(decrpt_msg(settings.ADMIN_PHONE), p_msg)
+            PushUtils.push_wechat_touser('admin', p_msg)
             return HttpResponse('Done')
         except Exception, e:
             print traceback.format_exc()

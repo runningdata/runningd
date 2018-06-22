@@ -39,6 +39,22 @@ def push_to_admin(msg):
     return 'push both to admin success'
 
 
+def push_wechat_touser(user, msg):
+    try:
+        payload = {'agentid': '1000009', 'touser': user.replace('admin', 'chenxin'), 'text': msg}
+        r = requests.post(settings.WECHAT_ALERT_URL, data=json.dumps(payload),
+                          headers={'Content-Type': 'application/json'}, timeout=60)
+        if r.status_code != 200:
+            raise Exception(u'failed to send wechat {msg}'.format(msg=msg))
+            return 'error', r.text
+        else:
+            logger.info('pushed wechat done for %s ' % '|'.join(users))
+            return 'success'
+    except Exception as e:
+        logger.error('error : %s ' % e)
+        logger.error('traceback is : %s ' % traceback.format_exc())
+
+
 def push_wechat(user_profiles, msg):
     try:
         users = [user.user.username for user in user_profiles]
