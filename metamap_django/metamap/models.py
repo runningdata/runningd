@@ -273,7 +273,7 @@ class SourceApp(ETLObjRelated):
 class ShellApp(ETLObjRelated):
     type = 8
     content = models.TextField(default='', verbose_name=u"shell内容", blank=True, null=True)
-    variables = models.TextField(max_length=2000, default='', verbose_name=u"变量设置")
+    variables = models.TextField(max_length=2000, default='', verbose_name=u"变量设置", blank=True, null=True)
 
     def get_script(self, str_list, sche_vars=''):
         context = Context()
