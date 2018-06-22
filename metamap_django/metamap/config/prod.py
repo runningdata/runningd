@@ -239,7 +239,15 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/var/log/metamap_all.log',  # 日志输出文件
             'maxBytes': 1024 * 1024 * 5,  # 文件大小
-            'backupCount': 5,  # 备份份数
+            'backupCount': 10,  # 备份份数
+            'formatter': 'standard',  # 使用哪种formatters日志格式
+        },
+        'push_handler': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/metamap_push.log',  # 日志输出文件
+            'maxBytes': 1024 * 1024 * 5,  # 文件大小
+            'backupCount': 10,  # 备份份数
             'formatter': 'standard',  # 使用哪种formatters日志格式
         },
         'error_handler': {
@@ -265,6 +273,11 @@ LOGGING = {
         }
     },
     'loggers': {
+        'push': {
+            'handlers': ['push_handler'],
+            'level': 'INFO',
+            'propagate': False
+        },
         'django': {
             'handlers': ['default', 'console'],
             'level': 'INFO',

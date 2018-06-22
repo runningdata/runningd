@@ -5,9 +5,12 @@ import os
 import traceback
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.forms import HiddenInput, ModelForm
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.utils import timezone
 
 from metamap.models import ShellApp, ExecutionsV2
 from will_common.utils import dateutils
@@ -18,6 +21,27 @@ from will_common.utils.customexceptions import RDException
 from will_common.views.common import GroupListView
 
 logger = logging.getLogger('info')
+
+
+class ShellAppForm(ModelForm):
+    class Meta:
+        model = ShellApp
+        exclude = ['ctime', 'utime', 'priority', 'valid', 'exec_obj', 'rel_name']
+        widgets = {
+            'creator': HiddenInput(),
+            'id': HiddenInput(),
+        }
+
+    field_order = ['cgroup', 'name', 'content', 'variables']
+
+    def __init__(self, userid, *args, **kwargs):
+        super(ShellAppForm, self).__init__(*args, **kwargs)
+        fs = self.fields
+        for f in ShellApp._meta.fields:
+            if f.name != u'id' and f.name not in self.Meta.exclude:
+                fs[f.name].widget.attrs.update({'class': 'form-control'})
+        if userid != -1:
+            fs['creator'].initial = userid
 
 
 class ShellListView(GroupListView):
@@ -40,29 +64,40 @@ class ShellListView(GroupListView):
 
 def add(request):
     if request.method == 'POST':
-        shell = ShellApp()
-        httputils.post2obj(shell, request.POST, 'id')
-        if ShellApp.objects.filter(name=shell.name, valid=1).count() != 0:
-            raise RDException(u'命名冲突', u'已经存在同名ETL')
-        userutils.add_current_creator(shell, request)
-        shell.save()
-        logger.info('shell has been created successfully : %s ' % shell)
-        return HttpResponseRedirect('/metamap/shell/')
+        try:
+            form = ShellAppForm(-1, request.POST)
+            if form.is_valid():
+                form.save()
+                logger.info('ShellApp for %s has been added successfully' % form.name)
+            else:
+                form = ShellAppForm(request.user.userprofile.id)
+                return render(request, 'source/post_edit.html', {'form': form})
+            return HttpResponseRedirect('/metamap/shell/')
+        except Exception, e:
+            logger.error(traceback.format_exc())
+            return render(request, 'common/500.html', {'msg': traceback.format_exc().replace('\n', '<br>')})
     else:
-        return render(request, 'shell/edit.html')
+        form = ShellAppForm(request.user.userprofile.id)
+        return render(request, 'source/post_edit.html', {'form': form})
 
 
 def edit(request, pk):
     if request.method == 'POST':
-        shell = ShellApp.objects.get(pk=int(pk))
-        httputils.post2obj(shell, request.POST, 'id')
-        userutils.add_current_creator(shell, request)
-        shell.save()
-        logger.info('shell has been created successfully : %s ' % shell)
+        form = ShellAppForm(-1, request.POST, instance=ShellApp.objects.get(pk=pk))
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.utime = timezone.now()
+            obj.save()
+        else:
+            print form._errors
+            form = ShellAppForm(request.user.userprofile.id,
+                                instance=ShellApp.objects.get(pk=pk))
+            return render(request, 'source/post_edit.html', {'form': form})
+        logger.info('shell has been created successfully : %s ' % form.instance.name)
         return HttpResponseRedirect('/metamap/shell/')
     else:
-        obj = ShellApp.objects.get(pk=pk)
-        return render(request, 'shell/edit.html', {'obj': obj})
+        form = ShellAppForm(request.user.userprofile.id, instance=ShellApp.objects.get(pk=pk))
+        return render(request, 'source/post_edit.html', {'form': form})
 
 
 def exec_job(request, shellid):

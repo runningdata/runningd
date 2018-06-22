@@ -273,14 +273,17 @@ class SourceApp(ETLObjRelated):
 class ShellApp(ETLObjRelated):
     type = 8
     content = models.TextField(default='', verbose_name=u"shell内容", blank=True, null=True)
+    variables = models.TextField(max_length=2000, default='', verbose_name=u"变量设置")
 
     def get_script(self, str_list, sche_vars=''):
         context = Context()
+        str_list.append('{% load etlutils %}')
+        str_list.append(self.variables)
+        str_list.append(sche_vars)
         str_list.append('#! /bin/sh')
         str_list.append(self.content)
         template = Template('\n'.join(str_list))
         strip = template.render(context).strip()
-        strip = '{% load etlutils %} \n' + sche_vars + '\n' + strip
         return {strip, }
 
 

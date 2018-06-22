@@ -17,7 +17,7 @@ from will_common.utils import regxutils
 from will_common.utils.encryptutils import encrpt_msg
 
 push_url = settings.PUSH_URL
-logger = logging.getLogger('django')
+logger = logging.getLogger('push')
 
 
 def push_msg(user_profiles, msg):
