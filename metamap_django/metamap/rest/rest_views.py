@@ -6,7 +6,7 @@ from metamap.rest.serializers import ETLSerializer, SqoopHive2MysqlSerializer, S
     SourceAppSerializer, \
     JarAppSerializer, AnaETLSerializer, MetaSerializer, ExecObjSerializer
 from metamap.models import ETL, SqoopHive2Mysql, SqoopMysql2Hive, SourceApp, \
-    JarApp, AnaETL, Meta, ExecObj
+    JarApp, AnaETL, DataMeta, ExecObj
 from rest_framework import viewsets
 
 
@@ -50,12 +50,12 @@ class SqoopMysql2HiveViewSet(viewsets.ModelViewSet):
 
 
 class SqoopHiveMetaViewSet(viewsets.ModelViewSet):
-    queryset = Meta.objects.filter(type=2).order_by('-ctime')
+    queryset = DataMeta.objects.filter(type=2).order_by('-ctime')
     serializer_class = MetaSerializer
 
 
 class SqoopMysqlMetaViewSet(viewsets.ModelViewSet):
-    queryset = Meta.objects.filter(type=1).order_by('-ctime')
+    queryset = DataMeta.objects.filter(type=1).order_by('-ctime')
     serializer_class = MetaSerializer
 
 

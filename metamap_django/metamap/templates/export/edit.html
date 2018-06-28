@@ -18,7 +18,14 @@
                         <option class="bs-title-option" value="">选择....</option>
                     </select>
                     <label>名字</label>
-                    <input name="name" value="{{ obj.name }}" type="text" class="form-control"  required>
+                    <input name="name" value="{{ obj.name }}" type="text" class="form-control" required>
+                    <div class="form-group">
+                        <label>数据库</label>
+                        <select id="data_source_selct" name="data_source_id" class="selectpicker form-control"
+                                data-live-search="true">
+                            <option class="bs-title-option" value="">选择....</option>
+                        </select>
+                    </div>
                     <label>表头[英文逗号隔开]</label>
                     <input name="headers" value="{{ obj.headers }}" type="text" class="form-control">
                     <label>查询SQL</label>
@@ -97,10 +104,34 @@
     </div>
     <script>
         {% if obj %}
+            var data_source_id = {{ obj.data_source.id }};
             var cgroupid = {{ obj.cgroup_id }};
         {% else %}
+            var data_source_id = -1;
             var cgroupid = -1;
         {% endif %}
+    </script>
+    <script type="application/javascript">
+        $.ajax({
+                    type: "get",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    url: "/metamap/rest/meta/?format=json",
+                    success: function (result) {
+                        $.each(result, function (index, obj) {
+                            if (hive_meta_id == obj.id) {
+                                $("#data_source_selct").append("<option selected='selected' value='" + obj.id + "'>" + obj.db + "</option>");
+                            } else {
+                                $("#data_source_selct").append("<option value='" + obj.id + "'>" + obj.db + "</option>");
+                            }
+                        })
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(errorThrown);
+                    },
+                    async: false             //false表示同步
+                }
+        );
     </script>
     {% include 'components/common_group_js.html' %}
 

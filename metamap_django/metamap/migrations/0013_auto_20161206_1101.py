@@ -36,8 +36,8 @@ class Migration(migrations.Migration):
                 ('mysql_tbl', models.CharField(max_length=300)),
                 ('option', models.TextField(null=True)),
                 ('parallel', models.IntegerField(default=1, verbose_name=b'\xe5\xb9\xb6\xe5\x8f\x91\xe6\x89\xa7\xe8\xa1\x8c')),
-                ('hive_meta', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='h2m_h', to='metamap.Meta')),
-                ('mysql_meta', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='h2m_m', to='metamap.Meta')),
+                ('hive_meta', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='h2m_h', to='metamap.models.DataMeta')),
+                ('mysql_meta', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='h2m_m', to='metamap.models.DataMeta')),
             ],
         ),
         migrations.CreateModel(
@@ -48,8 +48,8 @@ class Migration(migrations.Migration):
                 ('query', models.TextField(null=True)),
                 ('mysql_tbl', models.CharField(max_length=300)),
                 ('option', models.TextField(null=True)),
-                ('hive_meta', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='m2h_h', to='metamap.Meta')),
-                ('mysql_meta', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='m2h_m', to='metamap.Meta')),
+                ('hive_meta', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='m2h_h', to='metamap.models.DataMeta')),
+                ('mysql_meta', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='m2h_m', to='metamap.models.DataMeta')),
             ],
         ),
         migrations.AlterField(

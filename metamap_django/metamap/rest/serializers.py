@@ -8,7 +8,7 @@ from django.utils import six
 from rest_framework import serializers, ISO_8601
 from rest_framework.settings import api_settings
 
-from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser, Meta, SqoopHive2Mysql, SqoopMysql2Hive, \
+from metamap.models import ETL, AnaETL, Exports, WillDependencyTask, BIUser, DataMeta, SqoopHive2Mysql, SqoopMysql2Hive, \
     SourceApp, JarApp, ExecObj, ExecutionsV2
 from will_common.serializers import WillDateTimeField
 from will_common.templatetags import etlutils
@@ -91,5 +91,5 @@ class ExecutionsV2Serializer(serializers.HyperlinkedModelSerializer):
 
 class MetaSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Meta
+        model = DataMeta
         fields = ('meta', 'db', 'id', 'ctime')

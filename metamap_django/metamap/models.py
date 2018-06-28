@@ -5,8 +5,8 @@ import os
 
 import re
 from django.conf import settings
-from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.validators import *
 from django.db import models
 
 from django.template import Context
@@ -14,7 +14,6 @@ from django.template import Template
 from django.utils import timezone
 
 from metamap.db_views import ColMeta, DB
-from will_common.djcelery_models import DjceleryCrontabschedule, DjceleryIntervalschedule
 from will_common.models import PeriodicTask, WillDependencyTask, UserProfile, OrgGroup, CommmonCreators, CommmonTimes
 from will_common.templatetags import etlutils
 from will_common.utils import dateutils
@@ -47,12 +46,33 @@ def get_delta_variables(variables, delta):
     return '\n'.join(new_lines)
 
 
+class DataMeta(models.Model):
+    '''
+       数据库对应meta
+    '''
+    meta = models.CharField(max_length=30, unique=True, db_column='meta')
+    db = models.CharField(max_length=30)
+    settings = models.CharField(max_length=300, null=True)
+    type = models.IntegerField(default=1)
+    ctime = models.DateTimeField(default=timezone.now)
+    valid = models.IntegerField(default=1)
+    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='meta_creator', null=True)
+    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='meta_cgroup', null=True)
+
+    def __str__(self):
+        return self.meta
+
+    class Meta:
+        db_table = 'metamap_meta'
+
+
 class ETLObjRelated(models.Model):
     '''
     every etl obj should extend me. for example: m2h, h2h, h2m .etc
     '''
     type = 110
-    name = models.CharField(max_length=100, verbose_name=u"任务名称", default='no_name_yet')
+    name = models.CharField(max_length=100, verbose_name=u"任务名称", default='no_name_yet',
+                            validators=[validate_unicode_slug, ])
     rel_name = models.CharField(max_length=100, verbose_name=u"可读的名字", default='no_name_yet')
     ctime = models.DateTimeField(default=timezone.now)
     creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, null=True)
@@ -153,26 +173,6 @@ class ETLObjRelated(models.Model):
         return str_list
 
 
-# @receiver(post_save, sender=ETLObjRelated)
-# def my_handler(sender, **kwargs):
-#     if sender.valid != 0:
-#         exe, created = ExecObj.objects.get_or_create(type=sender.type, name=sender.name)
-#         exe.rel_id = sender.id
-#         exe.creator = sender.creator
-#         exe.cgroup = sender.cgroup
-#         exe.save()
-#         if created:
-#             print('exec_obj %s created for %s , id is %d ' % (exe.name, sender.name, exe.id))
-#             logger.info('exec_obj %s created for %s' % (exe.name, sender.name))
-#             sender.exec_obj = exe
-#         else:
-#             try:
-#                 print('already has exec_obj %s for %s' % (sender.exec_obj.name, sender.name))
-#             except AttributeError, e:
-#                 sender.exec_obj = exe
-#                 print('already has exec_obj %s for %s, but no exec_id' % (sender.exec_obj.name, sender.name))
-#         sender.save
-
 class NULLETL(ETLObjRelated):
     type = 66
 
@@ -188,13 +188,35 @@ class NULLETL(ETLObjRelated):
         return str_list
 
 
+import argparse, re
+
+parser = argparse.ArgumentParser(description='parse mysql connection string')
+parser.add_argument('--conn', dest='conn',
+                    action='store',
+                    default='no connection string',
+                    help='mysql connection string should exist')
+parser.add_argument('--username', dest='username',
+                    action='store',
+                    default='non',
+                    help='mysql username should exist')
+parser.add_argument('--password', dest='password',
+                    action='store',
+                    default='non',
+                    help='mysql password should exist')
+parser.add_argument('--driver', dest='driver',
+                    action='store',
+                    default='com.mysql.jdbc.Driver',
+                    help='mysql driver should exist')
+
+
 class AnaETL(ETLObjRelated):
     type = 2
-    headers = models.TextField(null=False, blank=False)
-    query = models.TextField()
+    headers = models.TextField(null=False, blank=False, verbose_name=u"表头")
+    query = models.TextField(verbose_name=u"内容")
     author = models.CharField(max_length=20, blank=True, null=True)
-    variables = models.CharField(max_length=2000, default='')
-    auth_users = models.TextField(default='', null=False, blank=False)
+    variables = models.TextField(max_length=2000, default='', verbose_name=u"变量设置")
+    auth_users = models.TextField(default='', null=False, blank=False, verbose_name=u"接收用户")
+    data_source = models.ForeignKey(DataMeta, on_delete=models.DO_NOTHING, null=False, default=1, verbose_name=u"数据源")
 
     def is_auth(self, user, group):
         if len(self.auth_users) == 0:
@@ -211,6 +233,7 @@ class AnaETL(ETLObjRelated):
     def get_script(self, str_list, sche_vars=''):
         # str_list.append(self.variables)
         # str_list.append(sche_vars)
+
         if self.name.startswith('common_'):
             part = self.name + '-' + dateutils.now_datekey()
         else:
@@ -220,19 +243,30 @@ class AnaETL(ETLObjRelated):
             header = self.headers
             wa.write(header.encode('gb18030'))
             wa.write('\n')
-        result_dir = result + '_dir'
-        pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
-        pre_insertr = self.variables + sche_vars + pre_insertr
-        # fillename = result + '.hql'
-        # with open(fillename, 'w') as fil:
-        #     fil.write('set mapreduce.job.queuename=%s;' % settings.CLUTER_QUEUE)
-        #     fil.write(pre_insertr.encode('utf-8'))
-        sql = 'hive --hiveconf mapreduce.job.priority=VERY_HIGH --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr \
-              + self.query.replace('"', '\\"') + '\"'
-        # str_list.append('hive -f %s' % fillename)
-        str_list.append(sql)
-        command = 'cat %s/* | iconv -f utf-8 -c -t gb18030 >> %s' % (result_dir, result)
-        str_list.append(command)
+
+        # datasource is mysql
+        if self.data_source.type == 1:
+            args = parser.parse_args(re.split(r'\s', self.data_sourcel.settings))
+            print args
+            conn = args.conn.replace('jdbc:mysql://', '')
+            host = conn[0:conn.index(':')]
+            port = conn[conn.index(':') + 1:conn.index('/')]
+            str_list.append('mysql -h{host} -P{port} -u{username} -p{password} -e "{sql}" > {result}'
+                            .format(host=host,
+                                    port=port,
+                                    username=args.username,
+                                    password=args.password,
+                                    sql=self.query,
+                                    result=result))
+        elif self.data_source.type == 2:
+            result_dir = result + '_dir'
+            pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
+            pre_insertr = self.variables + sche_vars + pre_insertr
+            sql = 'hive --hiveconf mapreduce.job.priority=VERY_HIGH --hiveconf mapreduce.job.queuename=' + settings.CLUTER_QUEUE + ' -e \"' + pre_insertr \
+                  + self.query.replace('"', '\\"') + '\"'
+            str_list.append(sql)
+            command = 'cat %s/* | iconv -f utf-8 -c -t gb18030 >> %s' % (result_dir, result)
+            str_list.append(command)
         return str_list
 
 
@@ -550,23 +584,6 @@ class TblBlood(models.Model):
         return self.parentTbl + '-->' + self.tblName
 
 
-class Meta(models.Model):
-    '''
-       数据库对应meta
-    '''
-    meta = models.CharField(max_length=30, unique=True)
-    db = models.CharField(max_length=30)
-    settings = models.CharField(max_length=300, null=True)
-    type = models.IntegerField(default=1)
-    ctime = models.DateTimeField(default=timezone.now)
-    valid = models.IntegerField(default=1)
-    creator = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='meta_creator', null=True)
-    cgroup = models.ForeignKey(OrgGroup, on_delete=models.DO_NOTHING, related_name='meta_cgroup', null=True)
-
-    def __str__(self):
-        return self.meta
-
-
 class BIUser(models.Model):
     username = models.CharField(max_length=200, blank=True, null=True)
 
@@ -577,8 +594,8 @@ class BIUser(models.Model):
 
 class SqoopMysql2Hive(ETLObjRelated):
     type = 4
-    mysql_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_m')
-    hive_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_h')
+    mysql_meta = models.ForeignKey(DataMeta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_m')
+    hive_meta = models.ForeignKey(DataMeta, on_delete=models.DO_NOTHING, null=False, related_name='m2h_h')
     columns = models.TextField(null=True)
     mysql_tbl = models.CharField(max_length=300, null=False)
     option = models.TextField(null=True, )
@@ -654,8 +671,8 @@ class SqoopMysql2Hive(ETLObjRelated):
 
 class SqoopHive2Mysql(ETLObjRelated):
     type = 3
-    mysql_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_m')
-    hive_meta = models.ForeignKey(Meta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_h')
+    mysql_meta = models.ForeignKey(DataMeta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_m')
+    hive_meta = models.ForeignKey(DataMeta, on_delete=models.DO_NOTHING, null=False, related_name='h2m_h')
     columns = models.TextField(null=True)
     update_key = models.TextField(null=True)
     hive_tbl = models.CharField(max_length=300, null=False, default='none')

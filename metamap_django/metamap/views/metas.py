@@ -3,7 +3,7 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 
 from metamap.db_views import ColMeta, TBL
-from metamap.models import ETL, Meta
+from metamap.models import ETL, DataMeta
 from django.shortcuts import render
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -23,9 +23,9 @@ class MetaListView(GroupListView):
     def get_queryset(self):
         if 'search' in self.request.GET and self.request.GET['search'] != '':
             search = self.request.GET['search']
-            return Meta.objects.filter(meta__contains=search).order_by('ctime')
+            return DataMeta.objects.filter(meta__contains=search).order_by('ctime')
         self.paginate_by = DEFAULT_PAGE_SIEZE
-        return Meta.objects.all()
+        return DataMeta.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super(MetaListView, self).get_context_data(**kwargs)
@@ -35,7 +35,7 @@ class MetaListView(GroupListView):
 
 def add(request):
     if request.method == 'POST':
-        meta = Meta()
+        meta = DataMeta()
         httputils.post2obj(meta, request.POST, 'id')
         userutils.add_current_creator(meta, request)
         meta.save()
@@ -46,14 +46,14 @@ def add(request):
 
 def edit(request, pk):
     if request.method == 'POST':
-        meta = Meta.objects.filter(valid=1).get(pk=int(pk))
+        meta = DataMeta.objects.filter(valid=1).get(pk=int(pk))
         httputils.post2obj(meta, request.POST, 'id')
         userutils.add_current_creator(meta, request)
         meta.save()
         logger.info('Meta has been created successfully : %s ' % meta)
         return HttpResponseRedirect(reverse('meta:meta_list'))
     else:
-        obj = Meta.objects.get(pk=pk)
+        obj = DataMeta.objects.get(pk=pk)
         return render(request, 'meta/edit.html', {'obj': obj})
 
 class ColView(generic.ListView):

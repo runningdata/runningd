@@ -68,9 +68,10 @@ def add(request):
             form = ShellAppForm(-1, request.POST)
             if form.is_valid():
                 form.save()
-                logger.info('ShellApp for %s has been added successfully' % form.name)
+                logger.info('ShellApp for %s has been added successfully' % form.instance.name)
             else:
-                form = ShellAppForm(request.user.userprofile.id)
+                # raise RDException(form.errors.as_json(), traceback.format_exc())
+                print('not valid')
                 return render(request, 'source/post_edit.html', {'form': form})
             return HttpResponseRedirect('/metamap/shell/')
         except Exception, e:

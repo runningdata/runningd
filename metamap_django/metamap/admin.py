@@ -26,4 +26,4 @@ class ETLAdmin(admin.ModelAdmin):
 admin.site.register(TblBlood)
 admin.site.register(ETL, ETLAdmin)
 admin.site.register(Executions)
-admin.site.register(Meta)
+admin.site.register(DataMeta)
