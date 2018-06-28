@@ -211,10 +211,10 @@ parser.add_argument('--driver', dest='driver',
 
 class AnaETL(ETLObjRelated):
     type = 2
-    headers = models.TextField(null=False, blank=False, verbose_name=u"表头")
+    headers = models.TextField(null=True, blank=True, verbose_name=u"表头")
     query = models.TextField(verbose_name=u"内容")
     author = models.CharField(max_length=20, blank=True, null=True)
-    variables = models.TextField(max_length=2000, default='', verbose_name=u"变量设置")
+    variables = models.TextField(null=True, blank=True, max_length=2000, default='', verbose_name=u"变量设置")
     auth_users = models.TextField(default='', null=False, blank=False, verbose_name=u"接收用户")
     data_source = models.ForeignKey(DataMeta, on_delete=models.DO_NOTHING, null=False, default=1, verbose_name=u"数据源")
 
@@ -254,12 +254,12 @@ class AnaETL(ETLObjRelated):
             port = conn[conn.index(':') + 1:conn.index('/')]
             str_list.append(
                 u'mysql -h{host} -P{port} -u{username} -p{password} -e "set names gb18030; {sql}" | iconv -f utf-8 -c -t gb18030 > {result}'
-                .format(host=host,
-                        port=port,
-                        username=args.username,
-                        password=args.password,
-                        sql=self.query,
-                        result=result))
+                    .format(host=host,
+                            port=port,
+                            username=args.username,
+                            password=args.password,
+                            sql=self.query,
+                            result=result))
             # command = 'cat %s | iconv -f utf-8 -c -t gb18030 > %s' % (result, result)
             str_list.append('sed -i "s/\\t/,/g" %s ' % result)
             print('\n'.join(str_list))
