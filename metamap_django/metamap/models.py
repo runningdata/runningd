@@ -252,15 +252,15 @@ class AnaETL(ETLObjRelated):
             conn = args.conn.replace('jdbc:mysql://', '')
             host = conn[0:conn.index(':')]
             port = conn[conn.index(':') + 1:conn.index('/')]
-            str_list.append(u'mysql -h{host} -P{port} -u{username} -p{password} -e "{sql}" > {result}'
+            str_list.append(u'mysql -h{host} -P{port} -u{username} -p{password} -e "set names gb18030; {sql}" > {result}'
                             .format(host=host,
                                     port=port,
                                     username=args.username,
                                     password=args.password,
                                     sql=self.query,
                                     result=result))
-            command = 'cat %s | iconv -f utf-8 -c -t gb18030 > %s' % (result, result)
-            str_list.append(command)
+            # command = 'cat %s | iconv -f utf-8 -c -t gb18030 > %s' % (result, result)
+            # str_list.append(command)
         elif self.data_source.type == 2:
             result_dir = result + '_dir'
             pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
