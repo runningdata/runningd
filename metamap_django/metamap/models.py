@@ -191,7 +191,7 @@ class NULLETL(ETLObjRelated):
 import argparse, re
 
 parser = argparse.ArgumentParser(description='parse mysql connection string')
-parser.add_argument('--conn', dest='conn',
+parser.add_argument('--connect', dest='conn',
                     action='store',
                     default='no connection string',
                     help='mysql connection string should exist')
