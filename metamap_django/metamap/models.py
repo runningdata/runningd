@@ -246,7 +246,7 @@ class AnaETL(ETLObjRelated):
 
         # datasource is mysql
         if self.data_source.type == 1:
-            args = parser.parse_args(re.split(r'\s', self.data_sourcel.settings))
+            args = parser.parse_args(re.split(r'\s', self.data_source.settings))
             print args
             conn = args.conn.replace('jdbc:mysql://', '')
             host = conn[0:conn.index(':')]
