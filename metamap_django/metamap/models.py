@@ -261,7 +261,7 @@ class AnaETL(ETLObjRelated):
                         sql=self.query,
                         result=result))
             # command = 'cat %s | iconv -f utf-8 -c -t gb18030 > %s' % (result, result)
-            str_list.append('sed -i "s/\\t/,/g %s "' % result)
+            str_list.append('sed -i "s/\\t/,/g" %s ' % result)
             print('\n'.join(str_list))
         elif self.data_source.type == 2:
             result_dir = result + '_dir'
