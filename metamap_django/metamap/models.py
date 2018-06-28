@@ -259,6 +259,8 @@ class AnaETL(ETLObjRelated):
                                     password=args.password,
                                     sql=self.query,
                                     result=result))
+            command = 'cat % | iconv -f utf-8 -c -t gb18030 >> %s' % (result, result)
+            str_list.append(command)
         elif self.data_source.type == 2:
             result_dir = result + '_dir'
             pre_insertr = "insert overwrite local directory '%s' row format delimited fields terminated by ','  " % result_dir
