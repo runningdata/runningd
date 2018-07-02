@@ -209,6 +209,38 @@ parser.add_argument('--driver', dest='driver',
                     help='mysql driver should exist')
 
 
+class M2M(ETLObjRelated):
+    type = 2
+
+    def __str__(self):
+        return self.name
+
+    def get_script(self, str_list, sche_vars=''):
+        # str_list.append(self.variables)
+        # str_list.append(sche_vars)
+
+        if self.name.startswith('common_'):
+            part = self.name + '-' + dateutils.now_datekey()
+        else:
+            part = self.name + '-' + dateutils.now_datetime()
+
+        print re.split(r'\s+', self.data_source.settings)
+        args = parser.parse_args(re.split(r'\s+', self.data_source.settings))
+        print args
+        conn = args.conn.replace('jdbc:mysql://', '')
+        host = conn[0:conn.index(':')]
+        port = conn[conn.index(':') + 1:conn.index('/')]
+        str_list.append(
+            u'mysql -h{host} -P{port} -u{username} -p{password} -e "set names gb18030; {sql}"'
+                .format(host=host,
+                        port=port,
+                        username=args.username,
+                        password=args.password,
+                        sql=self.query))
+        print('\n'.join(str_list))
+        return str_list
+
+
 class AnaETL(ETLObjRelated):
     type = 2
     headers = models.TextField(null=True, blank=True, verbose_name=u"表头")
