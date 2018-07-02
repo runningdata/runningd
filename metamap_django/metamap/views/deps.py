@@ -210,7 +210,7 @@ def generate_job_file_v2(etlobj, parent_names, folder, schedule=-1):
             print traceback.format_exc()
             raise e
     else:
-        command = 'done'
+        command = 'echo done'
 
     # 生成job文件
     job_type = ' command\nretries=5\nretry.backoff=60000\n'
