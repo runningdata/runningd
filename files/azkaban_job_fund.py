@@ -43,7 +43,7 @@ args = parser.parse_args()
 
 
 def generate_task_files(jobtype, schedule, group):
-    target = 'http://{runningd_host}/metamap/deps/generate_job_dag_v2/{num}/{group_name}/'.format(runningd_host=metamap_host, job_type=jobtype, num=schedule, group_name=group)
+    target = 'http://{runningd_host}/nosecure/generate_job_dag_v2/{num}/{group_name}/'.format(runningd_host=metamap_host, job_type=jobtype, num=schedule, group_name=group)
     resp = requests.get(target)
     return resp.content
 

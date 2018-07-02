@@ -142,7 +142,6 @@ urlpatterns = [
         name='jar_status'),
 
     url(r'^deps/deps/(?P<pk>[0-9]+)/$', deps.edit_deps, name='jar_deps'),
-    url(r'^deps/generate_job_dag_v2/(?P<schedule>[0-9])/(?P<group_name>\w+)/$', deps.generate_job_dag_v2, name='generate_job_dag_v2'),
 
     url(r'^source/get_engine_type/$', source.get_engine_type, name='get_engine_type'),
     url(r'^rest/', include(router.urls)),
