@@ -28,6 +28,7 @@ from will_common.utils import PushUtils
 from will_common.utils import constants
 from will_common.utils import httputils
 from will_common.utils.constants import DEFAULT_PAGE_SIEZE
+from will_common.views.common import GroupListView
 
 logger = logging.getLogger('django')
 
@@ -42,7 +43,7 @@ def filter_ana(objjs, obj):
     # print('%objjs s count is %d ' % (objjs.count()))
 
 
-class ScheDepListView(generic.ListView):
+class ScheDepListView(GroupListView):
     template_name = 'sche/ana/list.html'
     context_object_name = 'objs'
     model = WillDependencyTask
@@ -62,7 +63,8 @@ class ScheDepListView(generic.ListView):
                 logger.error(' sche error for tt id : %id,   %s ' % (tt.id, traceback.format_exc()))
                 objjs = objjs.exclude(id=tt.id)
                 continue
-            if eo.type != 2 or eo.cgroup_id != self.request.user.userprofile.org_group_id:
+            # if eo.type != 2 or eo.cgroup_id != self.request.user.userprofile.org_group_id:
+            if eo.type != 2:
                 objjs = objjs.exclude(id=tt.id)
         print('after count is %d ' % objjs.count())
         return objjs
