@@ -7,6 +7,7 @@ from django import forms
 from django.contrib import auth
 from django.contrib.auth.models import Group
 from django.db import transaction
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import render, redirect, render_to_response
 from django.template import RequestContext
@@ -107,11 +108,13 @@ from django.utils.translation import ugettext as _
 
 class GroupListView(generic.ListView):
     def get(self, request, *args, **kwargs):
-        if request.user.username != 'admin':
-            current_group = self.request.user.userprofile.org_group
-            self.object_list = self.get_queryset().filter(cgroup=current_group)
-        else:
-            self.object_list = self.get_queryset()
+        # if request.user.username != 'admin':
+        #     current_group = self.request.user.userprofile.org_group
+        #     self.object_list = self.get_queryset().filter(cgroup=current_group)
+        # else:
+        #     self.object_list = self.get_queryset()
+        # TODO
+        self.object_list = self.get_queryset().filter(~Q(cgroup_id=2))
         allow_empty = self.get_allow_empty()
 
         if not allow_empty:
