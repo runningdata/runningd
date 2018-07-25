@@ -139,6 +139,7 @@ def execute(sql):
             with conn.cursor() as cur:
                 logger.info('clean sql is %s ' % sql)
                 # Execute query
+                cur.execute('set hive.mapred.mode=nonstrict')
                 cur.execute(sql)
 
                 # Fetch table results
