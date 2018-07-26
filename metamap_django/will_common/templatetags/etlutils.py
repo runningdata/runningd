@@ -121,6 +121,7 @@ status_dic = dict()
 status_dic[0] = u'运行中'
 status_dic[1] = u'完成'
 status_dic[2] = u'失败'
+status_dic[3] = u'终止'
 
 
 @register.simple_tag
