@@ -82,7 +82,9 @@
         }
     </style>
     <div id="gotop"></div>
-    <div id="killer"></div>
+    {% if perms.auth.admin_etl %}
+        <div id="killer"></div>
+    {% endif %}
     <div id="log" class="container bg-info">
     </div>
 {% endblock %}
