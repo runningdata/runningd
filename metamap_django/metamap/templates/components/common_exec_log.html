@@ -12,13 +12,13 @@
                     if (data.resp_status == 1) {
                         var cc = data.data;
                         if (data.status == 0) {
-                            $("#headd").attr("container bg-info");
+                            $("#headd").attr("class", "container bg-info");
                         } else if (data.status == 1) {
-                            $("#headd").attr("container bg-success");
+                            $("#headd").attr("class","container bg-success");
                         } else if (data.status == 2) {
-                            $("#headd").attr("container bg-warn");
+                            $("#headd").attr("class","container bg-warn");
                         } else if (data.status == 3) {
-                            $("#headd").attr("container bg-warn");
+                            $("#headd").attr("class","container bg-warn");
                         }
                         if ($("#log").html().length < cc.length) {
                             $("#log").html(cc);
