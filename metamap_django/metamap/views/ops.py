@@ -243,7 +243,7 @@ def kill_executions(request, execid):
     '''
     execution = ExecutionsV2.objects.get(pk=execid)
     try:
-        os.kill(execution.child_pid, signal.SIGKILL)
+        os.kill(execution.child_pid, signal.SIGTERM)
         execution.status = 3
         execution.save()
     except Exception, e:
