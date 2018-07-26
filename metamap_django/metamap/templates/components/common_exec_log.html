@@ -51,6 +51,7 @@
                     url: url_k,
                     success: function (data) {
                         alert(data);
+                        $(window).attr('location', '/metamap/executions/status/3/')
                     }
                 });
                 console.log('got killed');
