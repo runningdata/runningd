@@ -807,6 +807,7 @@ class Executions(models.Model):
 class ExecutionsV2(models.Model):
     log_location = models.CharField(max_length=120)
     job = models.ForeignKey(ExecObj, on_delete=models.CASCADE, null=False)
+    child_pid = models.IntegerField(default=-1000)
     cmd_shot = models.TextField()
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)

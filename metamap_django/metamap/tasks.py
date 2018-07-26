@@ -318,6 +318,8 @@ def exec_execobj(exec_id, schedule=-1, name=''):
         p = subprocess.Popen([''.join(command)], stdout=open(log_location, 'a'), stderr=subprocess.STDOUT,
                              shell=True,
                              universal_newlines=True)
+        execution.child_pid = p.pid
+        execution.save()
         p.wait()
         returncode = p.returncode
         logger.info('%s return code is %d' % (command, returncode))
