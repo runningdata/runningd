@@ -36,9 +36,13 @@
         {% if status == '1' %}
             panel-success
         {% endif %}
+        {% if status == '3' %}
+            panel-wanning
+        {% endif %}
         {% if  status == '2' %}
             panel-danger
         {% endif %}">
+
             <div class="panel-heading">
                 <caption class="h3">执行记录</caption>
             </div>
