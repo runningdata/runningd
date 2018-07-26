@@ -325,6 +325,8 @@ def exec_execobj(exec_id, schedule=-1, name=''):
         logger.info('%s return code is %d' % (command, returncode))
         if returncode == 0:
             execution.status = enums.EXECUTION_STATUS.DONE
+        elif returncode == 143:
+            execution.status = enums.EXECUTION_STATUS.KILLED
         else:
             execution.status = enums.EXECUTION_STATUS.FAILED
         execution.end_time = timezone.now()

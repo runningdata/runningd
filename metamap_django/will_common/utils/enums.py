@@ -10,4 +10,4 @@ def enum(*seq, **named):
     return type('Enum', (), enums)
 
 
-EXECUTION_STATUS = enum('RUNNING', 'DONE', 'FAILED')
+EXECUTION_STATUS = enum('RUNNING', 'DONE', 'FAILED', 'KILLED')
