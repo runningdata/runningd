@@ -12,13 +12,29 @@
                     if (data.resp_status == 1) {
                         var cc = data.data;
                         if (data.status == 0) {
-                            $("#headd").attr("class", "container bg-info");
+                            if (cc.length > 0) {
+                                $("#log").attr("class", "container bg-info");
+                            } else {
+                                $("#headd").attr("class", "container bg-info");
+                            }
                         } else if (data.status == 1) {
-                            $("#headd").attr("class","container bg-success");
+                            if (cc.length > 0) {
+                                $("#log").attr("class", "container bg-success");
+                            } else {
+                                $("#headd").attr("class", "container bg-success");
+                            }
                         } else if (data.status == 2) {
-                            $("#headd").attr("class","container bg-danger");
+                            if (cc.length > 0) {
+                                $("#log").attr("class", "container bg-danger");
+                            } else {
+                                $("#headd").attr("class", "container bg-danger");
+                            }
                         } else if (data.status == 3) {
-                            $("#headd").attr("class","container bg-warning");
+                            if (cc.length > 0) {
+                                $("#log").attr("class", "container bg-warning");
+                            } else {
+                                $("#headd").attr("class", "container bg-warning");
+                            }
                         }
                         if ($("#log").html().length < cc.length) {
                             $("#log").html(cc);
