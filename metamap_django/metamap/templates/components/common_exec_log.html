@@ -9,9 +9,23 @@
             $.ajax({
                 url: urlB,
                 success: function (data) {
-                    if ($("#log").html().length < data.length) {
-                        $("#log").html(data);
-                        $("html, body").animate({scrollTop: $(document).height() - window.innerHeight});
+                    if (data.resp_status == 1) {
+                        var cc = data.data;
+                        if (data.status == 0) {
+                            $("#log").attr("container bg-info");
+                        } else if (data.status == 1) {
+                            $("#log").attr("container bg-success");
+                        } else if (data.status == 2) {
+                            $("#log").attr("container bg-warn");
+                        } else if (data.status == 3) {
+                            $("#log").attr("container bg-warn");
+                        }
+                        if ($("#log").html().length < cc.length) {
+                            $("#log").html(cc);
+                            $("html, body").animate({scrollTop: $(document).height() - window.innerHeight});
+                        }
+                    } else {
+                        console.log('got error response ' + data);
                     }
                 }
             });

@@ -260,12 +260,17 @@ def get_exec_log(request, execid):
     '''
     execution = ExecutionsV2.objects.get(pk=execid)
 
+    result = {'data': 'failed', 'resp_status': 0, 'status': 3}
     try:
         with open(execution.log_location, 'r') as log:
             content = log.read().replace('\n', '<br>')
-    except:
-        return HttpResponse('')
-    return HttpResponse(content)
+
+        result['data'] = content
+        result['status'] = execution.status
+        result['resp_status'] = 1
+    except Exception, e:
+        logger.error(e.message)
+    return JsonResponse(result)
 
 
 class StatusListView(generic.ListView):
