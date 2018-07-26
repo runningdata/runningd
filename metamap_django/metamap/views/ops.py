@@ -8,6 +8,7 @@ import re
 import time
 import traceback
 
+import signal
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import Group
@@ -231,6 +232,21 @@ def exec_log(request, execid):
     :return:
     '''
     return render(request, 'executions/exec_log.html', {'execid': execid})
+
+
+def kill_executions(request, execid):
+    '''
+    杀掉指定进程
+    :param request:
+    :param execid:
+    :return:
+    '''
+    execution = ExecutionsV2.objects.get(pk=execid)
+    try:
+        os.kill(execution.child_id, signal.SIGKILL)
+    except:
+        return HttpResponse('kill failed')
+    return HttpResponse('killed')
 
 
 def get_exec_log(request, execid):

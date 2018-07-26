@@ -88,6 +88,7 @@ urlpatterns = [
         common.StatusListView.as_view(url_base='executions', model=ExecutionsV2), name='executions_status'),
     url(r'^executions/execlog/(?P<execid>[0-9]+)/$', ops.exec_log, name='executions_execlog'),
     url(r'^executions/getexeclog/(?P<execid>[0-9]+)/$', ops.get_exec_log, name='executions_getexeclog'),
+    url(r'^executions/k/(?P<execid>[0-9]+)/$', ops.kill_executions, name='executions_kill'),
 
     url(r'^shell/$', shell.ShellListView.as_view(), name='h2m_shell_list'),
     url(r'^shell/(?P<pk>[0-9]+)/$', shell.edit, name='h2m_shell_edit'),
