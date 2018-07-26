@@ -12,13 +12,13 @@
                     if (data.resp_status == 1) {
                         var cc = data.data;
                         if (data.status == 0) {
-                            $("#headd").attr("class", "container text-info");
+                            $("#headd").attr("class", "container bg-info");
                         } else if (data.status == 1) {
-                            $("#headd").attr("class","container text-success");
+                            $("#headd").attr("class","container bg-success");
                         } else if (data.status == 2) {
-                            $("#headd").attr("class","container text-danger");
+                            $("#headd").attr("class","container bg-warn");
                         } else if (data.status == 3) {
-                            $("#headd").attr("class","container text-warning");
+                            $("#headd").attr("class","container bg-warn");
                         }
                         if ($("#log").html().length < cc.length) {
                             $("#log").html(cc);
@@ -100,7 +100,7 @@
     {% if perms.auth.access_etl %}
         <div id="killer"></div>
     {% endif %}
-    <h2 id="headd" class="container bg-info">日志信息
+    <h2 id="headd" class="container bg-info" style="width: 160px">日志信息
     </h2>
     <div id="log" class="container bg-info ">
     </div>
