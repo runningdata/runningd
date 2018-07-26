@@ -45,18 +45,20 @@
             });
             goTop();//实现回到顶部元素的渐显与渐隐
 
-            $("#killer").click(function (e) {
-                console.log("wanna kill me?");
-                $.ajax({
-                    url: url_k,
-                    success: function (data) {
-                        alert(data);
-                        $(window).attr('location', '/metamap/executions/status/3/')
-                    }
+            {% if perms.auth.access_etl %}
+                $("#killer").click(function (e) {
+                    console.log("wanna kill me?");
+                    $.ajax({
+                        url: url_k,
+                        success: function (data) {
+                            alert(data);
+                            $(window).attr('location', '/metamap/executions/status/3/')
+                        }
+                    });
+                    console.log('got killed');
                 });
-                console.log('got killed');
-            });
-        });
+                });
+            {% endif %}
     </script>
 {% endblock %}
 
@@ -83,9 +85,7 @@
         }
     </style>
     <div id="gotop"></div>
-    {% if perms.auth.access_etl %}
-        <div id="killer"></div>
-    {% endif %}
+    <div id="killer"></div>
     <div id="log" class="container bg-info">
     </div>
 {% endblock %}
