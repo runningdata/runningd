@@ -17,6 +17,7 @@
                             } else {
                                 $("#headd").attr("class", "container bg-info");
                             }
+                            $("#killer").css("display", "block");
                         } else if (data.status == 1) {
                             if (cc.length > 0) {
                                 $("#log").attr("class", "container bg-success");
@@ -114,7 +115,7 @@
     </style>
     <div id="gotop"></div>
     {% if perms.auth.access_etl %}
-        <div id="killer"></div>
+        <div id="killer" style="display: none"></div>
     {% endif %}
     <h2 id="headd" class="container" style="width: 160px">日志信息
     </h2>
