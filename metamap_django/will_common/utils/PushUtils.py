@@ -10,7 +10,6 @@ from django.conf import settings
 from django.core.mail import BadHeaderError, get_connection
 from django.core.mail import EmailMessage
 from django.core.mail import send_mail
-from django.http import HttpResponse
 
 from will_common.models import UserProfile
 from will_common.utils import regxutils

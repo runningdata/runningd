@@ -44,6 +44,8 @@ EMAIL_PORT = result.get('EMAIL_PORT', 465)
 EMAIL_USE_SSL = result.get('EMAIL_USE_SSL', True)
 EMAIL_CANDIDATES = result['EMAIL_CANDIDATES']
 
+WECHAT_ALERT_URL = result.get('WECHAT_ALERT_URL', 'http://10.11.31.2:5000/api/sendMessage')
+
 # use root to execute....
 USE_ROOT = True
 
