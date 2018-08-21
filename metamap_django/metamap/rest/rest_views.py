@@ -21,10 +21,10 @@ class ExecObjViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['get'])
     def get_all(self, request, pk=None):
-        if request.user.username == 'admin':
-            deps = ExecObj.objects.all().order_by('name')
-        else:
-            deps = ExecObj.objects.filter(cgroup=request.user.userprofile.org_group).order_by('name')
+        # if request.user.username == 'admin':
+        deps = ExecObj.objects.all().order_by('name')
+        # else:
+            # deps = ExecObj.objects.filter(cgroup=request.user.userprofile.org_group).order_by('name')
         serializer = self.get_serializer(deps, many=True)
         return Response(serializer.data)
 
