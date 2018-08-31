@@ -106,7 +106,7 @@ def runcase(case, check, user):
                             phones = phones + ',' + str(user.phone)
                         alert.target_phone = phones
                         alert.owners = check.managers.all()
-                        resp = PushUtils.push_both(alert.owners, msg)
+                        resp = PushUtils.push_both(alert.owners.all(), msg)
                     elif user:
                         resp = PushUtils.push_both([user, ], msg)
                         alert.target_phone = user.phone
