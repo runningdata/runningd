@@ -80,19 +80,24 @@ def runcase(case, check, user):
         if result:
             for rule in case.dqmsrule_set.all():
                 print('handleing %s ' % rule.measure_column)
+                data_found_msg = 'no'
                 if case.datasrc.src_type == constants.DATASRC_TYPE_KYLIN:
                     re = result[rule.measure_column.upper()]
                 else:
                     re = result[rule.measure_column]
                 try:
-                    print('result is %d , max is %d, min is %d' % (re, rule.max, rule.min))
+                    if re:
+                        print('result is %d , max is %d, min is %d' % (re, rule.max, rule.min))
+                    else:
+                        re = 0
+                        data_found_msg = 'yes'
                 except:
-                    print('error happens ....... result is ' + re)
-                if re > rule.max or re < rule.min:
+                    print('error happens ....... result is ' + str(re))
+                if re > rule.max or re < rule.min or data_found_msg == 'yes':
                     alert = DqmsAlert.objects.create(rule=rule)
                     msg = constants.ALERT_MSG % (
                         dateutils.format_dbday(timezone.now()), chk_name, case.case_name, rule.measure_name, rule.min,
-                        rule.max, re)
+                        rule.max, re, data_found_msg)
                     if check:
                         # PushUtils.push_both([case.editor, ], msg)
                         # resp = PushUtils.push_both(check.managers.all(), msg)
@@ -118,8 +123,8 @@ def runcase(case, check, user):
     except Exception, e:
         logger.error(e.message)
         print('msg : %s when processing %s' % (traceback.format_exc(), case.case_name))
-        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), traceback.format_exc())
-        PushUtils.push_exact_email(settings.ADMIN_EMAIL, traceback.format_exc())
+        PushUtils.push_msg_tophone(encryptutils.decrpt_msg(settings.ADMIN_PHONE), u'处理%s时发生错误' % case.case_name)
+        PushUtils.push_exact_email(settings.ADMIN_EMAIL, u'处理%s时发生错误： %s' % (case.case_name, traceback.format_exc()))
         msg = constants.ERROR_ALERT_MASG.format(now_time=dateutils.now_datetime(), check_name=chk_name,
                                                 case_name=case_inst.case.case_name, msg=e.message)
         if check:
