@@ -80,7 +80,7 @@ def runcase(case, check, user):
         if result:
             for rule in case.dqmsrule_set.all():
                 print('handleing %s ' % rule.measure_column)
-                data_found_msg = 'no'
+                data_found_msg = 'yes'
                 if case.datasrc.src_type == constants.DATASRC_TYPE_KYLIN:
                     re = result[rule.measure_column.upper()]
                 else:
@@ -90,7 +90,7 @@ def runcase(case, check, user):
                         print('result is %d , max is %d, min is %d' % (re, rule.max, rule.min))
                     else:
                         re = 0
-                        data_found_msg = 'yes'
+                        data_found_msg = 'no'
                 except:
                     print('error happens ....... result is ' + str(re))
                 if re > rule.max or re < rule.min or data_found_msg == 'yes':
