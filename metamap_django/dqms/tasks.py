@@ -93,7 +93,7 @@ def runcase(case, check, user):
                         data_found_msg = 'no'
                 except:
                     print('error happens ....... result is ' + str(re))
-                if re > rule.max or re < rule.min or data_found_msg == 'yes':
+                if re > rule.max or re < rule.min or data_found_msg == 'no':
                     alert = DqmsAlert.objects.create(rule=rule)
                     msg = constants.ALERT_MSG % (
                         dateutils.format_dbday(timezone.now()), chk_name, case.case_name, rule.measure_name, rule.min,
