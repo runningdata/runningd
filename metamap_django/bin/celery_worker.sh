@@ -1,7 +1,7 @@
 #! /bin/bash
 
 export AZKABAN_USER=azkaban
-export AZKABAN_PWD=******
+export AZKABAN_PWD=*******
 
 if [ $# != 5 ];then
     echo "##########################################################"
